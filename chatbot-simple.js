@@ -48,7 +48,7 @@ const SimpleChatbot = {
 
         const welcomeBubble = document.createElement('div');
         welcomeBubble.className = 'chat-bubble ai';
-        welcomeBubble.innerHTML = `
+        const text = `
             👋 **Ciao! Sono il tuo Tutor AI di StudyJournal Pro.**<br><br>
             Ecco come posso aiutarti a dominare i tuoi studi:<br><br>
             📝 **Genera Appunti**: Scrivimi ad esempio *"Spiegami la Rivoluzione Francese"* o *"Riassumi il ciclo di Krebs"* per ricevere appunti perfetti.<br>
@@ -57,8 +57,18 @@ const SimpleChatbot = {
             💡 **Consigli di Studio**: Chiedimi tecniche di memorizzazione o come organizzare la tua giornata.<br><br>
             *Cosa studiamo oggi?*
         `;
+        welcomeBubble.innerHTML = this.formatMarkdown(text);
         messages.appendChild(welcomeBubble);
         this.history.push({ role: 'ai', content: 'Messaggio di benvenuto visualizzato.' });
+    },
+
+    formatMarkdown(text) {
+        if (!text) return '';
+        return text
+            .replace(/\*\*\*(.*?)\*\*\*/g, '<strong><em>$1</em></strong>') // Triple stars
+            .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')           // Double stars (Bold)
+            .replace(/\*(.*?)\*/g, '<em>$1</em>')                     // Single stars (Italic)
+            .replace(/\n/g, '<br>');                                // New lines
     },
 
     send() {
@@ -173,8 +183,7 @@ Scrivi in modo CHIARO e EDUCATIVO. Sii PRECISO e COMPLETO.`;
                             if (data.text) {
                                 fullText += data.text;
                                 aiBubble.innerHTML = `📝 <strong>Generando appunti su "${subject}"...</strong><br><br>` +
-                                    fullText.replace(/\n/g, '<br>')
-                                        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+                                    this.formatMarkdown(fullText);
                                 messagesDiv.scrollTop = messagesDiv.scrollHeight;
                             }
                         } catch (e) { }
@@ -194,8 +203,7 @@ Scrivi in modo CHIARO e EDUCATIVO. Sii PRECISO e COMPLETO.`;
 
             // Aggiungi tocco finale alla UI
             aiBubble.innerHTML = `📝 <strong>Ho creato gli appunti su "${subject}"!</strong><br><br>` +
-                fullText.replace(/\n/g, '<br>')
-                    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>') +
+                this.formatMarkdown(fullText) +
                 `<br><br><strong>Vuoi che generi automaticamente delle flashcard da questi appunti?</strong>`;
 
             this.history.push({ role: 'ai', content: fullText });
@@ -434,9 +442,7 @@ Scrivi in modo CHIARO e EDUCATIVO. Sii PRECISO e COMPLETO.`;
                             if (data.text) {
                                 fullText += data.text;
                                 // Aggiorna UI (formattando markdown semplice)
-                                aiBubble.innerHTML = fullText
-                                    .replace(/\n/g, '<br>')
-                                    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+                                aiBubble.innerHTML = this.formatMarkdown(fullText);
                                 messagesDiv.scrollTop = messagesDiv.scrollHeight;
                             }
                         } catch (e) {

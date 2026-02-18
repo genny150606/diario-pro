@@ -17,6 +17,10 @@
     <link rel="stylesheet" href="animations-ui.css">
     <link rel="stylesheet" href="responsive.css">
 
+    <!-- Supabase & Auth -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="auth.js" defer></script>
+
 
     <style>
         * {
@@ -237,7 +241,8 @@
 
         /* ==================== BUTTONS ==================== */
         button,
-        .btn {
+        .btn,
+        .form-input {
             padding: 10px 20px;
             font-size: 15px;
             font-weight: 500;
@@ -248,7 +253,22 @@
             font-family: inherit;
         }
 
+        .form-input {
+            width: 100%;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            color: var(--text-primary);
+            cursor: text;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--accent);
+            background: var(--bg-primary);
+        }
+
         .btn-primary {
+
             background: var(--accent);
             color: white;
         }
@@ -845,9 +865,20 @@
         </nav>
 
         <div class="header-right">
+            <!-- Auth UI -->
+            <button id="loginBtn" class="btn-primary" style="padding: 8px 16px; font-size: 14px;"
+                onclick="document.getElementById('authModal').style.display='flex'">
+                Accedi
+            </button>
+            <div id="userProfile" style="display: none; align-items: center; gap: 12px;">
+                <span id="userEmailDisplay" style="font-size: 14px; color: var(--text-secondary);"></span>
+                <button class="theme-toggle" onclick="AuthManager.signOut()" title="Logout">🚪</button>
+            </div>
+
             <button class="theme-toggle" onclick="toggleTheme()" title="Cambia tema">🌙</button>
             <button class="menu-toggle" id="hamburgerBtn" title="Menu">☰</button>
         </div>
+
     </header>
 
     <!-- MAIN CONTENT -->
@@ -1927,7 +1958,77 @@
         });
     </script>
 
+    <!-- AUTH MODAL -->
+    <div id="authModal" class="calendar-modal" style="display: none;">
+        <div class="calendar-container" style="max-width: 400px;">
+            <div class="calendar-header">
+                <h3 id="authModalTitle">Accedi a StudyJournal</h3>
+                <button onclick="document.getElementById('authModal').style.display='none'"
+                    style="background:none; border:none; font-size:20px; cursor:pointer;">×</button>
+            </div>
+
+            <div id="loginForm" style="display: flex; flex-direction: column; gap: 16px;">
+                <input type="email" id="authEmail" placeholder="Email" class="form-input">
+                <input type="password" id="authPassword" placeholder="Password" class="form-input">
+                <button class="btn-primary" onclick="handleAuthSubmit()">Accedi</button>
+                <p style="font-size: 14px; text-align: center; color: var(--text-secondary);">
+                    Non hai un account? <a href="#" onclick="toggleAuthMode(true)">Registrati</a>
+                </p>
+            </div>
+
+            <div id="signupForm" style="display: none; flex-direction: column; gap: 16px;">
+                <input type="email" id="signupEmail" placeholder="Email" class="form-input">
+                <input type="password" id="signupPassword" placeholder="Password" class="form-input">
+                <button class="btn-primary" onclick="handleSignupSubmit()">Crea Account</button>
+                <p style="font-size: 14px; text-align: center; color: var(--text-secondary);">
+                    Hai già un account? <a href="#" onclick="toggleAuthMode(false)">Accedi</a>
+                </p>
+            </div>
+
+            <div id="authError" style="color: var(--error); font-size: 13px; margin-top: 8px; display: none;"></div>
+        </div>
+    </div>
+
+    <script>
+        function toggleAuthMode(isSignup) {
+            document.getElementById('loginForm').style.display = isSignup ? 'none' : 'flex';
+            document.getElementById('signupForm').style.display = isSignup ? 'flex' : 'none';
+            document.getElementById('authModalTitle').textContent = isSignup ? 'Crea un Account' : 'Accedi a StudyJournal';
+            document.getElementById('authError').style.display = 'none';
+        }
+
+        async function handleAuthSubmit() {
+            const email = document.getElementById('authEmail').value;
+            const password = document.getElementById('authPassword').value;
+            const errorEl = document.getElementById('authError');
+
+            try {
+                await AuthManager.signIn(email, password);
+                document.getElementById('authModal').style.display = 'none';
+            } catch (error) {
+                errorEl.textContent = error.message;
+                errorEl.style.display = 'block';
+            }
+        }
+
+        async function handleSignupSubmit() {
+            const email = document.getElementById('signupEmail').value;
+            const password = document.getElementById('signupPassword').value;
+            const errorEl = document.getElementById('authError');
+
+            try {
+                await AuthManager.signUp(email, password);
+                alert('Account creato! Controlla la tua email per confermare.');
+                toggleAuthMode(false);
+            } catch (error) {
+                errorEl.textContent = error.message;
+                errorEl.style.display = 'block';
+            }
+        }
+    </script>
+
     <!-- CALENDAR MODAL -->
+
     <div id="calendarModal" class="calendar-modal">
         <div class="calendar-container">
             <div class="calendar-header">

@@ -32,8 +32,43 @@ const StorageManager = {
     save(data) {
         try {
             localStorage.setItem('studyjournal_data', JSON.stringify(data));
+            this.saveToCloud(data);
         } catch {
             console.error('Errore salvataggio dati');
+        }
+    },
+
+    async saveToCloud(data) {
+        if (!AuthManager || !AuthManager.user) return;
+
+        const { error } = await supabase
+            .from('users_data')
+            .upsert({
+                id: AuthManager.user.id,
+                data: data,
+                updated_at: new Date()
+            });
+
+        if (error) console.error('Cloud Sync Error:', error);
+    },
+
+    async loadFromCloud() {
+        if (!AuthManager || !AuthManager.user) return;
+
+        const { data, error } = await supabase
+            .from('users_data')
+            .select('data')
+            .eq('id', AuthManager.user.id)
+            .single();
+
+        if (error && error.code !== 'PGRST116') { // PGRST116 is 'no rows found'
+            console.error('Cloud Load Error:', error);
+            return;
+        }
+
+        if (data && data.data) {
+            this.save(data.data); // Update local storage
+            location.reload(); // Reload to refresh all managers
         }
     },
 
@@ -44,6 +79,7 @@ const StorageManager = {
         }
     }
 };
+
 
 /* ============================================
    DIARY MANAGER

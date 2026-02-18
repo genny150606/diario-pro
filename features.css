@@ -15,30 +15,70 @@
     gap: var(--space-4);
 }
 
-/* Toggle Button */
+/* Toggle Button — PROTAGONIST */
 #geminiChatToggle {
-    width: 56px;
-    height: 56px;
-    border-radius: var(--radius-full);
-    background: var(--color-accent);
-    color: #FFFFFF;
-    border: none;
-    font-size: 22px;
-    cursor: pointer;
-    box-shadow: var(--shadow-lg), 0 0 0 0 rgba(0, 122, 255, 0.3);
-    transition: all var(--duration-base) var(--ease-out);
+    position: relative;
     display: flex;
     align-items: center;
-    justify-content: center;
+    gap: var(--space-3);
+    padding: var(--space-3) var(--space-6) var(--space-3) var(--space-4);
+    border-radius: var(--radius-full);
+    background: linear-gradient(135deg, #007AFF, #5856D6);
+    color: #FFFFFF;
+    border: none;
+    font-size: var(--font-size-base);
+    font-weight: var(--fw-semibold);
+    cursor: pointer;
+    box-shadow: 0 8px 32px rgba(0, 122, 255, 0.4), 0 0 0 0 rgba(0, 122, 255, 0.3);
+    transition: all var(--duration-base) var(--ease-out);
+    min-height: 56px;
+    z-index: 1;
 }
 
 #geminiChatToggle:hover {
-    transform: scale(1.06);
-    box-shadow: var(--shadow-xl), 0 0 0 6px rgba(0, 122, 255, 0.12);
+    transform: scale(1.06) translateY(-2px);
+    box-shadow: 0 12px 44px rgba(0, 122, 255, 0.5), 0 0 0 0 rgba(0, 122, 255, 0.3);
 }
 
 #geminiChatToggle:active {
     transform: scale(0.98);
+}
+
+.chat-toggle-icon {
+    font-size: 24px;
+    line-height: 1;
+}
+
+.chat-toggle-label {
+    font-family: var(--font-family);
+    letter-spacing: var(--tracking-normal);
+}
+
+/* Pulsing glow ring */
+.chat-toggle-pulse {
+    position: absolute;
+    inset: -4px;
+    border-radius: inherit;
+    background: linear-gradient(135deg, #007AFF, #5856D6, #AF52DE);
+    z-index: -1;
+    opacity: 0.5;
+    animation: chatPulse 2.5s ease-in-out infinite;
+}
+
+@keyframes chatPulse {
+
+    0%,
+    100% {
+        opacity: 0.3;
+        transform: scale(1);
+        filter: blur(8px);
+    }
+
+    50% {
+        opacity: 0.6;
+        transform: scale(1.08);
+        filter: blur(12px);
+    }
 }
 
 /* Chat Window */
@@ -73,7 +113,7 @@
 /* Chat Header */
 #geminiChatHeader {
     padding: var(--space-5) var(--space-6);
-    background: transparent;
+    background: linear-gradient(135deg, rgba(0, 122, 255, 0.1), rgba(88, 86, 214, 0.08));
     border-bottom: 1px solid var(--color-border);
     display: flex;
     justify-content: space-between;
@@ -81,6 +121,34 @@
     font-size: var(--font-size-base);
     font-weight: var(--fw-semibold);
     color: var(--color-text);
+}
+
+.chat-header-info {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+}
+
+.chat-header-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--color-success);
+    box-shadow: 0 0 6px rgba(48, 209, 88, 0.5);
+    animation: dotBlink 3s ease-in-out infinite;
+}
+
+@keyframes dotBlink {
+
+    0%,
+    90%,
+    100% {
+        opacity: 1;
+    }
+
+    95% {
+        opacity: 0.3;
+    }
 }
 
 #geminiChatHeader button,

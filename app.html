@@ -81,7 +81,7 @@
             <!-- DASHBOARD -->
             <section id="dashboard" class="active">
                 <div class="hero">
-                    <h1>Benvenuto! 👋</h1>
+                    <h1><span class="gradient-heading">Benvenuto!</span> 👋</h1>
                     <p>Visualizza il tuo progresso di studio in tempo reale</p>
                 </div>
 
@@ -348,20 +348,25 @@
         </div>
     </div>
 
-    <!-- CHATBOT -->
+    <!-- CHATBOT — PROTAGONISTA -->
     <div id="geminiChat">
-        <button id="geminiChatToggle">💬</button>
+        <button id="geminiChatToggle">
+            <span class="chat-toggle-icon">🤖</span>
+            <span class="chat-toggle-label">AI Tutor</span>
+            <span class="chat-toggle-pulse"></span>
+        </button>
         <div id="geminiChatWindow" style="display: none;">
             <div id="geminiChatHeader">
-                <span>AI Tutor</span>
-                <button id="closeChatBtn"
-                    style="background: none; border: none; color: white; cursor: pointer; font-size: 18px; padding: 0; width: 24px; height: 24px;">✕</button>
+                <div class="chat-header-info">
+                    <span class="chat-header-dot"></span>
+                    <span>AI Tutor</span>
+                </div>
+                <button id="closeChatBtn">✕</button>
             </div>
             <div id="geminiChatMessages"></div>
             <div id="geminiChatInput">
-                <input type="text" id="chatInputField" placeholder="Fai una domanda...">
-                <button
-                    style="padding: 10px 16px; background: var(--accent); color: white; border: none; border-radius: 8px; cursor: pointer; transition: all 150ms ease; font-weight: 500;">➤</button>
+                <input type="text" id="chatInputField" placeholder="Chiedi qualcosa al tutor AI...">
+                <button>➤</button>
             </div>
         </div>
     </div>

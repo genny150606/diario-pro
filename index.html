@@ -1348,41 +1348,66 @@
             return data.notes || [];
         }
 
-        async function generateFlashcardsWithGemini() {
+        let selectedNoteForGen = null;
+
+        function openFlashcardGenModal() {
             const notes = loadNotes();
-
-            console.log('Note caricate:', notes.length);
-
             if (notes.length === 0) {
                 alert('❌ Aggiungi prima una nota nella sezione Note!');
                 return;
             }
 
-            let options = notes.map((n, i) => `${i + 1}. ${n.title || 'Senza titolo'}`).join('\n');
-            const choice = prompt(`Quale nota usare?\n\n${options}`, '1');
-            if (!choice) return;
+            const listContainer = document.getElementById('notesSelectionList');
+            if (listContainer) {
+                listContainer.innerHTML = notes.map((note, idx) => `
+                    <div class="note-select-item" onclick="selectNoteForGen(${idx}, this)">
+                        <span>${note.title || 'Senza titolo'}</span>
+                        <small style="color: var(--text-light);">${note.subject}</small>
+                    </div>
+                `).join('');
+            }
 
-            const idx = parseInt(choice) - 1;
-            if (idx < 0 || idx >= notes.length) {
-                alert('Numero non valido');
+            selectedNoteForGen = null;
+            document.getElementById('flashcardGenModal').style.display = 'flex';
+        }
+
+        function closeFlashcardGenModal() {
+            document.getElementById('flashcardGenModal').style.display = 'none';
+        }
+
+        function selectNoteForGen(idx, el) {
+            const items = document.querySelectorAll('.note-select-item');
+            items.forEach(item => item.classList.remove('selected'));
+            el.classList.add('selected');
+
+            const notes = loadNotes();
+            selectedNoteForGen = notes[idx];
+        }
+
+        async function confirmFlashcardGeneration() {
+            if (!selectedNoteForGen) {
+                alert('❌ Per favore, seleziona una nota!');
                 return;
             }
 
-            const selectedNote = notes[idx];
-            const numStr = prompt('Quante flashcard? (1-10)', '5');
-            const num = Math.min(10, Math.max(1, parseInt(numStr) || 5));
+            const numInput = document.getElementById('genCardCount');
+            const num = Math.min(20, Math.max(1, parseInt(numInput?.value) || 5));
+
+            closeFlashcardGenModal();
 
             // Mostra loading
             const container = document.getElementById('flashcardStudy');
-            container.innerHTML = '<p style="text-align: center; color: var(--text-secondary);">⏳ Generando flashcard...</p>';
+            if (container) {
+                container.innerHTML = '<p style="text-align: center; color: var(--text-secondary); padding: 24px;">⏳ Generando flashcard...</p>';
+            }
 
             try {
                 const response = await fetch('/api/generate-flashcards', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        notes: selectedNote.content || selectedNote.text,
-                        subject: selectedNote.subject || 'Generale',
+                        notes: selectedNoteForGen.content || selectedNoteForGen.text,
+                        subject: selectedNoteForGen.subject || 'Generale',
                         numberOfCards: num
                     })
                 });
@@ -1391,28 +1416,23 @@
                     throw new Error(`Server error: ${response.status}`);
                 }
 
-                const data = await response.json();
-                console.log('📥 Risposta da backend:', data);
-                console.log('Flashcards ricevute:', data.flashcards ? data.flashcards.length : 0);
+                const responseData = await response.json();
 
-                if (!data.flashcards || data.flashcards.length === 0) {
+                if (!responseData.flashcards || responseData.flashcards.length === 0) {
                     alert('❌ Non riesco a generare flashcard');
                     renderFlashcards(loadFlashcards());
                     return;
                 }
 
                 let flashcards = loadFlashcards();
-                console.log('Flashcards attuali prima:', flashcards.length);
-
                 let count = 0;
-                data.flashcards.forEach(card => {
-                    console.log('Card:', card);
+                responseData.flashcards.forEach(card => {
                     if (card.front && card.back) {
                         flashcards.push({
                             id: Date.now() + Math.random(),
                             front: card.front,
                             back: card.back,
-                            subject: selectedNote.subject || 'Generale',
+                            subject: selectedNoteForGen.subject || 'Generale',
                             correct: 0,
                             incorrect: 0,
                             difficulty: 'medium'
@@ -1421,21 +1441,13 @@
                     }
                 });
 
-                console.log('Flashcards finali:', flashcards.length);
-                console.log('Count aggiunte:', count);
-
                 saveFlashcards(flashcards);
-                console.log('Flashcards salvate in localStorage');
-
                 renderFlashcards(flashcards);
-                console.log('Flashcards renderizzate');
 
                 // Forza il caricamento della tab flashcards
                 const flashcardsTab = document.getElementById('flashcards-tab');
                 if (flashcardsTab) {
-                    flashcardsTab.classList.add('active');
-                    const notesTab = document.getElementById('notes-tab');
-                    if (notesTab) notesTab.classList.remove('active');
+                    showTab('flashcards-tab');
                 }
 
                 alert(`✅ ${count} flashcard create!`);
@@ -1445,6 +1457,11 @@
                 console.error(error);
                 renderFlashcards(loadFlashcards());
             }
+        }
+
+        // Mantieni vecchio nome per compatibilità se chiamato da pulsanti esistenti (o aggiorna i pulsanti)
+        function generateFlashcardsWithGemini() {
+            openFlashcardGenModal();
         }
 
         function deleteAllFlashcards() {
@@ -2185,8 +2202,43 @@
             <div id="calendarDays" class="calendar-days"></div>
 
             <div class="calendar-footer">
-                <button class="calendar-btn calendar-btn-cancel" onclick="closeCalendar()">Annulla</button>
+                <button class="btn-secondary" onclick="closeCalendar()">Annulla</button>
                 <button class="calendar-btn calendar-btn-confirm" onclick="confirmDate()">Conferma</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- FLASHCARD GENERATOR MODAL -->
+    <div id="flashcardGenModal" class="calendar-modal" style="display: none;">
+        <div class="calendar-container" style="max-width: 500px;">
+            <div class="calendar-header">
+                <h3>✨ Genera Flashcard</h3>
+                <button onclick="closeFlashcardGenModal()"
+                    style="background:none; border:none; color:var(--text-primary); font-size:24px; cursor:pointer;">×</button>
+            </div>
+
+            <div class="gen-modal-body" style="padding: 20px;">
+                <p style="margin-bottom: 16px; color: var(--text-secondary);">Scegli una nota e quante flashcard vuoi
+                    creare.</p>
+
+                <label style="display: block; margin-bottom: 8px; font-weight: 600;">1. Seleziona la Nota</label>
+                <div id="notesSelectionList" class="notes-selection-list">
+                    <!-- Dinamicamente popolato -->
+                </div>
+
+                <label style="display: block; margin-top: 20px; margin-bottom: 8px; font-weight: 600;">2. Quante
+                    Flashcard?</label>
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <input type="number" id="genCardCount" value="5" min="1" max="20" class="form-input"
+                        style="width: 80px; margin-bottom: 0;">
+                    <span style="color: var(--text-light); font-size: 0.9rem;">(Consigliato: 5-10)</span>
+                </div>
+            </div>
+
+            <div class="calendar-footer"
+                style="padding: 16px; border-top: 1px solid var(--glass-border); display: flex; gap: 12px; justify-content: flex-end;">
+                <button class="btn-secondary" onclick="closeFlashcardGenModal()">Annulla</button>
+                <button class="btn-primary" onclick="confirmFlashcardGeneration()">Genera Ora 🚀</button>
             </div>
         </div>
     </div>

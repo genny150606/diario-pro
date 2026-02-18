@@ -236,8 +236,8 @@ Scrivi in modo CHIARO e EDUCATIVO. Sii PRECISO e COMPLETO.`;
                 font-weight: 500;
                 font-size: 14px;
                 transition: all 150ms ease;
-            " onclick="SimpleChatbot.generateFlashcards()">
-                ✨ Genera Flashcard
+            " onclick="SimpleChatbot.askFlashcardQuantity()">
+                ✨ Sì, genera
             </button>
             <button style="
                 padding: 10px 16px;
@@ -250,7 +250,7 @@ Scrivi in modo CHIARO e EDUCATIVO. Sii PRECISO e COMPLETO.`;
                 font-size: 14px;
                 transition: all 150ms ease;
             " onclick="SimpleChatbot.skipFlashcards()">
-                Dopo
+                No, dopo
             </button>
         `;
 
@@ -258,7 +258,45 @@ Scrivi in modo CHIARO e EDUCATIVO. Sii PRECISO e COMPLETO.`;
         messagesDiv.scrollTop = messagesDiv.scrollHeight;
     },
 
-    async generateFlashcards() {
+    askFlashcardQuantity() {
+        const messagesDiv = document.getElementById('geminiChatMessages');
+        const aiBubble = document.createElement('div');
+        aiBubble.className = 'chat-bubble ai';
+        aiBubble.innerHTML = '🔢 <strong>Ottimo! Quante flashcard vuoi che generi?</strong>';
+        messagesDiv.appendChild(aiBubble);
+
+        const buttonDiv = document.createElement('div');
+        buttonDiv.style.cssText = `
+            display: flex;
+            gap: 8px;
+            margin-top: 12px;
+            padding: 0 16px;
+        `;
+
+        const quantities = [5, 10, 15];
+        buttonDiv.innerHTML = quantities.map(q => `
+            <button style="
+                flex: 1;
+                padding: 8px 12px;
+                background: var(--bg-tertiary);
+                color: var(--text-primary);
+                border: 1px solid var(--border);
+                border-radius: 8px;
+                cursor: pointer;
+                font-weight: 500;
+                transition: all 150ms ease;
+            " onmouseover="this.style.background='var(--primary)'; this.style.color='white';" 
+               onmouseout="this.style.background='var(--bg-tertiary)'; this.style.color='var(--text-primary)';"
+               onclick="SimpleChatbot.generateFlashcards(${q})">
+                ${q}
+            </button>
+        `).join('');
+
+        messagesDiv.appendChild(buttonDiv);
+        messagesDiv.scrollTop = messagesDiv.scrollHeight;
+    },
+
+    async generateFlashcards(num = 5) {
         if (!this.currentGeneratedNotes) {
             alert('❌ Nessun appunto disponibile');
             return;
@@ -280,7 +318,7 @@ Scrivi in modo CHIARO e EDUCATIVO. Sii PRECISO e COMPLETO.`;
                 body: JSON.stringify({
                     notes: this.currentGeneratedNotes.content.substring(0, 3000),
                     subject: this.currentGeneratedNotes.subject || 'Generale',
-                    numberOfCards: 5
+                    numberOfCards: num
                 })
             });
 

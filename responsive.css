@@ -31,10 +31,11 @@ header {
     left: 0 !important;
     right: 0 !important;
     height: 60px !important;
-    background: rgba(255, 255, 255, 0.7) !important;
-    backdrop-filter: blur(20px) !important;
-    -webkit-backdrop-filter: blur(20px) !important;
-    border-bottom: 1px solid var(--border) !important;
+    background: rgba(255, 255, 255, 0.4) !important;
+    /* Più trasparente per glassmorphism */
+    backdrop-filter: blur(20px) saturate(180%) !important;
+    -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05) !important;
     z-index: 10000 !important;
     display: flex !important;
     align-items: center !important;
@@ -43,6 +44,8 @@ header {
     /* Ridotto padding su mobile */
     gap: 12px !important;
     /* Ridotto gap su mobile */
+    box-shadow: 0 1px 1px rgba(0, 0, 0, 0.02) !important;
+    /* Ombra impercettibile */
 }
 
 @media (min-width: 1024px) {
@@ -53,7 +56,8 @@ header {
 }
 
 [data-theme="dark"] header {
-    background: rgba(17, 24, 39, 0.7) !important;
+    background: rgba(17, 24, 39, 0.4) !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
 }
 
 header .logo {
@@ -65,10 +69,24 @@ header .logo {
     font-weight: 700 !important;
     font-size: clamp(1rem, 3.5vw, 1.4rem) !important;
     flex-shrink: 0 !important;
+    transition: transform 0.3s cubic-bezier(0.2, 0, 0, 1) !important;
+    /* Animazione smooth */
+}
+
+/* Animazione logo solo su Desktop */
+@media (min-width: 1025px) {
+    header .logo:hover {
+        transform: scale(1.02);
+    }
+
+    header .logo:hover .logo-icon {
+        filter: drop-shadow(0 0 8px var(--accent-light));
+    }
 }
 
 .logo-icon {
     font-size: 1.5rem !important;
+    transition: filter 0.3s ease !important;
 }
 
 
@@ -102,6 +120,23 @@ header .logo {
     gap: clamp(0.25rem, 1vw, 0.5rem);
 }
 
+.theme-toggle,
+.menu-toggle,
+#loginBtn,
+#userProfile {
+    transition: transform 0.2s cubic-bezier(0.2, 0, 0, 1), opacity 0.2s ease !important;
+}
+
+/* Animazione icone solo su Desktop */
+@media (min-width: 1025px) {
+
+    .theme-toggle:hover,
+    .menu-toggle:hover,
+    #loginBtn:hover,
+    #userProfile:hover {
+        transform: translateY(-2px);
+    }
+}
 
 /* ============================================
    HAMBURGER BUTTON - SEMPRE VISIBILE
@@ -133,11 +168,11 @@ header .logo {
 }
 
 #hamburgerBtn:active {
-    transform: scale(0.95);
+    transform: scale(0.9);
 }
 
 /* ============================================
-   SIDEBAR / NAVBAR - MOBILE & DESKTOP
+   SIDEBAR / NAVBAR - GLASS REFINEMENT
    ============================================ */
 
 /* Mobile: Sidebar nascosta di default e posizionata fuori schermo */
@@ -150,14 +185,22 @@ header .logo {
         left: 0 !important;
         width: 280px !important;
         height: 100vh !important;
-        background: var(--bg-primary) !important;
-        border-right: 1px solid var(--border-color) !important;
+        background: rgba(255, 255, 255, 0.7) !important;
+        /* Glass mobile */
+        backdrop-filter: blur(25px) !important;
+        -webkit-backdrop-filter: blur(25px) !important;
+        border-right: 1px solid rgba(0, 0, 0, 0.05) !important;
         z-index: 9999 !important;
         padding: 80px 20px 20px 20px !important;
         transform: translateX(-100%) !important;
-        transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
-        box-shadow: 10px 0 30px rgba(0, 0, 0, 0.1) !important;
+        transition: transform 0.4s cubic-bezier(0.2, 0, 0, 1) !important;
+        box-shadow: 10px 0 40px rgba(0, 0, 0, 0.05) !important;
         gap: 10px !important;
+    }
+
+    [data-theme="dark"] .sidebar {
+        background: rgba(17, 24, 39, 0.7) !important;
+        border-right: 1px solid rgba(255, 255, 255, 0.05) !important;
     }
 
     .sidebar.open {
@@ -203,29 +246,41 @@ header .logo {
         height: auto !important;
         background: transparent !important;
         border: none !important;
-        gap: 5px !important;
+        gap: 8px !important;
         padding: 0 !important;
         z-index: 100 !important;
         box-shadow: none !important;
     }
 
     .sidebar .sidebar-item {
-        padding: 8px 16px !important;
-        border-radius: 8px !important;
+        padding: 10px 20px !important;
+        border-radius: 99px !important;
+        /* Pill style */
         font-size: 14px !important;
+        font-weight: 500 !important;
         color: var(--text-secondary) !important;
         text-decoration: none !important;
-        transition: all 0.2s ease !important;
+        transition: all 0.3s cubic-bezier(0.2, 0, 0, 1) !important;
+        background: transparent !important;
+        border: none !important;
     }
 
+    /* Animazioni desktop hover */
     .sidebar .sidebar-item:hover {
-        background: var(--bg-tertiary) !important;
-        color: var(--text-primary) !important;
+        background: rgba(99, 102, 241, 0.05) !important;
+        color: var(--primary) !important;
+        transform: translateY(-1px);
     }
 
     .sidebar .sidebar-item.active {
-        background: rgba(59, 130, 246, 0.1) !important;
-        color: var(--accent) !important;
+        background: var(--primary) !important;
+        color: white !important;
+        box-shadow: 0 4px 12px rgba(31, 41, 55, 0.2) !important;
+    }
+
+    [data-theme="dark"] .sidebar .sidebar-item.active {
+        background: var(--accent) !important;
+        box-shadow: 0 4px 12px rgba(96, 165, 250, 0.3) !important;
     }
 }
 

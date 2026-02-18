@@ -85,6 +85,20 @@ const AuthManager = {
         if (error) throw error;
         this.user = null;
         this.updateUI();
+        // Close dropdown if open
+        const dropdown = document.getElementById('accountDropdown');
+        if (dropdown) dropdown.classList.remove('show');
+    },
+
+    async updatePassword(newPassword) {
+        if (!newPassword || newPassword.length < 6) {
+            throw new Error('La password deve essere di almeno 6 caratteri.');
+        }
+        const { error } = await supabaseClient.auth.updateUser({
+            password: newPassword
+        });
+        if (error) throw error;
+        return true;
     },
 
     updateUI() {
@@ -95,7 +109,12 @@ const AuthManager = {
             if (loginBtn) loginBtn.style.display = 'none';
             if (userProfile) {
                 userProfile.style.display = 'flex';
-                document.getElementById('userEmailDisplay').textContent = this.user.email;
+                const emailDisplay = document.getElementById('userEmailDisplay');
+                if (emailDisplay) {
+                    // Truncate email if too long on mobile
+                    const email = this.user.email;
+                    emailDisplay.textContent = email.length > 20 ? email.substring(0, 17) + '...' : email;
+                }
             }
         } else {
             if (loginBtn) loginBtn.style.display = 'block';
@@ -103,6 +122,58 @@ const AuthManager = {
         }
     }
 };
+
+// Global helpers for Account Menu
+function toggleAccountMenu() {
+    const dropdown = document.getElementById('accountDropdown');
+    const chevron = document.querySelector('.account-btn .chevron');
+    if (dropdown) {
+        dropdown.classList.toggle('show');
+        if (chevron) {
+            chevron.style.transform = dropdown.classList.contains('show') ? 'rotate(180deg)' : 'rotate(0)';
+        }
+    }
+}
+
+function openChangePasswordModal() {
+    document.getElementById('passwordModal').style.display = 'flex';
+    document.getElementById('accountDropdown').classList.remove('show');
+    document.getElementById('passwordError').style.display = 'none';
+    document.getElementById('passwordSuccess').style.display = 'none';
+    document.getElementById('newPassword').value = '';
+}
+
+async function handleUpdatePassword() {
+    const newPassword = document.getElementById('newPassword').value;
+    const errorEl = document.getElementById('passwordError');
+    const successEl = document.getElementById('passwordSuccess');
+
+    errorEl.style.display = 'none';
+    successEl.style.display = 'none';
+
+    try {
+        await AuthManager.updatePassword(newPassword);
+        successEl.textContent = '✅ Password aggiornata con successo!';
+        successEl.style.display = 'block';
+        setTimeout(() => {
+            document.getElementById('passwordModal').style.display = 'none';
+        }, 2000);
+    } catch (err) {
+        errorEl.textContent = '❌ ' + err.message;
+        errorEl.style.display = 'block';
+    }
+}
+
+// Close dropdown when clicking outside
+document.addEventListener('click', (e) => {
+    const profile = document.getElementById('userProfile');
+    const dropdown = document.getElementById('accountDropdown');
+    if (profile && !profile.contains(e.target)) {
+        if (dropdown) dropdown.classList.remove('show');
+        const chevron = document.querySelector('.account-btn .chevron');
+        if (chevron) chevron.style.transform = 'rotate(0)';
+    }
+});
 
 // Initialize on load
 document.addEventListener('DOMContentLoaded', () => AuthManager.init());

@@ -138,6 +138,97 @@ p {
 }
 
 /* ============================================
+   ACCOUNT DROPDOWN
+   ============================================ */
+
+.user-profile-container {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.account-btn {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    padding: 6px 12px;
+    border-radius: 99px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    color: var(--text-primary);
+    transition: all 0.3s ease;
+}
+
+.account-btn:hover {
+    background: var(--bg-tertiary);
+}
+
+.account-btn .chevron {
+    font-size: 8px;
+    transition: transform 0.3s ease;
+}
+
+.account-dropdown {
+    position: absolute;
+    top: calc(100% + 10px);
+    right: 0;
+    background: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    width: 180px;
+    box-shadow: var(--shadow-lg);
+    display: none;
+    flex-direction: column;
+    overflow: hidden;
+    z-index: 10002;
+    padding: 6px;
+    backdrop-filter: blur(20px);
+    background: rgba(255, 255, 255, 0.8);
+}
+
+[data-theme="dark"] .account-dropdown {
+    background: rgba(31, 41, 55, 0.8);
+}
+
+.account-dropdown.show {
+    display: flex;
+    animation: slideDown 0.2s ease-out;
+}
+
+.account-dropdown button {
+    background: transparent;
+    border: none;
+    padding: 10px 12px;
+    text-align: left;
+    font-size: 14px;
+    color: var(--text-primary);
+    cursor: pointer;
+    border-radius: 8px;
+    transition: background 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.account-dropdown button:hover {
+    background: rgba(99, 102, 241, 0.1);
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ============================================
    LAYOUT PRINCIPALE
    ============================================ */
 

@@ -873,14 +873,21 @@
                 onclick="document.getElementById('authModal').style.display='flex'">
                 Accedi
             </button>
-            <div id="userProfile" style="display: none; align-items: center; gap: 12px;">
-                <span id="userEmailDisplay" style="font-size: 14px; color: var(--text-secondary);"></span>
-                <button class="theme-toggle" onclick="AuthManager.signOut()" title="Logout">🚪</button>
+            <div id="userProfile" class="user-profile-container" style="display: none;">
+                <button class="account-btn" onclick="toggleAccountMenu()" id="accountBtn">
+                    <span id="userEmailDisplay"></span>
+                    <span class="chevron">▼</span>
+                </button>
+                <div id="accountDropdown" class="account-dropdown">
+                    <button onclick="openChangePasswordModal()">🔑 Cambia Password</button>
+                    <button onclick="AuthManager.signOut()">🚪 Esci</button>
+                </div>
             </div>
 
             <button class="theme-toggle" onclick="toggleTheme()" title="Cambia tema">🌙</button>
             <button class="menu-toggle" id="hamburgerBtn" title="Menu">☰</button>
         </div>
+
 
     </header>
 

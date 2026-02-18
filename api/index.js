@@ -8,6 +8,13 @@ app.use(express.json({ limit: "50mb" }));
 
 const { GoogleGenerativeAI: GoogleGenAI } = require("@google/generative-ai");
 
+console.log("🚀 Backend initialized. Checking API Key...");
+if (!process.env.GEMINI_API_KEY) {
+    console.warn("⚠️ WARNING: GEMINI_API_KEY is missing in process.env!");
+} else {
+    console.log("✅ GEMINI_API_KEY found (length: " + process.env.GEMINI_API_KEY.length + ")");
+}
+
 // ============================================
 // RATE LIMITING & RETRY
 // ============================================
@@ -144,7 +151,8 @@ RISPOSTA: Solo JSON array, niente altro!
 
         res.json({ flashcards });
     } catch (error) {
-        console.error("❌ Errore flashcards:", error.message);
+        console.error("❌ Errore critico flashcards:", error);
+        console.error("Stack trace:", error.stack);
 
         if (error.code === 429 || error.status === "RESOURCE_EXHAUSTED") {
             return res.status(503).json({
@@ -225,7 +233,8 @@ ${context ? `CONTESTO: ${context}` : ""}`;
             success: true,
         });
     } catch (error) {
-        console.error("❌ Errore Chat:", error.message);
+        console.error("❌ Errore critico Chat:", error);
+        console.error("Stack trace:", error.stack);
 
         if (error.code === 429 || error.status === "RESOURCE_EXHAUSTED") {
             return res.status(503).json({

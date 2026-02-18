@@ -1534,6 +1534,7 @@
             const title = document.getElementById('noteTitle')?.value.trim();
             const subject = document.getElementById('noteSubject')?.value;
             const content = document.getElementById('noteContent')?.value.trim();
+            const dateValue = document.getElementById('noteDate')?.value;
 
             if (!title || !content) {
                 alert('❌ Inserisci titolo e contenuto!');
@@ -1548,7 +1549,7 @@
                 title: title,
                 subject: subject,
                 content: content,
-                createdAt: new Date().toLocaleDateString('it-IT')
+                createdAt: dateValue ? new Date(dateValue).toLocaleDateString('it-IT') : new Date().toLocaleDateString('it-IT')
             });
 
             saveData(data);
@@ -1558,6 +1559,7 @@
             document.getElementById('noteTitle').value = '';
             document.getElementById('noteSubject').value = '';
             document.getElementById('noteContent').value = '';
+            document.getElementById('noteDate').value = '';
             alert('✅ Nota salvata!');
         }
 

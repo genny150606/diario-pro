@@ -29,6 +29,12 @@
 </head>
 
 <body>
+    <!-- AURORA BACKGROUND (Subtle for App) -->
+    <div class="aurora-app-bg">
+        <div class="orb-app orb-1"></div>
+        <div class="orb-app orb-2"></div>
+    </div>
+
     <!-- HEADER TOP -->
     <header>
         <a href="#" class="logo">
@@ -314,34 +320,88 @@
             <!-- SETTINGS -->
             <section id="settings">
                 <div class="hero">
-                    <h1>Impostazioni ⚙️</h1>
+                    <h1><span class="gradient-heading">Impostazioni</span> ⚙️</h1>
                     <p>Personalizza la tua esperienza</p>
                 </div>
 
-                <div class="card">
-                    <h3>Scolastico</h3>
-                    <label style="display: block; margin-bottom: 16px;">
-                        <input type="radio" name="school" value="liceo"> Liceo
-                    </label>
-                    <label style="display: block; margin-bottom: 16px;">
-                        <input type="radio" name="school" value="università"> Università
-                    </label>
+                <!-- Tipo di Scuola -->
+                <div class="settings-group">
+                    <div class="settings-group-header">
+                        <span class="settings-group-icon">🎓</span>
+                        <div>
+                            <h3 class="settings-group-title">Tipo di Scuola</h3>
+                            <p class="settings-group-desc">Seleziona il tuo percorso di studi</p>
+                        </div>
+                    </div>
+                    <div class="settings-options">
+                        <label class="settings-option">
+                            <input type="radio" name="school" value="liceo">
+                            <span class="settings-option-card">
+                                <span class="settings-option-icon">🏫</span>
+                                <span class="settings-option-text">
+                                    <strong>Liceo</strong>
+                                    <small>Scuola superiore</small>
+                                </span>
+                            </span>
+                        </label>
+                        <label class="settings-option">
+                            <input type="radio" name="school" value="università">
+                            <span class="settings-option-card">
+                                <span class="settings-option-icon">🎓</span>
+                                <span class="settings-option-text">
+                                    <strong>Università</strong>
+                                    <small>Percorso universitario</small>
+                                </span>
+                            </span>
+                        </label>
+                    </div>
                 </div>
 
-                <div class="card">
-                    <h3>Tema</h3>
-                    <label style="display: block; margin-bottom: 16px;">
-                        <input type="radio" name="theme" value="light"> 🌞 Chiaro
-                    </label>
-                    <label style="display: block; margin-bottom: 16px;">
-                        <input type="radio" name="theme" value="dark"> 🌙 Scuro
-                    </label>
+                <!-- Tema -->
+                <div class="settings-group">
+                    <div class="settings-group-header">
+                        <span class="settings-group-icon">🎨</span>
+                        <div>
+                            <h3 class="settings-group-title">Tema</h3>
+                            <p class="settings-group-desc">Scegli l'aspetto dell'app</p>
+                        </div>
+                    </div>
+                    <div class="settings-options">
+                        <label class="settings-option">
+                            <input type="radio" name="theme" value="light">
+                            <span class="settings-option-card">
+                                <span class="settings-option-icon">☀️</span>
+                                <span class="settings-option-text">
+                                    <strong>Chiaro</strong>
+                                    <small>Interfaccia luminosa</small>
+                                </span>
+                            </span>
+                        </label>
+                        <label class="settings-option">
+                            <input type="radio" name="theme" value="dark">
+                            <span class="settings-option-card">
+                                <span class="settings-option-icon">🌙</span>
+                                <span class="settings-option-text">
+                                    <strong>Scuro</strong>
+                                    <small>Perfetto di notte</small>
+                                </span>
+                            </span>
+                        </label>
+                    </div>
                 </div>
 
-                <div class="card">
-                    <h3>Pericolo</h3>
-                    <button class="btn-secondary" style="background: #fee2e2; color: #991b1b;"
-                        onclick="clearAllData()">🗑️ Elimina tutti i dati</button>
+                <!-- Zona Pericolosa -->
+                <div class="settings-group settings-danger">
+                    <div class="settings-group-header">
+                        <span class="settings-group-icon">⚠️</span>
+                        <div>
+                            <h3 class="settings-group-title">Zona Pericolosa</h3>
+                            <p class="settings-group-desc">Azioni irreversibili — procedi con cautela</p>
+                        </div>
+                    </div>
+                    <button class="btn-danger" onclick="clearAllData()">
+                        🗑️ Elimina tutti i dati
+                    </button>
                 </div>
             </section>
 

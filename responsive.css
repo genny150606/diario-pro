@@ -26,17 +26,23 @@ body {
    ============================================ */
 
 header {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    height: 60px !important;
     flex-shrink: 0;
     width: 100%;
-    padding: clamp(0.75rem, 2vw, 1rem);
-    background: var(--bg-secondary);
+    padding: 0 24px !important;
+    background: var(--bg-primary) !important;
     border-bottom: 1px solid var(--border-color);
     display: flex;
     justify-content: space-between;
     align-items: center;
     gap: 1rem;
-    z-index: 1000;
+    z-index: 10000 !important;
 }
+
 
 header h1 {
     font-size: clamp(1.2rem, 4vw, 1.8rem);
@@ -133,9 +139,8 @@ header h1 {
         left: 0 !important;
         width: 100vw !important;
         height: 100vh !important;
-        background: rgba(0, 0, 0, 0.5) !important;
+        background: rgba(0, 0, 0, 0.6) !important;
         z-index: 9998 !important;
-        backdrop-filter: blur(4px) !important;
     }
 }
 
@@ -181,7 +186,20 @@ header h1 {
    MAIN CONTAINER
    ============================================ */
 
+/* ============================================
+   LAYOUT FIX - RIPRISTINO
+   ============================================ */
+
+.container {
+    display: flex !important;
+    flex: 1 !important;
+    margin-top: 60px !important;
+    min-height: calc(100vh - 60px) !important;
+    width: 100% !important;
+}
+
 .main-container {
+
     display: flex;
     flex: 1;
     width: 100%;
@@ -204,10 +222,13 @@ header h1 {
     -webkit-overflow-scrolling: touch;
 }
 
-/* .content rimosso nell'HTML, main-content ora gestisce lo scroll */
+/* Ripristino visibilità contenuto */
 .content {
-    display: none;
+    display: block !important;
+    padding: clamp(1.5rem, 4vw, 3rem) !important;
+    width: 100% !important;
 }
+
 
 /* ============================================
    OVERLAY PER MOBILE

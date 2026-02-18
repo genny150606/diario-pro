@@ -1,167 +1,255 @@
 /* ============================================
-   CHATBOT APPLE STYLE
+   FEATURES — CHATBOT, FLASHCARDS, NOTES, MODALS
+   Apple 2026 Premium Design
    ============================================ */
 
+/* ── CHATBOT ── */
 #geminiChat {
     position: fixed;
-    bottom: var(--spacing-lg);
-    right: var(--spacing-lg);
+    bottom: var(--space-6);
+    right: var(--space-6);
     z-index: 10000;
     display: flex;
     flex-direction: column;
-    gap: var(--spacing-md);
+    align-items: flex-end;
+    gap: var(--space-4);
 }
 
+/* Toggle Button */
 #geminiChatToggle {
-    width: 60px;
-    height: 60px;
-    border-radius: 50%;
+    width: 56px;
+    height: 56px;
+    border-radius: var(--radius-full);
     background: var(--color-accent);
-    color: white;
+    color: #FFFFFF;
     border: none;
-    font-size: var(--font-size-xl);
+    font-size: 22px;
     cursor: pointer;
-    box-shadow: var(--shadow-lg);
-    transition: all var(--transition-base);
+    box-shadow: var(--shadow-lg), 0 0 0 0 rgba(0, 122, 255, 0.3);
+    transition: all var(--duration-base) var(--ease-out);
     display: flex;
     align-items: center;
     justify-content: center;
-    margin-left: auto;
 }
 
 #geminiChatToggle:hover {
-    transform: scale(1.1);
-    box-shadow: 0 12px 24px rgba(59, 130, 246, 0.4);
+    transform: scale(1.06);
+    box-shadow: var(--shadow-xl), 0 0 0 6px rgba(0, 122, 255, 0.12);
 }
 
 #geminiChatToggle:active {
-    transform: scale(0.95);
+    transform: scale(0.98);
 }
 
+/* Chat Window */
 #geminiChatWindow {
     width: 100%;
-    max-width: 380px;
+    max-width: 400px;
     height: 520px;
-    background: var(--color-bg-primary);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-xl);
+    background: var(--glass-bg);
+    backdrop-filter: blur(40px) saturate(180%);
+    -webkit-backdrop-filter: blur(40px) saturate(180%);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-2xl);
     display: flex;
     flex-direction: column;
-    box-shadow: var(--shadow-xl);
-    animation: slideInUp var(--transition-slow) ease-out;
+    box-shadow: var(--shadow-float);
+    animation: chatSlideUp var(--duration-slow) var(--ease-out);
     overflow: hidden;
 }
 
+@keyframes chatSlideUp {
+    from {
+        transform: translateY(16px);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+/* Chat Header */
 #geminiChatHeader {
-    padding: var(--spacing-lg);
-    background: linear-gradient(135deg, var(--color-accent) 0%, #2563eb 100%);
-    color: white;
-    border-bottom: none;
+    padding: var(--space-5) var(--space-6);
+    background: transparent;
+    border-bottom: 1px solid var(--color-border);
     display: flex;
     justify-content: space-between;
     align-items: center;
+    font-size: var(--font-size-base);
+    font-weight: var(--fw-semibold);
+    color: var(--color-text);
 }
 
-#geminiChatHeader h3 {
-    margin: 0;
-    font-size: var(--font-size-lg);
-    font-weight: var(--font-weight-semibold);
+#geminiChatHeader button,
+#closeChatBtn {
+    background: none;
+    border: none;
+    color: var(--color-text-tertiary);
+    cursor: pointer;
+    font-size: 18px;
+    padding: var(--space-1);
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius-sm);
+    transition: all var(--duration-fast) var(--ease-out);
+    min-height: unset;
 }
 
+#geminiChatHeader button:hover,
+#closeChatBtn:hover {
+    background: var(--color-bg-secondary);
+    color: var(--color-text);
+}
+
+/* Chat Messages */
 #geminiChatMessages {
     flex: 1;
     overflow-y: auto;
-    -webkit-overflow-scrolling: touch;
-    padding: var(--spacing-lg);
+    padding: var(--space-5);
     display: flex;
     flex-direction: column;
-    gap: var(--spacing-md);
-}
-
-#geminiChatMessages::-webkit-scrollbar {
-    width: 6px;
-}
-
-#geminiChatMessages::-webkit-scrollbar-track {
-    background: var(--color-bg-secondary);
-}
-
-#geminiChatMessages::-webkit-scrollbar-thumb {
-    background: var(--color-border);
-    border-radius: 3px;
+    gap: var(--space-3);
 }
 
 .chat-bubble {
-    padding: var(--spacing-md) var(--spacing-lg);
-    border-radius: var(--radius-lg);
+    padding: var(--space-3) var(--space-4);
+    border-radius: var(--radius-xl);
     word-wrap: break-word;
-    animation: fadeInUp var(--transition-base) ease-out;
-    line-height: 1.5;
+    animation: bubbleFadeIn var(--duration-base) var(--ease-out);
     font-size: var(--font-size-sm);
+    line-height: var(--leading-relaxed);
+    max-width: 85%;
+}
+
+@keyframes bubbleFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(6px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 .chat-bubble.user {
     background: var(--color-accent);
-    color: white;
+    color: #FFFFFF;
     margin-left: auto;
-    max-width: 80%;
-    border-bottom-right-radius: var(--radius-md);
+    border-bottom-right-radius: var(--radius-sm);
 }
 
 .chat-bubble.ai {
-    background: var(--color-bg-tertiary);
-    color: var(--color-text-primary);
+    background: var(--color-bg-secondary);
+    color: var(--color-text);
     margin-right: auto;
-    max-width: 85%;
-    border-bottom-left-radius: var(--radius-md);
+    border-bottom-left-radius: var(--radius-sm);
     border: 1px solid var(--color-border);
 }
 
-.chat-bubble strong {
-    font-weight: var(--font-weight-semibold);
+/* AI Thinking Indicator */
+.ai-thinking {
+    display: flex;
+    gap: 4px;
+    padding: var(--space-4);
+    margin-right: auto;
 }
 
+.ai-thinking span {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--color-text-tertiary);
+    animation: thinkPulse 1.4s ease-in-out infinite;
+}
+
+.ai-thinking span:nth-child(2) {
+    animation-delay: 0.2s;
+}
+
+.ai-thinking span:nth-child(3) {
+    animation-delay: 0.4s;
+}
+
+@keyframes thinkPulse {
+
+    0%,
+    80%,
+    100% {
+        opacity: 0.3;
+        transform: scale(0.8);
+    }
+
+    40% {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+/* Chat Input */
 #geminiChatInput {
-    padding: var(--spacing-lg);
+    padding: var(--space-4);
     border-top: 1px solid var(--color-border);
     display: flex;
-    gap: var(--spacing-sm);
+    gap: var(--space-2);
+    background: var(--color-bg-elevated);
 }
 
 #geminiChatInput input {
     flex: 1;
-    border-radius: var(--radius-md);
+    padding: var(--space-3) var(--space-4);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-full);
+    background: var(--color-bg-secondary);
+    color: var(--color-text);
+    font-size: var(--font-size-sm);
+    font-family: var(--font-family);
+    margin-bottom: 0;
+    min-height: 40px;
+}
+
+#geminiChatInput input:focus {
+    border-color: var(--color-accent);
+    background: var(--color-bg);
+    box-shadow: 0 0 0 3px var(--color-accent-bg);
 }
 
 #geminiChatInput button {
+    padding: var(--space-2) var(--space-4);
     background: var(--color-accent);
-    color: white;
+    color: #FFFFFF;
     border: none;
-    border-radius: var(--radius-md);
-    padding: var(--spacing-sm) var(--spacing-md);
+    border-radius: var(--radius-full);
     cursor: pointer;
-    transition: all var(--transition-fast);
+    min-height: 40px;
+    min-width: 40px;
+    font-weight: var(--fw-medium);
+    font-size: var(--font-size-base);
 }
 
 #geminiChatInput button:hover {
-    background: var(--color-accent-light);
+    background: var(--color-accent-hover);
 }
 
-/* ============================================
-   FLASHCARDS APPLE STYLE
-   ============================================ */
-
+/* ── FLASHCARDS ── */
 .flashcard-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: var(--spacing-lg);
+    gap: var(--space-4);
 }
 
 .flashcard {
-    background: var(--color-bg-primary);
+    background: var(--color-bg-elevated);
     border: 1px solid var(--color-border);
-    border-radius: var(--radius-lg);
-    padding: var(--spacing-lg);
+    border-radius: var(--radius-xl);
+    padding: var(--space-6);
     min-height: 200px;
     display: flex;
     flex-direction: column;
@@ -169,148 +257,137 @@
     align-items: center;
     text-align: center;
     cursor: pointer;
-    transition: all var(--transition-base);
-    position: relative;
-    perspective: 1000px;
-    animation: scaleIn var(--transition-base) ease-out;
+    transition: all var(--duration-base) var(--ease-out);
+    box-shadow: var(--shadow-xs);
 }
 
 .flashcard:hover {
-    transform: translateY(-4px);
-    border-color: var(--color-text-light);
-    box-shadow: var(--shadow-lg);
+    box-shadow: var(--shadow-md);
+    transform: translateY(-2px);
 }
 
-.flashcard-content {
-    font-size: var(--font-size-lg);
-    font-weight: var(--font-weight-medium);
-    color: var(--color-text-primary);
-    line-height: 1.6;
-}
-
-.flashcard-badge {
-    position: absolute;
-    top: var(--spacing-md);
-    right: var(--spacing-md);
+.flashcard-difficulty {
+    padding: var(--space-1) var(--space-3);
+    border-radius: var(--radius-full);
     font-size: var(--font-size-xs);
-    padding: var(--spacing-xs) var(--spacing-sm);
+    font-weight: var(--fw-medium);
+    text-transform: uppercase;
+    letter-spacing: var(--tracking-wide);
     background: var(--color-bg-tertiary);
-    border-radius: var(--radius-sm);
     color: var(--color-text-secondary);
 }
 
-/* ============================================
-   NOTES & DIARY APPLE STYLE
-   ============================================ */
-
+/* ── NOTES ── */
 .note-card {
-    background: var(--color-bg-primary);
+    background: var(--color-bg-elevated);
     border: 1px solid var(--color-border);
-    border-radius: var(--radius-lg);
-    padding: var(--spacing-lg);
-    margin-bottom: var(--spacing-lg);
-    transition: all var(--transition-base);
-    animation: fadeInUp var(--transition-base) ease-out;
+    border-radius: var(--radius-xl);
+    padding: var(--space-6);
+    margin-bottom: var(--space-4);
+    transition: all var(--duration-base) var(--ease-out);
+    box-shadow: var(--shadow-xs);
 }
 
 .note-card:hover {
-    border-color: var(--color-text-light);
-    box-shadow: var(--shadow-md);
+    box-shadow: var(--shadow-sm);
+    border-color: var(--color-border-strong);
 }
 
-.note-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    margin-bottom: var(--spacing-md);
-    gap: var(--spacing-md);
-}
-
-.note-title {
-    font-size: var(--font-size-lg);
-    font-weight: var(--font-weight-semibold);
-    color: var(--color-text-primary);
-}
-
-.note-meta {
-    font-size: var(--font-size-sm);
-    color: var(--color-text-light);
-    margin-top: var(--spacing-xs);
-}
-
-.note-content {
-    font-size: var(--font-size-base);
-    color: var(--color-text-secondary);
-    line-height: 1.6;
-    margin-bottom: var(--spacing-md);
-}
-
-.note-footer {
+/* Note select item (flashcard gen modal) */
+.note-select-item {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding-top: var(--spacing-md);
-    border-top: 1px solid var(--color-border);
+    padding: var(--space-3) var(--space-4);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    margin-bottom: var(--space-2);
+    cursor: pointer;
+    transition: all var(--duration-fast) var(--ease-out);
 }
 
-/* ============================================
-   PROGRESS & CHARTS APPLE STYLE
-   ============================================ */
+.note-select-item:hover {
+    background: var(--color-bg-secondary);
+    border-color: var(--color-border-strong);
+}
 
+.note-select-item.selected {
+    background: var(--color-accent-bg);
+    border-color: var(--color-accent);
+}
+
+.notes-selection-list {
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+/* ── PROGRESS ── */
 .progress-bar-container {
-    height: 8px;
+    height: 6px;
     background: var(--color-bg-tertiary);
-    border-radius: 4px;
+    border-radius: 3px;
     overflow: hidden;
-    margin: var(--spacing-md) 0;
+    margin: var(--space-3) 0;
 }
 
 .progress-bar {
     height: 100%;
-    background: linear-gradient(90deg, var(--color-accent) 0%, var(--color-accent-light) 100%);
-    border-radius: 4px;
-    transition: width var(--transition-slow) ease-out;
+    background: var(--color-accent);
+    border-radius: 3px;
+    transition: width var(--duration-slow) var(--ease-out);
 }
 
-.chart-container {
-    background: var(--color-bg-primary);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-lg);
-    padding: var(--spacing-lg);
-    margin-bottom: var(--spacing-lg);
-}
-
-/* ============================================
-   MODAL / DIALOG APPLE STYLE
-   ============================================ */
-
+/* ── MODALS ── */
 .modal-overlay {
+    display: none;
     position: fixed;
     top: 0;
     left: 0;
     right: 0;
     bottom: 0;
-    background: rgba(0, 0, 0, 0.4);
-    display: flex;
+    background: rgba(0, 0, 0, 0.32);
+    backdrop-filter: blur(6px);
+    z-index: 10000;
     align-items: center;
     justify-content: center;
-    z-index: 9999;
-    backdrop-filter: blur(4px);
-    animation: fadeIn var(--transition-base) ease-out;
+    animation: modalFadeIn var(--duration-base) var(--ease-out);
+}
+
+@keyframes modalFadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
 }
 
 .modal-content {
-    background: var(--color-bg-primary);
-    border-radius: var(--radius-xl);
-    padding: var(--spacing-2xl);
-    max-width: 500px;
+    background: var(--color-bg-elevated);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-2xl);
+    padding: var(--space-8);
+    box-shadow: var(--shadow-float);
+    max-width: 460px;
     width: 90%;
-    box-shadow: var(--shadow-xl);
-    animation: scaleIn var(--transition-base) ease-out;
+    animation: modalSlideUp var(--duration-base) var(--ease-out);
+}
+
+@keyframes modalSlideUp {
+    from {
+        transform: translateY(16px);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
 }
 
 .modal-header {
-    margin-bottom: var(--spacing-lg);
+    margin-bottom: var(--space-6);
 }
 
 .modal-header h2 {
@@ -318,26 +395,23 @@
 }
 
 .modal-body {
-    margin-bottom: var(--spacing-lg);
+    margin-bottom: var(--space-6);
 }
 
 .modal-footer {
     display: flex;
-    gap: var(--spacing-md);
+    gap: var(--space-3);
     justify-content: flex-end;
 }
 
-/* ============================================
-   LOADING STATES
-   ============================================ */
-
+/* ── LOADING ── */
 .loading-spinner {
-    width: 40px;
-    height: 40px;
-    border: 3px solid var(--color-border);
+    width: 32px;
+    height: 32px;
+    border: 2px solid var(--color-border);
     border-top-color: var(--color-accent);
     border-radius: 50%;
-    animation: spin 1s linear infinite;
+    animation: spin 0.8s linear infinite;
 }
 
 @keyframes spin {
@@ -346,65 +420,48 @@
     }
 }
 
-.loading-dots {
-    display: flex;
-    gap: var(--spacing-sm);
-    align-items: center;
-}
+/* ── MOBILE CHATBOT ── */
+@media (max-width: 767px) {
+    #geminiChat {
+        bottom: var(--space-4);
+        right: var(--space-4);
+    }
 
-.loading-dots span {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    background: var(--color-accent);
-    animation: bounce 1.4s infinite;
-}
-
-.loading-dots span:nth-child(2) {
-    animation-delay: 0.2s;
-}
-
-.loading-dots span:nth-child(3) {
-    animation-delay: 0.4s;
-}
-
-/* ============================================
-   MOBILE RESPONSIVENESS
-   ============================================ */
-
-@media (max-width: 640px) {
     #geminiChatWindow {
+        position: fixed;
+        bottom: 0;
+        right: 0;
+        left: 0;
+        width: 100%;
         max-width: 100%;
-        height: calc(100vh - 140px);
-        border-radius: var(--radius-lg);
+        height: 85vh;
+        border-radius: var(--radius-2xl) var(--radius-2xl) 0 0;
+        animation: chatSheetUp var(--duration-slow) var(--ease-out);
     }
-    
-    .flashcard-grid {
-        grid-template-columns: 1fr;
+
+    @keyframes chatSheetUp {
+        from {
+            transform: translateY(100%);
+        }
+
+        to {
+            transform: translateY(0);
+        }
     }
-    
+
     .modal-content {
         width: 95%;
-        padding: var(--spacing-lg);
+        padding: var(--space-6);
     }
 }
 
+/* ── KEYFRAMES ── */
 @keyframes slideInUp {
     from {
-        transform: translateY(20px);
+        transform: translateY(16px);
         opacity: 0;
     }
-    to {
-        transform: translateY(0);
-        opacity: 1;
-    }
-}
 
-@keyframes fadeInUp {
-    from {
-        transform: translateY(10px);
-        opacity: 0;
-    }
     to {
         transform: translateY(0);
         opacity: 1;

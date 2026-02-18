@@ -179,7 +179,7 @@ RISPOSTA: Solo JSON array, niente altro!
 // ============================================
 app.post("/api/chat", async (req, res) => {
     try {
-        const { message, history = [], context = "" } = req.body;
+        const { message, history = [], context = "", stream = false } = req.body;
 
         if (!message || message.trim().length === 0) {
             return res
@@ -220,16 +220,33 @@ ${context ? `CONTESTO: ${context}` : ""}`;
             systemInstruction: systemPrompt
         });
 
-        const result = await ai.generateContent({
-            contents: [
-                ...conversationHistory,
-                {
-                    role: "user",
-                    parts: [{ text: String(message).substring(0, 800) }],
-                },
-            ],
-        });
+        const contents = [
+            ...conversationHistory,
+            {
+                role: "user",
+                parts: [{ text: String(message).substring(0, 800) }],
+            },
+        ];
 
+        // Se l'utente ha chiesto lo streaming
+        if (stream) {
+            res.setHeader('Content-Type', 'text/event-stream');
+            res.setHeader('Cache-Control', 'no-cache');
+            res.setHeader('Connection', 'keep-alive');
+
+            const result = await ai.generateContentStream({ contents });
+
+            for await (const chunk of result.stream) {
+                const chunkText = chunk.text();
+                res.write(`data: ${JSON.stringify({ text: chunkText })}\n\n`);
+            }
+
+            res.write('data: [DONE]\n\n');
+            return res.end();
+        }
+
+        // Altrimenti risposta classica (compatibilità garantita)
+        const result = await ai.generateContent({ contents });
         const response = await result.response;
         const reply = response.text() || "Nessuna risposta generata";
 
@@ -241,7 +258,7 @@ ${context ? `CONTESTO: ${context}` : ""}`;
         console.error("❌ Errore critico Chat:", error);
         console.error("Stack trace:", error.stack);
 
-        if (error.code === 429 || error.status === "RESOURCE_EXHAUSTED") {
+        if (error.code === 429 || error.status === "RESOURCE_EXHAUSTED" || error.message?.includes("429")) {
             return res.status(503).json({
                 error: "Troppe richieste a Gemini. Riprova tra 30 secondi.",
                 type: "rate_limit_error",

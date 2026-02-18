@@ -3,1444 +3,318 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>StudyJournal Pro</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StudyJournal Pro — Il Tuo Studio Potenziato dall'AI</title>
     <link rel="icon" type="image/png" href="favicon.png">
     <meta name="description"
-        content="StudyJournal Pro — Il tuo assistente AI per lo studio. Note, flashcard, compiti e voti in un'unica app premium.">
+        content="StudyJournal Pro è l'assistente AI definitivo per lo studio. Note intelligenti, flashcard automatiche, gestione compiti, voti e statistiche — tutto in un'unica app premium.">
 
-    <!-- Chart.js -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
-
-    <!-- Design System (load order matters) -->
+    <!-- Design System -->
     <link rel="stylesheet" href="theme.css">
-    <link rel="stylesheet" href="global.css">
-    <link rel="stylesheet" href="layout.css">
-    <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="features.css">
-    <link rel="stylesheet" href="animations.css">
-    <link rel="stylesheet" href="animations-ui.css">
-    <link rel="stylesheet" href="responsive.css">
-
-    <!-- Supabase & Auth -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="auth.js" defer></script>
-
+    <link rel="stylesheet" href="home.css">
 </head>
 
-<body>
-    <!-- HEADER TOP -->
-    <header>
-        <a href="#" class="logo">
-            <img src="favicon.png" alt="Logo" class="logo-img">
-            <span>StudyJournal</span>
+<body class="landing-page">
+
+    <!-- AURORA BACKGROUND -->
+    <div class="aurora-bg" aria-hidden="true">
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+        <div class="orb orb-3"></div>
+    </div>
+
+    <!-- NAV -->
+    <nav class="landing-nav">
+        <a href="#" class="nav-logo">
+            <img src="favicon.png" alt="StudyJournal Pro Logo">
+            <span>StudyJournal Pro</span>
         </a>
+        <div class="nav-actions">
+            <a href="app.html" class="nav-cta">Apri App →</a>
+        </div>
+    </nav>
 
-        <nav class="sidebar">
-            <div class="nav-indicator"></div>
-            <a href="#" onclick="showSection('dashboard')" class="sidebar-item nav-link active">Dashboard</a>
-            <a href="#" onclick="showSection('notes')" class="sidebar-item nav-link">Note</a>
-            <a href="#" onclick="showSection('tasks')" class="sidebar-item nav-link">Compiti</a>
-            <a href="#" onclick="showSection('grades')" class="sidebar-item nav-link">Voti</a>
-            <a href="#" onclick="showSection('stats')" class="sidebar-item nav-link">Statistiche</a>
-            <a href="#" onclick="showSection('presences')" class="sidebar-item nav-link">Presenze</a>
-            <a href="#" onclick="showSection('settings')" class="sidebar-item nav-link">Impostazioni</a>
-        </nav>
+    <!-- ═══════════ HERO ═══════════ -->
+    <section class="landing-hero">
+        <div class="hero-badge">✨ Potenziato da Intelligenza Artificiale</div>
 
+        <h1 class="hero-title">
+            <span class="gradient-text">Il Tuo Studio,</span><br>
+            Rivoluzionato dall'AI.
+        </h1>
 
-        <div class="header-right">
-            <!-- Auth UI -->
-            <button id="loginBtn" class="btn-primary" style="padding: 8px 16px; font-size: 14px;"
-                onclick="document.getElementById('authModal').style.display='flex'">
-                Accedi
-            </button>
-            <div id="userProfile" class="user-profile-container" style="display: none;">
-                <button class="account-btn" onclick="toggleAccountMenu()" id="accountBtn">
-                    <span id="userEmailDisplay"></span>
-                    <span class="chevron">▼</span>
-                </button>
-                <div id="accountDropdown" class="account-dropdown">
-                    <button onclick="openChangePasswordModal()">🔑 Cambia Password</button>
-                    <button onclick="AuthManager.signOut()">🚪 Esci</button>
-                </div>
-            </div>
+        <p class="hero-subtitle">
+            Note intelligenti, flashcard generate automaticamente, compiti organizzati,
+            voti monitorati e un tutor AI sempre con te. Tutto in un'unica piattaforma premium.
+        </p>
 
-            <button class="theme-toggle" onclick="toggleTheme()" title="Cambia tema">🌙</button>
-            <button class="menu-toggle" id="hamburgerBtn" title="Menu">☰</button>
+        <div class="hero-actions">
+            <a href="app.html" class="btn-hero btn-hero-primary">
+                Inizia Gratis 🚀
+            </a>
+            <a href="#features" class="btn-hero btn-hero-secondary">
+                Scopri le Funzionalità
+            </a>
         </div>
 
-
-    </header>
-
-    <!-- MAIN CONTENT -->
-    <div class="container">
-        <div class="content">
-
-            <!-- DASHBOARD -->
-            <section id="dashboard" class="active">
-                <div class="hero">
-                    <h1>Benvenuto! 👋</h1>
-                    <p>Visualizza il tuo progresso di studio in tempo reale</p>
+        <!-- Floating App Preview -->
+        <div class="hero-preview">
+            <div class="preview-window">
+                <div class="preview-titlebar">
+                    <span class="preview-dot"></span>
+                    <span class="preview-dot"></span>
+                    <span class="preview-dot"></span>
                 </div>
-
-                <div class="stats-grid">
-                    <div class="stat-card">
-                        <span class="stat-icon">📚</span>
-                        <div class="stat-label">Appunti Creati</div>
-                        <div class="stat-value">12</div>
-                        <div class="stat-change">↑ 3 questa settimana</div>
+                <div class="preview-content">
+                    <div class="preview-card">
+                        <div class="preview-card-icon">📝</div>
+                        <div class="preview-card-title">Note Salvate</div>
+                        <div class="preview-card-value">24</div>
                     </div>
-
-                    <div class="stat-card">
-                        <span class="stat-icon">📝</span>
-                        <div class="stat-label">Note</div>
-                        <div class="stat-value" id="dashboardNotes">0</div>
-                        <div class="stat-change">appunti salvati</div>
+                    <div class="preview-card">
+                        <div class="preview-card-icon">🎴</div>
+                        <div class="preview-card-title">Flashcard</div>
+                        <div class="preview-card-value">86</div>
                     </div>
-
-                    <div class="stat-card">
-                        <span class="stat-icon">🎴</span>
-                        <div class="stat-label">Flashcard</div>
-                        <div class="stat-value" id="dashboardFlashcards">0</div>
-                        <div class="stat-change">flashcard create</div>
-                    </div>
-
-                    <div class="stat-card">
-                        <span class="stat-icon">✅</span>
-                        <div class="stat-label">Compiti Completati</div>
-                        <div class="stat-value" id="dashboardTasksCompleted">0</div>
-                        <div class="stat-change">compiti finiti</div>
-                    </div>
-
-                    <div class="stat-card">
-                        <span class="stat-icon">⭐</span>
-                        <div class="stat-label">Media Voti</div>
-                        <div class="stat-value" id="dashboardAverage">-</div>
-                        <div class="stat-change">media generale</div>
+                    <div class="preview-card">
+                        <div class="preview-card-icon">⭐</div>
+                        <div class="preview-card-title">Media Voti</div>
+                        <div class="preview-card-value">8.4</div>
                     </div>
                 </div>
-            </section>
-
-            <!-- NOTES -->
-            <section id="notes">
-                <div class="hero">
-                    <h1>Note & Flashcard 📚</h1>
-                    <p>Organizza i tuoi appunti e crea flashcard per memorizzare</p>
-                </div>
-
-                <div class="tabs">
-                    <button class="tab-btn active" onclick="showTab('notes-tab')">Note</button>
-                    <button class="tab-btn" onclick="showTab('flashcards-tab')">Flashcard</button>
-                </div>
-
-                <div id="notes-tab" class="tab-content active">
-                    <div class="card">
-                        <h3>Aggiungi nuova nota</h3>
-                        <input type="text" id="noteTitle" placeholder="Titolo nota...">
-                        <select id="noteSubject" style="margin-bottom: 12px;">
-                            <option value="Generale">Generale</option>
-                            <option value="Matematica">Matematica</option>
-                            <option value="Italiano">Italiano</option>
-                            <option value="Inglese">Inglese</option>
-                            <option value="Scienze">Scienze</option>
-                            <option value="Storia">Storia</option>
-                        </select>
-                        <textarea id="noteContent" placeholder="Scrivi i tuoi appunti..."
-                            style="min-height: 120px; margin-bottom: 12px;"></textarea>
-
-                        <div class="date-input-container" style="margin-bottom: 16px;">
-                            <input type="date" id="noteDate">
-                            <span class="calendar-icon-trigger" onclick="openCalendar('noteDate')">📅</span>
-                        </div>
-
-                        <button class="btn-primary" onclick="addNote()">Salva Nota</button>
-                    </div>
-
-                    <div id="notesContainer"></div>
-                </div>
-
-                <div id="flashcards-tab" class="tab-content">
-                    <div class="section-header">
-                        <h3 style="margin: 0;">Le tue flashcard</h3>
-                    </div>
-
-                    <div class="card">
-                        <h3>Genera Flashcard</h3>
-                        <p style="color: var(--text-secondary); margin-bottom: 16px;">Crea flashcard automaticamente
-                            dagli appunti con l'AI</p>
-                        <button class="btn-primary" style="width: 100%; margin-bottom: 8px;"
-                            onclick="generateFlashcardsWithGemini()">
-                            🤖 Genera Flashcard con Gemini
-                        </button>
-                        <button class="btn-secondary" style="width: 100%;" onclick="deleteAllFlashcards()">
-                            🗑️ Elimina tutte le Flashcard
-                        </button>
-                    </div>
-
-                    <div id="flashcardStudy"></div>
-                </div>
-            </section>
-
-            <!-- TASKS -->
-            <section id="tasks">
-                <div class="hero">
-                    <h1>Compiti 📝</h1>
-                    <p>Gestisci i tuoi compiti e scadenze</p>
-                </div>
-
-                <div class="card">
-                    <h3>Nuovo compito</h3>
-                    <input type="text" id="taskTitle" placeholder="Descrizione compito...">
-                    <div class="date-input-container" style="margin-bottom: 12px;">
-                        <input type="date" id="taskDue">
-                        <span class="calendar-icon-trigger" onclick="openCalendar('taskDue')">📅</span>
-                    </div>
-                    <select id="taskSubject" style="margin-bottom: 12px;">
-                        <option value="Generale">Generale</option>
-                        <option value="Matematica">Matematica</option>
-                        <option value="Italiano">Italiano</option>
-                        <option value="Inglese">Inglese</option>
-                    </select>
-                    <button class="btn-primary" onclick="addTask()">Aggiungi Compito</button>
-                </div>
-
-                <div id="tasksContainer"></div>
-            </section>
-
-            <!-- GRADES -->
-            <section id="grades">
-                <div class="hero">
-                    <h1>Voti ⭐</h1>
-                    <p>Traccia i tuoi progressi scolastici</p>
-                </div>
-
-                <div class="card">
-                    <h3>Aggiungi nuovo voto</h3>
-                    <input type="text" id="gradeSubject" placeholder="Materia...">
-                    <input type="number" id="gradeValue" placeholder="Voto..." min="1" max="10"
-                        style="margin-bottom: 12px;">
-                    <div class="date-input-container" style="margin-bottom: 12px;">
-                        <input type="date" id="gradeDate">
-                        <span class="calendar-icon-trigger" onclick="openCalendar('gradeDate')">📅</span>
-                    </div>
-                    <textarea id="gradeNotes" placeholder="Note..." style="min-height: 80px;"></textarea>
-                    <button class="btn-primary" onclick="addGrade()">Salva Voto</button>
-                </div>
-
-                <div id="gradesContainer"></div>
-            </section>
-
-            <!-- STATS -->
-            <section id="stats">
-                <div class="hero">
-                    <h1>Statistiche 📊</h1>
-                    <p>Analizza i tuoi progressi nel tempo</p>
-                </div>
-
-                <div class="stats-grid">
-                    <div class="stat-card">
-                        <span class="stat-icon">📚</span>
-                        <div class="stat-label">Voti Totali</div>
-                        <div class="stat-value" id="statsGradesCount">0</div>
-                        <div class="stat-change">voti registrati</div>
-                    </div>
-
-                    <div class="stat-card">
-                        <span class="stat-icon">🎯</span>
-                        <div class="stat-label">Completamento Compiti</div>
-                        <div class="stat-value" id="statsCompletion">0%</div>
-                        <div class="stat-change">percentuale</div>
-                    </div>
-
-                    <div class="stat-card">
-                        <span class="stat-icon">📋</span>
-                        <div class="stat-label">Presenze</div>
-                        <div class="stat-value" id="statsPresences">0</div>
-                        <div class="stat-change">giorni in classe</div>
-                    </div>
-                </div>
-            </section>
-
-            <!-- PRESENCES -->
-            <section id="presences">
-                <div class="hero">
-                    <h1>Presenze & Assenze 📋</h1>
-                    <p>Monitora le tue presenze in classe</p>
-                </div>
-
-                <div class="stats-grid">
-                    <div class="stat-card">
-                        <span class="stat-icon">✅</span>
-                        <div class="stat-label">Presenze</div>
-                        <div class="stat-value" id="presencesCount">0</div>
-                        <div class="stat-change">giorni in classe</div>
-                    </div>
-
-                    <div class="stat-card">
-                        <span class="stat-icon">❌</span>
-                        <div class="stat-label">Assenze</div>
-                        <div class="stat-value" id="absencesCount">0</div>
-                        <div class="stat-change">giorni assente</div>
-                    </div>
-
-                    <div class="stat-card">
-                        <span class="stat-icon">📊</span>
-                        <div class="stat-label">Percentuale</div>
-                        <div class="stat-value" id="presencePercentage">-</div>
-                        <div class="stat-change">di presenze</div>
-                    </div>
-                </div>
-
-                <div class="card">
-                    <h3>Aggiungi Presenza o Assenza</h3>
-                    <div style="display: flex; gap: 12px; margin-bottom: 12px;">
-                        <div class="date-input-container" style="flex: 1;">
-                            <input type="date" id="presenceDate">
-                            <span class="calendar-icon-trigger" onclick="openCalendar('presenceDate')">📅</span>
-                        </div>
-                        <select id="presenceType" style="flex: 0.5; margin-bottom: 0;">
-                            <option value="presence">✅ Presente</option>
-                            <option value="absence">❌ Assente</option>
-                        </select>
-                    </div>
-                    <button class="btn-primary" style="width: 100%;" onclick="addPresence()">Registra</button>
-                </div>
-
-                <div id="presencesContainer"></div>
-            </section>
-
-            <!-- SETTINGS -->
-            <section id="settings">
-                <div class="hero">
-                    <h1>Impostazioni ⚙️</h1>
-                    <p>Personalizza la tua esperienza</p>
-                </div>
-
-                <div class="card">
-                    <h3>Scolastico</h3>
-                    <label style="display: block; margin-bottom: 16px;">
-                        <input type="radio" name="school" value="liceo"> Liceo
-                    </label>
-                    <label style="display: block; margin-bottom: 16px;">
-                        <input type="radio" name="school" value="università"> Università
-                    </label>
-                </div>
-
-                <div class="card">
-                    <h3>Tema</h3>
-                    <label style="display: block; margin-bottom: 16px;">
-                        <input type="radio" name="theme" value="light"> 🌞 Chiaro
-                    </label>
-                    <label style="display: block; margin-bottom: 16px;">
-                        <input type="radio" name="theme" value="dark"> 🌙 Scuro
-                    </label>
-                </div>
-
-                <div class="card">
-                    <h3>Pericolo</h3>
-                    <button class="btn-secondary" style="background: #fee2e2; color: #991b1b;"
-                        onclick="clearAllData()">🗑️ Elimina tutti i dati</button>
-                </div>
-            </section>
-
-        </div>
-    </div>
-
-    <!-- CHATBOT -->
-    <div id="geminiChat">
-        <button id="geminiChatToggle">💬</button>
-        <div id="geminiChatWindow" style="display: none;">
-            <div id="geminiChatHeader">
-                <span>AI Tutor</span>
-                <button id="closeChatBtn"
-                    style="background: none; border: none; color: white; cursor: pointer; font-size: 18px; padding: 0; width: 24px; height: 24px;">✕</button>
             </div>
-            <div id="geminiChatMessages"></div>
-            <div id="geminiChatInput">
-                <input type="text" id="chatInputField" placeholder="Fai una domanda...">
-                <button
-                    style="padding: 10px 16px; background: var(--accent); color: white; border: none; border-radius: 8px; cursor: pointer; transition: all 150ms ease; font-weight: 500;">➤</button>
+            <div class="preview-glow"></div>
+        </div>
+    </section>
+
+    <!-- ═══════════ FEATURES ═══════════ -->
+    <section class="landing-section" id="features">
+        <div class="reveal">
+            <div class="section-label">⚡ Funzionalità</div>
+            <h2 class="section-heading">Tutto quello di cui hai bisogno per eccellere.</h2>
+            <p class="section-desc">
+                Sei strumenti potenti in un'unica interfaccia. Pensato per studenti che vogliono il massimo.
+            </p>
+        </div>
+
+        <div class="features-grid">
+            <div class="feature-card reveal reveal-delay-1">
+                <div class="feature-icon">📚</div>
+                <h3 class="feature-title">Note Intelligenti</h3>
+                <p class="feature-desc">
+                    Organizza i tuoi appunti per materia con editor avanzato. Ricerca fulminea e sincronizzazione cloud.
+                </p>
+            </div>
+            <div class="feature-card reveal reveal-delay-2">
+                <div class="feature-icon">🤖</div>
+                <h3 class="feature-title">Flashcard con AI</h3>
+                <p class="feature-desc">
+                    Genera flashcard istantaneamente dai tuoi appunti grazie a Gemini AI. Studio attivo mai così facile.
+                </p>
+            </div>
+            <div class="feature-card reveal reveal-delay-3">
+                <div class="feature-icon">✅</div>
+                <h3 class="feature-title">Gestione Compiti</h3>
+                <p class="feature-desc">
+                    Traccia scadenze, priorità e progressi. Non dimenticare mai più un compito con notifiche
+                    intelligenti.
+                </p>
+            </div>
+            <div class="feature-card reveal reveal-delay-4">
+                <div class="feature-icon">⭐</div>
+                <h3 class="feature-title">Registro Voti</h3>
+                <p class="feature-desc">
+                    Monitora i tuoi voti per materia, calcola medie automatiche e visualizza i trend di miglioramento.
+                </p>
+            </div>
+            <div class="feature-card reveal reveal-delay-5">
+                <div class="feature-icon">📊</div>
+                <h3 class="feature-title">Statistiche Avanzate</h3>
+                <p class="feature-desc">
+                    Dashboard interattiva con grafici e analytics. Capisci i tuoi punti di forza e dove migliorare.
+                </p>
+            </div>
+            <div class="feature-card reveal reveal-delay-6">
+                <div class="feature-icon">💬</div>
+                <h3 class="feature-title">AI Tutor</h3>
+                <p class="feature-desc">
+                    Un assistente AI sempre disponibile per rispondere alle tue domande e aiutarti nello studio.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- ═══════════ STATS BANNER ═══════════ -->
+    <div class="stats-banner">
+        <div class="stats-banner-inner reveal">
+            <div class="stat-item">
+                <div class="stat-number">10K+</div>
+                <div class="stat-label-landing">Studenti attivi</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number">50K+</div>
+                <div class="stat-label-landing">Flashcard generate</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number">98%</div>
+                <div class="stat-label-landing">Soddisfazione</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number">24/7</div>
+                <div class="stat-label-landing">AI Tutor disponibile</div>
             </div>
         </div>
     </div>
 
-    <!-- FOOTER -->
-    <footer class="app-footer">
-        <div class="footer-content">
-            <p>© 2026 StudyJournal Pro • Created with ❤️ by <strong>Gennaro Pascale</strong></p>
-            <div class="footer-links">
-                <span>Versione 2.0.0</span>
-                <span>•</span>
-                <span>Premium Edition</span>
+    <!-- ═══════════ HOW IT WORKS ═══════════ -->
+    <section class="landing-section">
+        <div class="reveal">
+            <div class="section-label">🎯 Come Funziona</div>
+            <h2 class="section-heading">Tre passi verso il successo.</h2>
+            <p class="section-desc">
+                Iniziare è semplicissimo. In meno di un minuto stai già studiando in modo più intelligente.
+            </p>
+        </div>
+
+        <div class="timeline reveal">
+            <div class="timeline-step">
+                <div class="step-number">1</div>
+                <h3 class="step-title">Crea il tuo Account</h3>
+                <p class="step-desc">Registrati gratuitamente e accedi alla tua dashboard personale in pochi secondi.
+                </p>
             </div>
+            <div class="timeline-step">
+                <div class="step-number">2</div>
+                <h3 class="step-title">Aggiungi i tuoi Appunti</h3>
+                <p class="step-desc">Scrivi le tue note, organizzale per materia e lascia che l'AI crei le flashcard per
+                    te.</p>
+            </div>
+            <div class="timeline-step">
+                <div class="step-number">3</div>
+                <h3 class="step-title">Studia e Migliora</h3>
+                <p class="step-desc">Monitora i progressi con statistiche avanzate e raggiungi i tuoi obiettivi.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- ═══════════ TESTIMONIALS ═══════════ -->
+    <section class="landing-section">
+        <div class="reveal">
+            <div class="section-label">💬 Recensioni</div>
+            <h2 class="section-heading">Adorato dagli studenti.</h2>
+            <p class="section-desc">
+                Migliaia di studenti hanno già trasformato il loro modo di studiare.
+            </p>
+        </div>
+
+        <div class="testimonials-grid">
+            <div class="testimonial-card reveal reveal-delay-1">
+                <div class="testimonial-stars">★★★★★</div>
+                <p class="testimonial-text">
+                    "Da quando uso StudyJournal, la mia media è salita di due punti. Le flashcard generate dall'AI sono
+                    incredibili!"
+                </p>
+                <div class="testimonial-author">
+                    <div class="testimonial-avatar">M</div>
+                    <div>
+                        <div class="testimonial-name">Marco R.</div>
+                        <div class="testimonial-role">Liceo Scientifico, 4° anno</div>
+                    </div>
+                </div>
+            </div>
+            <div class="testimonial-card reveal reveal-delay-2">
+                <div class="testimonial-stars">★★★★★</div>
+                <p class="testimonial-text">
+                    "Finalmente un'app che ha tutto. Note, compiti, voti, statistiche... e il tutor AI è come avere un
+                    prof sempre disponibile."
+                </p>
+                <div class="testimonial-author">
+                    <div class="testimonial-avatar">S</div>
+                    <div>
+                        <div class="testimonial-name">Sara L.</div>
+                        <div class="testimonial-role">Università, Ingegneria</div>
+                    </div>
+                </div>
+            </div>
+            <div class="testimonial-card reveal reveal-delay-3">
+                <div class="testimonial-stars">★★★★★</div>
+                <p class="testimonial-text">
+                    "Il design è pazzesco, sembra un prodotto Apple. E le funzionalità sono perfette per organizzare lo
+                    studio."
+                </p>
+                <div class="testimonial-author">
+                    <div class="testimonial-avatar">L</div>
+                    <div>
+                        <div class="testimonial-name">Luca D.</div>
+                        <div class="testimonial-role">Liceo Classico, 5° anno</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ═══════════ FINAL CTA ═══════════ -->
+    <section class="cta-section">
+        <div class="cta-card reveal">
+            <h2 class="cta-heading">Pronto a trasformare il tuo studio?</h2>
+            <p class="cta-desc">
+                Unisciti a migliaia di studenti che studiano in modo più intelligente. Completamente gratuito.
+            </p>
+            <a href="app.html" class="btn-hero btn-hero-primary">
+                Inizia Ora — È Gratis ✨
+            </a>
+        </div>
+    </section>
+
+    <!-- ═══════════ FOOTER ═══════════ -->
+    <footer class="landing-footer">
+        <p>© 2026 StudyJournal Pro • Created with ❤️ by <strong>Gennaro Pascale</strong></p>
+        <div class="landing-footer-links">
+            <span>Versione 2.0.0</span>
+            <span>•</span>
+            <span>Premium Edition</span>
         </div>
     </footer>
 
-    <!-- SCRIPTS -->
+    <!-- SCROLL REVEAL SCRIPT -->
     <script>
-        function showSection(sectionId) {
-            // Nasconde tutte le sezioni
-            document.querySelectorAll('section').forEach(s => s.classList.remove('active'));
-            const section = document.getElementById(sectionId);
-            if (section) section.classList.add('active');
+        // Theme from localStorage
+        (function () {
+            const saved = localStorage.getItem('theme');
+            if (saved) document.documentElement.setAttribute('data-theme', saved);
+        })();
 
-            // Aggiorna stato active nei link
-            const navLinks = document.querySelectorAll('.sidebar-item');
-            navLinks.forEach(a => a.classList.remove('active'));
-
-            // Trova il link corrispondente alla sezione
-            const activeLink = Array.from(navLinks).find(a => a.getAttribute('onclick').includes(`'${sectionId}'`));
-            if (activeLink) activeLink.classList.add('active');
-
-            // Gestione Sincronizzazione Dati Sezione
-            if (sectionId === 'notes') {
-                if (typeof renderNotes === 'function') renderNotes();
-                if (typeof renderFlashcards === 'function') renderFlashcards(loadFlashcards());
-            } else if (sectionId === 'tasks') {
-                if (typeof renderTasks === 'function') renderTasks();
-            } else if (sectionId === 'grades') {
-                if (typeof renderGrades === 'function') renderGrades();
-            } else if (sectionId === 'presences') {
-                if (typeof renderPresences === 'function') renderPresences();
-                if (typeof updatePresenceStats === 'function') updatePresenceStats();
-            }
-
-            // Animazione indicatore (solo su Desktop)
-            updateNavIndicator(activeLink);
-
-            // Chiudi sidebar mobile se aperta
-            const sidebar = document.querySelector('.sidebar');
-            if (sidebar.classList.contains('open')) {
-                sidebar.classList.remove('open');
-                document.querySelector('.navbar-overlay')?.classList.remove('active');
-            }
-        }
-
-        function updateNavIndicator(activeLink) {
-            const indicator = document.querySelector('.nav-indicator');
-            if (!indicator) return;
-
-            if (activeLink && window.innerWidth > 1024) {
-                indicator.style.width = `${activeLink.offsetWidth}px`;
-                indicator.style.height = `${activeLink.offsetHeight}px`;
-                indicator.style.left = `${activeLink.offsetLeft}px`;
-                indicator.style.top = `${activeLink.offsetTop}px`;
-                indicator.style.opacity = '1';
-            } else {
-                indicator.style.opacity = '0';
-            }
-        }
-
-        // Inizializza indicatore al caricamento
-        window.addEventListener('resize', () => {
-            const activeLink = document.querySelector('.sidebar-item.active');
-            updateNavIndicator(activeLink);
-        });
-
+        // IntersectionObserver for scroll reveals
         document.addEventListener('DOMContentLoaded', () => {
-            setTimeout(() => {
-                const activeLink = document.querySelector('.sidebar-item.active');
-                updateNavIndicator(activeLink);
-            }, 500);
+            const revealElements = document.querySelectorAll('.reveal');
+
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('visible');
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, {
+                threshold: 0.15,
+                rootMargin: '0px 0px -40px 0px'
+            });
+
+            revealElements.forEach(el => observer.observe(el));
         });
 
-
-        function showTab(tabId) {
-            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
-            document.getElementById(tabId)?.classList.add('active');
-
-            const tabButtons = document.querySelectorAll('.tab-btn');
-            tabButtons.forEach(b => b.classList.remove('active'));
-
-            // Highlight the correct button
-            if (typeof event !== 'undefined' && event && event.target && event.target.classList.contains('tab-btn')) {
-                event.target.classList.add('active');
-            } else {
-                tabButtons.forEach(btn => {
-                    if (btn.getAttribute('onclick')?.includes(tabId)) {
-                        btn.classList.add('active');
-                    }
-                });
-            }
-        }
-
-        function toggleTheme() {
-            const html = document.documentElement;
-            const isDark = html.getAttribute('data-theme') === 'dark';
-            html.setAttribute('data-theme', isDark ? 'light' : 'dark');
-            localStorage.setItem('theme', isDark ? 'light' : 'dark');
-            updateThemeButton();
-        }
-
-        function updateThemeButton() {
-            const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-            document.querySelector('.theme-toggle').textContent = isDark ? '☀️' : '🌙';
-        }
-
-        // ==================== FLASHCARD FUNCTIONS ====================
-        function loadData() {
-            try {
-                const data = localStorage.getItem('studyjournal_data');
-                return data ? JSON.parse(data) : {};
-            } catch (e) {
-                console.error('Errore caricamento dati:', e);
-                return {};
-            }
-        }
-
-        function saveData(data) {
-            if (!AuthManager || !AuthManager.user) {
-                const authModal = document.getElementById('authModal');
-                if (authModal) {
-                    authModal.style.display = 'flex';
-                    const errorEl = document.getElementById('authError');
-                    if (errorEl) {
-                        errorEl.textContent = 'Accedi o registrati per salvare i tuoi dati.';
-                        errorEl.style.display = 'block';
-                    }
+        // Smooth scroll for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                const target = document.querySelector(link.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
                 }
-                return;
-            }
-
-            try {
-                localStorage.setItem('studyjournal_data', JSON.stringify(data));
-
-                // Cloud Sync
-                if (typeof supabaseClient !== 'undefined') {
-                    supabaseClient
-                        .from('users_data')
-                        .upsert({
-                            id: AuthManager.user.id,
-                            data: data,
-                            updated_at: new Date()
-                        })
-                        .then(({ error }) => {
-                            if (error) console.error('Cloud Sync Error:', error);
-                        });
-                }
-            } catch (e) {
-                console.error('Errore salvataggio dati:', e);
-            }
-        }
-
-
-        function loadFlashcards() {
-            const data = loadData();
-            return data.flashcards || [];
-        }
-
-        function saveFlashcards(flashcards) {
-            const data = loadData();
-            data.flashcards = flashcards;
-            saveData(data);
-        }
-
-        function loadNotes() {
-            const data = loadData();
-            return data.notes || [];
-        }
-
-        let selectedNoteForGen = null;
-
-        function openFlashcardGenModal() {
-            const notes = loadNotes();
-            if (notes.length === 0) {
-                alert('❌ Aggiungi prima una nota nella sezione Note!');
-                return;
-            }
-
-            const listContainer = document.getElementById('notesSelectionList');
-            if (listContainer) {
-                listContainer.innerHTML = notes.map((note, idx) => `
-                    <div class="note-select-item" onclick="selectNoteForGen(${idx}, this)">
-                        <span>${note.title || 'Senza titolo'}</span>
-                        <small style="color: var(--text-light);">${note.subject}</small>
-                    </div>
-                `).join('');
-            }
-
-            selectedNoteForGen = null;
-            document.getElementById('flashcardGenModal').style.display = 'flex';
-        }
-
-        function closeFlashcardGenModal() {
-            document.getElementById('flashcardGenModal').style.display = 'none';
-        }
-
-        function selectNoteForGen(idx, el) {
-            const items = document.querySelectorAll('.note-select-item');
-            items.forEach(item => item.classList.remove('selected'));
-            el.classList.add('selected');
-
-            const notes = loadNotes();
-            selectedNoteForGen = notes[idx];
-        }
-
-        async function confirmFlashcardGeneration() {
-            if (!selectedNoteForGen) {
-                alert('❌ Per favore, seleziona una nota!');
-                return;
-            }
-
-            const numInput = document.getElementById('genCardCount');
-            const num = Math.min(20, Math.max(1, parseInt(numInput?.value) || 5));
-
-            closeFlashcardGenModal();
-
-            // Mostra loading
-            const container = document.getElementById('flashcardStudy');
-            if (container) {
-                container.innerHTML = '<p style="text-align: center; color: var(--text-secondary); padding: 24px;">⏳ Generando flashcard...</p>';
-            }
-
-            try {
-                const response = await fetch('/api/generate-flashcards', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        notes: selectedNoteForGen.content || selectedNoteForGen.text,
-                        subject: selectedNoteForGen.subject || 'Generale',
-                        numberOfCards: num
-                    })
-                });
-
-                if (!response.ok) {
-                    throw new Error(`Server error: ${response.status}`);
-                }
-
-                const responseData = await response.json();
-
-                if (!responseData.flashcards || responseData.flashcards.length === 0) {
-                    alert('❌ Non riesco a generare flashcard');
-                    renderFlashcards(loadFlashcards());
-                    return;
-                }
-
-                let flashcards = loadFlashcards();
-                let count = 0;
-                responseData.flashcards.forEach(card => {
-                    if (card.front && card.back) {
-                        flashcards.push({
-                            id: Date.now() + Math.random(),
-                            front: card.front,
-                            back: card.back,
-                            subject: selectedNoteForGen.subject || 'Generale',
-                            correct: 0,
-                            incorrect: 0,
-                            difficulty: 'medium'
-                        });
-                        count++;
-                    }
-                });
-
-                saveFlashcards(flashcards);
-                renderFlashcards(flashcards);
-
-                // Forza il caricamento della tab flashcards
-                const flashcardsTab = document.getElementById('flashcards-tab');
-                if (flashcardsTab) {
-                    showTab('flashcards-tab');
-                }
-
-                alert(`✅ ${count} flashcard create!`);
-
-            } catch (error) {
-                alert(`❌ Errore: ${error.message}`);
-                console.error(error);
-                renderFlashcards(loadFlashcards());
-            }
-        }
-
-        // Mantieni vecchio nome per compatibilità se chiamato da pulsanti esistenti (o aggiorna i pulsanti)
-        function generateFlashcardsWithGemini() {
-            openFlashcardGenModal();
-        }
-
-        function deleteAllFlashcards() {
-            const flashcards = loadFlashcards();
-
-            if (!flashcards || flashcards.length === 0) {
-                alert('❌ Non ci sono flashcard da eliminare');
-                return;
-            }
-
-            if (confirm(`Sei sicuro di voler eliminare TUTTE le ${flashcards.length} flashcard?\n\nQuesta azione non può essere annullata!`)) {
-                saveFlashcards([]);
-                renderFlashcards([]);
-                alert('✅ Tutte le flashcard sono state eliminate.');
-            }
-        }
-
-        function renderFlashcards(cards) {
-            const container = document.getElementById('flashcardStudy');
-            console.log('🎴 renderFlashcards called');
-            console.log('Container found:', !!container);
-            console.log('Cards:', cards);
-            console.log('Cards count:', cards ? cards.length : 0);
-
-            if (!container) {
-                console.error('❌ flashcardStudy container non trovato!');
-                return;
-            }
-
-            if (!cards || cards.length === 0) {
-                console.log('📭 Nessuna flashcard da mostrare');
-                container.innerHTML = '<p style="text-align: center; color: var(--text-secondary); padding: 24px;">Nessuna flashcard. Usa il bottone sopra per generarne!</p>';
-                return;
-            }
-
-            console.log(`✅ Renderizzando ${cards.length} flashcard`);
-            container.innerHTML = cards.map((card, idx) => `
-                <div class="card" style="margin-bottom: 16px; cursor: pointer; position: relative;" onclick="flipCard(this)">
-                    <div style="font-weight: 600; color: var(--text-primary); margin-bottom: 12px;">
-                        ❓ ${card.front}
-                    </div>
-                    <div style="
-                        color: var(--text-secondary);
-                        opacity: 0;
-                        transition: opacity 0.3s ease;
-                        max-height: 0;
-                        overflow: hidden;
-                    " class="answer">
-                        ✅ ${card.back}
-                    </div>
-                    <small style="display: block; margin-top: 12px; color: var(--text-light);">
-                        Clicca per vedere la risposta
-                    </small>
-                    <button style="
-                        position: absolute;
-                        top: 12px;
-                        right: 12px;
-                        background: none;
-                        border: none;
-                        color: #ef4444;
-                        cursor: pointer;
-                        font-size: 18px;
-                        padding: 8px;
-                        transition: transform 0.2s ease;
-                    " onmouseover="this.style.transform='scale(1.2)'" onmouseout="this.style.transform='scale(1)'" onclick="event.stopPropagation(); deleteSingleFlashcard(${idx});" title="Elimina questa flashcard">
-                        🗑️
-                    </button>
-                </div>
-            `).join('');
-        }
-
-        function flipCard(el) {
-            const answer = el.querySelector('.answer');
-            const small = el.querySelector('small');
-
-            if (answer.style.opacity === '0') {
-                answer.style.opacity = '1';
-                answer.style.maxHeight = '500px';
-                small.textContent = 'Clicca per nascondere la risposta';
-            } else {
-                answer.style.opacity = '0';
-                answer.style.maxHeight = '0';
-                small.textContent = 'Clicca per vedere la risposta';
-            }
-        }
-
-        function deleteSingleFlashcard(index) {
-            let flashcards = loadFlashcards();
-
-            if (index >= 0 && index < flashcards.length) {
-                flashcards.splice(index, 1);
-                saveFlashcards(flashcards);
-                renderFlashcards(flashcards);
-            }
-        }
-
-        // ==================== NOTES FUNCTIONS ====================
-        function addNote() {
-            const title = document.getElementById('noteTitle')?.value.trim();
-            const subject = document.getElementById('noteSubject')?.value;
-            const content = document.getElementById('noteContent')?.value.trim();
-            const dateValue = document.getElementById('noteDate')?.value;
-
-            if (!title || !content) {
-                alert('❌ Inserisci titolo e contenuto!');
-                return;
-            }
-
-            let data = loadData();
-            if (!data.notes) data.notes = [];
-
-            data.notes.push({
-                id: Date.now(),
-                title: title,
-                subject: subject,
-                content: content,
-                createdAt: dateValue ? new Date(dateValue).toLocaleDateString('it-IT') : new Date().toLocaleDateString('it-IT')
             });
-
-            saveData(data);
-            renderNotes();
-            updateDashboard();
-
-            document.getElementById('noteTitle').value = '';
-            document.getElementById('noteSubject').value = '';
-            document.getElementById('noteContent').value = '';
-            document.getElementById('noteDate').value = '';
-            alert('✅ Nota salvata!');
-        }
-
-        function renderNotes() {
-            const data = loadData();
-            const notes = data.notes || [];
-            const container = document.getElementById('notesContainer');
-
-            if (!container) return;
-
-            if (notes.length === 0) {
-                container.innerHTML = '<p style="text-align: center; color: var(--text-secondary); padding: 24px;">Nessuna nota. Crea la tua prima nota!</p>';
-                return;
-            }
-
-            container.innerHTML = notes.map((note, idx) => `
-                <div class="card">
-                    <h3>${note.title}</h3>
-                    <p style="color: var(--text-secondary); margin: 8px 0; font-size: 13px;">${note.subject} • ${note.createdAt}</p>
-                    <p>${note.content}</p>
-                    <button class="btn-secondary" style="margin-top: 12px;" onclick="deleteNote(${idx})">🗑️ Elimina</button>
-                </div>
-            `).join('');
-        }
-
-        function deleteNote(idx) {
-            let data = loadData();
-            data.notes.splice(idx, 1);
-            saveData(data);
-            renderNotes();
-            updateDashboard();
-        }
-
-        // ==================== TASKS FUNCTIONS ====================
-        function addTask() {
-            const title = document.getElementById('taskTitle')?.value.trim();
-            const due = document.getElementById('taskDue')?.value;
-            const subject = document.getElementById('taskSubject')?.value;
-
-            if (!title || !due) {
-                alert('❌ Inserisci titolo e scadenza!');
-                return;
-            }
-
-            let data = loadData();
-            if (!data.tasks) data.tasks = [];
-
-            data.tasks.push({
-                id: Date.now(),
-                title: title,
-                due: due,
-                subject: subject,
-                completed: false,
-                createdAt: new Date().toLocaleDateString('it-IT')
-            });
-
-            saveData(data);
-            renderTasks();
-            updateDashboard();
-
-            document.getElementById('taskTitle').value = '';
-            document.getElementById('taskDue').value = '';
-            alert('✅ Compito aggiunto!');
-        }
-
-        function renderTasks() {
-            const data = loadData();
-            const tasks = data.tasks || [];
-            const container = document.getElementById('tasksContainer');
-
-            if (!container) return;
-
-            if (tasks.length === 0) {
-                container.innerHTML = '<p style="text-align: center; color: var(--text-secondary); padding: 24px;">Nessun compito. Aggiungi il tuo primo compito!</p>';
-                return;
-            }
-
-            container.innerHTML = tasks.map((task, idx) => `
-                <div class="card" style="display: flex; justify-content: space-between; align-items: center;">
-                    <div>
-                        <strong>${task.title}</strong>
-                        <p style="color: var(--text-secondary); font-size: 13px; margin-top: 4px;">
-                            ${task.subject} • Scadenza: ${task.due}
-                        </p>
-                    </div>
-                    <div style="display: flex; gap: 8px; align-items: center;">
-                        <input type="checkbox" onchange="toggleTask(${idx})" ${task.completed ? 'checked' : ''}>
-                        <button class="btn-secondary" onclick="deleteTask(${idx})">🗑️</button>
-                    </div>
-                </div>
-            `).join('');
-        }
-
-        function toggleTask(idx) {
-            let data = loadData();
-            data.tasks[idx].completed = !data.tasks[idx].completed;
-            saveData(data);
-            renderTasks();
-            updateDashboard();
-        }
-
-        function deleteTask(idx) {
-            let data = loadData();
-            data.tasks.splice(idx, 1);
-            saveData(data);
-            renderTasks();
-            updateDashboard();
-        }
-
-        // ==================== GRADES FUNCTIONS ====================
-        function addGrade() {
-            const subject = document.getElementById('gradeSubject')?.value.trim();
-            const value = parseInt(document.getElementById('gradeValue')?.value);
-            const date = document.getElementById('gradeDate')?.value;
-            const notes = document.getElementById('gradeNotes')?.value.trim();
-
-            if (!subject || !value || !date) {
-                alert('❌ Inserisci materia, voto e data!');
-                return;
-            }
-
-            let data = loadData();
-            if (!data.grades) data.grades = [];
-
-            data.grades.push({
-                id: Date.now(),
-                subject: subject,
-                value: value,
-                date: date,
-                notes: notes
-            });
-
-            saveData(data);
-            renderGrades();
-            updateDashboard();
-
-            document.getElementById('gradeSubject').value = '';
-            document.getElementById('gradeValue').value = '';
-            document.getElementById('gradeDate').value = '';
-            document.getElementById('gradeNotes').value = '';
-            alert('✅ Voto salvato!');
-        }
-
-        function renderGrades() {
-            const data = loadData();
-            const grades = data.grades || [];
-            const container = document.getElementById('gradesContainer');
-
-            if (!container) return;
-
-            if (grades.length === 0) {
-                container.innerHTML = '<p style="text-align: center; color: var(--text-secondary); padding: 24px;">Nessun voto. Aggiungi il tuo primo voto!</p>';
-                return;
-            }
-
-            container.innerHTML = grades.map((grade, idx) => `
-                <div class="card">
-                    <div style="display: flex; justify-content: space-between; align-items: start;">
-                        <div>
-                            <strong>${grade.subject}</strong>
-                            <p style="color: var(--text-secondary); font-size: 13px; margin-top: 4px;">${grade.date}</p>
-                            ${grade.notes ? `<p style="margin-top: 8px; color: var(--text-secondary);">${grade.notes}</p>` : ''}
-                        </div>
-                        <div style="text-align: right;">
-                            <div style="font-size: 24px; font-weight: 700; color: var(--accent);">${grade.value}</div>
-                            <button class="btn-secondary" style="margin-top: 8px;" onclick="deleteGrade(${idx})">🗑️</button>
-                        </div>
-                    </div>
-                </div>
-            `).join('');
-        }
-
-        function deleteGrade(idx) {
-            let data = loadData();
-            data.grades.splice(idx, 1);
-            saveData(data);
-            renderGrades();
-            updateDashboard();
-        }
-
-        // ==================== PRESENCES FUNCTIONS ====================
-        function addPresence() {
-            const date = document.getElementById('presenceDate')?.value;
-            const type = document.getElementById('presenceType')?.value;
-
-            if (!date) {
-                alert('❌ Seleziona una data!');
-                return;
-            }
-
-            let data = loadData();
-            if (!data.presences) data.presences = [];
-
-            data.presences.push({
-                id: Date.now(),
-                date: date,
-                type: type, // 'presence' o 'absence'
-                createdAt: new Date().toLocaleDateString('it-IT')
-            });
-
-            saveData(data);
-            renderPresences();
-            updatePresenceStats();
-            updateDashboard();
-
-            document.getElementById('presenceDate').value = '';
-            alert(`✅ ${type === 'presence' ? 'Presenza' : 'Assenza'} registrata!`);
-        }
-
-        function renderPresences() {
-            const data = loadData();
-            const presences = data.presences || [];
-            const container = document.getElementById('presencesContainer');
-
-            if (!container) return;
-
-            if (presences.length === 0) {
-                container.innerHTML = '<p style="text-align: center; color: var(--text-secondary); padding: 24px;">Nessuna presenza registrata.</p>';
-                return;
-            }
-
-            // Ordina per data (più recente prima)
-            presences.sort((a, b) => new Date(b.date) - new Date(a.date));
-
-            container.innerHTML = presences.map((p, idx) => `
-                <div class="card" style="display: flex; justify-content: space-between; align-items: center;">
-                    <div>
-                        <strong>${p.type === 'presence' ? '✅ Presente' : '❌ Assente'}</strong>
-                        <p style="color: var(--text-secondary); font-size: 13px; margin-top: 4px;">
-                            ${p.date}
-                        </p>
-                    </div>
-                    <button class="btn-secondary" onclick="deletePresence(${idx})">🗑️</button>
-                </div>
-            `).join('');
-        }
-
-        function deletePresence(idx) {
-            let data = loadData();
-            data.presences.splice(idx, 1);
-            saveData(data);
-            renderPresences();
-            updatePresenceStats();
-            updateDashboard();
-        }
-
-        function updatePresenceStats() {
-            const data = loadData();
-            const presences = data.presences || [];
-
-            const count = presences.filter(p => p.type === 'presence').length;
-            const absences = presences.filter(p => p.type === 'absence').length;
-            const total = count + absences;
-            const percentage = total > 0 ? Math.round((count / total) * 100) : 0;
-
-            document.getElementById('presencesCount').textContent = count;
-            document.getElementById('absencesCount').textContent = absences;
-            document.getElementById('presencePercentage').textContent = total > 0 ? `${percentage}%` : '-';
-        }
-
-        // ==================== UPDATE DASHBOARD ====================
-        function updateDashboard() {
-            const data = loadData();
-
-            // Dashboard stats
-            const notes = data.notes || [];
-            const flashcards = data.flashcards || [];
-            const tasks = data.tasks || [];
-            const grades = data.grades || [];
-            const presences = data.presences || [];
-
-            document.getElementById('dashboardNotes').textContent = notes.length;
-            document.getElementById('dashboardFlashcards').textContent = flashcards.length;
-
-            const completedTasks = tasks.filter(t => t.completed).length;
-            document.getElementById('dashboardTasksCompleted').textContent = completedTasks;
-
-            if (grades.length > 0) {
-                const avg = (grades.reduce((sum, g) => sum + g.value, 0) / grades.length).toFixed(1);
-                document.getElementById('dashboardAverage').textContent = avg;
-            } else {
-                document.getElementById('dashboardAverage').textContent = '-';
-            }
-
-            // Stats page
-            document.getElementById('statsGradesCount').textContent = grades.length;
-
-            const totalTasks = tasks.length;
-            const completion = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
-            document.getElementById('statsCompletion').textContent = `${completion}%`;
-
-            const presenceCount = presences.filter(p => p.type === 'presence').length;
-            document.getElementById('statsPresences').textContent = presenceCount;
-        }
-
-        // ==================== CLEAR ALL DATA ====================
-        function clearAllData() {
-            if (confirm('⚠️ ATTENZIONE!\n\nSei sicuro di voler eliminare TUTTI i dati?\n\nQuesta azione NON può essere annullata!')) {
-                if (confirm('🔴 ULTIMA CONFERMA:\n\nVeramente vuoi eliminare tutto?\n\nNote, Compiti, Voti, Flashcard, Presenze - TUTTO sarà cancellato!')) {
-                    localStorage.clear();
-                    console.log('✅ Tutti i dati sono stati eliminati');
-                    alert('✅ Tutti i dati sono stati eliminati. La pagina si ricaricherà...');
-                    setTimeout(() => {
-                        location.reload();
-                    }, 1000);
-                }
-            }
-        }
-
-        function toggleMenu() {
-            const nav = document.querySelector('nav');
-            if (nav) {
-                nav.style.display = nav.style.display === 'none' ? 'flex' : 'none';
-            }
-        }
-
-
-
-
-        // ==================== CALENDAR FUNCTIONS ====================
-        let calendarCurrentDate = new Date();
-        let calendarSelectedDate = null;
-        let calendarActiveInputId = null;
-
-        function openCalendar(inputId) {
-            calendarActiveInputId = inputId;
-            const input = document.getElementById(inputId);
-            if (input && input.value) {
-                calendarSelectedDate = new Date(input.value);
-                calendarCurrentDate = new Date(input.value);
-            } else {
-                calendarSelectedDate = null;
-                calendarCurrentDate = new Date();
-            }
-            renderCalendar();
-            document.getElementById('calendarModal').classList.add('active');
-        }
-
-        function closeCalendar() {
-            document.getElementById('calendarModal').classList.remove('active');
-        }
-
-        function previousMonth() {
-            calendarCurrentDate.setMonth(calendarCurrentDate.getMonth() - 1);
-            renderCalendar();
-        }
-
-        function nextMonth() {
-            calendarCurrentDate.setMonth(calendarCurrentDate.getMonth() + 1);
-            renderCalendar();
-        }
-
-        function renderCalendar() {
-            const year = calendarCurrentDate.getFullYear();
-            const month = calendarCurrentDate.getMonth();
-
-            // Aggiorna il titolo
-            const months = ['Gennaio', 'Febbraio', 'Marzo', 'Aprile', 'Maggio', 'Giugno',
-                'Luglio', 'Agosto', 'Settembre', 'Ottobre', 'Novembre', 'Dicembre'];
-            document.getElementById('calendarTitle').textContent = `${months[month]} ${year}`;
-
-            // Genera i giorni
-            const firstDay = new Date(year, month, 1).getDay();
-            const lastDay = new Date(year, month + 1, 0).getDate();
-            const prevLastDay = new Date(year, month, 0).getDate();
-
-            const daysContainer = document.getElementById('calendarDays');
-            daysContainer.innerHTML = '';
-
-            // Giorni del mese precedente
-            for (let i = firstDay - 1; i >= 0; i--) {
-                const day = document.createElement('div');
-                day.className = 'calendar-day other-month';
-                day.textContent = prevLastDay - i;
-                daysContainer.appendChild(day);
-            }
-
-            // Giorni di questo mese
-            const today = new Date();
-            for (let i = 1; i <= lastDay; i++) {
-                const day = document.createElement('div');
-                day.className = 'calendar-day';
-                day.textContent = i;
-
-                const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(i).padStart(2, '0')}`;
-
-                // Evidenzia oggi
-                if (year === today.getFullYear() &&
-                    month === today.getMonth() &&
-                    i === today.getDate()) {
-                    day.classList.add('today');
-                }
-
-                // Evidenzia selezionato
-                if (calendarSelectedDate &&
-                    year === calendarSelectedDate.getFullYear() &&
-                    month === calendarSelectedDate.getMonth() &&
-                    i === calendarSelectedDate.getDate()) {
-                    day.classList.add('selected');
-                }
-
-                day.onclick = () => selectDay(i);
-                daysContainer.appendChild(day);
-            }
-
-            // Giorni del mese successivo
-            const totalCells = daysContainer.children.length;
-            const remainingCells = 42 - totalCells; // 6 righe × 7 giorni
-            for (let i = 1; i <= remainingCells; i++) {
-                const day = document.createElement('div');
-                day.className = 'calendar-day other-month';
-                day.textContent = i;
-                daysContainer.appendChild(day);
-            }
-        }
-
-        function selectDay(day) {
-            calendarSelectedDate = new Date(calendarCurrentDate.getFullYear(),
-                calendarCurrentDate.getMonth(),
-                day);
-            renderCalendar();
-        }
-
-        function confirmDate() {
-            if (calendarSelectedDate && calendarActiveInputId) {
-                const year = calendarSelectedDate.getFullYear();
-                const month = String(calendarSelectedDate.getMonth() + 1).padStart(2, '0');
-                const day = String(calendarSelectedDate.getDate()).padStart(2, '0');
-                const dateStr = `${year}-${month}-${day}`;
-
-                document.getElementById(calendarActiveInputId).value = dateStr;
-            }
-            closeCalendar();
-        }
-
-        // Aggiungi il calendario opener ai campi date
-        window.addEventListener('DOMContentLoaded', () => {
-            const dateInputs = document.querySelectorAll('input[type="date"]');
-            dateInputs.forEach(input => {
-                input.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    openCalendar(input.id || 'taskDue');
-                });
-                input.addEventListener('focus', (e) => {
-                    e.preventDefault();
-                    openCalendar(input.id || 'taskDue');
-                });
-            });
-        });
-
-        // Load theme on startup e resetta dati
-        window.addEventListener('DOMContentLoaded', () => {
-            const savedTheme = localStorage.getItem('theme') || 'light';
-            document.documentElement.setAttribute('data-theme', savedTheme);
-            updateThemeButton();
-
-            // Inizializza dati vuoti se non esistono
-            if (!localStorage.getItem('studyjournal_data')) {
-                localStorage.setItem('studyjournal_data', JSON.stringify({
-                    flashcards: [],
-                    notes: [],
-                    tasks: [],
-                    grades: [],
-                    entries: []
-                }));
-            }
-
-            // Carica tutte le sezioni
-            renderNotes();
-            renderTasks();
-            renderGrades();
-            renderFlashcards(loadFlashcards());
-            renderPresences();
-            updatePresenceStats();
-            updateDashboard();
-
-            // Aggiungi event listener alle note per facilitare la generazione flashcard
-            document.getElementById('noteTitle')?.addEventListener('keypress', (e) => {
-                if (e.key === 'Enter') addNote();
-            });
-
-            // Nasconde gli ID input se non esistono
-            if (!document.getElementById('notesContainer')) {
-                console.warn('notesContainer non trovato');
-            }
         });
     </script>
 
-    <!-- AUTH MODAL -->
-    <div id="authModal" class="calendar-modal" style="display: none;">
-        <div class="calendar-container" style="max-width: 400px;">
-            <div class="calendar-header">
-                <h3 id="authModalTitle">Accedi a StudyJournal</h3>
-                <button onclick="document.getElementById('authModal').style.display='none'"
-                    style="background:none; border:none; font-size:20px; cursor:pointer;">×</button>
-            </div>
-
-            <div id="loginForm" style="display: flex; flex-direction: column; gap: 16px;">
-                <input type="email" id="authEmail" placeholder="Email" class="form-input">
-                <input type="password" id="authPassword" placeholder="Password" class="form-input">
-                <button class="btn-primary" onclick="handleAuthSubmit()">Accedi</button>
-                <p style="font-size: 14px; text-align: center; color: var(--text-secondary);">
-                    Non hai un account? <a href="#" onclick="toggleAuthMode(true)">Registrati</a>
-                </p>
-            </div>
-
-            <div id="signupForm" style="display: none; flex-direction: column; gap: 16px;">
-                <input type="email" id="signupEmail" placeholder="Email" class="form-input">
-                <input type="password" id="signupPassword" placeholder="Password" class="form-input">
-                <button class="btn-primary" onclick="handleSignupSubmit()">Crea Account</button>
-                <p style="font-size: 14px; text-align: center; color: var(--text-secondary);">
-                    Hai già un account? <a href="#" onclick="toggleAuthMode(false)">Accedi</a>
-                </p>
-            </div>
-
-            <div id="authError" style="color: var(--error); font-size: 13px; margin-top: 8px; display: none;"></div>
-        </div>
-    </div>
-
-    <!-- PASSWORD MODAL -->
-    <div id="passwordModal" class="calendar-modal" style="display: none;">
-        <div class="calendar-container" style="max-width: 400px;">
-            <div class="calendar-header">
-                <h3>🔑 Cambia Password</h3>
-                <button onclick="document.getElementById('passwordModal').style.display='none'"
-                    style="background:none; border:none; font-size:20px; cursor:pointer;">×</button>
-            </div>
-            <p style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 20px;">
-                Inserisci la tua nuova password qui sotto (minimo 6 caratteri).
-            </p>
-            <div id="passwordError" style="color: var(--error); font-size: 13px; margin-bottom: 15px; display: none;">
-            </div>
-            <div id="passwordSuccess"
-                style="color: var(--success); font-size: 13px; margin-bottom: 15px; display: none;"></div>
-
-            <div style="display: flex; flex-direction: column; gap: 16px;">
-                <input type="password" id="newPassword" placeholder="Nuova Password" class="form-input">
-                <button class="btn-primary" onclick="handleUpdatePassword()">Aggiorna Password</button>
-            </div>
-        </div>
-    </div>
-
-
-    <script>
-        function toggleAuthMode(isSignup) {
-            document.getElementById('loginForm').style.display = isSignup ? 'none' : 'flex';
-            document.getElementById('signupForm').style.display = isSignup ? 'flex' : 'none';
-            document.getElementById('authModalTitle').textContent = isSignup ? 'Crea un Account' : 'Accedi a StudyJournal';
-            document.getElementById('authError').style.display = 'none';
-        }
-
-        async function handleAuthSubmit() {
-            const email = document.getElementById('authEmail').value;
-            const password = document.getElementById('authPassword').value;
-            const errorEl = document.getElementById('authError');
-
-            try {
-                await AuthManager.signIn(email, password);
-                document.getElementById('authModal').style.display = 'none';
-            } catch (error) {
-                errorEl.textContent = error.message;
-                errorEl.style.display = 'block';
-            }
-        }
-
-        async function handleSignupSubmit() {
-            const email = document.getElementById('signupEmail').value;
-            const password = document.getElementById('signupPassword').value;
-            const errorEl = document.getElementById('authError');
-
-            try {
-                await AuthManager.signUp(email, password);
-                alert('Account creato! Controlla la tua email per confermare.');
-                toggleAuthMode(false);
-            } catch (error) {
-                errorEl.textContent = error.message;
-                errorEl.style.display = 'block';
-            }
-        }
-    </script>
-
-    <!-- CALENDAR MODAL -->
-
-    <div id="calendarModal" class="calendar-modal">
-        <div class="calendar-container">
-            <div class="calendar-header">
-                <h3 id="calendarTitle">Gennaio 2026</h3>
-                <div class="calendar-nav">
-                    <button onclick="previousMonth()">←</button>
-                    <button onclick="nextMonth()">→</button>
-                </div>
-            </div>
-
-            <div class="calendar-weekdays">
-                <div class="calendar-weekday">Dom</div>
-                <div class="calendar-weekday">Lun</div>
-                <div class="calendar-weekday">Mar</div>
-                <div class="calendar-weekday">Mer</div>
-                <div class="calendar-weekday">Gio</div>
-                <div class="calendar-weekday">Ven</div>
-                <div class="calendar-weekday">Sab</div>
-            </div>
-
-            <div id="calendarDays" class="calendar-days"></div>
-
-            <div class="calendar-footer">
-                <button class="btn-secondary" onclick="closeCalendar()">Annulla</button>
-                <button class="calendar-btn calendar-btn-confirm" onclick="confirmDate()">Conferma</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- FLASHCARD GENERATOR MODAL -->
-    <div id="flashcardGenModal" class="calendar-modal" style="display: none;">
-        <div class="calendar-container" style="max-width: 500px;">
-            <div class="calendar-header">
-                <h3>✨ Genera Flashcard</h3>
-                <button onclick="closeFlashcardGenModal()"
-                    style="background:none; border:none; color:var(--text-primary); font-size:24px; cursor:pointer;">×</button>
-            </div>
-
-            <div class="gen-modal-body" style="padding: 20px;">
-                <p style="margin-bottom: 16px; color: var(--text-secondary);">Scegli una nota e quante flashcard vuoi
-                    creare.</p>
-
-                <label style="display: block; margin-bottom: 8px; font-weight: 600;">1. Seleziona la Nota</label>
-                <div id="notesSelectionList" class="notes-selection-list">
-                    <!-- Dinamicamente popolato -->
-                </div>
-
-                <label style="display: block; margin-top: 20px; margin-bottom: 8px; font-weight: 600;">2. Quante
-                    Flashcard?</label>
-                <div style="display: flex; align-items: center; gap: 12px;">
-                    <input type="number" id="genCardCount" value="5" min="1" max="20" class="form-input"
-                        style="width: 80px; margin-bottom: 0;">
-                    <span style="color: var(--text-light); font-size: 0.9rem;">(Consigliato: 5-10)</span>
-                </div>
-            </div>
-
-            <div class="calendar-footer"
-                style="padding: 16px; border-top: 1px solid var(--glass-border); display: flex; gap: 12px; justify-content: flex-end;">
-                <button class="btn-secondary" onclick="closeFlashcardGenModal()">Annulla</button>
-                <button class="btn-primary" onclick="confirmFlashcardGeneration()">Genera Ora 🚀</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- CHATBOT SIMPLE -->
-    <script src="chatbot-simple.js"></script>
-
-    <!-- Script rimossi per evitare conflitti con l'HTML nuovo - Tutte le funzioni sono nel tag script inline sopra -->
-    <script src="hamburger-menu.js"></script>
-    <!-- 
-    <script src="script.js"></script>
-    <script src="onboarding.js"></script>
-    <script src="new-features.js"></script>
-    <script src="grades-adapter.js"></script>
-    <script src="flashcard-local-generator.js"></script>
-    <script src="gemini-features.js"></script>
-    -->
 </body>
 
 </html>

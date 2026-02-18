@@ -4,20 +4,22 @@
    ============================================ */
 
 :root {
-    /* Palette Colori - Soft Luxury */
-    --primary: #6366f1;
-    --primary-light: #818cf8;
-    --primary-dark: #4f46e5;
-    --secondary: #f472b6;
-    --accent: #14b8a6;
+    /* Ripristino Palette Originale */
+    --primary: #1f2937;
+    --primary-light: #374151;
+    --primary-dark: #111827;
+    --secondary: #6b7280;
+    --accent: #3b82f6;
+    --accent-light: #60a5fa;
 
     /* Sfondo e Testo */
-    --bg-primary: #fafafa;
-    --bg-secondary: #ffffff;
-    --bg-tertiary: #f5f5f5;
-    --text-primary: #1a1a1a;
-    --text-secondary: #6b6b6b;
-    --text-light: #a3a3a3;
+    --bg-primary: #ffffff;
+    --bg-secondary: #f9fafb;
+    --bg-tertiary: #f3f4f6;
+    --text-primary: #1f2937;
+    --text-secondary: #6b7280;
+    --text-light: #9ca3af;
+
 
     /* Bordi e Ombre */
     --border-color: #e5e5e5;

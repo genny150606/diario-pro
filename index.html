@@ -14,7 +14,6 @@
 
     <!-- Global Styles -->
     <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="theme.css">
     <link rel="stylesheet" href="animations-ui.css">
     <link rel="stylesheet" href="responsive.css">
 
@@ -802,7 +801,27 @@
         ::-webkit-scrollbar-thumb:hover {
             background: var(--text-light);
         }
+
+        section {
+            display: none;
+        }
+
+        section.active {
+            display: block;
+            animation: fadeIn 300ms ease-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
     </style>
+
 </head>
 
 <body>

@@ -31,17 +31,22 @@ header {
     left: 0 !important;
     right: 0 !important;
     height: 60px !important;
-    flex-shrink: 0;
-    width: 100%;
-    padding: 0 24px !important;
-    background: var(--bg-primary) !important;
-    border-bottom: 1px solid var(--border-color);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 1rem;
+    background: rgba(255, 255, 255, 0.7) !important;
+    backdrop-filter: blur(20px) !important;
+    -webkit-backdrop-filter: blur(20px) !important;
+    border-bottom: 1px solid var(--border) !important;
     z-index: 10000 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    padding: 0 32px !important;
+    gap: 32px !important;
 }
+
+[data-theme="dark"] header {
+    background: rgba(17, 24, 39, 0.7) !important;
+}
+
 
 
 header h1 {

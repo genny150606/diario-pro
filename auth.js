@@ -6,32 +6,38 @@ const SUPABASE_URL = 'https://rzdpntvojpibbndhsrlz.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_59TUF-ZKXzQ-W7cCx1myVQ_rBFzBkIK';
 
 // Initialize Supabase client
-const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 const AuthManager = {
     user: null,
 
     async init() {
-        // Check for existing session
-        const { data: { session } } = await supabase.auth.getSession();
-        this.user = session?.user || null;
-
-        // Listen for auth changes
-        supabase.auth.onAuthStateChange((event, session) => {
-            console.log('Auth Event:', event);
+        try {
+            // Check for existing session
+            const { data: { session } } = await supabaseClient.auth.getSession();
             this.user = session?.user || null;
+
+            // Listen for auth changes
+            supabaseClient.auth.onAuthStateChange((event, session) => {
+                console.log('Auth Event:', event);
+                this.user = session?.user || null;
+                this.updateUI();
+
+                if (event === 'SIGNED_IN') {
+                    if (typeof StorageManager !== 'undefined' && StorageManager.loadFromCloud) {
+                        StorageManager.loadFromCloud();
+                    }
+                }
+            });
+
             this.updateUI();
-
-            if (event === 'SIGNED_IN') {
-                StorageManager.loadFromCloud();
-            }
-        });
-
-        this.updateUI();
+        } catch (err) {
+            console.error('Auth Init Error:', err);
+        }
     },
 
     async signUp(email, password) {
-        const { data, error } = await supabase.auth.signUp({
+        const { data, error } = await supabaseClient.auth.signUp({
             email,
             password,
         });
@@ -40,7 +46,7 @@ const AuthManager = {
     },
 
     async signIn(email, password) {
-        const { data, error } = await supabase.auth.signInWithPassword({
+        const { data, error } = await supabaseClient.auth.signInWithPassword({
             email,
             password,
         });
@@ -49,7 +55,7 @@ const AuthManager = {
     },
 
     async signOut() {
-        const { error } = await supabase.auth.signOut();
+        const { error } = await supabaseClient.auth.signOut();
         if (error) throw error;
         this.user = null;
         this.updateUI();

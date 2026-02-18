@@ -62,10 +62,22 @@ const AuthManager = {
         }
     },
 
-    async signUp(email, password) {
+    async signUp(email, password, userData = {}) {
+        // Smart School Recommendation Logic
+        let schoolType = 'liceo'; // Default
+        if (userData.age) {
+            schoolType = userData.age <= 18 ? 'liceo' : 'università';
+        }
+
         const { data, error } = await supabaseClient.auth.signUp({
             email,
             password,
+            options: {
+                data: {
+                    ...userData,
+                    school_type: schoolType
+                }
+            }
         });
         if (error) throw error;
         return data;

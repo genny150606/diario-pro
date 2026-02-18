@@ -3,6 +3,28 @@
    Dashboard, Account, Forms, Footer
    ============================================ */
 
+/* ── BACK HOME LINK ── */
+.back-home-link {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: var(--color-bg-secondary);
+    border: 1px solid var(--color-border);
+    text-decoration: none;
+    font-size: 18px;
+    transition: all var(--duration-fast) var(--ease-out);
+    flex-shrink: 0;
+}
+
+.back-home-link:hover {
+    background: var(--color-accent-bg);
+    border-color: var(--color-accent-bg-strong);
+    transform: scale(1.08);
+}
+
 /* ── ACCOUNT DROPDOWN ── */
 .user-profile-container {
     position: relative;

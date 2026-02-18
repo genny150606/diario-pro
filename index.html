@@ -12,6 +12,9 @@
     <!-- Design System -->
     <link rel="stylesheet" href="theme.css">
     <link rel="stylesheet" href="home.css">
+
+    <!-- Supabase (for real-time stats & reviews) -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 
 <body class="landing-page">
@@ -69,17 +72,17 @@
                     <div class="preview-card">
                         <div class="preview-card-icon">📝</div>
                         <div class="preview-card-title">Note Salvate</div>
-                        <div class="preview-card-value">24</div>
+                        <div class="preview-card-value" id="previewNotes">—</div>
                     </div>
                     <div class="preview-card">
                         <div class="preview-card-icon">🎴</div>
                         <div class="preview-card-title">Flashcard</div>
-                        <div class="preview-card-value">86</div>
+                        <div class="preview-card-value" id="previewFlashcards">—</div>
                     </div>
                     <div class="preview-card">
-                        <div class="preview-card-icon">⭐</div>
-                        <div class="preview-card-title">Media Voti</div>
-                        <div class="preview-card-value">8.4</div>
+                        <div class="preview-card-icon">👥</div>
+                        <div class="preview-card-title">Utenti</div>
+                        <div class="preview-card-value" id="previewUsers">—</div>
                     </div>
                 </div>
             </div>
@@ -144,24 +147,24 @@
         </div>
     </section>
 
-    <!-- ═══════════ STATS BANNER ═══════════ -->
+    <!-- ═══════════ STATS BANNER (REAL DATA) ═══════════ -->
     <div class="stats-banner">
         <div class="stats-banner-inner reveal">
             <div class="stat-item">
-                <div class="stat-number">10K+</div>
-                <div class="stat-label-landing">Studenti attivi</div>
+                <div class="stat-number" id="statUsers">—</div>
+                <div class="stat-label-landing">Utenti registrati</div>
             </div>
             <div class="stat-item">
-                <div class="stat-number">50K+</div>
+                <div class="stat-number" id="statNotes">—</div>
+                <div class="stat-label-landing">Note create</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number" id="statFlashcards">—</div>
                 <div class="stat-label-landing">Flashcard generate</div>
             </div>
             <div class="stat-item">
-                <div class="stat-number">98%</div>
-                <div class="stat-label-landing">Soddisfazione</div>
-            </div>
-            <div class="stat-item">
-                <div class="stat-number">24/7</div>
-                <div class="stat-label-landing">AI Tutor disponibile</div>
+                <div class="stat-number" id="statReviews">—</div>
+                <div class="stat-label-landing">Recensioni</div>
             </div>
         </div>
     </div>
@@ -197,68 +200,84 @@
         </div>
     </section>
 
-    <!-- ═══════════ TESTIMONIALS ═══════════ -->
-    <section class="landing-section">
+    <!-- ═══════════ REVIEWS (REAL FROM DB) ═══════════ -->
+    <section class="landing-section" id="reviews">
         <div class="reveal">
             <div class="section-label">💬 Recensioni</div>
-            <h2 class="section-heading">Adorato dagli studenti.</h2>
+            <h2 class="section-heading">Cosa dicono gli studenti.</h2>
             <p class="section-desc">
-                Migliaia di studenti hanno già trasformato il loro modo di studiare.
+                Recensioni vere dai nostri utenti. Vuoi lasciarne una anche tu?
             </p>
         </div>
 
-        <div class="testimonials-grid">
-            <div class="testimonial-card reveal reveal-delay-1">
-                <div class="testimonial-stars">★★★★★</div>
-                <p class="testimonial-text">
-                    "Da quando uso StudyJournal, la mia media è salita di due punti. Le flashcard generate dall'AI sono
-                    incredibili!"
-                </p>
-                <div class="testimonial-author">
-                    <div class="testimonial-avatar">M</div>
-                    <div>
-                        <div class="testimonial-name">Marco R.</div>
-                        <div class="testimonial-role">Liceo Scientifico, 4° anno</div>
-                    </div>
-                </div>
-            </div>
-            <div class="testimonial-card reveal reveal-delay-2">
-                <div class="testimonial-stars">★★★★★</div>
-                <p class="testimonial-text">
-                    "Finalmente un'app che ha tutto. Note, compiti, voti, statistiche... e il tutor AI è come avere un
-                    prof sempre disponibile."
-                </p>
-                <div class="testimonial-author">
-                    <div class="testimonial-avatar">S</div>
-                    <div>
-                        <div class="testimonial-name">Sara L.</div>
-                        <div class="testimonial-role">Università, Ingegneria</div>
-                    </div>
-                </div>
-            </div>
-            <div class="testimonial-card reveal reveal-delay-3">
-                <div class="testimonial-stars">★★★★★</div>
-                <p class="testimonial-text">
-                    "Il design è pazzesco, sembra un prodotto Apple. E le funzionalità sono perfette per organizzare lo
-                    studio."
-                </p>
-                <div class="testimonial-author">
-                    <div class="testimonial-avatar">L</div>
-                    <div>
-                        <div class="testimonial-name">Luca D.</div>
-                        <div class="testimonial-role">Liceo Classico, 5° anno</div>
-                    </div>
-                </div>
-            </div>
+        <div class="testimonials-grid" id="reviewsContainer">
+            <p class="empty-state" style="grid-column: 1/-1;">Caricamento recensioni...</p>
+        </div>
+
+        <!-- Write Review Button -->
+        <div style="text-align: center; margin-top: var(--space-8);" class="reveal">
+            <button class="btn-hero btn-hero-secondary" onclick="openReviewModal()" id="writeReviewBtn">
+                ✍️ Lascia una Recensione
+            </button>
         </div>
     </section>
+
+    <!-- ═══════════ REVIEW MODAL ═══════════ -->
+    <div class="review-modal-overlay" id="reviewModal">
+        <div class="review-modal">
+            <div class="review-modal-header">
+                <h3>Lascia una Recensione ✨</h3>
+                <button onclick="closeReviewModal()" class="review-modal-close">✕</button>
+            </div>
+            <div class="review-modal-body">
+                <div id="reviewAuthNotice" style="display: none;">
+                    <p
+                        style="color: var(--color-warning); margin-bottom: var(--space-4); font-size: var(--font-size-sm);">
+                        ⚠️ Devi essere registrato nell'app per lasciare una recensione.
+                        <a href="app.html" style="color: var(--color-accent);">Accedi qui →</a>
+                    </p>
+                </div>
+
+                <label for="reviewName">Il tuo nome</label>
+                <input type="text" id="reviewName" placeholder="Es. Marco R." maxlength="50">
+
+                <label for="reviewRole">Chi sei</label>
+                <input type="text" id="reviewRole" placeholder="Es. Liceo Scientifico, 4° anno" maxlength="80">
+
+                <label>Valutazione</label>
+                <div class="star-rating" id="starRating">
+                    <span class="star" data-value="1">★</span>
+                    <span class="star" data-value="2">★</span>
+                    <span class="star" data-value="3">★</span>
+                    <span class="star" data-value="4">★</span>
+                    <span class="star" data-value="5">★</span>
+                </div>
+
+                <label for="reviewText">La tua recensione</label>
+                <textarea id="reviewText" placeholder="Racconta la tua esperienza con StudyJournal Pro..."
+                    style="min-height: 100px;" maxlength="500"></textarea>
+
+                <p id="reviewError"
+                    style="display: none; color: var(--color-error); font-size: var(--font-size-sm); margin-bottom: var(--space-3);">
+                </p>
+                <p id="reviewSuccess"
+                    style="display: none; color: var(--color-success); font-size: var(--font-size-sm); margin-bottom: var(--space-3);">
+                </p>
+
+                <button class="btn-hero btn-hero-primary" onclick="submitReview()" id="submitReviewBtn"
+                    style="width: 100%; justify-content: center;">
+                    Pubblica Recensione ✨
+                </button>
+            </div>
+        </div>
+    </div>
 
     <!-- ═══════════ FINAL CTA ═══════════ -->
     <section class="cta-section">
         <div class="cta-card reveal">
             <h2 class="cta-heading">Pronto a trasformare il tuo studio?</h2>
             <p class="cta-desc">
-                Unisciti a migliaia di studenti che studiano in modo più intelligente. Completamente gratuito.
+                Unisciti agli studenti che studiano in modo più intelligente. Completamente gratuito.
             </p>
             <a href="app.html" class="btn-hero btn-hero-primary">
                 Inizia Ora — È Gratis ✨
@@ -276,31 +295,293 @@
         </div>
     </footer>
 
-    <!-- SCROLL REVEAL SCRIPT -->
+    <!-- ═══════════ SCRIPTS ═══════════ -->
     <script>
-        // Theme from localStorage
+        // ============================================
+        // SUPABASE INIT
+        // ============================================
+        const SUPABASE_URL = 'https://rzdpntvojpibbndhsrlz.supabase.co';
+        const SUPABASE_KEY = 'sb_publishable_59TUF-ZKXzQ-W7cCx1myVQ_rBFzBkIK';
+        const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        // ============================================
+        // THEME
+        // ============================================
         (function () {
             const saved = localStorage.getItem('theme');
             if (saved) document.documentElement.setAttribute('data-theme', saved);
         })();
 
-        // IntersectionObserver for scroll reveals
-        document.addEventListener('DOMContentLoaded', () => {
-            const revealElements = document.querySelectorAll('.reveal');
+        // ============================================
+        // LOAD REAL STATS FROM DB
+        // ============================================
+        async function loadRealStats() {
+            try {
+                // Count users (rows in users_data table)
+                const { count: userCount } = await sb
+                    .from('users_data')
+                    .select('*', { count: 'exact', head: true });
 
-            const observer = new IntersectionObserver((entries) => {
-                entries.forEach(entry => {
-                    if (entry.isIntersecting) {
-                        entry.target.classList.add('visible');
-                        observer.unobserve(entry.target);
-                    }
+                // Aggregate notes & flashcards from all users' data
+                const { data: allUsersData } = await sb
+                    .from('users_data')
+                    .select('data');
+
+                let totalNotes = 0;
+                let totalFlashcards = 0;
+
+                if (allUsersData) {
+                    allUsersData.forEach(row => {
+                        const d = row.data;
+                        if (d) {
+                            if (d.notes) totalNotes += d.notes.length;
+                            if (d.flashcards) totalFlashcards += d.flashcards.length;
+                        }
+                    });
+                }
+
+                // Count reviews
+                const { count: reviewCount } = await sb
+                    .from('reviews')
+                    .select('*', { count: 'exact', head: true });
+
+                // Update DOM
+                animateNumber('statUsers', userCount || 0);
+                animateNumber('statNotes', totalNotes);
+                animateNumber('statFlashcards', totalFlashcards);
+                animateNumber('statReviews', reviewCount || 0);
+
+                // Preview cards
+                const previewNotes = document.getElementById('previewNotes');
+                const previewFlashcards = document.getElementById('previewFlashcards');
+                const previewUsers = document.getElementById('previewUsers');
+                if (previewNotes) previewNotes.textContent = totalNotes;
+                if (previewFlashcards) previewFlashcards.textContent = totalFlashcards;
+                if (previewUsers) previewUsers.textContent = userCount || 0;
+
+            } catch (err) {
+                console.error('Stats load error:', err);
+                // Fallback: show 0 instead of "—"
+                ['statUsers', 'statNotes', 'statFlashcards', 'statReviews'].forEach(id => {
+                    const el = document.getElementById(id);
+                    if (el && el.textContent === '—') el.textContent = '0';
                 });
-            }, {
-                threshold: 0.15,
-                rootMargin: '0px 0px -40px 0px'
-            });
+            }
+        }
 
-            revealElements.forEach(el => observer.observe(el));
+        function animateNumber(elementId, target) {
+            const el = document.getElementById(elementId);
+            if (!el) return;
+            const duration = 1200;
+            const start = performance.now();
+
+            function step(now) {
+                const progress = Math.min((now - start) / duration, 1);
+                const eased = 1 - Math.pow(1 - progress, 3); // easeOutCubic
+                el.textContent = Math.round(eased * target);
+                if (progress < 1) requestAnimationFrame(step);
+            }
+            requestAnimationFrame(step);
+        }
+
+        // ============================================
+        // LOAD REVIEWS FROM DB
+        // ============================================
+        async function loadReviews() {
+            const container = document.getElementById('reviewsContainer');
+            if (!container) return;
+
+            try {
+                const { data: reviews, error } = await sb
+                    .from('reviews')
+                    .select('*')
+                    .order('created_at', { ascending: false })
+                    .limit(9);
+
+                if (error) throw error;
+
+                if (!reviews || reviews.length === 0) {
+                    container.innerHTML = '<p class="empty-state" style="grid-column: 1/-1;">Nessuna recensione ancora. Sii il primo a lasciarne una! ✨</p>';
+                    return;
+                }
+
+                container.innerHTML = reviews.map((r, i) => `
+                    <div class="testimonial-card reveal reveal-delay-${Math.min(i + 1, 6)}" style="transition-delay: ${i * 0.1}s;">
+                        <div class="testimonial-stars">${'★'.repeat(r.rating || 5)}${'☆'.repeat(5 - (r.rating || 5))}</div>
+                        <p class="testimonial-text">"${escapeHtml(r.text)}"</p>
+                        <div class="testimonial-author">
+                            <div class="testimonial-avatar">${(r.name || '?')[0].toUpperCase()}</div>
+                            <div>
+                                <div class="testimonial-name">${escapeHtml(r.name || 'Anonimo')}</div>
+                                <div class="testimonial-role">${escapeHtml(r.role || 'Studente')}</div>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+
+                // Re-observe for scroll reveal
+                setTimeout(() => {
+                    container.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+                }, 100);
+
+            } catch (err) {
+                console.error('Reviews load error:', err);
+                container.innerHTML = '<p class="empty-state" style="grid-column: 1/-1;">Nessuna recensione ancora. Sii il primo! ✨</p>';
+            }
+        }
+
+        function escapeHtml(str) {
+            const div = document.createElement('div');
+            div.textContent = str;
+            return div.innerHTML;
+        }
+
+        // ============================================
+        // REVIEW MODAL
+        // ============================================
+        let selectedRating = 5;
+
+        function openReviewModal() {
+            document.getElementById('reviewModal').classList.add('active');
+            document.getElementById('reviewError').style.display = 'none';
+            document.getElementById('reviewSuccess').style.display = 'none';
+            updateStars(5);
+
+            // Check if user is logged in
+            sb.auth.getSession().then(({ data: { session } }) => {
+                const notice = document.getElementById('reviewAuthNotice');
+                const btn = document.getElementById('submitReviewBtn');
+                if (!session) {
+                    notice.style.display = 'block';
+                    btn.disabled = true;
+                    btn.style.opacity = '0.5';
+                } else {
+                    notice.style.display = 'none';
+                    btn.disabled = false;
+                    btn.style.opacity = '1';
+                }
+            });
+        }
+
+        function closeReviewModal() {
+            document.getElementById('reviewModal').classList.remove('active');
+        }
+
+        function updateStars(rating) {
+            selectedRating = rating;
+            document.querySelectorAll('#starRating .star').forEach(star => {
+                const val = parseInt(star.dataset.value);
+                star.classList.toggle('active', val <= rating);
+            });
+        }
+
+        // Star click handlers
+        document.querySelectorAll('#starRating .star').forEach(star => {
+            star.addEventListener('click', () => updateStars(parseInt(star.dataset.value)));
+            star.addEventListener('mouseenter', () => {
+                const val = parseInt(star.dataset.value);
+                document.querySelectorAll('#starRating .star').forEach(s => {
+                    s.classList.toggle('hover', parseInt(s.dataset.value) <= val);
+                });
+            });
+            star.addEventListener('mouseleave', () => {
+                document.querySelectorAll('#starRating .star').forEach(s => s.classList.remove('hover'));
+            });
+        });
+
+        async function submitReview() {
+            const name = document.getElementById('reviewName').value.trim();
+            const role = document.getElementById('reviewRole').value.trim();
+            const text = document.getElementById('reviewText').value.trim();
+            const errorEl = document.getElementById('reviewError');
+            const successEl = document.getElementById('reviewSuccess');
+
+            errorEl.style.display = 'none';
+            successEl.style.display = 'none';
+
+            if (!name || !text) {
+                errorEl.textContent = '❌ Inserisci il tuo nome e la recensione.';
+                errorEl.style.display = 'block';
+                return;
+            }
+
+            if (text.length < 10) {
+                errorEl.textContent = '❌ La recensione deve essere di almeno 10 caratteri.';
+                errorEl.style.display = 'block';
+                return;
+            }
+
+            const { data: { session } } = await sb.auth.getSession();
+            if (!session) {
+                errorEl.textContent = '❌ Devi essere registrato per lasciare una recensione.';
+                errorEl.style.display = 'block';
+                return;
+            }
+
+            const btn = document.getElementById('submitReviewBtn');
+            btn.disabled = true;
+            btn.textContent = 'Pubblicando...';
+
+            try {
+                const { error } = await sb.from('reviews').insert({
+                    user_id: session.user.id,
+                    name: name,
+                    role: role || 'Studente',
+                    text: text,
+                    rating: selectedRating
+                });
+
+                if (error) throw error;
+
+                successEl.textContent = '✅ Recensione pubblicata! Grazie!';
+                successEl.style.display = 'block';
+
+                // Reset form
+                document.getElementById('reviewName').value = '';
+                document.getElementById('reviewRole').value = '';
+                document.getElementById('reviewText').value = '';
+
+                // Reload reviews
+                setTimeout(() => {
+                    closeReviewModal();
+                    loadReviews();
+                    loadRealStats();
+                }, 1500);
+
+            } catch (err) {
+                console.error('Review submit error:', err);
+                errorEl.textContent = '❌ Errore: ' + (err.message || 'Riprova più tardi.');
+                errorEl.style.display = 'block';
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Pubblica Recensione ✨';
+            }
+        }
+
+        // Close modal on overlay click
+        document.getElementById('reviewModal').addEventListener('click', (e) => {
+            if (e.target === e.currentTarget) closeReviewModal();
+        });
+
+        // ============================================
+        // SCROLL REVEAL (IntersectionObserver)
+        // ============================================
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, {
+            threshold: 0.15,
+            rootMargin: '0px 0px -40px 0px'
+        });
+
+        document.addEventListener('DOMContentLoaded', () => {
+            document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+            loadRealStats();
+            loadReviews();
         });
 
         // Smooth scroll for anchor links

@@ -39,26 +39,69 @@ header {
     display: flex !important;
     align-items: center !important;
     justify-content: space-between !important;
-    padding: 0 32px !important;
-    gap: 32px !important;
+    padding: 0 20px !important;
+    /* Ridotto padding su mobile */
+    gap: 12px !important;
+    /* Ridotto gap su mobile */
+}
+
+@media (min-width: 1024px) {
+    header {
+        padding: 0 32px !important;
+        gap: 32px !important;
+    }
 }
 
 [data-theme="dark"] header {
     background: rgba(17, 24, 39, 0.7) !important;
 }
 
+header .logo {
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    text-decoration: none !important;
+    color: var(--text-primary) !important;
+    font-weight: 700 !important;
+    font-size: clamp(1rem, 3.5vw, 1.4rem) !important;
+    flex-shrink: 0 !important;
+}
+
+.logo-icon {
+    font-size: 1.5rem !important;
+}
 
 
-header h1 {
-    font-size: clamp(1.2rem, 4vw, 1.8rem);
-    margin: 0;
-    flex-shrink: 0;
+.header-right {
+    display: flex;
+    align-items: center;
+    gap: 8px !important;
+    /* Gap stretto su mobile */
+    z-index: 10001;
+}
+
+@media (min-width: 1024px) {
+    .header-right {
+        gap: 16px !important;
+    }
+}
+
+/* Nascondi email su mobile per fare spazio */
+@media (max-width: 768px) {
+    #userEmailDisplay {
+        display: none !important;
+    }
+
+    #userProfile {
+        gap: 8px !important;
+    }
 }
 
 .header-icons {
     display: flex;
     gap: clamp(0.25rem, 1vw, 0.5rem);
 }
+
 
 /* ============================================
    HAMBURGER BUTTON - SEMPRE VISIBILE

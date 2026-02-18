@@ -25,8 +25,12 @@ const AuthManager = {
                 this.updateUI();
 
                 if (event === 'SIGNED_IN' || (event === 'INITIAL_SESSION' && session)) {
+                    // Prevent infinite reload loop using sessionStorage
+                    if (sessionStorage.getItem('cloudSyncDone')) return;
+
                     // Try to load from cloud using either StorageManager or direct Supabase call
                     if (typeof StorageManager !== 'undefined' && StorageManager.loadFromCloud) {
+                        sessionStorage.setItem('cloudSyncDone', 'true');
                         StorageManager.loadFromCloud();
                     } else if (typeof supabaseClient !== 'undefined') {
                         // Fallback for index.html standalone
@@ -38,11 +42,17 @@ const AuthManager = {
                             .then(({ data, error }) => {
                                 if (!error && data && data.data) {
                                     localStorage.setItem('studyjournal_data', JSON.stringify(data.data));
+                                    sessionStorage.setItem('cloudSyncDone', 'true');
                                     location.reload();
                                 }
                             });
                     }
                 }
+
+                if (event === 'SIGNED_OUT') {
+                    sessionStorage.removeItem('cloudSyncDone');
+                }
+
 
             });
 

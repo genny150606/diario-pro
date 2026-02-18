@@ -855,6 +855,7 @@
         </a>
 
         <nav class="sidebar">
+            <div class="nav-indicator"></div>
             <a href="#" onclick="showSection('dashboard')" class="sidebar-item nav-link active">Dashboard</a>
             <a href="#" onclick="showSection('notes')" class="sidebar-item nav-link">Note</a>
             <a href="#" onclick="showSection('tasks')" class="sidebar-item nav-link">Compiti</a>
@@ -863,6 +864,7 @@
             <a href="#" onclick="showSection('presences')" class="sidebar-item nav-link">Presenze</a>
             <a href="#" onclick="showSection('settings')" class="sidebar-item nav-link">Impostazioni</a>
         </nav>
+
 
         <div class="header-right">
             <!-- Auth UI -->
@@ -1161,12 +1163,71 @@
     <!-- SCRIPTS -->
     <script>
         function showSection(sectionId) {
+            // Nasconde tutte le sezioni
             document.querySelectorAll('section').forEach(s => s.classList.remove('active'));
-            document.getElementById(sectionId).classList.add('active');
+            const section = document.getElementById(sectionId);
+            if (section) section.classList.add('active');
 
-            document.querySelectorAll('nav a').forEach(a => a.classList.remove('active'));
-            event.target.classList.add('active');
+            // Aggiorna stato active nei link
+            const navLinks = document.querySelectorAll('.sidebar-item');
+            navLinks.forEach(a => a.classList.remove('active'));
+
+            // Trova il link corrispondente alla sezione
+            const activeLink = Array.from(navLinks).find(a => a.getAttribute('onclick').includes(`'${sectionId}'`));
+            if (activeLink) activeLink.classList.add('active');
+
+            // Gestione Sincronizzazione Dati Sezione
+            if (sectionId === 'notes') {
+                if (typeof renderNotes === 'function') renderNotes();
+                if (typeof renderFlashcards === 'function') renderFlashcards(loadFlashcards());
+            } else if (sectionId === 'tasks') {
+                if (typeof renderTasks === 'function') renderTasks();
+            } else if (sectionId === 'grades') {
+                if (typeof renderGrades === 'function') renderGrades();
+            } else if (sectionId === 'presences') {
+                if (typeof renderPresences === 'function') renderPresences();
+                if (typeof updatePresenceStats === 'function') updatePresenceStats();
+            }
+
+            // Animazione indicatore (solo su Desktop)
+            updateNavIndicator(activeLink);
+
+            // Chiudi sidebar mobile se aperta
+            const sidebar = document.querySelector('.sidebar');
+            if (sidebar.classList.contains('open')) {
+                sidebar.classList.remove('open');
+                document.querySelector('.navbar-overlay')?.classList.remove('active');
+            }
         }
+
+        function updateNavIndicator(activeLink) {
+            const indicator = document.querySelector('.nav-indicator');
+            if (!indicator) return;
+
+            if (activeLink && window.innerWidth > 1024) {
+                indicator.style.width = `${activeLink.offsetWidth}px`;
+                indicator.style.height = `${activeLink.offsetHeight}px`;
+                indicator.style.left = `${activeLink.offsetLeft}px`;
+                indicator.style.top = `${activeLink.offsetTop}px`;
+                indicator.style.opacity = '1';
+            } else {
+                indicator.style.opacity = '0';
+            }
+        }
+
+        // Inizializza indicatore al caricamento
+        window.addEventListener('resize', () => {
+            const activeLink = document.querySelector('.sidebar-item.active');
+            updateNavIndicator(activeLink);
+        });
+
+        document.addEventListener('DOMContentLoaded', () => {
+            setTimeout(() => {
+                const activeLink = document.querySelector('.sidebar-item.active');
+                updateNavIndicator(activeLink);
+            }, 500);
+        });
+
 
         function showTab(tabId) {
             document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
@@ -1790,24 +1851,7 @@
             }
         }
 
-        function showSection(sectionId) {
-            document.querySelectorAll('section').forEach(s => s.classList.remove('active'));
-            const section = document.getElementById(sectionId);
-            if (section) section.classList.add('active');
 
-            // Carica i dati della sezione
-            if (sectionId === 'notes') {
-                renderNotes();
-                renderFlashcards(loadFlashcards());
-            } else if (sectionId === 'tasks') {
-                renderTasks();
-            } else if (sectionId === 'grades') {
-                renderGrades();
-            } else if (sectionId === 'presences') {
-                renderPresences();
-                updatePresenceStats();
-            }
-        }
 
         function showTab(tabId) {
             document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));

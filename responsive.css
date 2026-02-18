@@ -54,7 +54,8 @@ header h1 {
    ============================================ */
 
 #hamburgerBtn {
-    display: block !important;
+    display: none !important;
+    /* Nascosto su desktop di default */
     background: none;
     border: none;
     color: var(--text-primary);
@@ -65,6 +66,13 @@ header h1 {
     flex-shrink: 0;
     transition: transform 0.2s ease;
 }
+
+@media (max-width: 1024px) {
+    #hamburgerBtn {
+        display: block !important;
+    }
+}
+
 
 #hamburgerBtn:hover {
     transform: scale(1.1);
@@ -77,40 +85,76 @@ header h1 {
 /* ============================================
    SIDEBAR / NAVBAR - COMPRIMIBILE SU TUTTO
    ============================================*/
-/* Sidebar / Navbar - COMPRIMIBILE SU TUTTO */
+/* Sidebar / Navbar - MOBILE ONLY */
+@media (max-width: 1024px) {
+    .sidebar {
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 0 !important;
+        padding: 0 !important;
+        position: fixed !important;
+        left: 0;
+        top: 60px;
+        /* Allinea con l'altezza dell'header */
+        width: 250px !important;
+        height: calc(100vh - 60px) !important;
+        background: var(--bg-secondary) !important;
+        border-right: 1px solid var(--border-color) !important;
+        overflow-y: auto !important;
+        overflow-x: hidden !important;
+        -webkit-overflow-scrolling: touch !important;
+        z-index: 1500;
+        transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        transform: translateX(-100%);
+        backdrop-filter: blur(10px);
 
-.sidebar {
-    display: flex !important;
-    flex-direction: column !important;
-    gap: 0 !important;
-    padding: 0 !important;
-    position: fixed !important;
-    left: 0;
-    top: 70px;
-    width: 250px !important;
-    height: calc(100vh - 70px) !important;
-    background: var(--bg-secondary) !important;
-    border-right: 1px solid var(--border-color) !important;
-    overflow-y: auto !important;
-    overflow-x: hidden !important;
-    -webkit-overflow-scrolling: touch !important;
-    z-index: 999;
-    transition: transform 0.3s ease;
-    transform: translateX(-100%);
+        /* Nascondi scrollbar */
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+    }
 
-    /* Nascondi scrollbar ma mantieni funzionalità */
-    scrollbar-width: none;
-    -ms-overflow-style: none;
+    .sidebar.open {
+        transform: translateX(0) !important;
+    }
+
+    /* Overlay solo su mobile */
+    .navbar-overlay.active {
+        display: block;
+        z-index: 1400;
+    }
 }
 
-.sidebar::-webkit-scrollbar {
-    display: none;
+/* Sidebar / Navbar - DESKTOP */
+@media (min-width: 1025px) {
+    .sidebar {
+        display: flex !important;
+        flex-direction: row !important;
+        position: static !important;
+        transform: none !important;
+        width: auto !important;
+        height: auto !important;
+        background: transparent !important;
+        border: none !important;
+        gap: 8px !important;
+        padding: 0 !important;
+        z-index: 1000;
+        overflow: visible !important;
+    }
+
+    .sidebar-item {
+        width: auto !important;
+        border: none !important;
+        padding: 8px 16px !important;
+        border-radius: 8px !important;
+    }
+
+    .sidebar-item:hover,
+    .sidebar-item.active {
+        border: none !important;
+        padding-left: 16px !important;
+    }
 }
 
-/* Sidebar aperta */
-.sidebar.open {
-    transform: translateX(0) !important;
-}
 
 /* Mobile: sidebar a tutta larghezza */
 @media (max-width: 767px) {

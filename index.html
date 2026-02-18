@@ -884,49 +884,8 @@
         }
 
         /* ==================== RESPONSIVE ==================== */
-        @media (max-width: 1024px) {
-            .content {
-                padding: 32px;
-            }
+        /* Media queries rimosse per evitare conflitti con responsive.css */
 
-            nav {
-                display: none;
-            }
-
-            .menu-toggle {
-                display: block;
-            }
-        }
-
-        @media (max-width: 768px) {
-            header {
-                padding: 0 16px;
-                gap: 16px;
-            }
-
-            .content {
-                padding: 24px 16px;
-            }
-
-            .stats-grid {
-                grid-template-columns: 1fr;
-                gap: 16px;
-            }
-
-            #geminiChat {
-                bottom: 16px;
-                right: 16px;
-            }
-
-            #geminiChatWindow {
-                max-width: 100%;
-                height: calc(100vh - 200px);
-            }
-
-            .hero h1 {
-                font-size: 24px;
-            }
-        }
 
         /* ==================== SCROLLBAR ==================== */
         ::-webkit-scrollbar {
@@ -957,14 +916,14 @@
             <span>StudyJournal</span>
         </a>
 
-        <nav>
-            <a href="#" onclick="showSection('dashboard')" class="nav-link active">Dashboard</a>
-            <a href="#" onclick="showSection('notes')" class="nav-link">Note</a>
-            <a href="#" onclick="showSection('tasks')" class="nav-link">Compiti</a>
-            <a href="#" onclick="showSection('grades')" class="nav-link">Voti</a>
-            <a href="#" onclick="showSection('stats')" class="nav-link">Statistiche</a>
-            <a href="#" onclick="showSection('presences')" class="nav-link">Presenze</a>
-            <a href="#" onclick="showSection('settings')" class="nav-link">Impostazioni</a>
+        <nav class="sidebar">
+            <a href="#" onclick="showSection('dashboard')" class="sidebar-item nav-link active">Dashboard</a>
+            <a href="#" onclick="showSection('notes')" class="sidebar-item nav-link">Note</a>
+            <a href="#" onclick="showSection('tasks')" class="sidebar-item nav-link">Compiti</a>
+            <a href="#" onclick="showSection('grades')" class="sidebar-item nav-link">Voti</a>
+            <a href="#" onclick="showSection('stats')" class="sidebar-item nav-link">Statistiche</a>
+            <a href="#" onclick="showSection('presences')" class="sidebar-item nav-link">Presenze</a>
+            <a href="#" onclick="showSection('settings')" class="sidebar-item nav-link">Impostazioni</a>
         </nav>
 
         <div class="header-right">
@@ -1345,7 +1304,7 @@
             container.innerHTML = '<p style="text-align: center; color: var(--text-secondary);">⏳ Generando flashcard...</p>';
 
             try {
-                const response = await fetch('https://19d1a28e-3588-4a44-933d-0e623bd9fb06-00-38wfijucqonl7.worf.replit.dev/api/generate-flashcards', {
+                const response = await fetch('/api/generate-flashcards', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
@@ -2084,11 +2043,11 @@
     <script src="chatbot-simple.js"></script>
 
     <!-- Script rimossi per evitare conflitti con l'HTML nuovo - Tutte le funzioni sono nel tag script inline sopra -->
+    <script src="hamburger-menu.js"></script>
     <!-- 
     <script src="script.js"></script>
     <script src="onboarding.js"></script>
     <script src="new-features.js"></script>
-    <script src="hamburger-menu.js"></script>
     <script src="grades-adapter.js"></script>
     <script src="flashcard-local-generator.js"></script>
     <script src="gemini-features.js"></script>

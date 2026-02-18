@@ -1,0 +1,2098 @@
+<!DOCTYPE html>
+<html lang="it">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StudyJournal Pro</title>
+
+    <!-- Apple System Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Chart.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #1f2937;
+            --primary-light: #374151;
+            --accent: #3b82f6;
+            --accent-light: #60a5fa;
+            --bg-primary: #ffffff;
+            --bg-secondary: #f9fafb;
+            --bg-tertiary: #f3f4f6;
+            --text-primary: #1f2937;
+            --text-secondary: #6b7280;
+            --text-light: #9ca3af;
+            --border: #e5e7eb;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --error: #ef4444;
+        }
+
+        [data-theme="dark"] {
+            --primary: #f9fafb;
+            --primary-light: #e5e7eb;
+            --accent: #60a5fa;
+            --bg-primary: #111827;
+            --bg-secondary: #1f2937;
+            --bg-tertiary: #374151;
+            --text-primary: #f9fafb;
+            --text-secondary: #d1d5db;
+            --text-light: #9ca3af;
+            --border: #374151;
+        }
+
+        html,
+        body {
+            width: 100%;
+            height: 100%;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Inter', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        body {
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        /* ==================== HEADER TOP ==================== */
+        header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 60px;
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 32px;
+            gap: 32px;
+        }
+
+        [data-theme="dark"] header {
+            background: rgba(17, 24, 39, 0.7);
+        }
+
+        [data-theme="dark"] nav a {
+            color: var(--text-secondary);
+        }
+
+        [data-theme="dark"] nav a:hover {
+            color: var(--text-primary);
+            background: var(--bg-tertiary);
+        }
+
+        [data-theme="dark"] nav a.active {
+            color: var(--accent);
+            background: rgba(59, 130, 246, 0.1);
+        }
+
+        /* Dark mode per il calendario */
+        [data-theme="dark"] input[type="date"]::-webkit-calendar-picker-indicator {
+            filter: invert(0.3);
+        }
+
+        [data-theme="dark"] input[type="date"]::-webkit-datetime-edit-text {
+            color: var(--text-secondary);
+        }
+
+        [data-theme="dark"] input[type="date"]::-webkit-datetime-edit-month-field,
+        [data-theme="dark"] input[type="date"]::-webkit-datetime-edit-day-field,
+        [data-theme="dark"] input[type="date"]::-webkit-datetime-edit-year-field {
+            color: var(--text-primary);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--text-primary);
+            text-decoration: none;
+            flex-shrink: 0;
+        }
+
+        .logo-icon {
+            font-size: 28px;
+        }
+
+        /* ==================== NAV HORIZONTAL ==================== */
+        nav {
+            display: flex;
+            gap: 2px;
+            align-items: center;
+            flex: 1;
+            justify-content: center;
+        }
+
+        nav a {
+            padding: 8px 16px;
+            font-size: 15px;
+            font-weight: 500;
+            color: var(--text-secondary);
+            text-decoration: none;
+            border-radius: 8px;
+            transition: all 150ms cubic-bezier(0.2, 0, 0.38, 0.9);
+            cursor: pointer;
+            border: none;
+            background: none;
+        }
+
+        nav a:hover {
+            color: var(--text-primary);
+            background: var(--bg-tertiary);
+        }
+
+        nav a.active {
+            color: var(--accent);
+            background: rgba(59, 130, 246, 0.1);
+        }
+
+        /* ==================== HEADER RIGHT ==================== */
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            flex-shrink: 0;
+        }
+
+        .theme-toggle,
+        .menu-toggle {
+            background: none;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 8px;
+            transition: all 150ms cubic-bezier(0.2, 0, 0.38, 0.9);
+            color: var(--text-secondary);
+        }
+
+        .theme-toggle:hover,
+        .menu-toggle:hover {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+        }
+
+        .menu-toggle {
+            display: none;
+        }
+
+        /* ==================== MAIN CONTAINER ==================== */
+        .container {
+            display: flex;
+            flex: 1;
+            margin-top: 60px;
+            min-height: calc(100vh - 60px);
+        }
+
+        .content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 48px 64px;
+            max-width: 1400px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        /* ==================== SECTIONS ==================== */
+        section {
+            display: none;
+        }
+
+        section.active {
+            display: block;
+            animation: fadeIn 300ms ease-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        /* ==================== DASHBOARD HERO ==================== */
+        .hero {
+            margin-bottom: 48px;
+        }
+
+        .hero h1 {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            letter-spacing: -0.02em;
+        }
+
+        .hero p {
+            font-size: 16px;
+            color: var(--text-secondary);
+            margin-bottom: 24px;
+        }
+
+        /* ==================== STATS GRID ==================== */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 24px;
+            margin-bottom: 48px;
+        }
+
+        .stat-card {
+            background: var(--bg-primary);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 24px;
+            transition: all 300ms cubic-bezier(0.2, 0, 0.38, 0.9);
+            cursor: default;
+        }
+
+        .stat-card:hover {
+            border-color: var(--text-light);
+            transform: translateY(-4px);
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.08);
+        }
+
+        .stat-icon {
+            font-size: 32px;
+            margin-bottom: 12px;
+            display: block;
+        }
+
+        .stat-label {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+        }
+
+        .stat-value {
+            font-size: 36px;
+            font-weight: 700;
+            color: var(--accent);
+            margin-bottom: 8px;
+        }
+
+        .stat-change {
+            font-size: 13px;
+            color: var(--success);
+            font-weight: 500;
+        }
+
+        /* ==================== SECTION HEADER ==================== */
+        .section-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 32px;
+            padding-bottom: 24px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .section-title {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 24px;
+            font-weight: 700;
+        }
+
+        /* ==================== CARDS ==================== */
+        .card {
+            background: var(--bg-primary);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 16px;
+            transition: all 300ms cubic-bezier(0.2, 0, 0.38, 0.9);
+        }
+
+        .card:hover {
+            border-color: var(--text-light);
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.08);
+        }
+
+        /* ==================== BUTTONS ==================== */
+        button,
+        .btn {
+            padding: 10px 20px;
+            font-size: 15px;
+            font-weight: 500;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 150ms cubic-bezier(0.2, 0, 0.38, 0.9);
+            font-family: inherit;
+        }
+
+        .btn-primary {
+            background: var(--accent);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--accent-light);
+            transform: translateY(-1px);
+        }
+
+        .btn-primary:active {
+            transform: translateY(0);
+        }
+
+        .btn-secondary {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+            border: 1px solid var(--border);
+        }
+
+        .btn-secondary:hover {
+            background: var(--bg-secondary);
+        }
+
+        /* ==================== FORMS ==================== */
+        input[type="text"],
+        input[type="email"],
+        input[type="password"],
+        input[type="number"],
+        input[type="date"],
+        textarea,
+        select {
+            width: 100%;
+            padding: 10px 12px;
+            font-size: 15px;
+            font-family: inherit;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            transition: all 150ms ease;
+            outline: none;
+            margin-bottom: 12px;
+        }
+
+        input:focus,
+        textarea:focus,
+        select:focus {
+            border-color: var(--accent);
+            background: var(--bg-primary);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        /* ==================== CUSTOM CALENDAR MODAL ==================== */
+        .calendar-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.4);
+            z-index: 10000;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(5px);
+            animation: fadeIn 300ms ease-out;
+        }
+
+        .calendar-modal.active {
+            display: flex;
+        }
+
+        .calendar-container {
+            background: var(--bg-primary);
+            border-radius: 20px;
+            padding: 32px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+            max-width: 400px;
+            width: 90%;
+            animation: slideUp 300ms ease-out;
+            border: 1px solid var(--border);
+        }
+
+        .calendar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .calendar-header h3 {
+            font-size: 20px;
+            font-weight: 700;
+            margin: 0;
+            color: var(--text-primary);
+        }
+
+        .calendar-nav {
+            display: flex;
+            gap: 8px;
+        }
+
+        .calendar-nav button {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            color: var(--text-primary);
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 150ms ease;
+        }
+
+        .calendar-nav button:hover {
+            background: var(--accent);
+            color: white;
+            border-color: var(--accent);
+            transform: translateY(-2px);
+        }
+
+        .calendar-weekdays {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+
+        .calendar-weekday {
+            text-align: center;
+            font-weight: 600;
+            font-size: 12px;
+            color: var(--text-secondary);
+            padding: 8px 0;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .calendar-days {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 8px;
+            margin-bottom: 24px;
+        }
+
+        .calendar-day {
+            aspect-ratio: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid transparent;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 500;
+            font-size: 14px;
+            color: var(--text-primary);
+            background: var(--bg-secondary);
+            transition: all 150ms cubic-bezier(0.2, 0, 0.38, 0.9);
+        }
+
+        .calendar-day:hover {
+            background: var(--bg-tertiary);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15);
+        }
+
+        .calendar-day.other-month {
+            color: var(--text-light);
+            background: transparent;
+            cursor: not-allowed;
+        }
+
+        .calendar-day.other-month:hover {
+            background: transparent;
+            transform: none;
+        }
+
+        .calendar-day.selected {
+            background: var(--accent);
+            color: white;
+            border-color: var(--accent);
+            font-weight: 700;
+            box-shadow: 0 8px 16px rgba(59, 130, 246, 0.3);
+            transform: scale(1.05);
+        }
+
+        .calendar-day.today {
+            border: 2px solid var(--accent);
+            color: var(--accent);
+            font-weight: 700;
+        }
+
+        .calendar-day.today.selected {
+            background: var(--accent);
+            color: white;
+        }
+
+        .calendar-footer {
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+        }
+
+        .calendar-btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 14px;
+            transition: all 150ms ease;
+        }
+
+        .calendar-btn-cancel {
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            border: 1px solid var(--border);
+        }
+
+        .calendar-btn-cancel:hover {
+            background: var(--bg-tertiary);
+        }
+
+        .calendar-btn-confirm {
+            background: var(--accent);
+            color: white;
+        }
+
+        .calendar-btn-confirm:hover {
+            background: var(--accent-light);
+            transform: translateY(-1px);
+            box-shadow: 0 8px 16px rgba(59, 130, 246, 0.3);
+        }
+
+        /* ==================== CUSTOM CALENDAR STYLING ==================== */
+        input[type="date"] {
+            appearance: none;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            width: 100%;
+            padding: 12px 16px;
+            padding-right: 48px;
+            font-size: 15px;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            transition: all 150ms ease;
+            margin-bottom: 12px;
+            cursor: pointer;
+            font-weight: 500;
+            position: relative;
+        }
+
+        input[type="date"]:hover {
+            border-color: var(--accent);
+            box-shadow: 0 2px 8px rgba(59, 130, 246, 0.1);
+        }
+
+        input[type="date"]:focus {
+            outline: none;
+            border-color: var(--accent);
+            background: var(--bg-primary);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        /* Icona calendario - WebKit */
+        input[type="date"]::-webkit-calendar-picker-indicator {
+            cursor: pointer;
+            border-radius: 6px;
+            background: none;
+            color: var(--accent);
+            width: 24px;
+            height: 24px;
+            margin-right: 8px;
+            opacity: 1;
+            filter: none;
+        }
+
+        input[type="date"]::-webkit-calendar-picker-indicator:hover {
+            background: rgba(59, 130, 246, 0.1);
+        }
+
+        /* Firefox - icona calendario */
+        input[type="date"]::-moz-calendar-picker-indicator {
+            cursor: pointer;
+            color: var(--accent);
+            opacity: 1;
+        }
+
+        /* Stile testo */
+        input[type="date"]::-webkit-datetime-edit {
+            padding: 0;
+            margin: 0;
+        }
+
+        input[type="date"]::-webkit-datetime-edit-fields-wrapper {
+            padding: 0;
+            margin: 0;
+        }
+
+        input[type="date"]::-webkit-datetime-edit-text {
+            color: var(--text-secondary);
+            padding: 0 4px;
+            font-size: 15px;
+        }
+
+        input[type="date"]::-webkit-datetime-edit-month-field,
+        input[type="date"]::-webkit-datetime-edit-day-field,
+        input[type="date"]::-webkit-datetime-edit-year-field {
+            color: var(--text-primary);
+            font-weight: 600;
+            padding: 0 2px;
+        }
+
+        input[type="date"]::-webkit-datetime-edit-year-field {
+            padding-left: 4px;
+        }
+
+        input[type="date"]::-webkit-datetime-edit-text {
+            opacity: 0.7;
+        }
+
+        /* Dark mode */
+        [data-theme="dark"] input[type="date"] {
+            background: var(--bg-secondary);
+            border-color: var(--border);
+        }
+
+        [data-theme="dark"] input[type="date"]:focus {
+            background: var(--bg-primary);
+            border-color: var(--accent);
+        }
+
+        [data-theme="dark"] input[type="date"]::-webkit-datetime-edit-text {
+            color: var(--text-secondary);
+        }
+
+        [data-theme="dark"] input[type="date"]::-webkit-datetime-edit-month-field,
+        [data-theme="dark"] input[type="date"]::-webkit-datetime-edit-day-field,
+        [data-theme="dark"] input[type="date"]::-webkit-datetime-edit-year-field {
+            color: var(--text-primary);
+        }
+
+        [data-theme="dark"] input[type="date"]::-webkit-calendar-picker-indicator:hover {
+            background: rgba(96, 165, 250, 0.2);
+        }
+
+        /* ==================== TABS ==================== */
+        .tabs {
+            display: flex;
+            gap: 0;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 32px;
+            overflow-x: auto;
+        }
+
+        .tab-btn {
+            padding: 12px 24px;
+            font-size: 15px;
+            font-weight: 500;
+            color: var(--text-secondary);
+            background: none;
+            border: none;
+            border-bottom: 2px solid transparent;
+            cursor: pointer;
+            transition: all 150ms ease;
+            white-space: nowrap;
+        }
+
+        .tab-btn:hover {
+            color: var(--text-primary);
+        }
+
+        .tab-btn.active {
+            color: var(--accent);
+            border-bottom-color: var(--accent);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 300ms ease-out;
+        }
+
+        /* ==================== CHATBOT ==================== */
+        #geminiChat {
+            position: fixed;
+            bottom: 32px;
+            right: 32px;
+            z-index: 10000;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        #geminiChatToggle {
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background: var(--accent);
+            color: white;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            box-shadow: 0 12px 24px rgba(59, 130, 246, 0.3);
+            transition: all 150ms ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-left: auto;
+        }
+
+        #geminiChatToggle:hover {
+            transform: scale(1.08);
+            box-shadow: 0 16px 32px rgba(59, 130, 246, 0.4);
+        }
+
+        #geminiChatWindow {
+            width: 100%;
+            max-width: 384px;
+            height: 540px;
+            background: var(--bg-primary);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+            animation: slideUp 300ms ease-out;
+            overflow: hidden;
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translateY(20px);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        #geminiChatHeader {
+            padding: 20px 24px;
+            background: linear-gradient(135deg, var(--accent), #2563eb);
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 15px;
+            font-weight: 600;
+        }
+
+        #geminiChatMessages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .chat-bubble {
+            padding: 12px 16px;
+            border-radius: 12px;
+            word-wrap: break-word;
+            animation: fadeIn 300ms ease-out;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        .chat-bubble.user {
+            background: var(--accent);
+            color: white;
+            margin-left: auto;
+            max-width: 85%;
+            border-bottom-right-radius: 4px;
+        }
+
+        .chat-bubble.ai {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+            margin-right: auto;
+            max-width: 85%;
+            border-bottom-left-radius: 4px;
+        }
+
+        #geminiChatInput {
+            padding: 16px;
+            border-top: 1px solid var(--border);
+            display: flex;
+            gap: 8px;
+        }
+
+        #geminiChatInput input {
+            flex: 1;
+            padding: 10px 12px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            font-size: 14px;
+            font-family: inherit;
+        }
+
+        #geminiChatInput button {
+            padding: 10px 16px;
+            background: var(--accent);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 150ms ease;
+            font-weight: 500;
+        }
+
+        #geminiChatInput button:hover {
+            background: var(--accent-light);
+            transform: translateY(-1px);
+        }
+
+        #geminiChatInput button:active {
+            transform: translateY(0);
+        }
+
+        /* ==================== RESPONSIVE ==================== */
+        @media (max-width: 1024px) {
+            .content {
+                padding: 32px;
+            }
+
+            nav {
+                display: none;
+            }
+
+            .menu-toggle {
+                display: block;
+            }
+        }
+
+        @media (max-width: 768px) {
+            header {
+                padding: 0 16px;
+                gap: 16px;
+            }
+
+            .content {
+                padding: 24px 16px;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+                gap: 16px;
+            }
+
+            #geminiChat {
+                bottom: 16px;
+                right: 16px;
+            }
+
+            #geminiChatWindow {
+                max-width: 100%;
+                height: calc(100vh - 200px);
+            }
+
+            .hero h1 {
+                font-size: 24px;
+            }
+        }
+
+        /* ==================== SCROLLBAR ==================== */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--bg-secondary);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--border);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--text-light);
+        }
+    </style>
+</head>
+
+<body>
+    <!-- HEADER TOP -->
+    <header>
+        <a href="#" class="logo">
+            <span class="logo-icon">📓</span>
+            <span>StudyJournal</span>
+        </a>
+
+        <nav>
+            <a href="#" onclick="showSection('dashboard')" class="nav-link active">Dashboard</a>
+            <a href="#" onclick="showSection('notes')" class="nav-link">Note</a>
+            <a href="#" onclick="showSection('tasks')" class="nav-link">Compiti</a>
+            <a href="#" onclick="showSection('grades')" class="nav-link">Voti</a>
+            <a href="#" onclick="showSection('stats')" class="nav-link">Statistiche</a>
+            <a href="#" onclick="showSection('presences')" class="nav-link">Presenze</a>
+            <a href="#" onclick="showSection('settings')" class="nav-link">Impostazioni</a>
+        </nav>
+
+        <div class="header-right">
+            <button class="theme-toggle" onclick="toggleTheme()" title="Cambia tema">🌙</button>
+            <button class="menu-toggle" id="hamburgerBtn" title="Menu">☰</button>
+        </div>
+    </header>
+
+    <!-- MAIN CONTENT -->
+    <div class="container">
+        <div class="content">
+
+            <!-- DASHBOARD -->
+            <section id="dashboard" class="active">
+                <div class="hero">
+                    <h1>Benvenuto! 👋</h1>
+                    <p>Visualizza il tuo progresso di studio in tempo reale</p>
+                </div>
+
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <span class="stat-icon">📚</span>
+                        <div class="stat-label">Appunti Creati</div>
+                        <div class="stat-value">12</div>
+                        <div class="stat-change">↑ 3 questa settimana</div>
+                    </div>
+
+                    <div class="stat-card">
+                        <span class="stat-icon">📝</span>
+                        <div class="stat-label">Note</div>
+                        <div class="stat-value" id="dashboardNotes">0</div>
+                        <div class="stat-change">appunti salvati</div>
+                    </div>
+
+                    <div class="stat-card">
+                        <span class="stat-icon">🎴</span>
+                        <div class="stat-label">Flashcard</div>
+                        <div class="stat-value" id="dashboardFlashcards">0</div>
+                        <div class="stat-change">flashcard create</div>
+                    </div>
+
+                    <div class="stat-card">
+                        <span class="stat-icon">✅</span>
+                        <div class="stat-label">Compiti Completati</div>
+                        <div class="stat-value" id="dashboardTasksCompleted">0</div>
+                        <div class="stat-change">compiti finiti</div>
+                    </div>
+
+                    <div class="stat-card">
+                        <span class="stat-icon">⭐</span>
+                        <div class="stat-label">Media Voti</div>
+                        <div class="stat-value" id="dashboardAverage">-</div>
+                        <div class="stat-change">media generale</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- NOTES -->
+            <section id="notes">
+                <div class="hero">
+                    <h1>Note & Flashcard 📚</h1>
+                    <p>Organizza i tuoi appunti e crea flashcard per memorizzare</p>
+                </div>
+
+                <div class="tabs">
+                    <button class="tab-btn active" onclick="showTab('notes-tab')">Note</button>
+                    <button class="tab-btn" onclick="showTab('flashcards-tab')">Flashcard</button>
+                </div>
+
+                <div id="notes-tab" class="tab-content active">
+                    <div class="card">
+                        <h3>Aggiungi nuova nota</h3>
+                        <input type="text" id="noteTitle" placeholder="Titolo nota...">
+                        <select id="noteSubject" style="margin-bottom: 12px;">
+                            <option value="Generale">Generale</option>
+                            <option value="Matematica">Matematica</option>
+                            <option value="Italiano">Italiano</option>
+                            <option value="Inglese">Inglese</option>
+                            <option value="Scienze">Scienze</option>
+                            <option value="Storia">Storia</option>
+                        </select>
+                        <textarea id="noteContent" placeholder="Scrivi i tuoi appunti..."
+                            style="min-height: 120px;"></textarea>
+                        <button class="btn-primary" onclick="addNote()">Salva Nota</button>
+                    </div>
+
+                    <div id="notesContainer"></div>
+                </div>
+
+                <div id="flashcards-tab" class="tab-content">
+                    <div class="section-header">
+                        <h3 style="margin: 0;">Le tue flashcard</h3>
+                    </div>
+
+                    <div class="card">
+                        <h3>Genera Flashcard</h3>
+                        <p style="color: var(--text-secondary); margin-bottom: 16px;">Crea flashcard automaticamente
+                            dagli appunti con l'AI</p>
+                        <button class="btn-primary" style="width: 100%; margin-bottom: 8px;"
+                            onclick="generateFlashcardsWithGemini()">
+                            🤖 Genera Flashcard con Gemini
+                        </button>
+                        <button class="btn-secondary" style="width: 100%;" onclick="deleteAllFlashcards()">
+                            🗑️ Elimina tutte le Flashcard
+                        </button>
+                    </div>
+
+                    <div id="flashcardStudy"></div>
+                </div>
+            </section>
+
+            <!-- TASKS -->
+            <section id="tasks">
+                <div class="hero">
+                    <h1>Compiti 📝</h1>
+                    <p>Gestisci i tuoi compiti e scadenze</p>
+                </div>
+
+                <div class="card">
+                    <h3>Nuovo compito</h3>
+                    <input type="text" id="taskTitle" placeholder="Descrizione compito...">
+                    <input type="date" id="taskDue" style="margin-bottom: 12px;">
+                    <select id="taskSubject" style="margin-bottom: 12px;">
+                        <option value="Generale">Generale</option>
+                        <option value="Matematica">Matematica</option>
+                        <option value="Italiano">Italiano</option>
+                        <option value="Inglese">Inglese</option>
+                    </select>
+                    <button class="btn-primary" onclick="addTask()">Aggiungi Compito</button>
+                </div>
+
+                <div id="tasksContainer"></div>
+            </section>
+
+            <!-- GRADES -->
+            <section id="grades">
+                <div class="hero">
+                    <h1>Voti ⭐</h1>
+                    <p>Traccia i tuoi progressi scolastici</p>
+                </div>
+
+                <div class="card">
+                    <h3>Aggiungi nuovo voto</h3>
+                    <input type="text" id="gradeSubject" placeholder="Materia...">
+                    <input type="number" id="gradeValue" placeholder="Voto..." min="1" max="10"
+                        style="margin-bottom: 12px;">
+                    <input type="date" id="gradeDate" style="margin-bottom: 12px;">
+                    <textarea id="gradeNotes" placeholder="Note..." style="min-height: 80px;"></textarea>
+                    <button class="btn-primary" onclick="addGrade()">Salva Voto</button>
+                </div>
+
+                <div id="gradesContainer"></div>
+            </section>
+
+            <!-- STATS -->
+            <section id="stats">
+                <div class="hero">
+                    <h1>Statistiche 📊</h1>
+                    <p>Analizza i tuoi progressi nel tempo</p>
+                </div>
+
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <span class="stat-icon">📚</span>
+                        <div class="stat-label">Voti Totali</div>
+                        <div class="stat-value" id="statsGradesCount">0</div>
+                        <div class="stat-change">voti registrati</div>
+                    </div>
+
+                    <div class="stat-card">
+                        <span class="stat-icon">🎯</span>
+                        <div class="stat-label">Completamento Compiti</div>
+                        <div class="stat-value" id="statsCompletion">0%</div>
+                        <div class="stat-change">percentuale</div>
+                    </div>
+
+                    <div class="stat-card">
+                        <span class="stat-icon">📋</span>
+                        <div class="stat-label">Presenze</div>
+                        <div class="stat-value" id="statsPresences">0</div>
+                        <div class="stat-change">giorni in classe</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- PRESENCES -->
+            <section id="presences">
+                <div class="hero">
+                    <h1>Presenze & Assenze 📋</h1>
+                    <p>Monitora le tue presenze in classe</p>
+                </div>
+
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <span class="stat-icon">✅</span>
+                        <div class="stat-label">Presenze</div>
+                        <div class="stat-value" id="presencesCount">0</div>
+                        <div class="stat-change">giorni in classe</div>
+                    </div>
+
+                    <div class="stat-card">
+                        <span class="stat-icon">❌</span>
+                        <div class="stat-label">Assenze</div>
+                        <div class="stat-value" id="absencesCount">0</div>
+                        <div class="stat-change">giorni assente</div>
+                    </div>
+
+                    <div class="stat-card">
+                        <span class="stat-icon">📊</span>
+                        <div class="stat-label">Percentuale</div>
+                        <div class="stat-value" id="presencePercentage">-</div>
+                        <div class="stat-change">di presenze</div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3>Aggiungi Presenza o Assenza</h3>
+                    <div style="display: flex; gap: 12px; margin-bottom: 12px;">
+                        <input type="date" id="presenceDate" style="flex: 1;">
+                        <select id="presenceType" style="flex: 0.5; margin-bottom: 0;">
+                            <option value="presence">✅ Presente</option>
+                            <option value="absence">❌ Assente</option>
+                        </select>
+                    </div>
+                    <button class="btn-primary" style="width: 100%;" onclick="addPresence()">Registra</button>
+                </div>
+
+                <div id="presencesContainer"></div>
+            </section>
+
+            <!-- SETTINGS -->
+            <section id="settings">
+                <div class="hero">
+                    <h1>Impostazioni ⚙️</h1>
+                    <p>Personalizza la tua esperienza</p>
+                </div>
+
+                <div class="card">
+                    <h3>Scolastico</h3>
+                    <label style="display: block; margin-bottom: 16px;">
+                        <input type="radio" name="school" value="liceo"> Liceo
+                    </label>
+                    <label style="display: block; margin-bottom: 16px;">
+                        <input type="radio" name="school" value="università"> Università
+                    </label>
+                </div>
+
+                <div class="card">
+                    <h3>Tema</h3>
+                    <label style="display: block; margin-bottom: 16px;">
+                        <input type="radio" name="theme" value="light"> 🌞 Chiaro
+                    </label>
+                    <label style="display: block; margin-bottom: 16px;">
+                        <input type="radio" name="theme" value="dark"> 🌙 Scuro
+                    </label>
+                </div>
+
+                <div class="card">
+                    <h3>Pericolo</h3>
+                    <button class="btn-secondary" style="background: #fee2e2; color: #991b1b;"
+                        onclick="clearAllData()">🗑️ Elimina tutti i dati</button>
+                </div>
+            </section>
+
+        </div>
+    </div>
+
+    <!-- CHATBOT -->
+    <div id="geminiChat">
+        <button id="geminiChatToggle">💬</button>
+        <div id="geminiChatWindow" style="display: none;">
+            <div id="geminiChatHeader">
+                <span>AI Tutor</span>
+                <button id="closeChatBtn"
+                    style="background: none; border: none; color: white; cursor: pointer; font-size: 18px; padding: 0; width: 24px; height: 24px;">✕</button>
+            </div>
+            <div id="geminiChatMessages"></div>
+            <div id="geminiChatInput">
+                <input type="text" id="chatInputField" placeholder="Fai una domanda...">
+                <button
+                    style="padding: 10px 16px; background: var(--accent); color: white; border: none; border-radius: 8px; cursor: pointer; transition: all 150ms ease; font-weight: 500;">➤</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- SCRIPTS -->
+    <script>
+        function showSection(sectionId) {
+            document.querySelectorAll('section').forEach(s => s.classList.remove('active'));
+            document.getElementById(sectionId).classList.add('active');
+
+            document.querySelectorAll('nav a').forEach(a => a.classList.remove('active'));
+            event.target.classList.add('active');
+        }
+
+        function showTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+            document.getElementById(tabId).classList.add('active');
+
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            event.target.classList.add('active');
+        }
+
+        function toggleTheme() {
+            const html = document.documentElement;
+            const isDark = html.getAttribute('data-theme') === 'dark';
+            html.setAttribute('data-theme', isDark ? 'light' : 'dark');
+            localStorage.setItem('theme', isDark ? 'light' : 'dark');
+            updateThemeButton();
+        }
+
+        function updateThemeButton() {
+            const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+            document.querySelector('.theme-toggle').textContent = isDark ? '☀️' : '🌙';
+        }
+
+        // ==================== FLASHCARD FUNCTIONS ====================
+        function loadData() {
+            try {
+                const data = localStorage.getItem('studyjournal_data');
+                return data ? JSON.parse(data) : {};
+            } catch (e) {
+                console.error('Errore caricamento dati:', e);
+                return {};
+            }
+        }
+
+        function saveData(data) {
+            try {
+                localStorage.setItem('studyjournal_data', JSON.stringify(data));
+            } catch (e) {
+                console.error('Errore salvataggio dati:', e);
+            }
+        }
+
+        function loadFlashcards() {
+            const data = loadData();
+            return data.flashcards || [];
+        }
+
+        function saveFlashcards(flashcards) {
+            const data = loadData();
+            data.flashcards = flashcards;
+            saveData(data);
+        }
+
+        function loadNotes() {
+            const data = loadData();
+            return data.notes || [];
+        }
+
+        async function generateFlashcardsWithGemini() {
+            const notes = loadNotes();
+
+            console.log('Note caricate:', notes.length);
+
+            if (notes.length === 0) {
+                alert('❌ Aggiungi prima una nota nella sezione Note!');
+                return;
+            }
+
+            let options = notes.map((n, i) => `${i + 1}. ${n.title || 'Senza titolo'}`).join('\n');
+            const choice = prompt(`Quale nota usare?\n\n${options}`, '1');
+            if (!choice) return;
+
+            const idx = parseInt(choice) - 1;
+            if (idx < 0 || idx >= notes.length) {
+                alert('Numero non valido');
+                return;
+            }
+
+            const selectedNote = notes[idx];
+            const numStr = prompt('Quante flashcard? (1-10)', '5');
+            const num = Math.min(10, Math.max(1, parseInt(numStr) || 5));
+
+            // Mostra loading
+            const container = document.getElementById('flashcardStudy');
+            container.innerHTML = '<p style="text-align: center; color: var(--text-secondary);">⏳ Generando flashcard...</p>';
+
+            try {
+                const response = await fetch('https://19d1a28e-3588-4a44-933d-0e623bd9fb06-00-38wfijucqonl7.worf.replit.dev/api/generate-flashcards', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        notes: selectedNote.content || selectedNote.text,
+                        subject: selectedNote.subject || 'Generale',
+                        numberOfCards: num
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`Server error: ${response.status}`);
+                }
+
+                const data = await response.json();
+                console.log('📥 Risposta da backend:', data);
+                console.log('Flashcards ricevute:', data.flashcards ? data.flashcards.length : 0);
+
+                if (!data.flashcards || data.flashcards.length === 0) {
+                    alert('❌ Non riesco a generare flashcard');
+                    renderFlashcards(loadFlashcards());
+                    return;
+                }
+
+                let flashcards = loadFlashcards();
+                console.log('Flashcards attuali prima:', flashcards.length);
+
+                let count = 0;
+                data.flashcards.forEach(card => {
+                    console.log('Card:', card);
+                    if (card.front && card.back) {
+                        flashcards.push({
+                            id: Date.now() + Math.random(),
+                            front: card.front,
+                            back: card.back,
+                            subject: selectedNote.subject || 'Generale',
+                            correct: 0,
+                            incorrect: 0,
+                            difficulty: 'medium'
+                        });
+                        count++;
+                    }
+                });
+
+                console.log('Flashcards finali:', flashcards.length);
+                console.log('Count aggiunte:', count);
+
+                saveFlashcards(flashcards);
+                console.log('Flashcards salvate in localStorage');
+
+                renderFlashcards(flashcards);
+                console.log('Flashcards renderizzate');
+
+                // Forza il caricamento della tab flashcards
+                const flashcardsTab = document.getElementById('flashcards-tab');
+                if (flashcardsTab) {
+                    flashcardsTab.classList.add('active');
+                    const notesTab = document.getElementById('notes-tab');
+                    if (notesTab) notesTab.classList.remove('active');
+                }
+
+                alert(`✅ ${count} flashcard create!`);
+
+            } catch (error) {
+                alert(`❌ Errore: ${error.message}`);
+                console.error(error);
+                renderFlashcards(loadFlashcards());
+            }
+        }
+
+        function deleteAllFlashcards() {
+            const flashcards = loadFlashcards();
+
+            if (!flashcards || flashcards.length === 0) {
+                alert('❌ Non ci sono flashcard da eliminare');
+                return;
+            }
+
+            if (confirm(`Sei sicuro di voler eliminare TUTTE le ${flashcards.length} flashcard?\n\nQuesta azione non può essere annullata!`)) {
+                saveFlashcards([]);
+                renderFlashcards([]);
+                alert('✅ Tutte le flashcard sono state eliminate.');
+            }
+        }
+
+        function renderFlashcards(cards) {
+            const container = document.getElementById('flashcardStudy');
+            console.log('🎴 renderFlashcards called');
+            console.log('Container found:', !!container);
+            console.log('Cards:', cards);
+            console.log('Cards count:', cards ? cards.length : 0);
+
+            if (!container) {
+                console.error('❌ flashcardStudy container non trovato!');
+                return;
+            }
+
+            if (!cards || cards.length === 0) {
+                console.log('📭 Nessuna flashcard da mostrare');
+                container.innerHTML = '<p style="text-align: center; color: var(--text-secondary); padding: 24px;">Nessuna flashcard. Usa il bottone sopra per generarne!</p>';
+                return;
+            }
+
+            console.log(`✅ Renderizzando ${cards.length} flashcard`);
+            container.innerHTML = cards.map((card, idx) => `
+                <div class="card" style="margin-bottom: 16px; cursor: pointer; position: relative;" onclick="flipCard(this)">
+                    <div style="font-weight: 600; color: var(--text-primary); margin-bottom: 12px;">
+                        ❓ ${card.front}
+                    </div>
+                    <div style="
+                        color: var(--text-secondary);
+                        opacity: 0;
+                        transition: opacity 0.3s ease;
+                        max-height: 0;
+                        overflow: hidden;
+                    " class="answer">
+                        ✅ ${card.back}
+                    </div>
+                    <small style="display: block; margin-top: 12px; color: var(--text-light);">
+                        Clicca per vedere la risposta
+                    </small>
+                    <button style="
+                        position: absolute;
+                        top: 12px;
+                        right: 12px;
+                        background: none;
+                        border: none;
+                        color: #ef4444;
+                        cursor: pointer;
+                        font-size: 18px;
+                        padding: 8px;
+                        transition: transform 0.2s ease;
+                    " onmouseover="this.style.transform='scale(1.2)'" onmouseout="this.style.transform='scale(1)'" onclick="event.stopPropagation(); deleteSingleFlashcard(${idx});" title="Elimina questa flashcard">
+                        🗑️
+                    </button>
+                </div>
+            `).join('');
+        }
+
+        function flipCard(el) {
+            const answer = el.querySelector('.answer');
+            const small = el.querySelector('small');
+
+            if (answer.style.opacity === '0') {
+                answer.style.opacity = '1';
+                answer.style.maxHeight = '500px';
+                small.textContent = 'Clicca per nascondere la risposta';
+            } else {
+                answer.style.opacity = '0';
+                answer.style.maxHeight = '0';
+                small.textContent = 'Clicca per vedere la risposta';
+            }
+        }
+
+        function deleteSingleFlashcard(index) {
+            let flashcards = loadFlashcards();
+
+            if (index >= 0 && index < flashcards.length) {
+                flashcards.splice(index, 1);
+                saveFlashcards(flashcards);
+                renderFlashcards(flashcards);
+            }
+        }
+
+        // ==================== NOTES FUNCTIONS ====================
+        function addNote() {
+            const title = document.getElementById('noteTitle')?.value.trim();
+            const subject = document.getElementById('noteSubject')?.value;
+            const content = document.getElementById('noteContent')?.value.trim();
+
+            if (!title || !content) {
+                alert('❌ Inserisci titolo e contenuto!');
+                return;
+            }
+
+            let data = loadData();
+            if (!data.notes) data.notes = [];
+
+            data.notes.push({
+                id: Date.now(),
+                title: title,
+                subject: subject,
+                content: content,
+                createdAt: new Date().toLocaleDateString('it-IT')
+            });
+
+            saveData(data);
+            renderNotes();
+            updateDashboard();
+
+            document.getElementById('noteTitle').value = '';
+            document.getElementById('noteSubject').value = '';
+            document.getElementById('noteContent').value = '';
+            alert('✅ Nota salvata!');
+        }
+
+        function renderNotes() {
+            const data = loadData();
+            const notes = data.notes || [];
+            const container = document.getElementById('notesContainer');
+
+            if (!container) return;
+
+            if (notes.length === 0) {
+                container.innerHTML = '<p style="text-align: center; color: var(--text-secondary); padding: 24px;">Nessuna nota. Crea la tua prima nota!</p>';
+                return;
+            }
+
+            container.innerHTML = notes.map((note, idx) => `
+                <div class="card">
+                    <h3>${note.title}</h3>
+                    <p style="color: var(--text-secondary); margin: 8px 0; font-size: 13px;">${note.subject} • ${note.createdAt}</p>
+                    <p>${note.content}</p>
+                    <button class="btn-secondary" style="margin-top: 12px;" onclick="deleteNote(${idx})">🗑️ Elimina</button>
+                </div>
+            `).join('');
+        }
+
+        function deleteNote(idx) {
+            let data = loadData();
+            data.notes.splice(idx, 1);
+            saveData(data);
+            renderNotes();
+            updateDashboard();
+        }
+
+        // ==================== TASKS FUNCTIONS ====================
+        function addTask() {
+            const title = document.getElementById('taskTitle')?.value.trim();
+            const due = document.getElementById('taskDue')?.value;
+            const subject = document.getElementById('taskSubject')?.value;
+
+            if (!title || !due) {
+                alert('❌ Inserisci titolo e scadenza!');
+                return;
+            }
+
+            let data = loadData();
+            if (!data.tasks) data.tasks = [];
+
+            data.tasks.push({
+                id: Date.now(),
+                title: title,
+                due: due,
+                subject: subject,
+                completed: false,
+                createdAt: new Date().toLocaleDateString('it-IT')
+            });
+
+            saveData(data);
+            renderTasks();
+            updateDashboard();
+
+            document.getElementById('taskTitle').value = '';
+            document.getElementById('taskDue').value = '';
+            alert('✅ Compito aggiunto!');
+        }
+
+        function renderTasks() {
+            const data = loadData();
+            const tasks = data.tasks || [];
+            const container = document.getElementById('tasksContainer');
+
+            if (!container) return;
+
+            if (tasks.length === 0) {
+                container.innerHTML = '<p style="text-align: center; color: var(--text-secondary); padding: 24px;">Nessun compito. Aggiungi il tuo primo compito!</p>';
+                return;
+            }
+
+            container.innerHTML = tasks.map((task, idx) => `
+                <div class="card" style="display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <strong>${task.title}</strong>
+                        <p style="color: var(--text-secondary); font-size: 13px; margin-top: 4px;">
+                            ${task.subject} • Scadenza: ${task.due}
+                        </p>
+                    </div>
+                    <div style="display: flex; gap: 8px; align-items: center;">
+                        <input type="checkbox" onchange="toggleTask(${idx})" ${task.completed ? 'checked' : ''}>
+                        <button class="btn-secondary" onclick="deleteTask(${idx})">🗑️</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function toggleTask(idx) {
+            let data = loadData();
+            data.tasks[idx].completed = !data.tasks[idx].completed;
+            saveData(data);
+            renderTasks();
+            updateDashboard();
+        }
+
+        function deleteTask(idx) {
+            let data = loadData();
+            data.tasks.splice(idx, 1);
+            saveData(data);
+            renderTasks();
+            updateDashboard();
+        }
+
+        // ==================== GRADES FUNCTIONS ====================
+        function addGrade() {
+            const subject = document.getElementById('gradeSubject')?.value.trim();
+            const value = parseInt(document.getElementById('gradeValue')?.value);
+            const date = document.getElementById('gradeDate')?.value;
+            const notes = document.getElementById('gradeNotes')?.value.trim();
+
+            if (!subject || !value || !date) {
+                alert('❌ Inserisci materia, voto e data!');
+                return;
+            }
+
+            let data = loadData();
+            if (!data.grades) data.grades = [];
+
+            data.grades.push({
+                id: Date.now(),
+                subject: subject,
+                value: value,
+                date: date,
+                notes: notes
+            });
+
+            saveData(data);
+            renderGrades();
+            updateDashboard();
+
+            document.getElementById('gradeSubject').value = '';
+            document.getElementById('gradeValue').value = '';
+            document.getElementById('gradeDate').value = '';
+            document.getElementById('gradeNotes').value = '';
+            alert('✅ Voto salvato!');
+        }
+
+        function renderGrades() {
+            const data = loadData();
+            const grades = data.grades || [];
+            const container = document.getElementById('gradesContainer');
+
+            if (!container) return;
+
+            if (grades.length === 0) {
+                container.innerHTML = '<p style="text-align: center; color: var(--text-secondary); padding: 24px;">Nessun voto. Aggiungi il tuo primo voto!</p>';
+                return;
+            }
+
+            container.innerHTML = grades.map((grade, idx) => `
+                <div class="card">
+                    <div style="display: flex; justify-content: space-between; align-items: start;">
+                        <div>
+                            <strong>${grade.subject}</strong>
+                            <p style="color: var(--text-secondary); font-size: 13px; margin-top: 4px;">${grade.date}</p>
+                            ${grade.notes ? `<p style="margin-top: 8px; color: var(--text-secondary);">${grade.notes}</p>` : ''}
+                        </div>
+                        <div style="text-align: right;">
+                            <div style="font-size: 24px; font-weight: 700; color: var(--accent);">${grade.value}</div>
+                            <button class="btn-secondary" style="margin-top: 8px;" onclick="deleteGrade(${idx})">🗑️</button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function deleteGrade(idx) {
+            let data = loadData();
+            data.grades.splice(idx, 1);
+            saveData(data);
+            renderGrades();
+            updateDashboard();
+        }
+
+        // ==================== PRESENCES FUNCTIONS ====================
+        function addPresence() {
+            const date = document.getElementById('presenceDate')?.value;
+            const type = document.getElementById('presenceType')?.value;
+
+            if (!date) {
+                alert('❌ Seleziona una data!');
+                return;
+            }
+
+            let data = loadData();
+            if (!data.presences) data.presences = [];
+
+            data.presences.push({
+                id: Date.now(),
+                date: date,
+                type: type, // 'presence' o 'absence'
+                createdAt: new Date().toLocaleDateString('it-IT')
+            });
+
+            saveData(data);
+            renderPresences();
+            updatePresenceStats();
+            updateDashboard();
+
+            document.getElementById('presenceDate').value = '';
+            alert(`✅ ${type === 'presence' ? 'Presenza' : 'Assenza'} registrata!`);
+        }
+
+        function renderPresences() {
+            const data = loadData();
+            const presences = data.presences || [];
+            const container = document.getElementById('presencesContainer');
+
+            if (!container) return;
+
+            if (presences.length === 0) {
+                container.innerHTML = '<p style="text-align: center; color: var(--text-secondary); padding: 24px;">Nessuna presenza registrata.</p>';
+                return;
+            }
+
+            // Ordina per data (più recente prima)
+            presences.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+            container.innerHTML = presences.map((p, idx) => `
+                <div class="card" style="display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <strong>${p.type === 'presence' ? '✅ Presente' : '❌ Assente'}</strong>
+                        <p style="color: var(--text-secondary); font-size: 13px; margin-top: 4px;">
+                            ${p.date}
+                        </p>
+                    </div>
+                    <button class="btn-secondary" onclick="deletePresence(${idx})">🗑️</button>
+                </div>
+            `).join('');
+        }
+
+        function deletePresence(idx) {
+            let data = loadData();
+            data.presences.splice(idx, 1);
+            saveData(data);
+            renderPresences();
+            updatePresenceStats();
+            updateDashboard();
+        }
+
+        function updatePresenceStats() {
+            const data = loadData();
+            const presences = data.presences || [];
+
+            const count = presences.filter(p => p.type === 'presence').length;
+            const absences = presences.filter(p => p.type === 'absence').length;
+            const total = count + absences;
+            const percentage = total > 0 ? Math.round((count / total) * 100) : 0;
+
+            document.getElementById('presencesCount').textContent = count;
+            document.getElementById('absencesCount').textContent = absences;
+            document.getElementById('presencePercentage').textContent = total > 0 ? `${percentage}%` : '-';
+        }
+
+        // ==================== UPDATE DASHBOARD ====================
+        function updateDashboard() {
+            const data = loadData();
+
+            // Dashboard stats
+            const notes = data.notes || [];
+            const flashcards = data.flashcards || [];
+            const tasks = data.tasks || [];
+            const grades = data.grades || [];
+            const presences = data.presences || [];
+
+            document.getElementById('dashboardNotes').textContent = notes.length;
+            document.getElementById('dashboardFlashcards').textContent = flashcards.length;
+
+            const completedTasks = tasks.filter(t => t.completed).length;
+            document.getElementById('dashboardTasksCompleted').textContent = completedTasks;
+
+            if (grades.length > 0) {
+                const avg = (grades.reduce((sum, g) => sum + g.value, 0) / grades.length).toFixed(1);
+                document.getElementById('dashboardAverage').textContent = avg;
+            } else {
+                document.getElementById('dashboardAverage').textContent = '-';
+            }
+
+            // Stats page
+            document.getElementById('statsGradesCount').textContent = grades.length;
+
+            const totalTasks = tasks.length;
+            const completion = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
+            document.getElementById('statsCompletion').textContent = `${completion}%`;
+
+            const presenceCount = presences.filter(p => p.type === 'presence').length;
+            document.getElementById('statsPresences').textContent = presenceCount;
+        }
+
+        // ==================== CLEAR ALL DATA ====================
+        function clearAllData() {
+            if (confirm('⚠️ ATTENZIONE!\n\nSei sicuro di voler eliminare TUTTI i dati?\n\nQuesta azione NON può essere annullata!')) {
+                if (confirm('🔴 ULTIMA CONFERMA:\n\nVeramente vuoi eliminare tutto?\n\nNote, Compiti, Voti, Flashcard, Presenze - TUTTO sarà cancellato!')) {
+                    localStorage.clear();
+                    console.log('✅ Tutti i dati sono stati eliminati');
+                    alert('✅ Tutti i dati sono stati eliminati. La pagina si ricaricherà...');
+                    setTimeout(() => {
+                        location.reload();
+                    }, 1000);
+                }
+            }
+        }
+
+        function toggleMenu() {
+            const nav = document.querySelector('nav');
+            if (nav) {
+                nav.style.display = nav.style.display === 'none' ? 'flex' : 'none';
+            }
+        }
+
+        function showSection(sectionId) {
+            document.querySelectorAll('section').forEach(s => s.classList.remove('active'));
+            const section = document.getElementById(sectionId);
+            if (section) section.classList.add('active');
+
+            // Carica i dati della sezione
+            if (sectionId === 'notes') {
+                renderNotes();
+                renderFlashcards(loadFlashcards());
+            } else if (sectionId === 'tasks') {
+                renderTasks();
+            } else if (sectionId === 'grades') {
+                renderGrades();
+            } else if (sectionId === 'presences') {
+                renderPresences();
+                updatePresenceStats();
+            }
+        }
+
+        function showTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+            document.getElementById(tabId)?.classList.add('active');
+
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            event.target?.classList.add('active');
+        }
+
+        // ==================== CALENDAR FUNCTIONS ====================
+        let calendarCurrentDate = new Date();
+        let calendarSelectedDate = null;
+        let calendarActiveInputId = null;
+
+        function openCalendar(inputId) {
+            calendarActiveInputId = inputId;
+            const input = document.getElementById(inputId);
+            if (input && input.value) {
+                calendarSelectedDate = new Date(input.value);
+                calendarCurrentDate = new Date(input.value);
+            } else {
+                calendarSelectedDate = null;
+                calendarCurrentDate = new Date();
+            }
+            renderCalendar();
+            document.getElementById('calendarModal').classList.add('active');
+        }
+
+        function closeCalendar() {
+            document.getElementById('calendarModal').classList.remove('active');
+        }
+
+        function previousMonth() {
+            calendarCurrentDate.setMonth(calendarCurrentDate.getMonth() - 1);
+            renderCalendar();
+        }
+
+        function nextMonth() {
+            calendarCurrentDate.setMonth(calendarCurrentDate.getMonth() + 1);
+            renderCalendar();
+        }
+
+        function renderCalendar() {
+            const year = calendarCurrentDate.getFullYear();
+            const month = calendarCurrentDate.getMonth();
+
+            // Aggiorna il titolo
+            const months = ['Gennaio', 'Febbraio', 'Marzo', 'Aprile', 'Maggio', 'Giugno',
+                'Luglio', 'Agosto', 'Settembre', 'Ottobre', 'Novembre', 'Dicembre'];
+            document.getElementById('calendarTitle').textContent = `${months[month]} ${year}`;
+
+            // Genera i giorni
+            const firstDay = new Date(year, month, 1).getDay();
+            const lastDay = new Date(year, month + 1, 0).getDate();
+            const prevLastDay = new Date(year, month, 0).getDate();
+
+            const daysContainer = document.getElementById('calendarDays');
+            daysContainer.innerHTML = '';
+
+            // Giorni del mese precedente
+            for (let i = firstDay - 1; i >= 0; i--) {
+                const day = document.createElement('div');
+                day.className = 'calendar-day other-month';
+                day.textContent = prevLastDay - i;
+                daysContainer.appendChild(day);
+            }
+
+            // Giorni di questo mese
+            const today = new Date();
+            for (let i = 1; i <= lastDay; i++) {
+                const day = document.createElement('div');
+                day.className = 'calendar-day';
+                day.textContent = i;
+
+                const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(i).padStart(2, '0')}`;
+
+                // Evidenzia oggi
+                if (year === today.getFullYear() &&
+                    month === today.getMonth() &&
+                    i === today.getDate()) {
+                    day.classList.add('today');
+                }
+
+                // Evidenzia selezionato
+                if (calendarSelectedDate &&
+                    year === calendarSelectedDate.getFullYear() &&
+                    month === calendarSelectedDate.getMonth() &&
+                    i === calendarSelectedDate.getDate()) {
+                    day.classList.add('selected');
+                }
+
+                day.onclick = () => selectDay(i);
+                daysContainer.appendChild(day);
+            }
+
+            // Giorni del mese successivo
+            const totalCells = daysContainer.children.length;
+            const remainingCells = 42 - totalCells; // 6 righe × 7 giorni
+            for (let i = 1; i <= remainingCells; i++) {
+                const day = document.createElement('div');
+                day.className = 'calendar-day other-month';
+                day.textContent = i;
+                daysContainer.appendChild(day);
+            }
+        }
+
+        function selectDay(day) {
+            calendarSelectedDate = new Date(calendarCurrentDate.getFullYear(),
+                calendarCurrentDate.getMonth(),
+                day);
+            renderCalendar();
+        }
+
+        function confirmDate() {
+            if (calendarSelectedDate && calendarActiveInputId) {
+                const year = calendarSelectedDate.getFullYear();
+                const month = String(calendarSelectedDate.getMonth() + 1).padStart(2, '0');
+                const day = String(calendarSelectedDate.getDate()).padStart(2, '0');
+                const dateStr = `${year}-${month}-${day}`;
+
+                document.getElementById(calendarActiveInputId).value = dateStr;
+            }
+            closeCalendar();
+        }
+
+        // Aggiungi il calendario opener ai campi date
+        window.addEventListener('DOMContentLoaded', () => {
+            const dateInputs = document.querySelectorAll('input[type="date"]');
+            dateInputs.forEach(input => {
+                input.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    openCalendar(input.id || 'taskDue');
+                });
+                input.addEventListener('focus', (e) => {
+                    e.preventDefault();
+                    openCalendar(input.id || 'taskDue');
+                });
+            });
+        });
+
+        // Load theme on startup e resetta dati
+        window.addEventListener('DOMContentLoaded', () => {
+            const savedTheme = localStorage.getItem('theme') || 'light';
+            document.documentElement.setAttribute('data-theme', savedTheme);
+            updateThemeButton();
+
+            // Inizializza dati vuoti se non esistono
+            if (!localStorage.getItem('studyjournal_data')) {
+                localStorage.setItem('studyjournal_data', JSON.stringify({
+                    flashcards: [],
+                    notes: [],
+                    tasks: [],
+                    grades: [],
+                    entries: []
+                }));
+            }
+
+            // Carica tutte le sezioni
+            renderNotes();
+            renderTasks();
+            renderGrades();
+            renderFlashcards(loadFlashcards());
+            renderPresences();
+            updatePresenceStats();
+            updateDashboard();
+
+            // Aggiungi event listener alle note per facilitare la generazione flashcard
+            document.getElementById('noteTitle')?.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') addNote();
+            });
+
+            // Nasconde gli ID input se non esistono
+            if (!document.getElementById('notesContainer')) {
+                console.warn('notesContainer non trovato');
+            }
+        });
+    </script>
+
+    <!-- CALENDAR MODAL -->
+    <div id="calendarModal" class="calendar-modal">
+        <div class="calendar-container">
+            <div class="calendar-header">
+                <h3 id="calendarTitle">Gennaio 2026</h3>
+                <div class="calendar-nav">
+                    <button onclick="previousMonth()">←</button>
+                    <button onclick="nextMonth()">→</button>
+                </div>
+            </div>
+
+            <div class="calendar-weekdays">
+                <div class="calendar-weekday">Dom</div>
+                <div class="calendar-weekday">Lun</div>
+                <div class="calendar-weekday">Mar</div>
+                <div class="calendar-weekday">Mer</div>
+                <div class="calendar-weekday">Gio</div>
+                <div class="calendar-weekday">Ven</div>
+                <div class="calendar-weekday">Sab</div>
+            </div>
+
+            <div id="calendarDays" class="calendar-days"></div>
+
+            <div class="calendar-footer">
+                <button class="calendar-btn calendar-btn-cancel" onclick="closeCalendar()">Annulla</button>
+                <button class="calendar-btn calendar-btn-confirm" onclick="confirmDate()">Conferma</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- CHATBOT SIMPLE -->
+    <script src="chatbot-simple.js"></script>
+
+    <!-- Script rimossi per evitare conflitti con l'HTML nuovo - Tutte le funzioni sono nel tag script inline sopra -->
+    <!-- 
+    <script src="script.js"></script>
+    <script src="onboarding.js"></script>
+    <script src="new-features.js"></script>
+    <script src="hamburger-menu.js"></script>
+    <script src="grades-adapter.js"></script>
+    <script src="flashcard-local-generator.js"></script>
+    <script src="gemini-features.js"></script>
+    -->
+</body>
+
+</html>

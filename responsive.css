@@ -1,0 +1,449 @@
+/* ============================================
+   RESPONSIVE COMPLETO - MOBILE FIRST
+   ============================================ */
+
+* {
+    box-sizing: border-box;
+}
+
+html,
+body {
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden;
+}
+
+body {
+    display: flex;
+    flex-direction: column;
+    background: var(--bg-primary);
+}
+
+/* ============================================
+   HEADER
+   ============================================ */
+
+header {
+    flex-shrink: 0;
+    width: 100%;
+    padding: clamp(0.75rem, 2vw, 1rem);
+    background: var(--bg-secondary);
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    z-index: 1000;
+}
+
+header h1 {
+    font-size: clamp(1.2rem, 4vw, 1.8rem);
+    margin: 0;
+    flex-shrink: 0;
+}
+
+.header-icons {
+    display: flex;
+    gap: clamp(0.25rem, 1vw, 0.5rem);
+}
+
+/* ============================================
+   HAMBURGER BUTTON - SEMPRE VISIBILE
+   ============================================ */
+
+#hamburgerBtn {
+    display: block !important;
+    background: none;
+    border: none;
+    color: var(--text-primary);
+    font-size: clamp(1.5rem, 3vw, 1.8rem);
+    cursor: pointer;
+    padding: 0.5rem;
+    z-index: 2000;
+    flex-shrink: 0;
+    transition: transform 0.2s ease;
+}
+
+#hamburgerBtn:hover {
+    transform: scale(1.1);
+}
+
+#hamburgerBtn:active {
+    transform: scale(0.95);
+}
+
+/* ============================================
+   SIDEBAR / NAVBAR - COMPRIMIBILE SU TUTTO
+   ============================================*/
+/* Sidebar / Navbar - COMPRIMIBILE SU TUTTO */
+
+.sidebar {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 0 !important;
+    padding: 0 !important;
+    position: fixed !important;
+    left: 0;
+    top: 70px;
+    width: 250px !important;
+    height: calc(100vh - 70px) !important;
+    background: var(--bg-secondary) !important;
+    border-right: 1px solid var(--border-color) !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    -webkit-overflow-scrolling: touch !important;
+    z-index: 999;
+    transition: transform 0.3s ease;
+    transform: translateX(-100%);
+
+    /* Nascondi scrollbar ma mantieni funzionalità */
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+.sidebar::-webkit-scrollbar {
+    display: none;
+}
+
+/* Sidebar aperta */
+.sidebar.open {
+    transform: translateX(0) !important;
+}
+
+/* Mobile: sidebar a tutta larghezza */
+@media (max-width: 767px) {
+    .sidebar {
+        width: 80% !important;
+        max-width: 300px !important;
+    }
+}
+
+/* ============================================
+   MAIN CONTAINER
+   ============================================ */
+
+.main-container {
+    display: flex;
+    flex: 1;
+    width: 100%;
+    min-width: 0;
+    position: relative;
+    z-index: 1;
+    margin-left: 0;
+}
+
+.main-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    min-width: 0;
+    overflow-y: auto;
+    /* Abilita lo scroll */
+    overflow-x: hidden;
+    min-height: 0;
+    -webkit-overflow-scrolling: touch;
+}
+
+/* .content rimosso nell'HTML, main-content ora gestisce lo scroll */
+.content {
+    display: none;
+}
+
+/* ============================================
+   OVERLAY PER MOBILE
+   ============================================ */
+
+.navbar-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 98;
+}
+
+@media (max-width: 767px) {
+    .navbar-overlay.active {
+        display: block;
+    }
+}
+
+/* ============================================
+   TYPOGRAPHY
+   ============================================ */
+
+h1 {
+    font-size: clamp(1.5rem, 5vw, 2.2rem);
+    margin: clamp(0.5rem, 2vw, 1rem) 0;
+}
+
+h2 {
+    font-size: clamp(1.2rem, 4vw, 1.8rem);
+    margin: clamp(0.4rem, 1.5vw, 0.8rem) 0;
+}
+
+h3 {
+    font-size: clamp(1rem, 3vw, 1.4rem);
+    margin: clamp(0.3rem, 1vw, 0.6rem) 0;
+}
+
+h4,
+h5,
+h6 {
+    font-size: clamp(0.95rem, 2.5vw, 1.2rem);
+}
+
+p,
+span {
+    font-size: clamp(0.9rem, 2vw, 1rem);
+    line-height: 1.6;
+}
+
+/* ============================================
+   CARDS & SECTIONS
+   ============================================ */
+
+.card {
+    padding: clamp(1rem, 2.5vw, 1.5rem) !important;
+    margin: clamp(0.5rem, 1.5vw, 1rem) 0 !important;
+    border-radius: clamp(8px, 2vw, 12px) !important;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+}
+
+.form-card {
+    padding: clamp(1rem, 2.5vw, 1.5rem) !important;
+    margin: clamp(0.5rem, 1.5vw, 1rem) 0 !important;
+}
+
+.section-header {
+    padding: clamp(1rem, 2vw, 1.5rem) !important;
+    margin-bottom: clamp(1rem, 2vw, 1.5rem) !important;
+}
+
+/* ============================================
+   BUTTONS
+   ============================================ */
+
+.btn,
+button {
+    padding: clamp(0.6rem, 1.5vw, 0.85rem) clamp(1rem, 2vw, 1.5rem) !important;
+    font-size: clamp(0.85rem, 1.8vw, 0.95rem) !important;
+    border-radius: clamp(6px, 1.5vw, 8px) !important;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-primary {
+    background: var(--primary) !important;
+    color: white !important;
+}
+
+.btn-secondary {
+    background: var(--bg-tertiary) !important;
+    border: 1px solid var(--border-color) !important;
+}
+
+@media (hover: none) and (pointer: coarse) {
+
+    .btn,
+    button {
+        min-height: 48px;
+        min-width: 48px;
+        padding: clamp(0.75rem, 2vw, 1rem) clamp(1rem, 2.5vw, 1.5rem) !important;
+    }
+}
+
+/* ============================================
+   INPUT FIELDS
+   ============================================ */
+
+input[type="text"],
+input[type="number"],
+input[type="date"],
+input[type="password"],
+input[type="email"],
+select,
+textarea {
+    width: 100% !important;
+    padding: clamp(0.6rem, 1.5vw, 0.8rem) !important;
+    font-size: clamp(0.9rem, 1.8vw, 1rem) !important;
+    border-radius: clamp(6px, 1.5vw, 8px) !important;
+    border: 1px solid var(--border-color);
+    background: var(--bg-tertiary);
+    color: var(--text-primary);
+    margin-bottom: clamp(0.75rem, 2vw, 1rem) !important;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+}
+
+label {
+    font-size: clamp(0.9rem, 1.8vw, 0.95rem) !important;
+    display: block;
+    margin-bottom: clamp(0.25rem, 1vw, 0.5rem) !important;
+    color: var(--text-primary);
+    font-weight: 500;
+}
+
+/* ============================================
+   TABS
+   ============================================ */
+
+.tabs {
+    display: flex;
+    gap: clamp(0.25rem, 1vw, 0.5rem);
+    margin-bottom: clamp(1rem, 2vw, 1.5rem);
+    border-bottom: 2px solid var(--border-color);
+    overflow-x: auto;
+    flex-wrap: nowrap;
+}
+
+.tab-button {
+    padding: clamp(0.6rem, 1.2vw, 0.8rem) clamp(1rem, 1.5vw, 1.2rem) !important;
+    font-size: clamp(0.85rem, 1.5vw, 0.95rem) !important;
+    white-space: nowrap;
+    flex-shrink: 0;
+    background: none;
+    border: none;
+    border-bottom: 3px solid transparent;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.tab-button.active {
+    color: var(--primary);
+    border-bottom-color: var(--primary);
+    font-weight: 600;
+}
+
+/* ============================================
+   FLASHCARDS
+   ============================================ */
+
+.flashcard-item {
+    padding: clamp(1rem, 2vw, 1.2rem) !important;
+    margin-bottom: clamp(0.75rem, 1.5vw, 1rem) !important;
+    border-radius: clamp(8px, 2vw, 10px) !important;
+    background: var(--bg-secondary);
+    border-left: 4px solid var(--primary);
+}
+
+.empty-state {
+    text-align: center;
+    color: var(--text-secondary);
+    padding: clamp(2rem, 5vw, 3rem);
+    font-size: clamp(1rem, 2vw, 1.1rem);
+}
+
+/* ============================================
+   GRID LAYOUT
+   ============================================ */
+
+.grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: clamp(1rem, 2.5vw, 1.5rem);
+}
+
+@media (min-width: 600px) {
+    .grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (min-width: 1024px) {
+    .grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+/* ============================================
+   SIDEBAR ITEMS
+   ============================================ */
+
+.sidebar-item {
+    padding: clamp(0.75rem, 1.5vw, 1rem) !important;
+    font-size: clamp(0.9rem, 1.8vw, 0.95rem) !important;
+    border: none;
+    border-bottom: 1px solid var(--border-color);
+    background: transparent;
+    color: var(--text-primary);
+    cursor: pointer;
+    text-align: left;
+    width: 100%;
+    transition: all 0.2s ease;
+}
+
+.sidebar-item:hover,
+.sidebar-item.active {
+    background: rgba(99, 102, 241, 0.1);
+    border-left: 4px solid var(--primary);
+    padding-left: calc(clamp(0.75rem, 1.5vw, 1rem) - 4px) !important;
+}
+
+/* ============================================
+   LANDSCAPE MODE
+   ============================================ */
+
+@media (max-height: 600px) {
+    header {
+        padding: clamp(0.5rem, 1vw, 0.75rem);
+    }
+
+    .sidebar {
+        top: 60px;
+        height: calc(100vh - 60px);
+    }
+
+    .card,
+    .form-card {
+        padding: clamp(0.75rem, 1.5vw, 1rem) !important;
+        margin: clamp(0.25rem, 0.8vw, 0.5rem) 0 !important;
+    }
+
+    .btn {
+        padding: clamp(0.5rem, 1vw, 0.65rem) clamp(0.75rem, 1.5vw, 1rem) !important;
+    }
+}
+
+/* ============================================
+   ACCESSIBILITY
+   ============================================ */
+
+@media (prefers-reduced-motion: reduce) {
+    * {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+
+@media print {
+
+    header,
+    .sidebar,
+    .navbar-overlay,
+    #hamburgerBtn {
+        display: none !important;
+    }
+
+    body {
+        margin-left: 0;
+    }
+
+    .content {
+        padding: 0;
+    }
+}

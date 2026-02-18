@@ -154,7 +154,7 @@
     padding-left: var(--space-6);
     padding-right: var(--space-6);
     /* Large top padding to clear the fixed nav + breathing room */
-    padding-top: 160px;
+    padding-top: 220px;
     padding-bottom: 80px;
 }
 

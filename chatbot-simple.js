@@ -34,7 +34,31 @@ const SimpleChatbot = {
         }
         this.isOpen = !this.isOpen;
         window.style.display = this.isOpen ? 'flex' : 'none';
+
+        if (this.isOpen && this.history.length === 0) {
+            this.displayWelcomeMessage();
+        }
+
         console.log('💬 Chat:', this.isOpen ? 'APERTO' : 'CHIUSO');
+    },
+
+    displayWelcomeMessage() {
+        const messages = document.getElementById('geminiChatMessages');
+        if (!messages) return;
+
+        const welcomeBubble = document.createElement('div');
+        welcomeBubble.className = 'chat-bubble ai';
+        welcomeBubble.innerHTML = `
+            👋 **Ciao! Sono il tuo Tutor AI di StudyJournal Pro.**<br><br>
+            Ecco come posso aiutarti a dominare i tuoi studi:<br><br>
+            📝 **Genera Appunti**: Scrivimi ad esempio *"Spiegami la Rivoluzione Francese"* o *"Riassumi il ciclo di Krebs"* per ricevere appunti perfetti.<br>
+            🎴 **Crea Flashcard**: Dopo aver generato appunti, posso creare automaticamente delle flashcard per farti ripassare.<br>
+            ❓ **Fai Domande**: Non capisci un concetto? Chiedimelo e te lo spiegherò in modo semplice.<br>
+            💡 **Consigli di Studio**: Chiedimi tecniche di memorizzazione o come organizzare la tua giornata.<br><br>
+            *Cosa studiamo oggi?*
+        `;
+        messages.appendChild(welcomeBubble);
+        this.history.push({ role: 'ai', content: 'Messaggio di benvenuto visualizzato.' });
     },
 
     send() {

@@ -1266,10 +1266,21 @@
 
         function showTab(tabId) {
             document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
-            document.getElementById(tabId).classList.add('active');
+            document.getElementById(tabId)?.classList.add('active');
 
-            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-            event.target.classList.add('active');
+            const tabButtons = document.querySelectorAll('.tab-btn');
+            tabButtons.forEach(b => b.classList.remove('active'));
+
+            // Highlight the correct button
+            if (typeof event !== 'undefined' && event && event.target && event.target.classList.contains('tab-btn')) {
+                event.target.classList.add('active');
+            } else {
+                tabButtons.forEach(btn => {
+                    if (btn.getAttribute('onclick')?.includes(tabId)) {
+                        btn.classList.add('active');
+                    }
+                });
+            }
         }
 
         function toggleTheme() {
@@ -1907,13 +1918,6 @@
 
 
 
-        function showTab(tabId) {
-            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
-            document.getElementById(tabId)?.classList.add('active');
-
-            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-            event.target?.classList.add('active');
-        }
 
         // ==================== CALENDAR FUNCTIONS ====================
         let calendarCurrentDate = new Date();

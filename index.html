@@ -1201,12 +1201,40 @@
         }
 
         function saveData(data) {
+            if (!AuthManager || !AuthManager.user) {
+                const authModal = document.getElementById('authModal');
+                if (authModal) {
+                    authModal.style.display = 'flex';
+                    const errorEl = document.getElementById('authError');
+                    if (errorEl) {
+                        errorEl.textContent = 'Accedi o registrati per salvare i tuoi dati.';
+                        errorEl.style.display = 'block';
+                    }
+                }
+                return;
+            }
+
             try {
                 localStorage.setItem('studyjournal_data', JSON.stringify(data));
+
+                // Cloud Sync
+                if (typeof supabaseClient !== 'undefined') {
+                    supabaseClient
+                        .from('users_data')
+                        .upsert({
+                            id: AuthManager.user.id,
+                            data: data,
+                            updated_at: new Date()
+                        })
+                        .then(({ error }) => {
+                            if (error) console.error('Cloud Sync Error:', error);
+                        });
+                }
             } catch (e) {
                 console.error('Errore salvataggio dati:', e);
             }
         }
+
 
         function loadFlashcards() {
             const data = loadData();

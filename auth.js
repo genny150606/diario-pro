@@ -20,14 +20,30 @@ const AuthManager = {
             // Listen for auth changes
             supabaseClient.auth.onAuthStateChange((event, session) => {
                 console.log('Auth Event:', event);
+                const prevUser = this.user;
                 this.user = session?.user || null;
                 this.updateUI();
 
-                if (event === 'SIGNED_IN') {
+                if (event === 'SIGNED_IN' || (event === 'INITIAL_SESSION' && session)) {
+                    // Try to load from cloud using either StorageManager or direct Supabase call
                     if (typeof StorageManager !== 'undefined' && StorageManager.loadFromCloud) {
                         StorageManager.loadFromCloud();
+                    } else if (typeof supabaseClient !== 'undefined') {
+                        // Fallback for index.html standalone
+                        supabaseClient
+                            .from('users_data')
+                            .select('data')
+                            .eq('id', session.user.id)
+                            .single()
+                            .then(({ data, error }) => {
+                                if (!error && data && data.data) {
+                                    localStorage.setItem('studyjournal_data', JSON.stringify(data.data));
+                                    location.reload();
+                                }
+                            });
                     }
                 }
+
             });
 
             this.updateUI();

@@ -30,6 +30,21 @@ const StorageManager = {
     },
 
     save(data) {
+        if (!AuthManager || !AuthManager.user) {
+            const authModal = document.getElementById('authModal');
+            if (authModal) {
+                authModal.style.display = 'flex';
+                const errorEl = document.getElementById('authError');
+                if (errorEl) {
+                    errorEl.textContent = 'Accedi o registrati per salvare i tuoi dati.';
+                    errorEl.style.display = 'block';
+                }
+            } else {
+                alert('Accedi per salvare i tuoi dati.');
+            }
+            return;
+        }
+
         try {
             localStorage.setItem('studyjournal_data', JSON.stringify(data));
             this.saveToCloud(data);
@@ -39,9 +54,9 @@ const StorageManager = {
     },
 
     async saveToCloud(data) {
-        if (!AuthManager || !AuthManager.user) return;
+        if (!AuthManager || !AuthManager.user || !supabaseClient) return;
 
-        const { error } = await supabase
+        const { error } = await supabaseClient
             .from('users_data')
             .upsert({
                 id: AuthManager.user.id,
@@ -52,14 +67,16 @@ const StorageManager = {
         if (error) console.error('Cloud Sync Error:', error);
     },
 
-    async loadFromCloud() {
-        if (!AuthManager || !AuthManager.user) return;
 
-        const { data, error } = await supabase
+    async loadFromCloud() {
+        if (!AuthManager || !AuthManager.user || !supabaseClient) return;
+
+        const { data, error } = await supabaseClient
             .from('users_data')
             .select('data')
             .eq('id', AuthManager.user.id)
             .single();
+
 
         if (error && error.code !== 'PGRST116') { // PGRST116 is 'no rows found'
             console.error('Cloud Load Error:', error);

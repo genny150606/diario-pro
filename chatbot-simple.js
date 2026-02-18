@@ -86,10 +86,10 @@ const SimpleChatbot = {
     },
 
     async generateNotes(userRequest, messagesDiv) {
-        // Mostra skeleton loading
+        // Mostra skeleton loading iniziale
         const skeletonBubble = document.createElement('div');
         skeletonBubble.className = 'chat-bubble ai';
-        skeletonBubble.innerHTML = '⏳ Generando appunti...';
+        skeletonBubble.innerHTML = '⏳ Preparando gli appunti...';
         messagesDiv.appendChild(skeletonBubble);
         messagesDiv.scrollTop = messagesDiv.scrollHeight;
 
@@ -106,7 +106,7 @@ STRUTTURA OBBLIGATORIA:
 
 Scrivi in modo CHIARO e EDUCATIVO. Sii PRECISO e COMPLETO.`;
 
-            console.log('🔄 Generando appunti...');
+            console.log('🔄 Avvio streaming appunti...');
 
             const response = await fetch(`${this.apiUrl}/api/chat`, {
                 method: 'POST',
@@ -114,46 +114,72 @@ Scrivi in modo CHIARO e EDUCATIVO. Sii PRECISO e COMPLETO.`;
                 body: JSON.stringify({
                     message: prompt,
                     history: [],
-                    context: 'Generazione appunti'
+                    context: 'Generazione appunti',
+                    stream: true
                 })
             });
 
             if (!response.ok) throw new Error(`Server error: ${response.status}`);
 
-            const data = await response.json();
-            const content = data.reply;
+            skeletonBubble.remove();
 
-            if (!content || content.length < 50) {
-                throw new Error('Contenuto generato troppo breve');
+            // Crea la bolla che conterrà gli appunti
+            const aiBubble = document.createElement('div');
+            aiBubble.className = 'chat-bubble ai';
+            messagesDiv.appendChild(aiBubble);
+
+            const reader = response.body.getReader();
+            const decoder = new TextDecoder();
+            let fullText = "";
+
+            while (true) {
+                const { done, value } = await reader.read();
+                if (done) break;
+
+                const chunk = decoder.decode(value, { stream: true });
+                const lines = chunk.split('\n');
+
+                for (const line of lines) {
+                    if (line.startsWith('data: ')) {
+                        const dataStr = line.replace('data: ', '').trim();
+                        if (dataStr === '[DONE]') continue;
+
+                        try {
+                            const data = JSON.parse(dataStr);
+                            if (data.text) {
+                                fullText += data.text;
+                                aiBubble.innerHTML = `📝 <strong>Generando appunti su "${subject}"...</strong><br><br>` +
+                                    fullText.replace(/\n/g, '<br>')
+                                        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+                                messagesDiv.scrollTop = messagesDiv.scrollHeight;
+                            }
+                        } catch (e) { }
+                    }
+                }
             }
 
-            console.log('✅ Appunti generati');
+            console.log('✅ Appunti completati');
 
-            // Salva appunti e mostra risposta
+            // Salva appunti finali
             this.currentGeneratedNotes = {
                 title: subject,
                 subject: this.determineSubject(subject),
-                content: content,
+                content: fullText,
                 generatedAt: new Date().toISOString()
             };
 
-            skeletonBubble.remove();
-
-            const aiBubble = document.createElement('div');
-            aiBubble.className = 'chat-bubble ai';
+            // Aggiungi tocco finale alla UI
             aiBubble.innerHTML = `📝 <strong>Ho creato gli appunti su "${subject}"!</strong><br><br>` +
-                `<strong>Vuoi che generi automaticamente delle flashcard da questi appunti?</strong>`;
-            messagesDiv.appendChild(aiBubble);
-            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+                fullText.replace(/\n/g, '<br>')
+                    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>') +
+                `<br><br><strong>Vuoi che generi automaticamente delle flashcard da questi appunti?</strong>`;
 
-            this.history.push({ role: 'ai', content: aiBubble.innerHTML });
-
-            // Aggiungi pulsante flashcard
+            this.history.push({ role: 'ai', content: fullText });
             setTimeout(() => this.addFlashcardButton(messagesDiv), 300);
 
         } catch (error) {
             console.error('❌ Errore appunti:', error.message);
-            skeletonBubble.textContent = '❌ Errore: ' + error.message;
+            skeletonBubble.textContent = '❌ Errore (piano saturo). Riprova tra poco.';
         }
     },
 
@@ -332,18 +358,15 @@ Scrivi in modo CHIARO e EDUCATIVO. Sii PRECISO e COMPLETO.`;
     async callChatAPI(message, messagesDiv) {
         const loadingBubble = document.createElement('div');
         loadingBubble.className = 'chat-bubble ai';
-        loadingBubble.textContent = '⏳ Caricamento...';
+        loadingBubble.textContent = '⏳ Pensando...';
         messagesDiv.appendChild(loadingBubble);
         messagesDiv.scrollTop = messagesDiv.scrollHeight;
 
         try {
-            console.log('🚀 Chiamo API chat');
+            console.log('🚀 Avvio streaming chat');
 
-            // Recupera contesto
             const schoolType = localStorage.getItem('studyjournal_school_type') || 'high_school';
             const contextStr = `Tipo di scuola: ${schoolType === 'university' ? 'Università' : 'Liceo'}. Ruolo: Tutor scolastico amichevole.`;
-
-            // Escludi l'ultimo messaggio (quello corrente) dalla history per evitare duplicati se il backend lo aggiunge
             const historyPayload = this.history.slice(0, -1).slice(-6);
 
             const response = await fetch(`${this.apiUrl}/api/chat`, {
@@ -352,34 +375,59 @@ Scrivi in modo CHIARO e EDUCATIVO. Sii PRECISO e COMPLETO.`;
                 body: JSON.stringify({
                     message: message,
                     history: historyPayload,
-                    context: contextStr
+                    context: contextStr,
+                    stream: true
                 })
             });
 
-            console.log('📥 Status:', response.status);
-
             if (!response.ok) throw new Error(`Error ${response.status}`);
-
-            const data = await response.json();
-            const reply = data.reply || 'Nessuna risposta';
-
-            console.log('✅ Risposta ricevuta');
 
             loadingBubble.remove();
 
+            // Crea la bolla finale che si riempirà
             const aiBubble = document.createElement('div');
             aiBubble.className = 'chat-bubble ai';
-            aiBubble.innerHTML = reply
-                .replace(/\n/g, '<br>')
-                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
             messagesDiv.appendChild(aiBubble);
-            messagesDiv.scrollTop = messagesDiv.scrollHeight;
 
-            this.history.push({ role: 'ai', content: reply });
+            const reader = response.body.getReader();
+            const decoder = new TextDecoder();
+            let fullText = "";
+
+            while (true) {
+                const { done, value } = await reader.read();
+                if (done) break;
+
+                const chunk = decoder.decode(value, { stream: true });
+                const lines = chunk.split('\n');
+
+                for (const line of lines) {
+                    if (line.startsWith('data: ')) {
+                        const dataStr = line.replace('data: ', '').trim();
+                        if (dataStr === '[DONE]') continue;
+
+                        try {
+                            const data = JSON.parse(dataStr);
+                            if (data.text) {
+                                fullText += data.text;
+                                // Aggiorna UI (formattando markdown semplice)
+                                aiBubble.innerHTML = fullText
+                                    .replace(/\n/g, '<br>')
+                                    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+                                messagesDiv.scrollTop = messagesDiv.scrollHeight;
+                            }
+                        } catch (e) {
+                            console.warn('⚠️ Errore parse chunk:', e);
+                        }
+                    }
+                }
+            }
+
+            console.log('✅ Streaming completato');
+            this.history.push({ role: 'ai', content: fullText });
 
         } catch (error) {
             console.error('❌ Errore API:', error.message);
-            loadingBubble.textContent = '❌ Errore: ' + error.message;
+            loadingBubble.textContent = '❌ Errore (piano gratuito saturo). Riprova tra 10 secondi.';
         }
     },
 

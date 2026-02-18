@@ -43,13 +43,18 @@ async function callGeminiWithRetry(
         } catch (error) {
             console.error(`❌ Tentativo ${attempt} fallito:`, error.message);
 
-            // Se è un errore 429 (rate limit), aspetta prima di riprovare
-            if (error.code === 429 || error.status === "RESOURCE_EXHAUSTED") {
+            // Controllo più approfondito per il rate limiting (429)
+            const isRateLimit =
+                error.code === 429 ||
+                error.status === "RESOURCE_EXHAUSTED" ||
+                (error.response && error.response.status === 429) ||
+                (error.message && error.message.includes("429")) ||
+                (error.message && error.message.includes("quota"));
+
+            if (isRateLimit) {
                 if (attempt < maxRetries) {
-                    const waitTime = RETRY_DELAY * attempt; // Aumenta il tempo di attesa ad ogni tentativo
-                    console.log(
-                        `⏳ Rate limited. Aspettando ${waitTime}ms prima del prossimo tentativo...`,
-                    );
+                    const waitTime = RETRY_DELAY * attempt;
+                    console.log(`⏳ Rate limited. Aspettando ${waitTime}ms...`);
                     await new Promise((resolve) => setTimeout(resolve, waitTime));
                     continue;
                 }

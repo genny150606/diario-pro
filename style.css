@@ -614,7 +614,6 @@ textarea {
 .btn-primary {
     background: var(--primary) !important;
     color: #ffffff !important;
-    -webkit-text-fill-color: #ffffff !important;
     box-shadow: var(--shadow-md);
 }
 
@@ -623,8 +622,8 @@ textarea {
 .btn-primary i {
     background: transparent !important;
     color: inherit !important;
-    -webkit-text-fill-color: inherit !important;
 }
+
 
 
 
@@ -641,7 +640,6 @@ textarea {
 .btn-secondary {
     background-color: var(--bg-tertiary) !important;
     color: var(--text-primary) !important;
-    -webkit-text-fill-color: initial !important;
     border: 1px solid var(--border-color) !important;
 }
 
@@ -650,8 +648,8 @@ textarea {
 .btn-secondary i {
     background: transparent !important;
     color: inherit !important;
-    -webkit-text-fill-color: inherit !important;
 }
+
 
 
 

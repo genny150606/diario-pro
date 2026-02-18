@@ -115,9 +115,9 @@ header,
         top: 0;
         width: var(--sidebar-width);
         height: 100vh;
-        background: var(--glass-bg);
-        backdrop-filter: var(--glass-blur);
-        -webkit-backdrop-filter: var(--glass-blur);
+        background: var(--color-bg);
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
         border-right: 1px solid var(--glass-border);
         z-index: 9999;
         transform: translateX(-100%);
@@ -225,8 +225,7 @@ header,
     left: 0;
     right: 0;
     bottom: 0;
-    background: rgba(0, 0, 0, 0.3);
-    backdrop-filter: blur(2px);
+    background: rgba(0, 0, 0, 0.4);
     z-index: 9998;
 }
 

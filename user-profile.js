@@ -57,17 +57,40 @@ const UserProfile = {
         const navGrades = document.getElementById('navGrades');
         const navPresences = document.getElementById('navPresences');
 
+        // View Containers
+        const gradesLiceo = document.getElementById('grades-view-liceo');
+        const gradesUni = document.getElementById('grades-view-uni');
+        const presencesLiceo = document.getElementById('presences-view-liceo');
+        const examsUni = document.getElementById('exams-view-uni');
+
         if (mode === 'uni') {
             // UNIVERSITY MODE
-            if (navGrades) navGrades.innerHTML = 'Libretto'; // Was 'Voti'
-            if (navPresences) navPresences.innerHTML = 'Esami'; // Was 'Presenze'
+            if (navGrades) navGrades.innerHTML = 'Libretto';
+            if (navPresences) navPresences.innerHTML = 'Esami';
+
+            if (gradesLiceo) gradesLiceo.style.display = 'none';
+            if (gradesUni) gradesUni.style.display = 'block';
+
+            if (presencesLiceo) presencesLiceo.style.display = 'none';
+            if (examsUni) examsUni.style.display = 'block';
 
             // Dashboard Cards
             this.updateDashboardLabels('uni');
+
+            // Trigger specific renders if functions exist
+            if (typeof renderUniGrades === 'function') renderUniGrades();
+            if (typeof renderUniExams === 'function') renderUniExams();
+
         } else {
             // HIGH SCHOOL MODE
             if (navGrades) navGrades.innerHTML = 'Voti';
             if (navPresences) navPresences.innerHTML = 'Presenze';
+
+            if (gradesLiceo) gradesLiceo.style.display = 'block';
+            if (gradesUni) gradesUni.style.display = 'none';
+
+            if (presencesLiceo) presencesLiceo.style.display = 'block';
+            if (examsUni) examsUni.style.display = 'none';
 
             // Dashboard Cards
             this.updateDashboardLabels('liceo');
@@ -82,13 +105,10 @@ const UserProfile = {
         if (avgLabel) {
             avgLabel.textContent = mode === 'uni' ? 'Media Ponderata' : 'Media Voti';
         }
-
-        // Update "Compiti" to "Scadenze/Progetti" maybe? Keeping simple for now.
     },
 
     syncSettingsUI(schoolType) {
         // Check the correct radio button
-        // Value in HTML might be 'liceo' or 'università'
         const radios = document.getElementsByName('school');
         for (const radio of radios) {
             if (radio.value.toLowerCase() === schoolType.toLowerCase()) {
@@ -121,12 +141,20 @@ const UserProfile = {
             // 2. Update Local UI immediately
             this.applySchoolMode(newType);
 
-            // 3. Optional: Show Toast
-            alert(`Modalità aggiornata a: ${newType.charAt(0).toUpperCase() + newType.slice(1)}`);
+            // 3. Show Toast
+            if (typeof UIManager !== 'undefined') {
+                await UIManager.alert(`Modalità aggiornata a: ${newType.charAt(0).toUpperCase() + newType.slice(1)}`, 'Impostazioni Aggiornate');
+            } else {
+                alert(`Modalità aggiornata a: ${newType.charAt(0).toUpperCase() + newType.slice(1)}`);
+            }
 
         } catch (err) {
             console.error('Error updating school type:', err);
-            alert('Errore nel salvataggio delle impostazioni.');
+            if (typeof UIManager !== 'undefined') {
+                await UIManager.alert('Errore nel salvataggio delle impostazioni.', 'Errore');
+            } else {
+                alert('Errore nel salvataggio delle impostazioni.');
+            }
         }
     }
 };

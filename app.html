@@ -26,6 +26,7 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="auth.js" defer></script>
     <script src="user-profile.js" defer></script>
+    <script src="ui-manager.js" defer></script>
 
 </head>
 
@@ -220,25 +221,81 @@
 
             <!-- GRADES -->
             <section id="grades">
-                <div class="hero">
-                    <h1>Voti ⭐</h1>
-                    <p>Traccia i tuoi progressi scolastici</p>
-                </div>
-
-                <div class="card">
-                    <h3>Aggiungi nuovo voto</h3>
-                    <input type="text" id="gradeSubject" placeholder="Materia...">
-                    <input type="number" id="gradeValue" placeholder="Voto..." min="1" max="10"
-                        style="margin-bottom: 12px;">
-                    <div class="date-input-container" style="margin-bottom: 12px;">
-                        <input type="date" id="gradeDate">
-                        <span class="calendar-icon-trigger" onclick="openCalendar('gradeDate')">📅</span>
+                <!-- VIEW LICEO -->
+                <div id="grades-view-liceo">
+                    <div class="hero">
+                        <h1>Voti ⭐</h1>
+                        <p>Traccia i tuoi progressi scolastici</p>
                     </div>
-                    <textarea id="gradeNotes" placeholder="Note..." style="min-height: 80px;"></textarea>
-                    <button class="btn-primary" onclick="addGrade()">Salva Voto</button>
+
+                    <div class="card">
+                        <h3>Aggiungi nuovo voto</h3>
+                        <input type="text" id="gradeSubject" placeholder="Materia...">
+                        <input type="number" id="gradeValue" placeholder="Voto..." min="1" max="10"
+                            style="margin-bottom: 12px;">
+                        <div class="date-input-container" style="margin-bottom: 12px;">
+                            <input type="date" id="gradeDate">
+                            <span class="calendar-icon-trigger" onclick="openCalendar('gradeDate')">📅</span>
+                        </div>
+                        <textarea id="gradeNotes" placeholder="Note..." style="min-height: 80px;"></textarea>
+                        <button class="btn-primary" onclick="addGrade()">Salva Voto</button>
+                    </div>
+
+                    <div id="gradesContainer"></div>
                 </div>
 
-                <div id="gradesContainer"></div>
+                <!-- VIEW UNI (Libretto) -->
+                <div id="grades-view-uni" style="display: none;">
+                    <div class="hero">
+                        <h1>Libretto 🎓</h1>
+                        <p>Gestisci i tuoi esami universitari</p>
+                    </div>
+
+                    <div class="card">
+                        <h3>Registra Esame</h3>
+                        <div style="display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 12px; margin-bottom: 12px;">
+                            <input type="text" id="uniSubject" placeholder="Materia (es. Analisi)" class="form-input"
+                                style="margin:0;">
+                            <input type="number" id="uniGrade" placeholder="Voto" class="form-input" min="18" max="31"
+                                style="margin:0;">
+                            <input type="number" id="uniCfu" placeholder="CFU" class="form-input" min="1" max="24"
+                                style="margin:0;">
+                        </div>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px;">
+                            <div class="date-input-container" style="margin:0;">
+                                <input type="date" id="uniDate">
+                                <span class="calendar-icon-trigger" onclick="openCalendar('uniDate')">📅</span>
+                            </div>
+                            <select id="uniOutcome" class="form-input" style="margin:0;">
+                                <option value="voto">Voto (es. 28)</option>
+                                <option value="lode">30 e Lode</option>
+                                <option value="idoneita">Idoneità</option>
+                            </select>
+                        </div>
+                        <button class="btn-primary" onclick="addUniExam()">Aggiungi al Libretto</button>
+                    </div>
+
+                    <div style="display: flex; gap: 12px; margin-bottom: 24px;">
+                        <div class="card" style="flex:1; text-align: center; padding: 16px;">
+                            <div
+                                style="font-size: 13px; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px;">
+                                Media Ponderata</div>
+                            <div id="uniGpaDisplay"
+                                style="font-size: 32px; font-weight: 800; color: var(--accent); margin-top: 8px;">--
+                            </div>
+                        </div>
+                        <div class="card" style="flex:1; text-align: center; padding: 16px;">
+                            <div
+                                style="font-size: 13px; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px;">
+                                CFU Totali</div>
+                            <div id="uniCfuDisplay"
+                                style="font-size: 32px; font-weight: 800; color: var(--text-primary); margin-top: 8px;">
+                                0</div>
+                        </div>
+                    </div>
+
+                    <div id="uniGradesContainer"></div>
+                </div>
             </section>
 
             <!-- STATS -->
@@ -274,50 +331,82 @@
 
             <!-- PRESENCES -->
             <section id="presences">
-                <div class="hero">
-                    <h1>Presenze & Assenze 📋</h1>
-                    <p>Monitora le tue presenze in classe</p>
-                </div>
-
-                <div class="stats-grid">
-                    <div class="stat-card">
-                        <span class="stat-icon">✅</span>
-                        <div class="stat-label">Presenze</div>
-                        <div class="stat-value" id="presencesCount">0</div>
-                        <div class="stat-change">giorni in classe</div>
+                <!-- VIEW LICEO -->
+                <div id="presences-view-liceo">
+                    <div class="hero">
+                        <h1>Presenze & Assenze 📋</h1>
+                        <p>Monitora le tue presenze in classe</p>
                     </div>
 
-                    <div class="stat-card">
-                        <span class="stat-icon">❌</span>
-                        <div class="stat-label">Assenze</div>
-                        <div class="stat-value" id="absencesCount">0</div>
-                        <div class="stat-change">giorni assente</div>
-                    </div>
-
-                    <div class="stat-card">
-                        <span class="stat-icon">📊</span>
-                        <div class="stat-label">Percentuale</div>
-                        <div class="stat-value" id="presencePercentage">-</div>
-                        <div class="stat-change">di presenze</div>
-                    </div>
-                </div>
-
-                <div class="card">
-                    <h3>Aggiungi Presenza o Assenza</h3>
-                    <div style="display: flex; gap: 12px; margin-bottom: 12px;">
-                        <div class="date-input-container" style="flex: 1;">
-                            <input type="date" id="presenceDate">
-                            <span class="calendar-icon-trigger" onclick="openCalendar('presenceDate')">📅</span>
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <span class="stat-icon">✅</span>
+                            <div class="stat-label">Presenze</div>
+                            <div class="stat-value" id="presencesCount">0</div>
+                            <div class="stat-change">giorni in classe</div>
                         </div>
-                        <select id="presenceType" style="flex: 0.5; margin-bottom: 0;">
-                            <option value="presence">✅ Presente</option>
-                            <option value="absence">❌ Assente</option>
-                        </select>
+
+                        <div class="stat-card">
+                            <span class="stat-icon">❌</span>
+                            <div class="stat-label">Assenze</div>
+                            <div class="stat-value" id="absencesCount">0</div>
+                            <div class="stat-change">giorni assente</div>
+                        </div>
+
+                        <div class="stat-card">
+                            <span class="stat-icon">📊</span>
+                            <div class="stat-label">Percentuale</div>
+                            <div class="stat-value" id="presencePercentage">-</div>
+                            <div class="stat-change">di presenze</div>
+                        </div>
                     </div>
-                    <button class="btn-primary" style="width: 100%;" onclick="addPresence()">Registra</button>
+
+                    <div class="card">
+                        <h3>Aggiungi Presenza o Assenza</h3>
+                        <div style="display: flex; gap: 12px; margin-bottom: 12px;">
+                            <div class="date-input-container" style="flex: 1;">
+                                <input type="date" id="presenceDate">
+                                <span class="calendar-icon-trigger" onclick="openCalendar('presenceDate')">📅</span>
+                            </div>
+                            <select id="presenceType" style="flex: 0.5; margin-bottom: 0;">
+                                <option value="presence">✅ Presente</option>
+                                <option value="absence">❌ Assente</option>
+                            </select>
+                        </div>
+                        <button class="btn-primary" style="width: 100%;" onclick="addPresence()">Registra</button>
+                    </div>
+
+                    <div id="presencesContainer"></div>
                 </div>
 
-                <div id="presencesContainer"></div>
+                <!-- VIEW UNI (Exams) -->
+                <div id="exams-view-uni" style="display: none;">
+                    <div class="hero">
+                        <h1>Esami & Appelli 📅</h1>
+                        <p>Gestisci le scadenze dei tuoi esami</p>
+                    </div>
+
+                    <div class="card">
+                        <h3>Nuovo Appello</h3>
+                        <input type="text" id="examName" placeholder="Materia (es. Fisica II)" class="form-input">
+                        <div style="display: flex; gap: 12px; margin-bottom: 12px;">
+                            <div class="date-input-container" style="flex: 1;">
+                                <input type="date" id="examDate">
+                                <span class="calendar-icon-trigger" onclick="openCalendar('examDate')">📅</span>
+                            </div>
+                            <input type="time" id="examTime" class="form-input" style="flex: 0.5; margin-bottom: 0;">
+                        </div>
+                        <select id="examType" class="form-input" style="margin-bottom: 12px;">
+                            <option value="scritto">Scritto ✍️</option>
+                            <option value="orale">Orale 🗣️</option>
+                            <option value="parziale">Parziale 🧩</option>
+                            <option value="progetto">Progetto 💻</option>
+                        </select>
+                        <button class="btn-primary" onclick="addExamUni()">Aggiungi Appello</button>
+                    </div>
+
+                    <div id="uniExamsContainer"></div>
+                </div>
             </section>
 
             <!-- SETTINGS -->
@@ -512,7 +601,39 @@
                 const activeLink = document.querySelector('.sidebar-item.active');
                 updateNavIndicator(activeLink);
             }, 500);
+
+            setupAuthListeners();
         });
+
+        function setupAuthListeners() {
+            // LOGIN
+            document.getElementById('authEmail')?.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') document.getElementById('authPassword')?.focus();
+            });
+            document.getElementById('authPassword')?.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') handleAuthSubmit();
+            });
+
+            // SIGNUP
+            document.getElementById('signupName')?.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') document.getElementById('signupSurname')?.focus();
+            });
+            document.getElementById('signupSurname')?.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') document.getElementById('signupAge')?.focus();
+            });
+            document.getElementById('signupAge')?.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') document.getElementById('signupUsername')?.focus();
+            });
+            document.getElementById('signupUsername')?.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') document.getElementById('signupEmail')?.focus();
+            });
+            document.getElementById('signupEmail')?.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') document.getElementById('signupPassword')?.focus();
+            });
+            document.getElementById('signupPassword')?.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') handleSignupSubmit();
+            });
+        }
 
 
         function showTab(tabId) {
@@ -612,10 +733,11 @@
 
         let selectedNoteForGen = null;
 
+        // ==================== NOTES FUNCTIONS ====================
         function openFlashcardGenModal() {
             const notes = loadNotes();
             if (notes.length === 0) {
-                alert('❌ Aggiungi prima una nota nella sezione Note!');
+                UIManager.alert('❌ Aggiungi prima una nota nella sezione Note!', 'Attenzione');
                 return;
             }
 
@@ -633,22 +755,9 @@
             document.getElementById('flashcardGenModal').style.display = 'flex';
         }
 
-        function closeFlashcardGenModal() {
-            document.getElementById('flashcardGenModal').style.display = 'none';
-        }
-
-        function selectNoteForGen(idx, el) {
-            const items = document.querySelectorAll('.note-select-item');
-            items.forEach(item => item.classList.remove('selected'));
-            el.classList.add('selected');
-
-            const notes = loadNotes();
-            selectedNoteForGen = notes[idx];
-        }
-
         async function confirmFlashcardGeneration() {
             if (!selectedNoteForGen) {
-                alert('❌ Per favore, seleziona una nota!');
+                await UIManager.alert('❌ Per favore, seleziona una nota!', 'Attenzione');
                 return;
             }
 
@@ -681,7 +790,7 @@
                 const responseData = await response.json();
 
                 if (!responseData.flashcards || responseData.flashcards.length === 0) {
-                    alert('❌ Non riesco a generare flashcard');
+                    await UIManager.alert('❌ Non riesco a generare flashcard', 'Errore');
                     renderFlashcards(loadFlashcards());
                     return;
                 }
@@ -712,34 +821,49 @@
                     showTab('flashcards-tab');
                 }
 
-                alert(`✅ ${count} flashcard create!`);
+                await UIManager.alert(`✅ ${count} flashcard create!`, 'Successo');
 
             } catch (error) {
-                alert(`❌ Errore: ${error.message}`);
+                await UIManager.alert(`❌ Errore: ${error.message}`, 'Errore');
                 console.error(error);
                 renderFlashcards(loadFlashcards());
             }
         }
 
-        // Mantieni vecchio nome per compatibilità se chiamato da pulsanti esistenti (o aggiorna i pulsanti)
-        function generateFlashcardsWithGemini() {
-            openFlashcardGenModal();
-        }
-
-        function deleteAllFlashcards() {
+        async function deleteAllFlashcards() {
             const flashcards = loadFlashcards();
 
             if (!flashcards || flashcards.length === 0) {
-                alert('❌ Non ci sono flashcard da eliminare');
+                await UIManager.alert('❌ Non ci sono flashcard da eliminare', 'Info');
                 return;
             }
 
-            if (confirm(`Sei sicuro di voler eliminare TUTTE le ${flashcards.length} flashcard?\n\nQuesta azione non può essere annullata!`)) {
+            const confirmed = await UIManager.confirm(
+                `Sei sicuro di voler eliminare TUTTE le ${flashcards.length} flashcard?\n\nQuesta azione non può essere annullata!`,
+                'Conferma Eliminazione'
+            );
+
+            if (confirmed) {
                 saveFlashcards([]);
                 renderFlashcards([]);
-                alert('✅ Tutte le flashcard sono state eliminate.');
+                await UIManager.alert('✅ Tutte le flashcard sono state eliminate.', 'Successo');
             }
         }
+
+        // ... (renderFlashcards omitted as it has no alerts) ...
+
+        function renderFlashcards(cards) {
+            const container = document.getElementById('flashcardStudy');
+            // ... previous logic remains same but I am not modifying it ...
+            // Wait, I need to include renderFlashcards to match content if I am replacing block? 
+            // Ah, renderFlashcards is long. I should try to replace smaller chunks or include it.
+            // I'll leave renderFlashcards alone by splitting the replacement if needed.
+            // But my EndLine is 910. I need to be careful.
+            // I'll just include the start of renderFlashcards and let the matching logic handle it?
+            // No, unsafe. I will check where renderFlashcards starts. It starts around 745.
+            // I will replace up to line 743 (deleteAllFlashcards) in one go, then do addNote/addTask separately.
+        }
+
 
         function renderFlashcards(cards) {
             const container = document.getElementById('flashcardStudy');
@@ -828,7 +952,7 @@
             const dateValue = document.getElementById('noteDate')?.value;
 
             if (!title || !content) {
-                alert('❌ Inserisci titolo e contenuto!');
+                UIManager.alert('❌ Inserisci titolo e contenuto!', 'Attenzione');
                 return;
             }
 
@@ -851,7 +975,7 @@
             document.getElementById('noteSubject').value = '';
             document.getElementById('noteContent').value = '';
             document.getElementById('noteDate').value = '';
-            alert('✅ Nota salvata!');
+            UIManager.alert('✅ Nota salvata!', 'Salvato');
         }
 
         function renderNotes() {
@@ -876,12 +1000,15 @@
             `).join('');
         }
 
-        function deleteNote(idx) {
-            let data = loadData();
-            data.notes.splice(idx, 1);
-            saveData(data);
-            renderNotes();
-            updateDashboard();
+        async function deleteNote(idx) {
+            const confirmed = await UIManager.confirm('Vuoi eliminare questa nota?', 'Conferma Eliminazione');
+            if (confirmed) {
+                let data = loadData();
+                data.notes.splice(idx, 1);
+                saveData(data);
+                renderNotes();
+                updateDashboard();
+            }
         }
 
         // ==================== TASKS FUNCTIONS ====================
@@ -891,7 +1018,7 @@
             const subject = document.getElementById('taskSubject')?.value;
 
             if (!title || !due) {
-                alert('❌ Inserisci titolo e scadenza!');
+                UIManager.alert('❌ Inserisci titolo e scadenza!', 'Attenzione');
                 return;
             }
 
@@ -913,7 +1040,7 @@
 
             document.getElementById('taskTitle').value = '';
             document.getElementById('taskDue').value = '';
-            alert('✅ Compito aggiunto!');
+            UIManager.alert('✅ Compito aggiunto!', 'Salvato');
         }
 
         function renderTasks() {
@@ -952,12 +1079,15 @@
             updateDashboard();
         }
 
-        function deleteTask(idx) {
-            let data = loadData();
-            data.tasks.splice(idx, 1);
-            saveData(data);
-            renderTasks();
-            updateDashboard();
+        async function deleteTask(idx) {
+            const confirmed = await UIManager.confirm('Vuoi eliminare questo compito?', 'Conferma Eliminazione');
+            if (confirmed) {
+                let data = loadData();
+                data.tasks.splice(idx, 1);
+                saveData(data);
+                renderTasks();
+                updateDashboard();
+            }
         }
 
         // ==================== GRADES FUNCTIONS ====================
@@ -968,7 +1098,7 @@
             const notes = document.getElementById('gradeNotes')?.value.trim();
 
             if (!subject || !value || !date) {
-                alert('❌ Inserisci materia, voto e data!');
+                UIManager.alert('❌ Inserisci materia, voto e data!', 'Attenzione');
                 return;
             }
 
@@ -991,7 +1121,7 @@
             document.getElementById('gradeValue').value = '';
             document.getElementById('gradeDate').value = '';
             document.getElementById('gradeNotes').value = '';
-            alert('✅ Voto salvato!');
+            UIManager.alert('✅ Voto salvato!', 'Salvato');
         }
 
         function renderGrades() {
@@ -1023,12 +1153,218 @@
             `).join('');
         }
 
-        function deleteGrade(idx) {
+        async function deleteGrade(idx) {
+            const confirmed = await UIManager.confirm('Vuoi eliminare questo voto?', 'Conferma Eliminazione');
+            if (confirmed) {
+                let data = loadData();
+                data.grades.splice(idx, 1);
+                saveData(data);
+                renderGrades();
+                updateDashboard();
+            }
+        }
+
+        // ==================== UNIVERSITY FUNCTIONS (LIBRETTO) ====================
+        function addUniExam() {
+            const subject = document.getElementById('uniSubject')?.value.trim();
+            const grade = parseInt(document.getElementById('uniGrade')?.value);
+            const cfu = parseInt(document.getElementById('uniCfu')?.value);
+            const date = document.getElementById('uniDate')?.value;
+            const outcome = document.getElementById('uniOutcome')?.value; // 'voto', 'lode', 'idoneita'
+
+            if (!subject) {
+                UIManager.alert('❌ Inserisci il nome della materia', 'Errore');
+                return;
+            }
+
+            if (outcome === 'voto' && (!grade || grade < 18 || grade > 31)) {
+                UIManager.alert('❌ Inserisci un voto valido (18-30)', 'Errore');
+                return;
+            }
+
+            if (!cfu || cfu < 1) {
+                UIManager.alert('❌ Inserisci i CFU', 'Errore');
+                return;
+            }
+
             let data = loadData();
-            data.grades.splice(idx, 1);
+            if (!data.uni_grades) data.uni_grades = [];
+
+            data.uni_grades.push({
+                id: Date.now(),
+                subject,
+                grade: outcome === 'lode' ? 30 : (outcome === 'idoneita' ? null : grade),
+                cfu,
+                date: date ? new Date(date).toLocaleDateString('it-IT') : new Date().toLocaleDateString('it-IT'),
+                outcome, // 'voto', 'lode', 'idoneita'
+                isLode: outcome === 'lode'
+            });
+
             saveData(data);
-            renderGrades();
-            updateDashboard();
+            renderUniGrades();
+
+            // Clear inputs
+            document.getElementById('uniSubject').value = '';
+            document.getElementById('uniGrade').value = '';
+            document.getElementById('uniCfu').value = '';
+            document.getElementById('uniDate').value = '';
+
+            UIManager.alert('✅ Esame registrato nel libretto!', 'Successo');
+        }
+
+        function renderUniGrades() {
+            const data = loadData();
+            const grades = data.uni_grades || [];
+            const container = document.getElementById('uniGradesContainer');
+
+            // Calculate GPA & CFU
+            let totalCfu = 0;
+            let totalWeighted = 0;
+            let countForAvg = 0;
+
+            grades.forEach(g => {
+                if (g.outcome !== 'idoneita' && g.grade) {
+                    totalWeighted += (g.grade * g.cfu);
+                    totalCfu += g.cfu; // Count CFU only for grades? Usually all CFU count for progress, but for GPA only graded ones.
+                    countForAvg++;     // Let's assume weighted average uses only graded exams.
+                } else if (g.outcome === 'idoneita') {
+                    // CFU count but don't affect average
+                }
+            });
+
+            // Total CFU typically includes idoneità too
+            const totalCfuAll = grades.reduce((sum, g) => sum + g.cfu, 0);
+
+            const gpa = totalCfu > 0 ? (totalWeighted / totalCfu).toFixed(2) : '--';
+
+            // Update Stats Display
+            if (document.getElementById('uniGpaDisplay')) document.getElementById('uniGpaDisplay').textContent = gpa;
+            if (document.getElementById('uniCfuDisplay')) document.getElementById('uniCfuDisplay').textContent = totalCfuAll;
+
+            if (!container) return;
+
+            if (grades.length === 0) {
+                container.innerHTML = '<div style="text-align: center; padding: 20px; color: var(--text-secondary);">Nessun esame registrato.</div>';
+                return;
+            }
+
+            // Descending date
+            grades.sort((a, b) => b.id - a.id);
+
+            container.innerHTML = grades.map((g, idx) => `
+                <div class="card" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; padding: 12px 16px;">
+                    <div>
+                        <div style="font-weight: 600; font-size: 16px;">${g.subject}</div>
+                        <div style="font-size: 13px; color: var(--text-secondary); margin-top: 4px;">
+                            ${g.cfu} CFU • ${g.date}
+                        </div>
+                    </div>
+                    <div style="text-align: right; display: flex; align-items: center; gap: 16px;">
+                        <span style="font-size: 18px; font-weight: 700; color: ${g.outcome === 'idoneita' ? 'var(--success)' : 'var(--accent)'};">
+                            ${g.outcome === 'idoneita' ? 'Idoneo' : (g.isLode ? '30L' : g.grade)}
+                        </span>
+                         <button class="btn-secondary" style="padding: 4px 8px;" onclick="deleteUniGrade(${idx})">🗑️</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        async function deleteUniGrade(idx) {
+            const confirmed = await UIManager.confirm('Vuoi eliminare questo esame dal libretto?', 'Conferma Eliminazione');
+            if (confirmed) {
+                let data = loadData();
+                data.uni_grades.splice(idx, 1);
+                saveData(data);
+                renderUniGrades();
+            }
+        }
+
+        // ==================== UNIVERSITY FUNCTIONS (EXAMS/APPELLI) ====================
+        function addExamUni() {
+            const name = document.getElementById('examName')?.value.trim();
+            const date = document.getElementById('examDate')?.value;
+            const time = document.getElementById('examTime')?.value;
+            const type = document.getElementById('examType')?.value;
+
+            if (!name || !date) {
+                UIManager.alert('❌ Inserisci Materia e Data', 'Errore');
+                return;
+            }
+
+            let data = loadData();
+            if (!data.uni_exams) data.uni_exams = [];
+
+            data.uni_exams.push({
+                id: Date.now(),
+                name,
+                date,
+                time,
+                type
+            });
+
+            saveData(data);
+            renderUniExams();
+
+            document.getElementById('examName').value = '';
+            document.getElementById('examDate').value = '';
+            document.getElementById('examTime').value = '';
+
+            UIManager.alert('✅ Appello aggiunto!', 'Successo');
+        }
+
+        function renderUniExams() {
+            const data = loadData();
+            const exams = data.uni_exams || [];
+            const container = document.getElementById('uniExamsContainer');
+
+            if (!container) return;
+
+            if (exams.length === 0) {
+                container.innerHTML = '<div style="text-align: center; padding: 20px; color: var(--text-secondary);">Nessun appello in programma.</div>';
+                return;
+            }
+
+            // Sort by Date (nearest first)
+            exams.sort((a, b) => new Date(a.date) - new Date(b.date));
+
+            container.innerHTML = exams.map((e, idx) => {
+                const examDate = new Date(e.date);
+                const today = new Date();
+                const diffTime = examDate - today;
+                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+                let countdown = diffDays > 0 ? `Tra ${diffDays} giorni` : (diffDays === 0 ? 'Oggi!' : 'Passato');
+                let color = diffDays < 3 && diffDays >= 0 ? 'var(--error)' : 'var(--text-secondary)';
+
+                return `
+                <div class="card" style="margin-bottom: 12px; border-left: 4px solid var(--accent);">
+                    <div style="display: flex; justify-content: space-between; align-items: start;">
+                        <div>
+                            <div style="font-weight: 600; font-size: 16px;">${e.name}</div>
+                            <div style="display: flex; gap: 8px; margin-top: 6px;">
+                                <span class="tag" style="background: rgba(var(--accent-rgb), 0.1); color: var(--accent); padding: 2px 8px; border-radius: 4px; font-size: 12px; text-transform: uppercase;">${e.type}</span>
+                                <span style="font-size: 13px; color: var(--text-secondary); display: flex; align-items: center;">
+                                    🕒 ${new Date(e.date).toLocaleDateString('it-IT')} ${e.time ? ' alle ' + e.time : ''}
+                                </span>
+                            </div>
+                        </div>
+                        <div style="text-align: right;">
+                             <div style="font-size: 13px; font-weight: 600; color: ${color}; margin-bottom: 8px;">${countdown}</div>
+                             <button class="btn-secondary" style="padding: 4px 8px;" onclick="deleteUniExam(${idx})">🗑️</button>
+                        </div>
+                    </div>
+                </div>
+            `}).join('');
+        }
+
+        async function deleteUniExam(idx) {
+            const confirmed = await UIManager.confirm('Vuoi rimuovere questo appello?', 'Conferma');
+            if (confirmed) {
+                let data = loadData();
+                data.uni_exams.splice(idx, 1);
+                saveData(data);
+                renderUniExams();
+            }
         }
 
         // ==================== PRESENCES FUNCTIONS ====================
@@ -1037,7 +1373,7 @@
             const type = document.getElementById('presenceType')?.value;
 
             if (!date) {
-                alert('❌ Seleziona una data!');
+                UIManager.alert('❌ Seleziona una data!', 'Attenzione');
                 return;
             }
 
@@ -1057,7 +1393,7 @@
             updateDashboard();
 
             document.getElementById('presenceDate').value = '';
-            alert(`✅ ${type === 'presence' ? 'Presenza' : 'Assenza'} registrata!`);
+            UIManager.alert(`✅ ${type === 'presence' ? 'Presenza' : 'Assenza'} registrata!`, 'Salvato');
         }
 
         function renderPresences() {
@@ -1088,13 +1424,16 @@
             `).join('');
         }
 
-        function deletePresence(idx) {
-            let data = loadData();
-            data.presences.splice(idx, 1);
-            saveData(data);
-            renderPresences();
-            updatePresenceStats();
-            updateDashboard();
+        async function deletePresence(idx) {
+            const confirmed = await UIManager.confirm('Vuoi eliminare questa voce?', 'Conferma Eliminazione');
+            if (confirmed) {
+                let data = loadData();
+                data.presences.splice(idx, 1);
+                saveData(data);
+                renderPresences();
+                updatePresenceStats();
+                updateDashboard();
+            }
         }
 
         function updatePresenceStats() {
@@ -1401,6 +1740,38 @@
         </div>
     </div>
 
+    <!-- CUSTOM CONFIRM MODAL -->
+    <div id="confirmModal" class="calendar-modal" style="display: none; z-index: 10000;">
+        <div class="calendar-container" style="max-width: 400px; text-align: center;">
+            <div class="calendar-header" style="justify-content: center; border-bottom: none; padding-bottom: 0;">
+                <h3 id="confirmTitle" style="margin: 0; font-size: 1.2rem;">⚠️ Conferma Azione</h3>
+            </div>
+            <p id="confirmMessage" style="margin: 16px 0 24px; color: var(--text-secondary); line-height: 1.5;">
+                Sei sicuro di voler procedere?
+            </p>
+            <div class="calendar-footer" style="justify-content: center; gap: 12px; border-top: none; padding-top: 0;">
+                <button class="btn-secondary" id="confirmCancelBtn" style="width: 100px;">Annulla</button>
+                <button class="btn-primary" id="confirmOkBtn"
+                    style="background: var(--error); width: 100px;">Conferma</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- CUSTOM ALERT MODAL -->
+    <div id="alertModal" class="calendar-modal" style="display: none; z-index: 10001;">
+        <div class="calendar-container" style="max-width: 400px; text-align: center;">
+            <div class="calendar-header" style="justify-content: center; border-bottom: none; padding-bottom: 0;">
+                <h3 id="alertTitle" style="margin: 0; font-size: 1.2rem;">Avviso</h3>
+            </div>
+            <p id="alertMessage" style="margin: 16px 0 24px; color: var(--text-secondary); line-height: 1.5;">
+                Messaggio di avviso.
+            </p>
+            <div class="calendar-footer" style="justify-content: center; border-top: none; padding-top: 0;">
+                <button class="btn-primary" id="alertOkBtn" style="width: 100px;">OK</button>
+            </div>
+        </div>
+    </div>
+
 
     <script>
         function toggleAuthMode(isSignup) {
@@ -1527,8 +1898,12 @@
     <script>
         // ==================== SETTINGS FUNCTIONS ====================
         async function clearAllData() {
-            if (confirm('⚠️ SEI SICURO? \n\nQuesta azione eliminerà DEFINITIVAMENTE tutti i tuoi dati (Note, Flashcard, Voti, Compiti). \n\nL\'azione è irreversibile.')) {
+            const confirmed = await UIManager.confirm(
+                'Questa azione eliminerà DEFINITIVAMENTE tutti i tuoi dati (Note, Flashcard, Voti, Compiti).\n\nL\'azione è irreversibile.',
+                '⚠️ SEI SICURO?'
+            );
 
+            if (confirmed) {
                 // 1. Clear Local Data
                 localStorage.removeItem('studyjournal_data');
 
@@ -1546,7 +1921,7 @@
                     }
                 }
 
-                alert('✅ Tutti i dati sono stati eliminati. La pagina verrà ricaricata.');
+                await UIManager.alert('Tutti i dati sono stati eliminati. La pagina verrà ricaricata.', 'Dati Eliminati');
                 location.reload();
             }
         }

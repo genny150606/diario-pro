@@ -2069,6 +2069,30 @@
         </div>
     </div>
 
+    <!-- PASSWORD MODAL -->
+    <div id="passwordModal" class="calendar-modal" style="display: none;">
+        <div class="calendar-container" style="max-width: 400px;">
+            <div class="calendar-header">
+                <h3>🔑 Cambia Password</h3>
+                <button onclick="document.getElementById('passwordModal').style.display='none'"
+                    style="background:none; border:none; font-size:20px; cursor:pointer;">×</button>
+            </div>
+            <p style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 20px;">
+                Inserisci la tua nuova password qui sotto (minimo 6 caratteri).
+            </p>
+            <div id="passwordError" style="color: var(--error); font-size: 13px; margin-bottom: 15px; display: none;">
+            </div>
+            <div id="passwordSuccess"
+                style="color: var(--success); font-size: 13px; margin-bottom: 15px; display: none;"></div>
+
+            <div style="display: flex; flex-direction: column; gap: 16px;">
+                <input type="password" id="newPassword" placeholder="Nuova Password" class="form-input">
+                <button class="btn-primary" onclick="handleUpdatePassword()">Aggiorna Password</button>
+            </div>
+        </div>
+    </div>
+
+
     <script>
         function toggleAuthMode(isSignup) {
             document.getElementById('loginForm').style.display = isSignup ? 'none' : 'flex';

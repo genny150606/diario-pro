@@ -645,6 +645,38 @@ input[type="date"]::-webkit-datetime-edit {
     padding: var(--spacing-sm);
 }
 
+.date-input-container {
+    position: relative;
+    display: flex;
+    align-items: center;
+    width: 100%;
+}
+
+.date-input-container input[type="date"] {
+    width: 100% !important;
+    padding-right: 40px !important;
+    /* Spazio per l'icona */
+}
+
+.calendar-icon-trigger {
+    position: absolute;
+    right: 12px;
+    font-size: 1.2rem;
+    cursor: pointer;
+    transition: transform 0.2s ease, filter 0.2s ease;
+    user-select: none;
+    z-index: 5;
+}
+
+.calendar-icon-trigger:hover {
+    transform: scale(1.15);
+    filter: drop-shadow(0 0 5px var(--accent-light));
+}
+
+[data-theme="dark"] .calendar-icon-trigger {
+    filter: drop-shadow(0 0 3px rgba(255, 255, 255, 0.3));
+}
+
 input[type="date"]::-webkit-datetime-edit-fields-wrapper {
     color: var(--text-primary);
 }

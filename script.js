@@ -555,34 +555,7 @@ const UIManager = {
     },
 
     initCustomDatePickers() {
-        const dateInputs = document.querySelectorAll('input[type="date"]');
-
-        dateInputs.forEach(input => {
-            const wrapper = document.createElement('div');
-            wrapper.className = 'custom-date-wrapper';
-            input.parentNode.insertBefore(wrapper, input);
-
-            // Crea display della data
-            const displayDate = document.createElement('div');
-            displayDate.className = 'date-display';
-            displayDate.textContent = input.value ? new Date(input.value + 'T00:00:00').toLocaleDateString('it-IT') : 'Seleziona data';
-            wrapper.appendChild(displayDate);
-
-            // Crea bottone calendario
-            const btn = document.createElement('button');
-            btn.type = 'button';
-            btn.className = 'date-picker-btn';
-            btn.innerHTML = '📅';
-            btn.addEventListener('click', (e) => {
-                e.preventDefault();
-                this.openDatePicker(input, displayDate);
-            });
-
-            wrapper.appendChild(btn);
-
-            // Nascondi input originale
-            input.style.display = 'none';
-        });
+        // Redundant - functionality moved to index.html with visible icons
     },
 
     openDatePicker(input, displayDate) {

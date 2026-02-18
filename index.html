@@ -965,7 +965,13 @@
                             <option value="Storia">Storia</option>
                         </select>
                         <textarea id="noteContent" placeholder="Scrivi i tuoi appunti..."
-                            style="min-height: 120px;"></textarea>
+                            style="min-height: 120px; margin-bottom: 12px;"></textarea>
+
+                        <div class="date-input-container" style="margin-bottom: 16px;">
+                            <input type="date" id="noteDate">
+                            <span class="calendar-icon-trigger" onclick="openCalendar('noteDate')">📅</span>
+                        </div>
+
                         <button class="btn-primary" onclick="addNote()">Salva Nota</button>
                     </div>
 
@@ -1004,7 +1010,10 @@
                 <div class="card">
                     <h3>Nuovo compito</h3>
                     <input type="text" id="taskTitle" placeholder="Descrizione compito...">
-                    <input type="date" id="taskDue" style="margin-bottom: 12px;">
+                    <div class="date-input-container" style="margin-bottom: 12px;">
+                        <input type="date" id="taskDue">
+                        <span class="calendar-icon-trigger" onclick="openCalendar('taskDue')">📅</span>
+                    </div>
                     <select id="taskSubject" style="margin-bottom: 12px;">
                         <option value="Generale">Generale</option>
                         <option value="Matematica">Matematica</option>
@@ -1029,7 +1038,10 @@
                     <input type="text" id="gradeSubject" placeholder="Materia...">
                     <input type="number" id="gradeValue" placeholder="Voto..." min="1" max="10"
                         style="margin-bottom: 12px;">
-                    <input type="date" id="gradeDate" style="margin-bottom: 12px;">
+                    <div class="date-input-container" style="margin-bottom: 12px;">
+                        <input type="date" id="gradeDate">
+                        <span class="calendar-icon-trigger" onclick="openCalendar('gradeDate')">📅</span>
+                    </div>
                     <textarea id="gradeNotes" placeholder="Note..." style="min-height: 80px;"></textarea>
                     <button class="btn-primary" onclick="addGrade()">Salva Voto</button>
                 </div>
@@ -1101,7 +1113,10 @@
                 <div class="card">
                     <h3>Aggiungi Presenza o Assenza</h3>
                     <div style="display: flex; gap: 12px; margin-bottom: 12px;">
-                        <input type="date" id="presenceDate" style="flex: 1;">
+                        <div class="date-input-container" style="flex: 1;">
+                            <input type="date" id="presenceDate">
+                            <span class="calendar-icon-trigger" onclick="openCalendar('presenceDate')">📅</span>
+                        </div>
                         <select id="presenceType" style="flex: 0.5; margin-bottom: 0;">
                             <option value="presence">✅ Presente</option>
                             <option value="absence">❌ Assente</option>

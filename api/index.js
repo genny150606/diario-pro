@@ -6,7 +6,7 @@ const app = express();
 app.use(cors());
 app.use(express.json({ limit: "50mb" }));
 
-const { GoogleGenAI } = require("@google/genai");
+const { GoogleGenerativeAI: GoogleGenAI } = require("@google/generative-ai");
 
 // ============================================
 // RATE LIMITING & RETRY
@@ -24,21 +24,15 @@ async function callGeminiWithRetry(
         try {
             console.log(`🔄 Tentativo ${attempt}/${maxRetries}...`);
 
-            const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
-
-            const config = {
+            const genAI = new GoogleGenAI(process.env.GEMINI_API_KEY);
+            const ai = genAI.getGenerativeModel({
                 model: "gemini-2.0-flash",
-                contents: prompt,
-            };
+                systemInstruction: systemPrompt
+            });
 
-            if (systemPrompt) {
-                config.systemInstruction = systemPrompt;
-            }
-
-            const response = await ai.models.generateContent(config);
-
-            console.log("✅ Risposta ricevuta da Gemini");
-            return response.text;
+            const result = await ai.generateContent(prompt);
+            const response = await result.response;
+            return response.text();
         } catch (error) {
             console.error(`❌ Tentativo ${attempt} fallito:`, error.message);
 
@@ -207,11 +201,13 @@ ISTRUZIONI:
 
 ${context ? `CONTESTO: ${context}` : ""}`;
 
-        const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
-
-        const response = await ai.models.generateContent({
+        const genAI = new GoogleGenAI(process.env.GEMINI_API_KEY);
+        const ai = genAI.getGenerativeModel({
             model: "gemini-2.0-flash",
-            systemInstruction: systemPrompt,
+            systemInstruction: systemPrompt
+        });
+
+        const result = await ai.generateContent({
             contents: [
                 ...conversationHistory,
                 {
@@ -221,7 +217,8 @@ ${context ? `CONTESTO: ${context}` : ""}`;
             ],
         });
 
-        const reply = response.text || "Nessuna risposta generata";
+        const response = await result.response;
+        const reply = response.text() || "Nessuna risposta generata";
 
         res.json({
             reply: reply.substring(0, 5000),

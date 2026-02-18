@@ -192,11 +192,14 @@ header h1 {
 
 .container {
     display: flex !important;
+    flex-direction: column !important;
     flex: 1 !important;
     margin-top: 60px !important;
     min-height: calc(100vh - 60px) !important;
     width: 100% !important;
+    overflow-y: auto !important;
 }
+
 
 .main-container {
 

@@ -118,9 +118,10 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
+    justify-content: flex-start;
+    /* Prevents logo cutoff on small desktop screens */
     text-align: center;
-    padding: 60px var(--space-6);
+    padding: 100px var(--space-6) 80px;
 }
 
 .hero-badge {

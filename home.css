@@ -119,7 +119,8 @@
     align-items: center;
     justify-content: flex-start;
     text-align: center;
-    padding: 100px var(--space-6) 80px;
+    /* Large bottom padding ensures preview window stays inside hero */
+    padding: 100px var(--space-6) clamp(120px, 18vw, 220px);
     /* Do NOT use overflow:hidden — it clips the preview window */
 }
 
@@ -283,8 +284,8 @@
 
 /* ── FLOATING APP PREVIEW ── */
 .hero-preview {
-    margin-top: var(--space-16);
-    max-width: 900px;
+    margin-top: var(--space-12);
+    max-width: 860px;
     width: 100%;
     animation: fadeInUp 1s var(--ease-out) 0.6s both;
     position: relative;
@@ -372,14 +373,24 @@
 }
 
 /* ── SECTIONS COMMON ── */
+/* Full-width background wrapper that covers hero overflow */
+#features,
+#how-it-works,
+#testimonials,
+#pricing,
+.landing-section-wrapper {
+    position: relative;
+    z-index: 2;
+    background: var(--color-bg);
+    width: 100%;
+}
+
 .landing-section {
     position: relative;
     z-index: 2;
     padding: 120px var(--space-8);
     max-width: 1200px;
     margin: 0 auto;
-    /* Ensure section background covers any glow from hero */
-    background: transparent;
 }
 
 .section-label {

@@ -500,12 +500,19 @@
                         </div>
 
                         <div class="profile-edit-field">
-                            <label for="editPhotoUrl">Foto Profilo (URL)</label>
-                            <div class="profile-edit-row">
-                                <input type="url" id="editPhotoUrl" placeholder="https://esempio.com/foto.jpg"
-                                    class="form-input">
+                            <label>Foto Profilo</label>
+                            <div class="profile-edit-row" style="flex-wrap:wrap; gap:8px;">
+                                <input type="file" id="profilePhotoFile" accept="image/*" style="display:none;"
+                                    onchange="handleProfilePhotoFile(event)">
                                 <button class="btn-small btn-accent"
-                                    onclick="updateProfileField('photo')">Salva</button>
+                                    onclick="document.getElementById('profilePhotoFile').click()"
+                                    style="flex:0 0 auto;">📷 Carica Foto</button>
+                                <span
+                                    style="color:var(--color-text-secondary);font-size:12px;display:flex;align-items:center;">oppure</span>
+                                <input type="url" id="editPhotoUrl" placeholder="https://esempio.com/foto.jpg"
+                                    class="form-input" style="flex:1; min-width:150px;">
+                                <button class="btn-small btn-accent" onclick="updateProfileField('photo')">Salva
+                                    URL</button>
                             </div>
                         </div>
                     </div>
@@ -593,6 +600,10 @@
             </div>
             <div id="geminiChatMessages"></div>
             <div id="geminiChatInput">
+                <input type="file" id="chatFileInput" accept=".pdf,.txt,.doc,.docx" style="display:none;"
+                    onchange="SimpleChatbot.handleFileUpload(event)">
+                <button class="chat-attach-btn" onclick="document.getElementById('chatFileInput').click()"
+                    title="Allega PDF/Testo">📎</button>
                 <input type="text" id="chatInputField" placeholder="Chiedi qualcosa al tutor AI...">
                 <button>➤</button>
             </div>
@@ -631,7 +642,9 @@
 
             // Gestione Sincronizzazione Dati Sezione
             try {
-                if (sectionId === 'notes') {
+                if (sectionId === 'dashboard') {
+                    if (typeof updateDashboard === 'function') updateDashboard();
+                } else if (sectionId === 'notes') {
                     if (typeof renderNotes === 'function') renderNotes();
                     if (typeof renderFlashcards === 'function') renderFlashcards(loadFlashcards());
                 } else if (sectionId === 'tasks') {
@@ -688,6 +701,11 @@
                 const activeLink = document.querySelector('.sidebar-item.active');
                 updateNavIndicator(activeLink);
             }, 500);
+
+            // Update dashboard on load so grade average is computed
+            setTimeout(() => {
+                if (typeof updateDashboard === 'function') updateDashboard();
+            }, 600);
 
             setupAuthListeners();
         });

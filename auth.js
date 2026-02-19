@@ -17,12 +17,27 @@ const AuthManager = {
             const { data: { session } } = await supabaseClient.auth.getSession();
             this.user = session?.user || null;
 
+            // ── AUTH GATE: Require login for app.html ──
+            const isAppPage = window.location.pathname.includes('app');
+            if (isAppPage && !this.user) {
+                // Show nothing, redirect to homepage
+                document.body.style.display = 'none';
+                window.location.href = 'index.html';
+                return;
+            }
+
             // Listen for auth changes
             supabaseClient.auth.onAuthStateChange((event, session) => {
                 console.log('Auth Event:', event);
                 const prevUser = this.user;
                 this.user = session?.user || null;
                 this.updateUI();
+
+                // Redirect to homepage on sign out (if on app page)
+                if (event === 'SIGNED_OUT' && window.location.pathname.includes('app')) {
+                    window.location.href = 'index.html';
+                    return;
+                }
 
                 if (event === 'SIGNED_IN' || (event === 'INITIAL_SESSION' && session)) {
                     // Prevent infinite reload loop using sessionStorage

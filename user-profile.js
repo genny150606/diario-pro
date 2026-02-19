@@ -255,10 +255,48 @@ async function updateProfileField(field) {
 }
 
 function openProfilePhotoEdit() {
-    const input = document.getElementById('editPhotoUrl');
-    if (input) {
-        input.focus();
-        input.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    // Trigger file picker directly when clicking the photo
+    const fileInput = document.getElementById('profilePhotoFile');
+    if (fileInput) {
+        fileInput.click();
+    } else {
+        const input = document.getElementById('editPhotoUrl');
+        if (input) {
+            input.focus();
+            input.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+    }
+}
+
+async function handleProfilePhotoFile(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    event.target.value = '';
+
+    // Validate file
+    if (!file.type.startsWith('image/')) {
+        await UIManager.alert('❌ Il file selezionato non è un\'immagine.', 'Errore');
+        return;
+    }
+    if (file.size > 2 * 1024 * 1024) {
+        await UIManager.alert('❌ L\'immagine deve essere inferiore a 2MB.', 'Errore');
+        return;
+    }
+
+    try {
+        // Convert to base64 Data URL
+        const dataUrl = await new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = () => resolve(reader.result);
+            reader.onerror = reject;
+            reader.readAsDataURL(file);
+        });
+
+        // Save as profile photo
+        await UserProfile.updateProfilePhoto(dataUrl);
+        await UIManager.alert('📷 Foto profilo aggiornata con successo!', 'Profilo');
+    } catch (err) {
+        await UIManager.alert('❌ ' + err.message, 'Errore');
     }
 }
 

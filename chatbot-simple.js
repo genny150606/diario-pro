@@ -765,6 +765,111 @@ Scrivi in modo CHIARO e EDUCATIVO. Sii PRECISO e COMPLETO.`;
             if (keywords.some(keyword => lowerTitle.includes(keyword))) return subject;
         }
         return 'Generale';
+    },
+
+    // ═══════════════════════════════════════════
+    // FILE UPLOAD — PDF & TXT Import
+    // ═══════════════════════════════════════════
+    async handleFileUpload(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+        event.target.value = '';
+
+        const messagesDiv = document.getElementById('geminiChatMessages');
+        const fileName = file.name;
+        const ext = fileName.split('.').pop().toLowerCase();
+
+        const userBubble = document.createElement('div');
+        userBubble.className = 'chat-bubble user';
+        userBubble.textContent = `📎 ${fileName}`;
+        messagesDiv.appendChild(userBubble);
+        messagesDiv.scrollTop = messagesDiv.scrollHeight;
+
+        const loadingBubble = document.createElement('div');
+        loadingBubble.className = 'chat-bubble ai';
+        loadingBubble.innerHTML = `⏳ Elaborando <strong>${fileName}</strong>...`;
+        messagesDiv.appendChild(loadingBubble);
+        messagesDiv.scrollTop = messagesDiv.scrollHeight;
+
+        try {
+            let text = '';
+
+            if (ext === 'txt') {
+                text = await file.text();
+            } else if (ext === 'pdf') {
+                text = await this.extractPDFText(file);
+            } else {
+                throw new Error(`Formato .${ext} non supportato. Usa PDF o TXT.`);
+            }
+
+            if (!text || text.trim().length < 10) {
+                throw new Error('Il file sembra vuoto o non contiene testo leggibile.');
+            }
+
+            let appData = {};
+            try { const saved = localStorage.getItem('studyjournal_data'); if (saved) appData = JSON.parse(saved); } catch (e) { }
+            if (!appData.notes) appData.notes = [];
+
+            const noteTitle = fileName.replace(/\.[^/.]+$/, '');
+            const subject = this.determineSubject(noteTitle);
+
+            appData.notes.push({
+                id: Date.now(),
+                title: noteTitle,
+                content: text.substring(0, 10000),
+                subject: subject,
+                createdAt: new Date().toISOString(),
+                source: 'file_import'
+            });
+
+            localStorage.setItem('studyjournal_data', JSON.stringify(appData));
+            loadingBubble.remove();
+
+            this.addAIBubble(messagesDiv,
+                `✅ File importato con successo!<br><br>` +
+                `📄 **${noteTitle}**<br>` +
+                `📚 Materia: ${subject}<br>` +
+                `📝 ${text.length} caratteri estratti<br><br>` +
+                `Vuoi che generi **flashcard** da questi appunti?`
+            );
+
+            this.currentGeneratedNotes = { title: noteTitle, subject, content: text.substring(0, 3000), generatedAt: new Date().toISOString() };
+            setTimeout(() => this.addFlashcardButton(messagesDiv), 300);
+
+            this.addActionButton(messagesDiv, '📚 Vai alle Note', () => {
+                if (typeof showSection === 'function') showSection('notes');
+                this.toggle();
+            });
+
+        } catch (error) {
+            loadingBubble.innerHTML = `❌ Errore: ${error.message}`;
+        }
+    },
+
+    async extractPDFText(file) {
+        if (typeof pdfjsLib === 'undefined') {
+            await new Promise((resolve, reject) => {
+                const script = document.createElement('script');
+                script.src = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js';
+                script.onload = resolve;
+                script.onerror = () => reject(new Error('Impossibile caricare il lettore PDF.'));
+                document.head.appendChild(script);
+            });
+            pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+        }
+
+        const arrayBuffer = await file.arrayBuffer();
+        const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+        let fullText = '';
+
+        for (let i = 1; i <= pdf.numPages; i++) {
+            const page = await pdf.getPage(i);
+            const content = await page.getTextContent();
+            const pageText = content.items.map(item => item.str).join(' ');
+            fullText += pageText + '\n\n';
+        }
+
+        return fullText.trim();
     }
 };
 

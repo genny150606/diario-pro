@@ -134,23 +134,7 @@
         <nav class="sidebar">
             <div class="nav-indicator"></div>
 
-            <!-- GAMIFICATION BADGE -->
-            <div class="level-badge-container" id="sidebarLevelBadge" onclick="GamificationManager.showLevelDetails()">
-                <div class="level-circle">
-                    <span class="level-number" id="userLevelDisplay">1</span>
-                    <span class="level-label-mini">LVL</span>
-                </div>
-                <div class="level-info">
-                    <div class="level-title" id="userLevelTitle">Principiante</div>
-                    <div class="xp-bar-container">
-                        <div class="xp-bar-fill" id="sidebarXpFill" style="width: 0%"></div>
-                    </div>
-                    <div class="xp-text">
-                        <span id="userXpDisplay">0 XP</span>
-                        <span id="nextLevelXpDisplay">100 XP</span>
-                    </div>
-                </div>
-            </div>
+            <!-- GAMIFICATION BADGE REDIRECTED TO HEADER -->
 
             <a href="#" data-section="dashboard" class="sidebar-item nav-link active" id="navDashboard">Dashboard</a>
             <a href="#" data-section="notes" class="sidebar-item nav-link" id="navNotes">Note</a>
@@ -165,7 +149,7 @@
 
         <div class="header-right">
             <!-- LEVEL BADGE (Moved from Sidebar) -->
-            <div class="header-level-badge" id="headerLevelBadge" onclick="GamificationManager.renderGamificationPage()"
+            <div class="header-level-badge" id="headerLevelBadge" onclick="AppManager.showSection('gamification')"
                 title="Il mio Livello">
                 <div class="header-level-ring">
                     <svg viewBox="0 0 36 36" class="circular-chart">

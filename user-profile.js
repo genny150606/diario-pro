@@ -1,98 +1,186 @@
 /* ============================================
    USER PROFILE & PERSONALIZATION MANAGER
-   Handles user metadata, school type logic, and UI adaptation.
+   Handles user metadata, school type, profile editing, and UI adaptation.
    ============================================ */
 
 const UserProfile = {
     currentUser: null,
 
     async init() {
-        // Wait for AuthManager to be ready (it sets user)
-        // We can access AuthManager.user directly or wait for onAuthStateChange in auth.js
-        // Ideally, this is called from auth.js or script.js after login
-
         const { data: { session } } = await supabaseClient.auth.getSession();
         if (session?.user) {
             this.currentUser = session.user;
             this.loadFromMetadata(session.user);
             this.setupSettingsListeners();
+            this.populateProfileSection(session.user);
         }
     },
 
     loadFromMetadata(user) {
         if (!user || !user.user_metadata) return;
-
         const metadata = user.user_metadata;
-
-        // 1. Update Profile Display (Header)
         this.updateProfileDisplay(metadata);
-
-        // 2. Apply School Mode
-        // Default to 'liceo' if not set
         const schoolType = metadata.school_type || 'liceo';
         this.applySchoolMode(schoolType);
-
-        // 3. Sync Settings UI
         this.syncSettingsUI(schoolType);
     },
 
     updateProfileDisplay(metadata) {
         const displayEl = document.getElementById('userEmailDisplay');
         if (displayEl) {
-            // Prefer username, then First Name, then Email (handled by auth.js default)
             let displayName = metadata.username || metadata.first_name || this.currentUser.email;
-
-            // Truncate if too long
             if (displayName.length > 15) displayName = displayName.substring(0, 15) + '...';
-
             displayEl.textContent = displayName;
         }
     },
 
+    // ── PROFILE SECTION ──
+    populateProfileSection(user) {
+        if (!user) return;
+        const metadata = user.user_metadata || {};
+
+        // Username
+        const usernameEl = document.getElementById('profileUsername');
+        if (usernameEl) usernameEl.textContent = metadata.username || 'Non impostato';
+
+        // Full Name
+        const fullNameEl = document.getElementById('profileFullName');
+        if (fullNameEl) {
+            const first = metadata.first_name || '';
+            const last = metadata.last_name || '';
+            fullNameEl.textContent = (first + ' ' + last).trim() || user.email;
+        }
+
+        // Age Badge
+        const ageEl = document.getElementById('profileAge');
+        if (ageEl && metadata.age) {
+            ageEl.textContent = metadata.age + ' anni';
+            ageEl.style.display = 'inline-block';
+        } else if (ageEl) {
+            ageEl.style.display = 'none';
+        }
+
+        // Photo
+        this.loadProfilePhoto(metadata.profile_photo);
+
+        // Populate edit fields
+        const editUsername = document.getElementById('editUsername');
+        if (editUsername) editUsername.value = metadata.username || '';
+
+        const editEmail = document.getElementById('editEmail');
+        if (editEmail) editEmail.value = user.email || '';
+
+        const editPhotoUrl = document.getElementById('editPhotoUrl');
+        if (editPhotoUrl) editPhotoUrl.value = metadata.profile_photo || '';
+
+        // Fallback initials
+        const fallbackEl = document.getElementById('profilePhotoFallback');
+        if (fallbackEl) {
+            const initials = this.getInitials(metadata);
+            fallbackEl.textContent = initials || '?';
+        }
+    },
+
+    getInitials(metadata) {
+        const first = metadata.first_name || '';
+        const last = metadata.last_name || '';
+        if (first || last) {
+            return (first.charAt(0) + last.charAt(0)).toUpperCase();
+        }
+        if (metadata.username) return metadata.username.charAt(0).toUpperCase();
+        return '?';
+    },
+
+    loadProfilePhoto(url) {
+        const photoEl = document.getElementById('profilePhoto');
+        const fallbackEl = document.getElementById('profilePhotoFallback');
+        if (!photoEl) return;
+
+        if (url && url.trim()) {
+            photoEl.src = url;
+            photoEl.onload = () => {
+                photoEl.classList.add('loaded');
+                if (fallbackEl) fallbackEl.style.display = 'none';
+            };
+            photoEl.onerror = () => {
+                photoEl.classList.remove('loaded');
+                if (fallbackEl) fallbackEl.style.display = 'flex';
+            };
+        } else {
+            photoEl.classList.remove('loaded');
+            if (fallbackEl) fallbackEl.style.display = 'flex';
+        }
+    },
+
+    // ── PROFILE UPDATE METHODS ──
+    async updateUsername(newUsername) {
+        if (!this.currentUser) throw new Error('Non sei loggato.');
+        if (!newUsername || newUsername.trim().length < 2) throw new Error('Username troppo corto (min 2 caratteri).');
+
+        const { error } = await supabaseClient.auth.updateUser({
+            data: { username: newUsername.trim() }
+        });
+        if (error) throw error;
+
+        // Update local state
+        this.currentUser.user_metadata.username = newUsername.trim();
+        this.populateProfileSection(this.currentUser);
+        this.updateProfileDisplay(this.currentUser.user_metadata);
+        return true;
+    },
+
+    async updateEmail(newEmail) {
+        if (!this.currentUser) throw new Error('Non sei loggato.');
+        if (!newEmail || !newEmail.includes('@')) throw new Error('Email non valida.');
+
+        const { error } = await supabaseClient.auth.updateUser({
+            email: newEmail.trim()
+        });
+        if (error) throw error;
+        return true;
+    },
+
+    async updateProfilePhoto(photoUrl) {
+        if (!this.currentUser) throw new Error('Non sei loggato.');
+
+        const { error } = await supabaseClient.auth.updateUser({
+            data: { profile_photo: photoUrl.trim() }
+        });
+        if (error) throw error;
+
+        this.currentUser.user_metadata.profile_photo = photoUrl.trim();
+        this.loadProfilePhoto(photoUrl.trim());
+        return true;
+    },
+
+    // ── SCHOOL MODE ──
     applySchoolMode(type) {
-        // Normalize type
         const mode = type.toLowerCase() === 'università' ? 'uni' : 'liceo';
 
-        // Sidebar Elements
         const navGrades = document.getElementById('navGrades');
         const navPresences = document.getElementById('navPresences');
-
-        // View Containers
         const gradesLiceo = document.getElementById('grades-view-liceo');
         const gradesUni = document.getElementById('grades-view-uni');
         const presencesLiceo = document.getElementById('presences-view-liceo');
         const examsUni = document.getElementById('exams-view-uni');
 
         if (mode === 'uni') {
-            // UNIVERSITY MODE
             if (navGrades) navGrades.innerHTML = 'Libretto';
             if (navPresences) navPresences.innerHTML = 'Esami';
-
             if (gradesLiceo) gradesLiceo.style.display = 'none';
             if (gradesUni) gradesUni.style.display = 'block';
-
             if (presencesLiceo) presencesLiceo.style.display = 'none';
             if (examsUni) examsUni.style.display = 'block';
-
-            // Dashboard Cards
             this.updateDashboardLabels('uni');
-
-            // Trigger specific renders if functions exist
             if (typeof renderUniGrades === 'function') renderUniGrades();
             if (typeof renderUniExams === 'function') renderUniExams();
-
         } else {
-            // HIGH SCHOOL MODE
             if (navGrades) navGrades.innerHTML = 'Voti';
             if (navPresences) navPresences.innerHTML = 'Presenze';
-
             if (gradesLiceo) gradesLiceo.style.display = 'block';
             if (gradesUni) gradesUni.style.display = 'none';
-
             if (presencesLiceo) presencesLiceo.style.display = 'block';
             if (examsUni) examsUni.style.display = 'none';
-
-            // Dashboard Cards
             this.updateDashboardLabels('liceo');
         }
 
@@ -100,7 +188,6 @@ const UserProfile = {
     },
 
     updateDashboardLabels(mode) {
-        // Example: Update "Media Voti" label to "Media Ponderata" for Uni
         const avgLabel = document.querySelector('#dashboardAverage')?.parentElement.querySelector('.stat-label');
         if (avgLabel) {
             avgLabel.textContent = mode === 'uni' ? 'Media Ponderata' : 'Media Voti';
@@ -108,7 +195,6 @@ const UserProfile = {
     },
 
     syncSettingsUI(schoolType) {
-        // Check the correct radio button
         const radios = document.getElementsByName('school');
         for (const radio of radios) {
             if (radio.value.toLowerCase() === schoolType.toLowerCase()) {
@@ -129,44 +215,54 @@ const UserProfile = {
 
     async handleSchoolTypeChange(newType) {
         if (!this.currentUser) return;
-
         try {
-            // 1. Update Supabase
             const { error } = await supabaseClient.auth.updateUser({
                 data: { school_type: newType }
             });
-
             if (error) throw error;
-
-            // 2. Update Local UI immediately
             this.applySchoolMode(newType);
-
-            // 3. Show Toast
             if (typeof UIManager !== 'undefined') {
                 await UIManager.alert(`Modalità aggiornata a: ${newType.charAt(0).toUpperCase() + newType.slice(1)}`, 'Impostazioni Aggiornate');
-            } else {
-                alert(`Modalità aggiornata a: ${newType.charAt(0).toUpperCase() + newType.slice(1)}`);
             }
-
         } catch (err) {
             console.error('Error updating school type:', err);
             if (typeof UIManager !== 'undefined') {
                 await UIManager.alert('Errore nel salvataggio delle impostazioni.', 'Errore');
-            } else {
-                alert('Errore nel salvataggio delle impostazioni.');
             }
         }
     }
 };
 
+// ── Global Profile Edit Functions ──
+async function updateProfileField(field) {
+    try {
+        if (field === 'username') {
+            const val = document.getElementById('editUsername').value;
+            await UserProfile.updateUsername(val);
+            await UIManager.alert('✅ Username aggiornato con successo!', 'Profilo');
+        } else if (field === 'email') {
+            const val = document.getElementById('editEmail').value;
+            await UserProfile.updateEmail(val);
+            await UIManager.alert('📧 Email aggiornata! Controlla la tua casella per confermare.', 'Profilo');
+        } else if (field === 'photo') {
+            const val = document.getElementById('editPhotoUrl').value;
+            await UserProfile.updateProfilePhoto(val);
+            await UIManager.alert('📷 Foto profilo aggiornata!', 'Profilo');
+        }
+    } catch (err) {
+        await UIManager.alert('❌ ' + err.message, 'Errore');
+    }
+}
+
+function openProfilePhotoEdit() {
+    const input = document.getElementById('editPhotoUrl');
+    if (input) {
+        input.focus();
+        input.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+}
+
 // Initialize on load
 document.addEventListener('DOMContentLoaded', () => {
-    // Small delay to ensure Supabase is ready if needed, 
-    // or rely on auth.js to trigger it. 
-    // For now, let's call init explicitly.
     UserProfile.init();
 });
-
-// Also listen for auth state changes from auth.js if possible,
-// or just re-run init when AuthManager updates.
-// We can expose a strict update method.

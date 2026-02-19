@@ -4,6 +4,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta http-equiv="Content-Security-Policy"
+        content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline'; connect-src 'self' https://*.supabase.co; img-src 'self' data: blob: https:; font-src 'self' https:; object-src 'none'; base-uri 'self'; form-action 'self';">
+    <meta name="referrer" content="strict-origin-when-cross-origin">
     <title>StudyJournal Pro</title>
     <link rel="icon" type="image/png" href="favicon.png">
     <meta name="description"
@@ -448,36 +451,63 @@
                     </div>
                 </div>
 
-                <!-- Tema -->
-                <div class="settings-group">
+                <!-- Profilo Utente -->
+                <div class="settings-group" id="profileSection">
                     <div class="settings-group-header">
-                        <span class="settings-group-icon">🎨</span>
+                        <span class="settings-group-icon">👤</span>
                         <div>
-                            <h3 class="settings-group-title">Tema</h3>
-                            <p class="settings-group-desc">Scegli l'aspetto dell'app</p>
+                            <h3 class="settings-group-title">Profilo</h3>
+                            <p class="settings-group-desc">Gestisci il tuo account e la tua identità</p>
                         </div>
                     </div>
-                    <div class="settings-options">
-                        <label class="settings-option">
-                            <input type="radio" name="theme" value="light">
-                            <span class="settings-option-card">
-                                <span class="settings-option-icon">☀️</span>
-                                <span class="settings-option-text">
-                                    <strong>Chiaro</strong>
-                                    <small>Interfaccia luminosa</small>
-                                </span>
-                            </span>
-                        </label>
-                        <label class="settings-option">
-                            <input type="radio" name="theme" value="dark">
-                            <span class="settings-option-card">
-                                <span class="settings-option-icon">🌙</span>
-                                <span class="settings-option-text">
-                                    <strong>Scuro</strong>
-                                    <small>Perfetto di notte</small>
-                                </span>
-                            </span>
-                        </label>
+
+                    <!-- Profile Card -->
+                    <div class="profile-card">
+                        <div class="profile-photo-wrapper" id="profilePhotoWrapper">
+                            <img id="profilePhoto" src="" alt="Foto Profilo" class="profile-photo">
+                            <div class="profile-photo-fallback" id="profilePhotoFallback">?</div>
+                            <div class="profile-photo-overlay" onclick="openProfilePhotoEdit()">
+                                <span>📷</span>
+                            </div>
+                        </div>
+                        <div class="profile-info">
+                            <h2 id="profileUsername" class="profile-username">Username</h2>
+                            <p id="profileFullName" class="profile-fullname">Nome Cognome</p>
+                            <span id="profileAge" class="profile-age-badge"></span>
+                        </div>
+                    </div>
+
+                    <!-- Edit Profile -->
+                    <div class="profile-edit-section">
+                        <h4 class="profile-edit-title">✏️ Modifica Profilo</h4>
+
+                        <div class="profile-edit-field">
+                            <label for="editUsername">Username</label>
+                            <div class="profile-edit-row">
+                                <input type="text" id="editUsername" placeholder="Il tuo username" class="form-input">
+                                <button class="btn-small btn-accent"
+                                    onclick="updateProfileField('username')">Salva</button>
+                            </div>
+                        </div>
+
+                        <div class="profile-edit-field">
+                            <label for="editEmail">Email</label>
+                            <div class="profile-edit-row">
+                                <input type="email" id="editEmail" placeholder="La tua email" class="form-input">
+                                <button class="btn-small btn-accent"
+                                    onclick="updateProfileField('email')">Salva</button>
+                            </div>
+                        </div>
+
+                        <div class="profile-edit-field">
+                            <label for="editPhotoUrl">Foto Profilo (URL)</label>
+                            <div class="profile-edit-row">
+                                <input type="url" id="editPhotoUrl" placeholder="https://esempio.com/foto.jpg"
+                                    class="form-input">
+                                <button class="btn-small btn-accent"
+                                    onclick="updateProfileField('photo')">Salva</button>
+                            </div>
+                        </div>
                     </div>
                 </div>
 

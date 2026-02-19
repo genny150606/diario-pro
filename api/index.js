@@ -6,6 +6,68 @@ const app = express();
 app.use(cors());
 app.use(express.json({ limit: "50mb" }));
 
+// ============================================
+// SECURITY — Rate Limiting & Input Sanitization
+// ============================================
+
+// Simple in-memory rate limiter (20 requests/minute per IP)
+const rateLimitMap = new Map();
+const RATE_LIMIT_WINDOW = 60 * 1000; // 1 minute
+const RATE_LIMIT_MAX = 20;
+
+// Auto-clean stale entries every 2 minutes
+setInterval(() => {
+    const now = Date.now();
+    for (const [ip, data] of rateLimitMap) {
+        if (now - data.windowStart > RATE_LIMIT_WINDOW * 2) {
+            rateLimitMap.delete(ip);
+        }
+    }
+}, 120000);
+
+app.use((req, res, next) => {
+    const ip = req.headers['x-forwarded-for'] || req.ip || 'unknown';
+    const now = Date.now();
+
+    if (!rateLimitMap.has(ip)) {
+        rateLimitMap.set(ip, { count: 1, windowStart: now });
+        return next();
+    }
+
+    const data = rateLimitMap.get(ip);
+
+    if (now - data.windowStart > RATE_LIMIT_WINDOW) {
+        // Reset window
+        data.count = 1;
+        data.windowStart = now;
+        return next();
+    }
+
+    data.count++;
+
+    if (data.count > RATE_LIMIT_MAX) {
+        return res.status(429).json({
+            error: "Troppe richieste. Riprova tra un minuto.",
+            type: "rate_limit_error",
+            retryAfter: 60
+        });
+    }
+
+    next();
+});
+
+// Input sanitization helper
+function sanitizeInput(str, maxLength = 2000) {
+    if (typeof str !== 'string') return '';
+    return str
+        .replace(/<script[^>]*>[\s\S]*?<\/script>/gi, '') // Strip script tags
+        .replace(/<[^>]+>/g, '') // Strip all HTML tags
+        .replace(/javascript:/gi, '') // Strip JS protocol
+        .replace(/on\w+\s*=/gi, '') // Strip event handlers
+        .trim()
+        .substring(0, maxLength);
+}
+
 const { GoogleGenerativeAI: GoogleGenAI } = require("@google/generative-ai");
 
 console.log("🚀 Backend initialized. Checking API Key...");

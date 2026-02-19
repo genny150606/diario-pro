@@ -158,6 +158,7 @@
             <a href="#" data-section="grades" class="sidebar-item nav-link" id="navGrades">Voti</a>
             <a href="#" data-section="stats" class="sidebar-item nav-link" id="navStats">Statistiche</a>
             <a href="#" data-section="presences" class="sidebar-item nav-link" id="navPresences">Presenze</a>
+            <a href="#" data-section="gamification" class="sidebar-item nav-link" id="navGamification">🏆 Livello</a>
             <a href="#" data-section="settings" class="sidebar-item nav-link" id="navSettings">Impostazioni</a>
         </nav>
 
@@ -508,6 +509,74 @@
                     </div>
 
                     <div id="uniExamsContainer"></div>
+                </div>
+            </section>
+
+            
+            <!-- GAMIFICATION PAGE -->
+            <section id="gamification">
+                <div class="gamification-hero">
+                    <div class="hero-level-circle">
+                        <span class="hero-level-number" id="gamePageLevel">1</span>
+                        <span class="hero-level-label">Livello</span>
+                    </div>
+                    <h1 id="gamePageTitle">Principiante</h1>
+                    <p class="section-desc">Continua a studiare per sbloccare nuovi titoli!</p>
+                    
+                    <div class="hero-xp-bar">
+                        <div class="hero-xp-fill" id="gamePageXpFill" style="width: 0%"></div>
+                    </div>
+                    <div style="margin-top: 8px; font-size: 12px; opacity: 0.8;">
+                        <span id="gamePageXp">0</span> / <span id="gamePageNextXp">100</span> XP
+                    </div>
+                </div>
+
+                <div class="stats-grid-gamification">
+                    <div class="stat-card-game">
+                        <div class="stat-game-value" id="totalXpValue">0</div>
+                        <div class="stat-game-label">XP Totali</div>
+                    </div>
+                    <div class="stat-card-game">
+                        <div class="stat-game-value" id="streakValue">0 ??</div>
+                        <div class="stat-game-label">Giorni di Fila</div>
+                    </div>
+                    <div class="stat-card-game">
+                        <div class="stat-game-value" id="notesXpValue">0</div>
+                        <div class="stat-game-label">Note Create</div>
+                    </div>
+                    <div class="stat-card-game">
+                        <div class="stat-game-value" id="flashcardsXpValue">0</div>
+                        <div class="stat-game-label">Flashcard Generate</div>
+                    </div>
+                </div>
+
+                <h2 class="section-heading">?? Obiettivi</h2>
+                <div class="achievements-grid">
+                    <div class="achievement-card unlocked">
+                        <span class="achievement-icon">??</span>
+                        <div class="achievement-title">Primo Passo</div>
+                        <div class="achievement-desc">Crea il tuo primo account.</div>
+                    </div>
+                    <div class="achievement-card" id="achFirstNote">
+                        <span class="achievement-icon">??</span>
+                        <div class="achievement-title">Scriba</div>
+                        <div class="achievement-desc">Crea la tua prima nota.</div>
+                    </div>
+                    <div class="achievement-card" id="achFirstFlashcard">
+                        <span class="achievement-icon">??</span>
+                        <div class="achievement-title">Memoria di Ferro</div>
+                        <div class="achievement-desc">Genera 5 flashcard.</div>
+                    </div>
+                    <div class="achievement-card" id="achLevel5">
+                        <span class="achievement-icon">?</span>
+                        <div class="achievement-title">Stella Nascente</div>
+                        <div class="achievement-desc">Raggiungi il livello 5.</div>
+                    </div>
+                    <div class="achievement-card" id="achStreak7">
+                        <span class="achievement-icon">??</span>
+                        <div class="achievement-title">Inarrestabile</div>
+                        <div class="achievement-desc">Studia per 7 giorni di fila.</div>
+                    </div>
                 </div>
             </section>
 

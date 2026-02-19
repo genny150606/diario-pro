@@ -137,11 +137,17 @@ const AuthManager = {
         });
         if (error) throw error;
 
-        // Auto-create user data row so stats count them immediately
+        // CRITICAL: Immediately create users_data row so homepage stats update instantly
         if (data && data.user) {
-            await supabaseClient.from('users_data').insert([
-                { id: data.user.id, data: {}, updated_at: new Date() }
+            const { error: insertError } = await supabaseClient.from('users_data').insert([
+                {
+                    id: data.user.id,
+                    data: {},
+                    updated_at: new Date().toISOString()
+                }
             ]);
+
+            if (insertError) console.error("Error creating user stats row:", insertError);
         }
 
         return data;

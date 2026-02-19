@@ -242,6 +242,30 @@ const DuelManager = {
         }
     },
 
+    async showDuelInvitation(opponentName) {
+        if (this.inviting) return;
+        this.inviting = true;
+        const confirmed = await UIManager.confirm(
+            `${opponentName} è pronto per la sfida! Sei pronto anche tu?`,
+            '⚔️ SFIDA IN ARRIVO'
+        );
+        this.inviting = false;
+        if (confirmed) {
+            this.setReady();
+        }
+    },
+
+    async setReady() {
+        console.log('✅ Setting player as READY');
+        const { error } = await supabaseClient
+            .from('quiz_players')
+            .update({ is_ready: true })
+            .eq('room_id', this.currentRoom.id)
+            .eq('username', this.getPlayerName());
+
+        if (error) console.error('SetReady error:', error);
+    },
+
     async handlePlayerSync() {
         // Simple wrapper for realtime events
         await this.updatePlayersList();
@@ -249,7 +273,23 @@ const DuelManager = {
 
     // ── GAME LOGIC ──
     async startBattle() {
-        if (!this.players.find(p => p.username === this.getPlayerName())?.is_ready) {
+        const myName = this.getPlayerName();
+        const me = this.players.find(p => p.username === myName);
+
+        // If Host and already ready, offer Force Start
+        if (this.isHost && me?.is_ready) {
+            const force = await UIManager.confirm(
+                "L'avversario non è ancora pronto. Vuoi forzare l'inizio della sfida?",
+                "⚡ FORZA INIZIO"
+            );
+            if (force) {
+                console.log("⚡ Force Starting Countdown...");
+                this.startCountdown();
+            }
+            return;
+        }
+
+        if (!me?.is_ready) {
             const confirmed = await UIManager.confirm(
                 'Sei pronto a sfidare il tuo avversario? Verrai contrassegnato come PRONTO.',
                 '⚔️ PREPARATI ALLA SFIDA'

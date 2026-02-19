@@ -158,12 +158,29 @@
             <a href="#" data-section="grades" class="sidebar-item nav-link" id="navGrades">Voti</a>
             <a href="#" data-section="stats" class="sidebar-item nav-link" id="navStats">Statistiche</a>
             <a href="#" data-section="presences" class="sidebar-item nav-link" id="navPresences">Presenze</a>
-            <a href="#" data-section="gamification" class="sidebar-item nav-link" id="navGamification">🏆 Livello</a>
+
             <a href="#" data-section="settings" class="sidebar-item nav-link" id="navSettings">Impostazioni</a>
         </nav>
 
 
         <div class="header-right">
+            <!-- LEVEL BADGE (Moved from Sidebar) -->
+            <div class="header-level-badge" id="headerLevelBadge" onclick="GamificationManager.renderGamificationPage()"
+                title="Il mio Livello">
+                <div class="header-level-ring">
+                    <svg viewBox="0 0 36 36" class="circular-chart">
+                        <path class="circle-bg" d="M18 2.0845
+                            a 15.9155 15.9155 0 0 1 0 31.831
+                            a 15.9155 15.9155 0 0 1 0 -31.831" />
+                        <path class="circle" id="headerLevelRing" stroke-dasharray="0, 100" d="M18 2.0845
+                            a 15.9155 15.9155 0 0 1 0 31.831
+                            a 15.9155 15.9155 0 0 1 0 -31.831" />
+                    </svg>
+                    <span class="header-level-text" id="headerLevelText">1</span>
+                </div>
+                <span class="header-level-label">Lvl</span>
+            </div>
+
             <!-- Auth UI -->
             <button id="loginBtn" class="btn-primary" style="padding: 8px 16px; font-size: 14px;"
                 onclick="document.getElementById('authModal').style.display='flex'">
@@ -512,7 +529,7 @@
                 </div>
             </section>
 
-            
+
             <!-- GAMIFICATION PAGE -->
             <section id="gamification">
                 <div class="gamification-hero">
@@ -522,7 +539,7 @@
                     </div>
                     <h1 id="gamePageTitle">Principiante</h1>
                     <p class="section-desc">Continua a studiare per sbloccare nuovi titoli!</p>
-                    
+
                     <div class="hero-xp-bar">
                         <div class="hero-xp-fill" id="gamePageXpFill" style="width: 0%"></div>
                     </div>

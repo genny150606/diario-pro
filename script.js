@@ -571,7 +571,20 @@ const StorageManager = {
             // Calculate progress within current level
             const progress = Math.min(100, Math.max(0, ((currentXP - prevLevelXP) / (nextLevelXP - prevLevelXP)) * 100));
 
-            // Sidebar Elements
+            // HEADER BADGE ELEMENTS
+            const headerLevelText = document.getElementById('headerLevelText');
+            const headerLevelRing = document.getElementById('headerLevelRing');
+
+            if (headerLevelText) headerLevelText.textContent = currentLevel;
+
+            if (headerLevelRing) {
+                // Update ring stroke-dasharray (0, 100) -> (progress, 100)
+                // Note: The stroke-dasharray is "length, gap". 100 is approx circumference for 32px viewbox with radius 15.9155
+                // Radius 15.9155 * 2 * PI = 100. So we can just set the first number to percentage.
+                headerLevelRing.setAttribute('stroke-dasharray', `${progress}, 100`);
+            }
+
+            // LEGACY SIDEBAR ELEMENTS (Just in case they exist)
             const levelDisplay = document.getElementById('userLevelDisplay');
             const levelTitle = document.getElementById('userLevelTitle');
             const xpFill = document.getElementById('sidebarXpFill');
@@ -602,6 +615,10 @@ const StorageManager = {
 
 
     };
+
+    // Initialize Gamification
+    GamificationManager.init();
+    window.GamificationManager = GamificationManager;
 
 
     /* ============================================

@@ -2,7 +2,77 @@
    GAMIFICATION UI
    ============================================ */
 
-/* Sidebar Badge */
+/* HEADER LEVEL BADGE (Moved from Sidebar) */
+.header-level-badge {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 12px;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(8px);
+    border-radius: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    margin-right: 12px;
+}
+
+.header-level-badge:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: translateY(-1px);
+    border-color: var(--color-accent);
+}
+
+.header-level-ring {
+    width: 28px;
+    height: 28px;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.circular-chart {
+    width: 100%;
+    height: 100%;
+    transform: rotate(-90deg);
+}
+
+.circle-bg {
+    fill: none;
+    stroke: rgba(255, 255, 255, 0.2);
+    stroke-width: 3;
+}
+
+.circle {
+    fill: none;
+    stroke: var(--color-accent);
+    stroke-width: 3;
+    stroke-linecap: round;
+    transition: stroke-dasharray 0.5s ease;
+}
+
+.header-level-text {
+    position: absolute;
+    font-size: 10px;
+    font-weight: 800;
+    color: var(--text-primary);
+}
+
+.header-level-label {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+/* Hide label on mobile */
+@media (max-width: 480px) {
+    .header-level-label {
+        display: none;
+    }
+}
+
+/* Sidebar Badge (Legacy - Removed from HTML but style kept just in case) */
 .level-badge-container {
     padding: 12px;
     background: var(--bg-secondary);

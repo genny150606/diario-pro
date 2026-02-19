@@ -684,6 +684,97 @@
         });
     </script>
 
+    <script>
+        // ============================================
+        // HERO TYPING ANIMATION
+        // ============================================
+        document.addEventListener('DOMContentLoaded', () => {
+            const line1 = document.getElementById('heroTitleLine1');
+            const line2 = document.getElementById('heroTitleLine2');
+            const subtitle = document.getElementById('heroSubtitle');
+            const actions = document.getElementById('heroActions');
+            const preview = document.getElementById('heroPreview');
+
+            if (!line1 || !line2 || !subtitle) return;
+
+            // Store original text
+            const text1 = line1.textContent;
+            const text2 = line2.textContent;
+            const textSubtitle = subtitle.textContent.trim();
+
+            // Clear text initially
+            line1.textContent = '';
+            line2.textContent = '';
+            subtitle.textContent = '';
+
+            // Disable CSS animations to prevent conflicts
+            [line1, line2, subtitle, actions, preview].forEach(el => {
+                if (el) {
+                    el.style.animation = 'none';
+                    el.style.opacity = '1';
+                }
+            });
+
+            // Hide elements that should appear later
+            if (actions) actions.style.opacity = '0';
+            if (preview) preview.style.opacity = '0';
+
+            async function typeSequence() {
+                // Wait a moment
+                await wait(500);
+
+                // Type Line 1
+                line1.classList.add('typing-cursor');
+                await typeWriter(line1, text1, 40);
+                line1.classList.remove('typing-cursor');
+
+                // Type Line 2
+                line2.classList.add('typing-cursor');
+                await typeWriter(line2, text2, 40);
+                line2.classList.remove('typing-cursor');
+
+                // Type Subtitle (faster)
+                subtitle.classList.add('typing-cursor');
+                await typeWriter(subtitle, textSubtitle, 20);
+                subtitle.classList.remove('typing-cursor');
+
+                // Fade in buttons and preview
+                if (actions) {
+                    actions.style.transition = 'opacity 0.8s ease-out';
+                    actions.style.opacity = '1';
+                }
+
+                if (preview) {
+                    setTimeout(() => {
+                        preview.style.transition = 'opacity 0.8s ease-out';
+                        preview.style.opacity = '1';
+                    }, 400);
+                }
+            }
+
+            typeSequence();
+        });
+
+        function typeWriter(element, text, speed) {
+            return new Promise(resolve => {
+                let i = 0;
+                function type() {
+                    if (i < text.length) {
+                        element.textContent += text.charAt(i);
+                        i++;
+                        setTimeout(type, speed + (Math.random() * 20));
+                    } else {
+                        resolve();
+                    }
+                }
+                type();
+            });
+        }
+
+        function wait(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        }
+    </script>
 </body>
 
 </html>

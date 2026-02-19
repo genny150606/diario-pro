@@ -1084,10 +1084,21 @@ const AppManager = {
         },
 
         showSection(sectionName) {
+            console.log('Navigate to:', sectionName);
             // Hide all sections
-            document.querySelectorAll('.section').forEach(s => s.classList.add('hidden'));
+            document.querySelectorAll('.section').forEach(s => {
+                s.classList.add('hidden');
+                s.style.display = 'none'; // Force hide
+            });
+
             // Show selected section
-            document.getElementById(sectionName).classList.remove('hidden');
+            const target = document.getElementById(sectionName);
+            if (target) {
+                target.classList.remove('hidden');
+                target.style.display = 'block'; // Force show
+            } else {
+                console.error('Section not found:', sectionName);
+            }
 
             // Update nav
             document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
@@ -1464,7 +1475,7 @@ window.renderTasks = (filter) => AppManager.renderTasks(filter);
 window.renderDiary = () => AppManager.renderDiary();
 window.renderGrades = () => AppManager.renderGrades();
 // EXPOSE GLOBALS
-window.AppManager = AppManager;
+window.AppManager = UIManager;
 window.GamificationManager = GamificationManager;
 window.renderPomodoro = () => AppManager.renderPomodoro();
 window.updateTimer = () => AppManager.updateTimer();

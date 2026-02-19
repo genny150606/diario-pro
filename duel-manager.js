@@ -58,11 +58,17 @@ const DuelManager = {
     },
 
     async joinRoom(code, username) {
+        if (!username) {
+            alert('Inserisci un nome per giocare.');
+            return null;
+        }
+
         try {
+            console.log('🔍 Joining room:', code);
             const { data: room, error } = await supabaseClient
                 .from('quiz_rooms')
                 .select()
-                .eq('code', code.toUpperCase())
+                .eq('code', code.toUpperCase().trim())
                 .eq('status', 'waiting')
                 .single();
 
@@ -77,7 +83,20 @@ const DuelManager = {
             document.getElementById('duelWaitingLobby').classList.remove('hidden');
             document.getElementById('roomCodeDisplay').textContent = room.code;
 
-            await this.joinPlayer(room.id, username);
+            // PREVENT DUPLICATES: Check if username already in room
+            const { data: existing } = await supabaseClient
+                .from('quiz_players')
+                .select('id')
+                .eq('room_id', room.id)
+                .eq('username', username)
+                .maybeSingle();
+
+            if (!existing) {
+                await this.joinPlayer(room.id, username);
+            } else {
+                console.log('👤 Player already in room, skipping insert');
+            }
+
             this.subscribeToRoom(room.id);
             return room;
         } catch (err) {
@@ -100,17 +119,19 @@ const DuelManager = {
 
     // ── REALTIME SYNC ──
     subscribeToRoom(roomId) {
+        console.log('📡 Subscribing to Room Realtime:', roomId);
         if (this.subscription) supabaseClient.removeChannel(this.subscription);
 
         this.subscription = supabaseClient
-            .channel(`room:${roomId}`)
+            .channel(`room_${roomId}`)
             .on('postgres_changes', {
                 event: '*',
                 schema: 'public',
                 table: 'quiz_players',
                 filter: `room_id=eq.${roomId}`
             }, payload => {
-                this.handlePlayerUpdate(payload);
+                console.log('🔄 Player Sync Event:', payload.eventType, payload.new);
+                this.updatePlayersList();
             })
             .on('postgres_changes', {
                 event: 'UPDATE',
@@ -118,16 +139,37 @@ const DuelManager = {
                 table: 'quiz_rooms',
                 filter: `id=eq.${roomId}`
             }, payload => {
-                if (payload.new.status === 'active') this.startQuizUI();
+                console.log('🏁 Room Status Update:', payload.new.status);
+                if (payload.new.status === 'active' && this.currentRoom.status !== 'active') {
+                    this.currentRoom.status = 'active';
+                    this.startQuizUI();
+                }
             })
-            .subscribe();
-
-        this.updatePlayersList();
+            .subscribe((status) => {
+                console.log('📶 Channel Status:', status);
+                if (status === 'SUBSCRIBED') {
+                    this.updatePlayersList();
+                }
+            });
     },
 
-    async handlePlayerUpdate(payload) {
-        console.log('🔄 Sync Update:', payload);
-        await this.updatePlayersList();
+    async updatePlayersList() {
+        if (!this.currentRoom) return;
+
+        const { data, error } = await supabaseClient
+            .from('quiz_players')
+            .select('*')
+            .eq('room_id', this.currentRoom.id)
+            .order('created_at', { ascending: true });
+
+        if (error) {
+            console.error('Error fetching players:', error);
+            return;
+        }
+
+        this.players = data || [];
+        console.log('👥 Players Updated:', this.players.length);
+        this.renderLobby();
 
         // If in battle, refresh progress bars
         if (this.currentRoom?.status === 'active') {
@@ -135,26 +177,22 @@ const DuelManager = {
         }
     },
 
-    async updatePlayersList() {
-        const { data } = await supabaseClient
-            .from('quiz_players')
-            .select('*')
-            .eq('room_id', this.currentRoom.id);
-
-        this.players = data || [];
-        this.renderLobby();
-    },
-
     // ── GAME LOGIC ──
     async startBattle() {
         if (!this.isHost) return;
 
+        console.log('⚔️ Starting Battle...');
         const { error } = await supabaseClient
             .from('quiz_rooms')
             .update({ status: 'active' })
             .eq('id', this.currentRoom.id);
 
-        if (error) console.error('Start error:', error);
+        if (error) {
+            console.error('Start error:', error);
+        } else {
+            this.currentRoom.status = 'active';
+            this.startQuizUI();
+        }
     },
 
     async submitAnswer(isCorrect) {
@@ -179,12 +217,14 @@ const DuelManager = {
     },
 
     getPlayerName() {
-        // Simple logic to find current user in players list
-        // In a real app we'd use user_id, here we use the name we joined with
-        return this.isHost ? (AuthManager.user?.email?.split('@')[0] || 'Player 1') : document.getElementById('duelUsername')?.value;
+        if (this.isHost) {
+            return AuthManager.user?.email?.split('@')[0] || 'Player 1';
+        }
+        const name = document.getElementById('duelUsername')?.value;
+        return name || 'Ospite';
     },
 
-    // ── UI RENDERING (Placeholders) ──
+    // ── UI RENDERING ──
     renderLobby() {
         const container = document.getElementById('duelLobbyList');
         if (!container) return;
@@ -259,7 +299,7 @@ const DuelManager = {
             <div class="final-scores">
                 ${this.players.map(p => `<p>${p.username}: ${p.score} punti</p>`).join('')}
             </div>
-            <button class="primary-btn" onclick="showSection('dashboard')">Torna alla Home</button>
+            <button class="btn-primary" onclick="showSection('dashboard')">Torna alla Home</button>
         `;
 
         // Grant XP for finishing

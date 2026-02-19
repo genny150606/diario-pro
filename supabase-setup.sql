@@ -14,10 +14,12 @@ CREATE TABLE IF NOT EXISTS public.users_data (
 ALTER TABLE public.users_data ENABLE ROW LEVEL SECURITY;
 
 -- Users can only read/write their OWN row
+DROP POLICY IF EXISTS "Users manage own data" ON public.users_data;
 CREATE POLICY "Users manage own data" ON public.users_data
     FOR ALL USING (auth.uid() = id) WITH CHECK (auth.uid() = id);
 
 -- Homepage stats query: allow anon to count rows (no personal data exposed)
+DROP POLICY IF EXISTS "Anon can count rows" ON public.users_data;
 CREATE POLICY "Anon can count rows" ON public.users_data
     FOR SELECT USING (true);
 
@@ -33,10 +35,12 @@ CREATE TABLE IF NOT EXISTS public.site_stats (
 ALTER TABLE public.site_stats ENABLE ROW LEVEL SECURITY;
 
 -- Anyone can read stats (homepage displays them)
+DROP POLICY IF EXISTS "Anyone can read site_stats" ON public.site_stats;
 CREATE POLICY "Anyone can read site_stats" ON public.site_stats
     FOR SELECT USING (true);
 
 -- Any authenticated user can increment stats
+DROP POLICY IF EXISTS "Auth users can upsert site_stats" ON public.site_stats;
 CREATE POLICY "Auth users can upsert site_stats" ON public.site_stats
     FOR ALL USING (auth.uid() IS NOT NULL) WITH CHECK (auth.uid() IS NOT NULL);
 
@@ -59,9 +63,11 @@ CREATE TABLE IF NOT EXISTS public.reviews (
 
 ALTER TABLE public.reviews ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "Anyone can read reviews" ON public.reviews;
 CREATE POLICY "Anyone can read reviews" ON public.reviews
     FOR SELECT USING (true);
 
+DROP POLICY IF EXISTS "Auth users can insert reviews" ON public.reviews;
 CREATE POLICY "Auth users can insert reviews" ON public.reviews
     FOR INSERT WITH CHECK (auth.uid() IS NOT NULL);
 
@@ -95,7 +101,10 @@ ALTER TABLE public.quiz_rooms ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.quiz_players ENABLE ROW LEVEL SECURITY;
 
 -- Allow anyone to manage duel rooms/players for now (anon access)
+DROP POLICY IF EXISTS "Public manage quiz_rooms" ON public.quiz_rooms;
 CREATE POLICY "Public manage quiz_rooms" ON public.quiz_rooms FOR ALL USING (true) WITH CHECK (true);
+
+DROP POLICY IF EXISTS "Public manage quiz_players" ON public.quiz_players;
 CREATE POLICY "Public manage quiz_players" ON public.quiz_players FOR ALL USING (true) WITH CHECK (true);
 
 -- IMPORTANT: Enable Realtime for these tables in Supabase Dashboard:

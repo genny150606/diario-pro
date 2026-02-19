@@ -78,66 +78,33 @@
     opacity: 0.2;
 }
 
-/* ── NAV ── */
-.landing-nav {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    z-index: 100;
-    padding: var(--space-4) var(--space-8);
+/* ── HERO LOGO ── */
+.hero-logo-container {
+    margin-bottom: var(--space-6);
+    animation: fadeInUp 0.8s var(--ease-out) both;
     display: flex;
-    align-items: center;
-    justify-content: space-between;
-    background: var(--glass-bg);
-    backdrop-filter: var(--glass-blur);
-    -webkit-backdrop-filter: var(--glass-blur);
-    border-bottom: 1px solid var(--glass-border);
-    transition: all var(--duration-base) var(--ease-out);
+    justify-content: center;
 }
 
-.landing-nav .nav-logo {
-    display: flex;
-    align-items: center;
-    gap: var(--space-3);
-    text-decoration: none;
-    color: var(--color-text);
-    font-weight: var(--fw-semibold);
-    font-size: var(--font-size-lg);
+.hero-logo-img {
+    width: 100px;
+    height: 100px;
+    border-radius: var(--radius-xl);
+    box-shadow: 0 10px 40px rgba(0, 122, 255, 0.4);
+    animation: floatLogo 6s ease-in-out infinite;
+    object-fit: cover;
 }
 
-.landing-nav .nav-logo img {
-    width: 32px;
-    height: 32px;
-    border-radius: var(--radius-sm);
-}
+@keyframes floatLogo {
 
-.landing-nav .nav-actions {
-    display: flex;
-    align-items: center;
-    gap: var(--space-3);
-}
+    0%,
+    100% {
+        transform: translateY(0);
+    }
 
-.landing-nav .nav-cta {
-    padding: var(--space-2) var(--space-5);
-    background: var(--color-accent);
-    color: #fff;
-    border: none;
-    border-radius: var(--radius-full);
-    font-weight: var(--fw-medium);
-    font-size: var(--font-size-sm);
-    cursor: pointer;
-    text-decoration: none;
-    transition: all var(--duration-fast) var(--ease-out);
-    min-height: 40px;
-    display: inline-flex;
-    align-items: center;
-}
-
-.landing-nav .nav-cta:hover {
-    background: var(--color-accent-hover);
-    transform: translateY(-1px);
-    box-shadow: 0 4px 20px rgba(0, 122, 255, 0.3);
+    50% {
+        transform: translateY(-15px);
+    }
 }
 
 /* ── HERO ── */

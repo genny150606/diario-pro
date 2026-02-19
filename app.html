@@ -27,6 +27,7 @@
     <script src="auth.js" defer></script>
     <script src="user-profile.js" defer></script>
     <script src="ui-manager.js" defer></script>
+    <script src="hamburger-menu.js" defer></script>
 
 </head>
 
@@ -48,15 +49,13 @@
 
         <nav class="sidebar">
             <div class="nav-indicator"></div>
-            <a href="#" onclick="showSection('dashboard')" class="sidebar-item nav-link active"
-                id="navDashboard">Dashboard</a>
-            <a href="#" onclick="showSection('notes')" class="sidebar-item nav-link" id="navNotes">Note</a>
-            <a href="#" onclick="showSection('tasks')" class="sidebar-item nav-link" id="navTasks">Compiti</a>
-            <a href="#" onclick="showSection('grades')" class="sidebar-item nav-link" id="navGrades">Voti</a>
-            <a href="#" onclick="showSection('stats')" class="sidebar-item nav-link" id="navStats">Statistiche</a>
-            <a href="#" onclick="showSection('presences')" class="sidebar-item nav-link" id="navPresences">Presenze</a>
-            <a href="#" onclick="showSection('settings')" class="sidebar-item nav-link"
-                id="navSettings">Impostazioni</a>
+            <a href="#" data-section="dashboard" class="sidebar-item nav-link active" id="navDashboard">Dashboard</a>
+            <a href="#" data-section="notes" class="sidebar-item nav-link" id="navNotes">Note</a>
+            <a href="#" data-section="tasks" class="sidebar-item nav-link" id="navTasks">Compiti</a>
+            <a href="#" data-section="grades" class="sidebar-item nav-link" id="navGrades">Voti</a>
+            <a href="#" data-section="stats" class="sidebar-item nav-link" id="navStats">Statistiche</a>
+            <a href="#" data-section="presences" class="sidebar-item nav-link" id="navPresences">Presenze</a>
+            <a href="#" data-section="settings" class="sidebar-item nav-link" id="navSettings">Impostazioni</a>
         </nav>
 
 
@@ -545,11 +544,15 @@
 
             // Aggiorna stato active nei link
             const navLinks = document.querySelectorAll('.sidebar-item');
-            navLinks.forEach(a => a.classList.remove('active'));
+            let activeLink = null;
 
-            // Trova il link corrispondente alla sezione
-            const activeLink = Array.from(navLinks).find(a => a.getAttribute('onclick').includes(`'${sectionId}'`));
-            if (activeLink) activeLink.classList.add('active');
+            navLinks.forEach(a => {
+                a.classList.remove('active');
+                if (a.getAttribute('data-section') === sectionId) {
+                    a.classList.add('active');
+                    activeLink = a;
+                }
+            });
 
             // Gestione Sincronizzazione Dati Sezione
             if (sectionId === 'notes') {
@@ -565,13 +568,14 @@
             }
 
             // Animazione indicatore (solo su Desktop)
-            updateNavIndicator(activeLink);
+            if (activeLink) updateNavIndicator(activeLink);
 
             // Chiudi sidebar mobile se aperta
             const sidebar = document.querySelector('.sidebar');
-            if (sidebar.classList.contains('open')) {
+            if (sidebar && sidebar.classList.contains('open')) {
                 sidebar.classList.remove('open');
                 document.querySelector('.navbar-overlay')?.classList.remove('active');
+                document.body.style.overflow = '';
             }
         }
 
@@ -597,6 +601,15 @@
         });
 
         document.addEventListener('DOMContentLoaded', () => {
+            // Setup navigation listeners
+            document.querySelectorAll('.sidebar-item[data-section]').forEach(item => {
+                item.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const sectionId = item.getAttribute('data-section');
+                    if (sectionId) showSection(sectionId);
+                });
+            });
+
             setTimeout(() => {
                 const activeLink = document.querySelector('.sidebar-item.active');
                 updateNavIndicator(activeLink);

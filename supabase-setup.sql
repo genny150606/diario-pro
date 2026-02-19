@@ -93,7 +93,8 @@ CREATE TABLE IF NOT EXISTS public.quiz_players (
     score INTEGER DEFAULT 0,
     current_question_index INTEGER DEFAULT 0,
     is_ready BOOLEAN DEFAULT false,
-    updated_at TIMESTAMPTZ DEFAULT NOW()
+    updated_at TIMESTAMPTZ DEFAULT NOW(),
+    created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
 -- Enable RLS

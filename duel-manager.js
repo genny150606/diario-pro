@@ -120,14 +120,17 @@ const DuelManager = {
     // ── REALTIME SYNC ──
     subscribeToRoom(roomId) {
         if (!roomId) return;
-        console.log('📡 Subscribing to Room Realtime:', roomId);
+        console.log('📡 Subscribing to Room:', roomId);
 
         if (this.subscription) {
             supabaseClient.removeChannel(this.subscription);
         }
 
+        // Defensive: Fetch current players immediately
+        this.updatePlayersList();
+
         this.subscription = supabaseClient
-            .channel(`duel_room_${roomId}`)
+            .channel(`duel_${roomId}`)
             .on('postgres_changes', {
                 event: '*',
                 schema: 'public',
@@ -150,42 +153,59 @@ const DuelManager = {
                 }
             })
             .subscribe((status) => {
-                console.log('📶 Channel Status:', status);
+                console.log('📶 Realtime Status:', status);
                 if (status === 'SUBSCRIBED') {
                     this.updatePlayersList();
                 }
             });
+
+        // FALLBACK: Auto-refresh list every 5s while in lobby
+        if (this.lobbyInterval) clearInterval(this.lobbyInterval);
+        this.lobbyInterval = setInterval(() => {
+            if (this.currentRoom && this.currentRoom.status === 'waiting') {
+                console.log('🕒 Fallback lobby refresh...');
+                this.updatePlayersList();
+            } else {
+                clearInterval(this.lobbyInterval);
+            }
+        }, 5000);
     },
 
     async updatePlayersList() {
         if (!this.currentRoom) return;
 
-        console.log('🔄 Fetching players for room:', this.currentRoom.id);
-        const { data, error } = await supabaseClient
-            .from('quiz_players')
-            .select('*')
-            .eq('room_id', this.currentRoom.id)
-            .order('created_at', { ascending: true });
+        console.log('🔄 Syncing players for room:', this.currentRoom.id);
+        try {
+            const { data, error } = await supabaseClient
+                .from('quiz_players')
+                .select('*')
+                .eq('room_id', this.currentRoom.id)
+                .order('created_at', { ascending: true });
 
-        if (error) {
-            console.error('Error fetching players:', error);
-            return;
-        }
+            if (error) {
+                // If created_at fails (maybe SQL didn't run?), try without order
+                console.warn('⚠️ Order by created_at failed, retrying without it...');
+                const { data: retryData, error: retryError } = await supabaseClient
+                    .from('quiz_players')
+                    .select('*')
+                    .eq('room_id', this.currentRoom.id);
 
-        this.players = data || [];
-        console.log('👥 Players Data:', this.players);
+                if (retryError) throw retryError;
+                this.players = retryData || [];
+            } else {
+                this.players = data || [];
+            }
 
-        // Ensure UI is visible
-        const lobbySection = document.getElementById('duelWaitingLobby');
-        if (lobbySection && lobbySection.classList.contains('hidden')) {
-            lobbySection.classList.remove('hidden');
-        }
+            console.log('👥 Current Players:', this.players);
 
-        this.renderLobby();
+            this.renderLobby();
 
-        // If in battle, refresh progress bars
-        if (this.currentRoom?.status === 'active') {
-            this.renderDuelProgress();
+            // If in battle, refresh progress bars
+            if (this.currentRoom?.status === 'active') {
+                this.renderDuelProgress();
+            }
+        } catch (err) {
+            console.error('❌ Sync Error:', err.message);
         }
     },
 

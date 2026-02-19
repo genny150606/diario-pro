@@ -13,42 +13,32 @@ const AuthManager = {
 
     async init() {
         try {
-            // Check for existing session
             const { data: { session } } = await supabaseClient.auth.getSession();
             this.user = session?.user || null;
 
-            // ── AUTH GATE: Require login for app.html ──
             const isAppPage = window.location.pathname.includes('app');
+
+            // ── AUTH GATE: Show login overlay if not authenticated ──
             if (isAppPage && !this.user) {
-                // Show nothing, redirect to homepage
-                document.body.style.display = 'none';
-                window.location.href = 'index.html';
-                return;
+                this.showAuthGate();
             }
 
             // Listen for auth changes
             supabaseClient.auth.onAuthStateChange((event, session) => {
                 console.log('Auth Event:', event);
-                const prevUser = this.user;
                 this.user = session?.user || null;
                 this.updateUI();
 
-                // Redirect to homepage on sign out (if on app page)
-                if (event === 'SIGNED_OUT' && window.location.pathname.includes('app')) {
-                    window.location.href = 'index.html';
-                    return;
-                }
+                if (event === 'SIGNED_IN') {
+                    // Hide auth overlay, reveal app
+                    this.hideAuthGate();
 
-                if (event === 'SIGNED_IN' || (event === 'INITIAL_SESSION' && session)) {
-                    // Prevent infinite reload loop using sessionStorage
                     if (sessionStorage.getItem('cloudSyncDone')) return;
 
-                    // Try to load from cloud using either StorageManager or direct Supabase call
                     if (typeof StorageManager !== 'undefined' && StorageManager.loadFromCloud) {
                         sessionStorage.setItem('cloudSyncDone', 'true');
                         StorageManager.loadFromCloud();
-                    } else if (typeof supabaseClient !== 'undefined') {
-                        // Fallback for index.html standalone
+                    } else {
                         supabaseClient
                             .from('users_data')
                             .select('data')
@@ -64,11 +54,20 @@ const AuthManager = {
                     }
                 }
 
-                if (event === 'SIGNED_OUT') {
-                    sessionStorage.removeItem('cloudSyncDone');
+                if (event === 'INITIAL_SESSION' && session) {
+                    if (sessionStorage.getItem('cloudSyncDone')) return;
+                    if (typeof StorageManager !== 'undefined' && StorageManager.loadFromCloud) {
+                        sessionStorage.setItem('cloudSyncDone', 'true');
+                        StorageManager.loadFromCloud();
+                    }
                 }
 
-
+                if (event === 'SIGNED_OUT') {
+                    sessionStorage.removeItem('cloudSyncDone');
+                    if (window.location.pathname.includes('app')) {
+                        this.showAuthGate();
+                    }
+                }
             });
 
             this.updateUI();
@@ -77,9 +76,35 @@ const AuthManager = {
         }
     },
 
+    showAuthGate() {
+        const overlay = document.getElementById('authModal');
+        if (overlay) overlay.style.display = 'flex';
+
+        // Hide app content behind overlay
+        document.querySelectorAll('header, .main-content, #geminiChat').forEach(el => {
+            el.style.display = 'none';
+        });
+    },
+
+    hideAuthGate() {
+        const overlay = document.getElementById('authModal');
+        if (overlay) {
+            overlay.style.opacity = '0';
+            overlay.style.transition = 'opacity 0.4s ease';
+            setTimeout(() => {
+                overlay.style.display = 'none';
+                overlay.style.opacity = '1';
+            }, 400);
+        }
+
+        // Show app content
+        document.querySelectorAll('header, .main-content, #geminiChat').forEach(el => {
+            el.style.display = '';
+        });
+    },
+
     async signUp(email, password, userData = {}) {
-        // Smart School Recommendation Logic
-        let schoolType = 'liceo'; // Default
+        let schoolType = 'liceo';
         if (userData.age) {
             schoolType = userData.age <= 18 ? 'liceo' : 'università';
         }
@@ -112,7 +137,6 @@ const AuthManager = {
         if (error) throw error;
         this.user = null;
         this.updateUI();
-        // Close dropdown if open
         const dropdown = document.getElementById('accountDropdown');
         if (dropdown) dropdown.classList.remove('show');
     },
@@ -138,7 +162,6 @@ const AuthManager = {
                 userProfile.style.display = 'flex';
                 const emailDisplay = document.getElementById('userEmailDisplay');
                 if (emailDisplay) {
-                    // Truncate email if too long on mobile
                     const email = this.user.email;
                     emailDisplay.textContent = email.length > 20 ? email.substring(0, 17) + '...' : email;
                 }
@@ -149,6 +172,98 @@ const AuthManager = {
         }
     }
 };
+
+// ═══════════ AUTH OVERLAY FUNCTIONS ═══════════
+
+function switchAuthTab(tab) {
+    const loginForm = document.getElementById('authLoginForm');
+    const signupForm = document.getElementById('authSignupForm');
+    const tabs = document.querySelectorAll('.auth-tab');
+
+    tabs.forEach(t => t.classList.remove('active'));
+
+    if (tab === 'login') {
+        if (loginForm) loginForm.style.display = 'block';
+        if (signupForm) signupForm.style.display = 'none';
+        tabs[0]?.classList.add('active');
+    } else {
+        if (loginForm) loginForm.style.display = 'none';
+        if (signupForm) signupForm.style.display = 'block';
+        tabs[1]?.classList.add('active');
+    }
+}
+
+async function handleAuthSubmit() {
+    const email = document.getElementById('authEmail')?.value.trim();
+    const password = document.getElementById('authPassword')?.value;
+    const errorEl = document.getElementById('authError');
+    const successEl = document.getElementById('authSuccess');
+
+    if (errorEl) errorEl.style.display = 'none';
+    if (successEl) successEl.style.display = 'none';
+
+    if (!email || !password) {
+        if (errorEl) { errorEl.textContent = '❌ Inserisci email e password.'; errorEl.style.display = 'block'; }
+        return;
+    }
+
+    try {
+        const btn = document.querySelector('#authLoginForm .auth-submit-btn');
+        if (btn) { btn.disabled = true; btn.style.opacity = '0.6'; btn.querySelector('span').textContent = 'Caricamento...'; }
+
+        await AuthManager.signIn(email, password);
+        if (successEl) { successEl.textContent = '✅ Accesso effettuato!'; successEl.style.display = 'block'; }
+    } catch (err) {
+        let msg = err.message;
+        if (msg.includes('Invalid login')) msg = '❌ Email o password non corretti.';
+        else if (msg.includes('Email not confirmed')) msg = '❌ Conferma la tua email prima di accedere.';
+        else msg = '❌ ' + msg;
+        if (errorEl) { errorEl.textContent = msg; errorEl.style.display = 'block'; }
+
+        const btn = document.querySelector('#authLoginForm .auth-submit-btn');
+        if (btn) { btn.disabled = false; btn.style.opacity = '1'; btn.querySelector('span').textContent = 'Accedi'; }
+    }
+}
+
+async function handleSignupSubmit() {
+    const name = document.getElementById('signupName')?.value.trim();
+    const surname = document.getElementById('signupSurname')?.value.trim();
+    const age = parseInt(document.getElementById('signupAge')?.value);
+    const username = document.getElementById('signupUsername')?.value.trim();
+    const email = document.getElementById('signupEmail')?.value.trim();
+    const password = document.getElementById('signupPassword')?.value;
+    const errorEl = document.getElementById('signupError');
+    const successEl = document.getElementById('signupSuccess');
+
+    if (errorEl) errorEl.style.display = 'none';
+    if (successEl) successEl.style.display = 'none';
+
+    if (!name || !surname || !age || !username || !email || !password) {
+        if (errorEl) { errorEl.textContent = '❌ Compila tutti i campi.'; errorEl.style.display = 'block'; }
+        return;
+    }
+    if (password.length < 6) {
+        if (errorEl) { errorEl.textContent = '❌ La password deve avere almeno 6 caratteri.'; errorEl.style.display = 'block'; }
+        return;
+    }
+
+    try {
+        const btn = document.querySelector('#authSignupForm .auth-submit-btn');
+        if (btn) { btn.disabled = true; btn.style.opacity = '0.6'; btn.querySelector('span').textContent = 'Creazione...'; }
+
+        await AuthManager.signUp(email, password, { name, surname, age, username });
+
+        if (successEl) { successEl.textContent = '✅ Account creato! Controlla l\'email per confermare.'; successEl.style.display = 'block'; }
+    } catch (err) {
+        let msg = err.message;
+        if (msg.includes('already registered')) msg = '❌ Questa email è già registrata.';
+        else msg = '❌ ' + msg;
+        if (errorEl) { errorEl.textContent = msg; errorEl.style.display = 'block'; }
+
+        const btn = document.querySelector('#authSignupForm .auth-submit-btn');
+        if (btn) { btn.disabled = false; btn.style.opacity = '1'; btn.querySelector('span').textContent = 'Crea Account'; }
+    }
+}
 
 // Global helpers for Account Menu
 function toggleAccountMenu() {

@@ -35,6 +35,85 @@
 </head>
 
 <body>
+    <!-- ═══════════ AUTH GATE OVERLAY ═══════════ -->
+    <div id="authModal" class="auth-overlay" style="display:none;">
+        <div class="auth-overlay-bg"></div>
+        <div class="auth-card">
+            <div class="auth-logo">
+                <img src="favicon.png" alt="Logo" style="width:48px;height:48px;border-radius:12px;">
+                <h1>StudyJournal <span style="color:var(--color-accent);">Pro</span></h1>
+                <p class="auth-subtitle">Accedi per iniziare a studiare con l'AI</p>
+            </div>
+
+            <div class="auth-tabs">
+                <button class="auth-tab active" onclick="switchAuthTab('login')">Accedi</button>
+                <button class="auth-tab" onclick="switchAuthTab('signup')">Registrati</button>
+            </div>
+
+            <!-- LOGIN FORM -->
+            <div id="authLoginForm" class="auth-form">
+                <div class="auth-field">
+                    <label for="authEmail">📧 Email</label>
+                    <input type="email" id="authEmail" placeholder="la-tua-email@esempio.com" class="auth-input"
+                        autocomplete="email">
+                </div>
+                <div class="auth-field">
+                    <label for="authPassword">🔒 Password</label>
+                    <input type="password" id="authPassword" placeholder="La tua password" class="auth-input"
+                        autocomplete="current-password">
+                </div>
+                <div id="authError" class="auth-error" style="display:none;"></div>
+                <div id="authSuccess" class="auth-success" style="display:none;"></div>
+                <button class="auth-submit-btn" onclick="handleAuthSubmit()">
+                    <span>Accedi</span>
+                    <span>→</span>
+                </button>
+            </div>
+
+            <!-- SIGNUP FORM -->
+            <div id="authSignupForm" class="auth-form" style="display:none;">
+                <div class="auth-fields-row">
+                    <div class="auth-field">
+                        <label for="signupName">👤 Nome</label>
+                        <input type="text" id="signupName" placeholder="Il tuo nome" class="auth-input">
+                    </div>
+                    <div class="auth-field">
+                        <label for="signupSurname">👤 Cognome</label>
+                        <input type="text" id="signupSurname" placeholder="Il tuo cognome" class="auth-input">
+                    </div>
+                </div>
+                <div class="auth-fields-row">
+                    <div class="auth-field">
+                        <label for="signupAge">🎂 Età</label>
+                        <input type="number" id="signupAge" placeholder="16" class="auth-input" min="10" max="99">
+                    </div>
+                    <div class="auth-field">
+                        <label for="signupUsername">✏️ Username</label>
+                        <input type="text" id="signupUsername" placeholder="Scegli un username" class="auth-input">
+                    </div>
+                </div>
+                <div class="auth-field">
+                    <label for="signupEmail">📧 Email</label>
+                    <input type="email" id="signupEmail" placeholder="la-tua-email@esempio.com" class="auth-input"
+                        autocomplete="email">
+                </div>
+                <div class="auth-field">
+                    <label for="signupPassword">🔒 Password</label>
+                    <input type="password" id="signupPassword" placeholder="Minimo 6 caratteri" class="auth-input"
+                        autocomplete="new-password">
+                </div>
+                <div id="signupError" class="auth-error" style="display:none;"></div>
+                <div id="signupSuccess" class="auth-success" style="display:none;"></div>
+                <button class="auth-submit-btn" onclick="handleSignupSubmit()">
+                    <span>Crea Account</span>
+                    <span>→</span>
+                </button>
+            </div>
+
+            <a href="index.html" class="auth-home-link">← Torna alla Homepage</a>
+        </div>
+    </div>
+
     <!-- AURORA BACKGROUND (Subtle for App) -->
     <div class="aurora-app-bg">
         <div class="orb-app orb-1"></div>

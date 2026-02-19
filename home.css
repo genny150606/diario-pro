@@ -207,6 +207,30 @@
     50% {
         background-position: 100% 50%;
     }
+
+    50% {
+        background-position: 100% 50%;
+    }
+}
+
+.typing-cursor::after {
+    content: '|';
+    display: inline-block;
+    margin-left: 2px;
+    animation: blinkCursor 1s step-end infinite;
+    color: var(--color-accent);
+}
+
+@keyframes blinkCursor {
+
+    0%,
+    100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0;
+    }
 }
 
 .hero-subtitle {

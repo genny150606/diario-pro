@@ -100,7 +100,7 @@ const SimpleChatbot = {
             .replace(/\n/g, '<br>');
     },
 
-    send() {
+    async send() {
         const input = document.getElementById('chatInputField');
         const messages = document.getElementById('geminiChatMessages');
         if (!input || !messages) return;
@@ -121,6 +121,19 @@ const SimpleChatbot = {
         // Track interaction in Supabase (non-blocking)
         if (typeof incrementChatbotStat === 'function') incrementChatbotStat();
 
+        // SPLIT COMMANDS: "fai questo POI fai quello"
+        // Split by "poi", "dopo", "e" (and), "then"
+        const commands = text.split(/\s+(?:poi|dopo|e|and|then)\s+/i);
+
+        for (const cmd of commands) {
+            if (!cmd.trim()) continue;
+            await this.processCommand(cmd.trim(), messages);
+            // Small delay between actions for natural feel
+            if (commands.length > 1) await new Promise(r => setTimeout(r, 800));
+        }
+    },
+
+    async processCommand(text, messages) {
         // Detect intent
         const intent = this.detectIntent(text);
         console.log('🧠 Intent detected:', intent.type);
@@ -136,13 +149,16 @@ const SimpleChatbot = {
                 this.handleAddTask(intent, messages);
                 break;
             case 'create_flashcards_free':
-                this.handleFreeFlashcards(intent, messages);
+                await this.handleFreeFlashcards(intent, messages);
                 break;
             case 'generate_notes':
-                this.generateNotes(text, messages);
+                await this.generateNotes(text, messages);
+                break;
+            case 'change_school':
+                this.handleSchoolSetting(messages);
                 break;
             default:
-                this.callChatAPI(text, messages);
+                await this.callChatAPI(text, messages);
         }
     },
 
@@ -211,7 +227,13 @@ const SimpleChatbot = {
             return { type: 'generate_notes' };
         }
 
-        // 6. GENERAL CHAT
+        // 6. SCHOOL SETTINGS
+        if (/(?:cambia|imposta|setta)\s+(?:tipo\s+)?(?:di\s+)?scuola/i.test(lower) ||
+            /(?:sono|vado)\s+(?:all'|al\s?)?(università|uni|liceo|superiori)/i.test(lower)) {
+            return { type: 'change_school' };
+        }
+
+        // 7. GENERAL CHAT
         return { type: 'general_chat' };
     },
 
@@ -401,6 +423,33 @@ const SimpleChatbot = {
         }
     },
 
+    // ── SCHOOL SETTINGS ──
+    handleSchoolSetting(messagesDiv) {
+        this.addAIBubble(messagesDiv, '🏫 **Che tipo di scuola frequenti?**<br>Questo mi aiuta a darti risposte più adatte.');
+
+        const btnDiv = document.createElement('div');
+        btnDiv.style.cssText = 'display: flex; gap: 8px; margin-top: 12px; padding: 0 16px;';
+
+        const makeBtn = (label, val) => {
+            const btn = document.createElement('button');
+            btn.style.cssText = 'flex:1; padding:8px; background:var(--bg-tertiary); color:var(--text-primary); border:1px solid var(--border); border-radius:8px; cursor:pointer;';
+            btn.textContent = label;
+            btn.onclick = () => this.setSchoolType(val, messagesDiv);
+            return btn;
+        };
+
+        btnDiv.appendChild(makeBtn('🎓 Università', 'university'));
+        btnDiv.appendChild(makeBtn('🏫 Liceo / Superiori', 'high_school'));
+        messagesDiv.appendChild(btnDiv);
+        messagesDiv.scrollTop = messagesDiv.scrollHeight;
+    },
+
+    setSchoolType(type, messagesDiv) {
+        localStorage.setItem('studyjournal_school_type', type);
+        const label = type === 'university' ? 'Università' : 'Liceo';
+        this.addAIBubble(messagesDiv, `✅ Ho impostato **${label}**. Adatterò le mie risposte!`);
+    },
+
     // ── FREE FLASHCARD GENERATION (without notes) ──
     async handleFreeFlashcards(intent, messagesDiv) {
         const loadingBubble = document.createElement('div');
@@ -580,7 +629,21 @@ Scrivi in modo CHIARO e EDUCATIVO. Sii PRECISO e COMPLETO.`;
 
             this.currentGeneratedNotes = { title: subject, subject: this.determineSubject(subject), content: fullText, generatedAt: new Date().toISOString() };
 
-            aiBubble.innerHTML = `📝 <strong>Appunti su "${subject}" pronti!</strong><br><br>` + this.formatMarkdown(fullText) + `<br><br><strong>Vuoi che generi flashcard da questi appunti?</strong>`;
+            // AUTO-SAVE NOTES TO CLOUD
+            const appData = (typeof loadData === 'function') ? loadData() : {};
+            if (!appData.notes) appData.notes = [];
+
+            appData.notes.push({
+                id: Date.now(),
+                title: subject,
+                subject: this.currentGeneratedNotes.subject,
+                content: fullText,
+                date: new Date().toISOString()
+            });
+
+            if (typeof saveData === 'function') saveData(appData);
+
+            aiBubble.innerHTML = `📝 <strong>Appunti su "${subject}" salvati!</strong><br><br>` + this.formatMarkdown(fullText) + `<br><br><strong>Vuoi che generi flashcard da questi appunti?</strong>`;
             this.history.push({ role: 'ai', content: fullText });
             setTimeout(() => this.addFlashcardButton(messagesDiv), 300);
 

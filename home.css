@@ -123,6 +123,7 @@
     /* Prevents logo cutoff on small desktop screens */
     text-align: center;
     padding: 100px var(--space-6) 80px;
+    overflow: hidden;
 }
 
 .hero-badge {
@@ -364,9 +365,9 @@
 .preview-glow {
     position: absolute;
     width: 60%;
-    height: 60%;
+    height: 40%;
     background: radial-gradient(circle, rgba(0, 122, 255, 0.15), transparent 70%);
-    bottom: -20%;
+    bottom: 0;
     left: 20%;
     pointer-events: none;
     filter: blur(40px);
@@ -375,7 +376,7 @@
 /* ── SECTIONS COMMON ── */
 .landing-section {
     position: relative;
-    z-index: 1;
+    z-index: 2;
     padding: 120px var(--space-8);
     max-width: 1200px;
     margin: 0 auto;

@@ -574,10 +574,18 @@
     <!-- SCRIPTS -->
     <script>
         function showSection(sectionId) {
+            console.log('🚀 Changing section to:', sectionId);
+
             // Nasconde tutte le sezioni
             document.querySelectorAll('section').forEach(s => s.classList.remove('active'));
             const section = document.getElementById(sectionId);
-            if (section) section.classList.add('active');
+
+            if (!section) {
+                console.warn(`⚠️ Sezione #${sectionId} non trovata!`);
+                return;
+            }
+
+            section.classList.add('active');
 
             // Aggiorna stato active nei link
             const navLinks = document.querySelectorAll('.sidebar-item');
@@ -592,28 +600,27 @@
             });
 
             // Gestione Sincronizzazione Dati Sezione
-            if (sectionId === 'notes') {
-                if (typeof renderNotes === 'function') renderNotes();
-                if (typeof renderFlashcards === 'function') renderFlashcards(loadFlashcards());
-            } else if (sectionId === 'tasks') {
-                if (typeof renderTasks === 'function') renderTasks();
-            } else if (sectionId === 'grades') {
-                if (typeof renderGrades === 'function') renderGrades();
-            } else if (sectionId === 'presences') {
-                if (typeof renderPresences === 'function') renderPresences();
-                if (typeof updatePresenceStats === 'function') updatePresenceStats();
+            try {
+                if (sectionId === 'notes') {
+                    if (typeof renderNotes === 'function') renderNotes();
+                    if (typeof renderFlashcards === 'function') renderFlashcards(loadFlashcards());
+                } else if (sectionId === 'tasks') {
+                    if (typeof renderTasks === 'function') renderTasks();
+                } else if (sectionId === 'grades') {
+                    if (typeof renderGrades === 'function') renderGrades();
+                } else if (sectionId === 'presences') {
+                    if (typeof renderPresences === 'function') renderPresences();
+                    if (typeof updatePresenceStats === 'function') updatePresenceStats();
+                }
+            } catch (err) {
+                console.error('❌ Errore durante il rendering della sezione:', err);
             }
 
             // Animazione indicatore (solo su Desktop)
             if (activeLink) updateNavIndicator(activeLink);
 
-            // Chiudi sidebar mobile se aperta
-            const sidebar = document.querySelector('.sidebar');
-            if (sidebar && sidebar.classList.contains('open')) {
-                sidebar.classList.remove('open');
-                document.querySelector('.navbar-overlay')?.classList.remove('active');
-                document.body.style.overflow = '';
-            }
+            // Nota: La chiusura della sidebar mobile è ora gestita interamente da hamburger-menu.js 
+            // per evitare conflitti e doppia esecuzione di logica.
         }
 
         function updateNavIndicator(activeLink) {
@@ -900,19 +907,6 @@
             }
         }
 
-        // ... (renderFlashcards omitted as it has no alerts) ...
-
-        function renderFlashcards(cards) {
-            const container = document.getElementById('flashcardStudy');
-            // ... previous logic remains same but I am not modifying it ...
-            // Wait, I need to include renderFlashcards to match content if I am replacing block? 
-            // Ah, renderFlashcards is long. I should try to replace smaller chunks or include it.
-            // I'll leave renderFlashcards alone by splitting the replacement if needed.
-            // But my EndLine is 910. I need to be careful.
-            // I'll just include the start of renderFlashcards and let the matching logic handle it?
-            // No, unsafe. I will check where renderFlashcards starts. It starts around 745.
-            // I will replace up to line 743 (deleteAllFlashcards) in one go, then do addNote/addTask separately.
-        }
 
 
         function renderFlashcards(cards) {

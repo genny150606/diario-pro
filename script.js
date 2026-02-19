@@ -1437,6 +1437,8 @@ window.updateDashboard = () => {
 window.renderTasks = (filter) => AppManager.renderTasks(filter);
 window.renderDiary = () => AppManager.renderDiary();
 window.renderGrades = () => AppManager.renderGrades();
+// EXPOSE GLOBALS
+window.AppManager = AppManager;
 window.renderPomodoro = () => AppManager.renderPomodoro();
 window.updateTimer = () => AppManager.updateTimer();
 

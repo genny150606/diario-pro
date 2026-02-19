@@ -311,11 +311,8 @@ const SimpleChatbot = {
     // ── ADD GRADE ──
     handleAddGrade(intent, messagesDiv) {
         try {
-            let appData = {};
-            try {
-                const saved = localStorage.getItem('studyjournal_data');
-                if (saved) appData = JSON.parse(saved);
-            } catch (e) { appData = {}; }
+            // Use global loadData to get correct user scope
+            const appData = (typeof loadData === 'function') ? loadData() : {};
 
             if (!appData.grades) appData.grades = [];
 
@@ -327,7 +324,12 @@ const SimpleChatbot = {
                 type: 'orale'
             });
 
-            localStorage.setItem('studyjournal_data', JSON.stringify(appData));
+            // Use global saveData to sync to cloud
+            if (typeof saveData === 'function') {
+                saveData(appData);
+            } else {
+                localStorage.setItem('studyjournal_data', JSON.stringify(appData));
+            }
 
             this.addAIBubble(messagesDiv,
                 `✅ Ho aggiunto un **${intent.value}** in **${intent.subject}**! 📊<br><br>` +
@@ -351,11 +353,8 @@ const SimpleChatbot = {
     // ── ADD TASK ──
     handleAddTask(intent, messagesDiv) {
         try {
-            let appData = {};
-            try {
-                const saved = localStorage.getItem('studyjournal_data');
-                if (saved) appData = JSON.parse(saved);
-            } catch (e) { appData = {}; }
+            // Use global loadData to get correct user scope
+            const appData = (typeof loadData === 'function') ? loadData() : {};
 
             if (!appData.tasks) appData.tasks = [];
 
@@ -372,7 +371,12 @@ const SimpleChatbot = {
             }
 
             appData.tasks.push(task);
-            localStorage.setItem('studyjournal_data', JSON.stringify(appData));
+            // Use global saveData to sync to cloud
+            if (typeof saveData === 'function') {
+                saveData(appData);
+            } else {
+                localStorage.setItem('studyjournal_data', JSON.stringify(appData));
+            }
 
             const dateStr = intent.date
                 ? intent.date.toLocaleDateString('it-IT', { weekday: 'long', day: 'numeric', month: 'long' })
@@ -421,12 +425,8 @@ const SimpleChatbot = {
             const data = await response.json();
             if (!data.flashcards || data.flashcards.length === 0) throw new Error('Nessuna flashcard generata');
 
-            // Save to localStorage
-            let appData = {};
-            try {
-                const saved = localStorage.getItem('studyjournal_data');
-                if (saved) appData = JSON.parse(saved);
-            } catch (e) { appData = {}; }
+            // Save to Cloud/Local via global helper
+            const appData = (typeof loadData === 'function') ? loadData() : {};
 
             if (!appData.flashcards) appData.flashcards = [];
 
@@ -446,7 +446,11 @@ const SimpleChatbot = {
                 }
             });
 
-            localStorage.setItem('studyjournal_data', JSON.stringify(appData));
+            if (typeof saveData === 'function') {
+                saveData(appData);
+            } else {
+                localStorage.setItem('studyjournal_data', JSON.stringify(appData));
+            }
 
             loadingBubble.remove();
 
@@ -640,8 +644,8 @@ Scrivi in modo CHIARO e EDUCATIVO. Sii PRECISO e COMPLETO.`;
             const data = await response.json();
             if (!data.flashcards || data.flashcards.length === 0) throw new Error('Nessuna flashcard generata');
 
-            let appData = {};
-            try { const saved = localStorage.getItem('studyjournal_data'); if (saved) appData = JSON.parse(saved); } catch (e) { }
+            // Save to Cloud/Local via global helper
+            const appData = (typeof loadData === 'function') ? loadData() : {};
             if (!appData.flashcards) appData.flashcards = [];
 
             let count = 0;
@@ -655,7 +659,11 @@ Scrivi in modo CHIARO e EDUCATIVO. Sii PRECISO e COMPLETO.`;
                 }
             });
 
-            localStorage.setItem('studyjournal_data', JSON.stringify(appData));
+            if (typeof saveData === 'function') {
+                saveData(appData);
+            } else {
+                localStorage.setItem('studyjournal_data', JSON.stringify(appData));
+            }
             loadingBubble.remove();
 
             const messageDiv = document.createElement('div');

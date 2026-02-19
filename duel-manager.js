@@ -139,23 +139,19 @@ const DuelManager = {
                 schema: 'public',
                 table: 'quiz_players',
                 filter: `room_id=eq.${roomId}`
-            }, payload => {
-                console.log('🔄 Player Update:', payload.new);
-                this.handlePlayerSync(payload.new);
+            }, () => {
+                this.handlePlayerSync();
             })
             .on('postgres_changes', {
                 event: 'UPDATE',
                 schema: 'public',
                 table: 'quiz_rooms',
                 filter: `id=eq.${roomId}`
-            }, payload => {
-                console.log('🏁 Room Status Update:', payload.new.status);
-                if (payload.new.status === 'active' && this.currentRoom.status !== 'active') {
-                    this.currentRoom.status = 'active';
-                    this.startQuizUI();
-                }
+            }, () => {
+                this.handlePlayerSync();
             })
             .subscribe((status) => {
+                console.log('📶 Realtime Status:', status);
                 if (status === 'SUBSCRIBED') {
                     this.updatePlayersList();
                 }
@@ -172,59 +168,29 @@ const DuelManager = {
         }, 5000);
     },
 
-    async handlePlayerSync(player) {
-        await this.updatePlayersList();
-
-        const myName = this.getPlayerName();
-        const me = this.players.find(p => p.username === myName);
-        const opponent = this.players.find(p => p.username !== myName);
-
-        console.log(`🔍 [Sync] Me: ${myName} (${me?.is_ready}), Opponent: ${opponent?.username} (${opponent?.is_ready})`);
-
-        // Trigger invitation if opponent is ready and I am not
-        if (opponent && opponent.is_ready && me && !me.is_ready) {
-            console.log('📢 Opponent is ready. Showing invitation...');
-            this.showDuelInvitation(opponent.username);
-        }
-
-        // Trigger countdown if both are ready
-        if (this.players.length === 2 && this.players.every(p => p.is_ready)) {
-            console.log('🚀 Both players ready! Starting countdown...');
-            if (!this.countdownStarted) {
-                this.startCountdown();
-            }
-        }
-    },
-
-    async showDuelInvitation(opponentName) {
-        if (this.inviting) return;
-        this.inviting = true;
-        const confirmed = await UIManager.confirm(
-            `${opponentName} è pronto per la sfida! Sei pronto anche tu?`,
-            '⚔️ SFIDA IN ARRIVO'
-        );
-        this.inviting = false;
-        if (confirmed) {
-            this.setReady();
-        }
-    },
-
-    async setReady() {
-        console.log('✅ Setting player as READY');
-        const { error } = await supabaseClient
-            .from('quiz_players')
-            .update({ is_ready: true })
-            .eq('room_id', this.currentRoom.id)
-            .eq('username', this.getPlayerName());
-
-        if (error) console.error('SetReady error:', error);
-    },
-
     async updatePlayersList() {
         if (!this.currentRoom) return;
 
-        console.log('🔄 Syncing players for room:', this.currentRoom.id);
+        console.log('🔄 Syncing lobby state for room:', this.currentRoom.id);
         try {
+            // 1. Fetch Room Status (to see if game started)
+            const { data: room, error: roomErr } = await supabaseClient
+                .from('quiz_rooms')
+                .select('*')
+                .eq('id', this.currentRoom.id)
+                .single();
+
+            if (!roomErr && room) {
+                if (room.status === 'active' && this.currentRoom.status !== 'active') {
+                    console.log('🏁 Game detected as ACTIVE via fetch.');
+                    this.currentRoom.status = 'active';
+                    this.startQuizUI();
+                    return; // Stop sync if active
+                }
+                this.currentRoom = room;
+            }
+
+            // 2. Fetch Players
             const { data, error } = await supabaseClient
                 .from('quiz_players')
                 .select('*')
@@ -232,30 +198,53 @@ const DuelManager = {
                 .order('created_at', { ascending: true });
 
             if (error) {
-                // If created_at fails (maybe SQL didn't run?), try without order
-                console.warn('⚠️ Order by created_at failed, retrying without it...');
+                console.warn('⚠️ Standard player sync failed, retrying simple...');
                 const { data: retryData, error: retryError } = await supabaseClient
                     .from('quiz_players')
                     .select('*')
                     .eq('room_id', this.currentRoom.id);
-
                 if (retryError) throw retryError;
                 this.players = retryData || [];
             } else {
                 this.players = data || [];
             }
 
-            console.log('👥 Current Players:', this.players);
-
+            console.log('👥 Players:', this.players.map(p => `${p.username}(${p.is_ready ? 'R' : 'W'})`));
             this.renderLobby();
 
-            // If in battle, refresh progress bars
-            if (this.currentRoom?.status === 'active') {
-                this.renderDuelProgress();
-            }
+            // 3. Act on current state
+            this.checkDuelLogic();
+
         } catch (err) {
             console.error('❌ Sync Error:', err.message);
         }
+    },
+
+    checkDuelLogic() {
+        if (this.currentRoom.status !== 'waiting') return;
+
+        const myName = this.getPlayerName();
+        const me = this.players.find(p => p.username === myName);
+        const opponent = this.players.find(p => p.username !== myName);
+
+        // a. Invitation logic
+        if (opponent && opponent.is_ready && me && !me.is_ready) {
+            console.log('📢 Opponent is ready. Showing invitation...');
+            this.showDuelInvitation(opponent.username);
+        }
+
+        // b. Countdown logic
+        if (this.players.length === 2 && this.players.every(p => p.is_ready)) {
+            if (!this.countdownStarted) {
+                console.log('🚀 Both ready! Triggering countdown...');
+                this.startCountdown();
+            }
+        }
+    },
+
+    async handlePlayerSync() {
+        // Simple wrapper for realtime events
+        await this.updatePlayersList();
     },
 
     // ── GAME LOGIC ──

@@ -1461,6 +1461,9 @@ document.addEventListener('DOMContentLoaded', () => {
     if (typeof UIManager.init === 'function') {
         UIManager.init();
     }
+
+    // Start Realtime Sync
+    StorageManager.initRealtime();
 });
 
 // Auto-save every 5 seconds

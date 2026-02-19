@@ -13,7 +13,6 @@ const UIManager = {
             const okBtn = document.getElementById('alertOkBtn');
 
             if (!modal) {
-                // Fallback if modal HTML is missing
                 window.alert(message);
                 resolve();
                 return;
@@ -22,22 +21,21 @@ const UIManager = {
             titleEl.textContent = title;
             msgEl.textContent = message;
             modal.style.display = 'flex';
+            modal.classList.add('active');
 
-            // Clean up previous listeners to avoid duplicates
             const newOkBtn = okBtn.cloneNode(true);
             okBtn.parentNode.replaceChild(newOkBtn, okBtn);
 
             newOkBtn.addEventListener('click', () => {
                 modal.style.display = 'none';
+                modal.classList.remove('active');
                 resolve();
             });
 
-            // Focus button for accessibility
             newOkBtn.focus();
         });
     },
 
-    // === CONFIRM ===
     confirm(message, title = 'Conferma Azione') {
         return new Promise((resolve) => {
             const modal = document.getElementById('confirmModal');
@@ -47,16 +45,15 @@ const UIManager = {
             const cancelBtn = document.getElementById('confirmCancelBtn');
 
             if (!modal) {
-                // Fallback
                 resolve(window.confirm(message));
                 return;
             }
 
             titleEl.textContent = title;
-            msgEl.innerHTML = message.replace(/\n/g, '<br>'); // Support newlines
+            msgEl.innerHTML = message.replace(/\n/g, '<br>');
             modal.style.display = 'flex';
+            modal.classList.add('active');
 
-            // Clone buttons to clear listeners
             const newOkBtn = okBtn.cloneNode(true);
             const newCancelBtn = cancelBtn.cloneNode(true);
             okBtn.parentNode.replaceChild(newOkBtn, okBtn);
@@ -64,15 +61,16 @@ const UIManager = {
 
             newOkBtn.addEventListener('click', () => {
                 modal.style.display = 'none';
+                modal.classList.remove('active');
                 resolve(true);
             });
 
             newCancelBtn.addEventListener('click', () => {
                 modal.style.display = 'none';
+                modal.classList.remove('active');
                 resolve(false);
             });
 
-            // Focus cancel by default for safety
             newCancelBtn.focus();
         });
     }

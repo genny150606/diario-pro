@@ -75,7 +75,17 @@ const SimpleChatbot = {
             micBtn.addEventListener('click', () => this.toggleJarvis());
         }
 
-        if (toggle) toggle.addEventListener('click', () => this.toggle());
+
+        // REPLACE TOGGLE STRUCTURE WITH ORB
+        if (toggle) {
+            toggle.innerHTML = `
+                <span class="chat-toggle-pulse"></span>
+                <span class="chat-toggle-icon">✨</span>
+                <span class="chat-toggle-label">AI Tutor</span>
+            `;
+            toggle.addEventListener('click', () => this.toggle());
+        }
+
         const closeBtn = document.getElementById('closeChatBtn');
         if (closeBtn) closeBtn.addEventListener('click', () => this.toggle());
         if (sendBtn) sendBtn.addEventListener('click', () => this.send());
@@ -670,12 +680,17 @@ const SimpleChatbot = {
         return hasKeyword && isGenerative;
     },
 
+    showThinking(parentDiv) {
+        const thinking = document.createElement('div');
+        thinking.className = 'ai-thinking';
+        thinking.innerHTML = '<span></span><span></span><span></span>';
+        parentDiv.appendChild(thinking);
+        parentDiv.scrollTop = parentDiv.scrollHeight;
+        return thinking;
+    },
+
     async generateNotes(userRequest, messagesDiv) {
-        const skeletonBubble = document.createElement('div');
-        skeletonBubble.className = 'chat-bubble ai';
-        skeletonBubble.innerHTML = '⏳ Preparando gli appunti...';
-        messagesDiv.appendChild(skeletonBubble);
-        messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        const skeletonBubble = this.showThinking(messagesDiv);
 
         try {
             const subject = this.extractSubject(userRequest);
@@ -962,11 +977,9 @@ Scrivi in modo CHIARO e EDUCATIVO. Sii PRECISO e COMPLETO.`;
         messagesDiv.appendChild(userBubble);
         messagesDiv.scrollTop = messagesDiv.scrollHeight;
 
-        const loadingBubble = document.createElement('div');
-        loadingBubble.className = 'chat-bubble ai';
-        loadingBubble.innerHTML = `⏳ Elaborando <strong>${fileName}</strong>...`;
-        messagesDiv.appendChild(loadingBubble);
         messagesDiv.scrollTop = messagesDiv.scrollHeight;
+
+        const loadingBubble = this.showThinking(messagesDiv);
 
         try {
             let text = '';

@@ -111,9 +111,8 @@ header,
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(0, 0, 0, 0.4);
-    backdrop-filter: blur(4px);
-    -webkit-backdrop-filter: blur(4px);
+    background: rgba(0, 0, 0, 0.5);
+    /* Slightly darker solid background */
     z-index: 9998;
     opacity: 0;
     visibility: hidden;
@@ -137,8 +136,6 @@ header,
         width: var(--sidebar-width);
         height: 100vh;
         background: var(--color-bg);
-        backdrop-filter: blur(8px);
-        -webkit-backdrop-filter: blur(8px);
         border-right: 1px solid var(--glass-border);
         z-index: 9999;
         transform: translateX(-100%);

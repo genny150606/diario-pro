@@ -29,9 +29,27 @@ const AuthManager = {
                 this.user = session?.user || null;
                 this.updateUI();
 
-                if (event === 'SIGNED_IN') {
+                if (event === 'SIGNED_IN' || event === 'INITIAL_SESSION') {
                     // Hide auth overlay, reveal app
-                    this.hideAuthGate();
+                    if (event === 'SIGNED_IN') this.hideAuthGate();
+
+                    // SELF-HEALING: Ensure users_data row exists
+                    if (session && session.user) {
+                        const uid = session.user.id;
+                        supabaseClient
+                            .from('users_data')
+                            .select('id')
+                            .eq('id', uid)
+                            .maybeSingle()
+                            .then(({ data }) => {
+                                if (!data) {
+                                    // Row missing? Create it now.
+                                    console.log('🚧 Fixing missing users_data row for:', uid);
+                                    return supabaseClient.from('users_data').insert([{ id: uid, data: {}, updated_at: new Date() }]);
+                                }
+                            })
+                            .catch(err => console.warn('User row check failed', err));
+                    }
 
                     // Load this user's data from Supabase into user-scoped cache
                     if (typeof CloudStorage !== 'undefined') {

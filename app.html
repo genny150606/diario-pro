@@ -24,6 +24,7 @@
     <link rel="stylesheet" href="animations.css">
     <link rel="stylesheet" href="animations-ui.css">
     <link rel="stylesheet" href="responsive.css">
+    <link rel="stylesheet" href="gamification.css">
 
     <!-- Supabase & Auth -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -132,6 +133,25 @@
 
         <nav class="sidebar">
             <div class="nav-indicator"></div>
+
+            <!-- GAMIFICATION BADGE -->
+            <div class="level-badge-container" id="sidebarLevelBadge" onclick="GamificationManager.showLevelDetails()">
+                <div class="level-circle">
+                    <span class="level-number" id="userLevelDisplay">1</span>
+                    <span class="level-label-mini">LVL</span>
+                </div>
+                <div class="level-info">
+                    <div class="level-title" id="userLevelTitle">Principiante</div>
+                    <div class="xp-bar-container">
+                        <div class="xp-bar-fill" id="sidebarXpFill" style="width: 0%"></div>
+                    </div>
+                    <div class="xp-text">
+                        <span id="userXpDisplay">0 XP</span>
+                        <span id="nextLevelXpDisplay">100 XP</span>
+                    </div>
+                </div>
+            </div>
+
             <a href="#" data-section="dashboard" class="sidebar-item nav-link active" id="navDashboard">Dashboard</a>
             <a href="#" data-section="notes" class="sidebar-item nav-link" id="navNotes">Note</a>
             <a href="#" data-section="tasks" class="sidebar-item nav-link" id="navTasks">Compiti</a>
@@ -2075,13 +2095,32 @@
     <!-- Script rimossi per evitare conflitti con l'HTML nuovo - Tutte le funzioni sono nel tag script inline sopra -->
     <script src="hamburger-menu.js"></script>
     <!-- 
-    <script src="script.js"></script>
-    <script src="onboarding.js"></script>
-    <script src="new-features.js"></script>
-    <script src="grades-adapter.js"></script>
-    <script src="flashcard-local-generator.js"></script>
-    <script src="gemini-features.js"></script>
-    -->
+    <!-- CORE SCRIPTS -->
+    <script src="script.js" defer></script>
+    <script src="onboarding.js" defer></script>
+    <script src="gemini-features.js" defer></script>
+    <script src="flashcard-local-generator.js" defer></script>
+
+    <!-- UI ELEMENTS FOR GAMIFICATION -->
+    <div id="xpToast" class="xp-toast">
+        <div class="xp-badge">+<span id="xpToastAmount">0</span> XP</div>
+        <div id="xpToastMessage">Azione completata!</div>
+    </div>
+
+    <!-- LEVEL UP OVERLAY -->
+    <div id="levelUpOverlay" class="level-up-overlay">
+        <div class="level-up-card">
+            <div class="level-up-icon">🚀</div>
+            <div class="level-up-title">LEVEL UP!</div>
+            <p class="level-up-desc">Complimenti! Hai raggiunto il livello <strong id="newLevelDisplay"
+                    style="color:var(--color-accent); font-size:1.2em;">2</strong></p>
+            <div class="xp-badge" style="display:inline-block; margin-bottom:20px; font-size:14px;">+ Nuove funzionalità
+                sbloccate</div>
+            <br>
+            <button class="level-up-btn" onclick="GamificationManager.closeLevelUp()">Continua a studiare 😎</button>
+        </div>
+    </div>
+</body>
 </body>
 
 </html>

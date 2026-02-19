@@ -9,6 +9,9 @@ const SimpleChatbot = {
     apiUrl: '',
     currentGeneratedNotes: null,
     history: [],
+    recognition: null,
+    isJarvisMode: false,
+    synth: window.speechSynthesis,
 
     // ── ITALIAN DAY NAMES → js getDay() values ──
     DAYS_IT: {
@@ -51,6 +54,26 @@ const SimpleChatbot = {
         const toggle = document.getElementById('geminiChatToggle');
         const sendBtn = document.querySelector('#geminiChatInput button');
         const input = document.getElementById('chatInputField');
+        const inputGroup = document.getElementById('geminiChatInput');
+
+        // JARVIS MODE BUTTON
+        if (inputGroup) {
+            const micBtn = document.createElement('button');
+            micBtn.id = 'jarvisToggleBtn';
+            micBtn.innerHTML = '🎙️';
+            micBtn.style.cssText = `
+                background: var(--bg-secondary); border: 1px solid var(--border);
+                border-radius: 50%; width: 40px; height: 40px; cursor: pointer;
+                display: flex; align-items: center; justify-content: center;
+                margin-right: 8px; transition: all 0.2s; font-size: 18px;
+            `;
+            micBtn.title = "Attiva Jarvis Mode (Vocale)";
+
+            // Insert before text input
+            inputGroup.insertBefore(micBtn, input);
+
+            micBtn.addEventListener('click', () => this.toggleJarvis());
+        }
 
         if (toggle) toggle.addEventListener('click', () => this.toggle());
         const closeBtn = document.getElementById('closeChatBtn');
@@ -59,6 +82,80 @@ const SimpleChatbot = {
         if (input) input.addEventListener('keypress', (e) => {
             if (e.key === 'Enter') this.send();
         });
+
+        this.initVoice();
+    },
+
+    initVoice() {
+        if ('webkitSpeechRecognition' in window) {
+            this.recognition = new webkitSpeechRecognition();
+            this.recognition.continuous = false;
+            this.recognition.lang = 'it-IT';
+            this.recognition.interimResults = false;
+
+            this.recognition.onresult = (event) => {
+                const text = event.results[0][0].transcript;
+                console.log('🎤 Jarvis heard:', text);
+                const input = document.getElementById('chatInputField');
+                if (input) {
+                    input.value = text;
+                    this.send(); // Auto-send
+                }
+            };
+
+            this.recognition.onend = () => {
+                const btn = document.getElementById('jarvisToggleBtn');
+                if (this.isJarvisMode && btn) {
+                    // Stay active? Or stop? For now, simplistic toggle.
+                    btn.classList.remove('jarvis-active');
+                }
+            };
+
+            this.recognition.onerror = (event) => {
+                console.error('Jarvis Error:', event.error);
+                this.toggleJarvis(false); // Force stop
+            };
+        } else {
+            console.warn('Web Speech API not supported');
+        }
+    },
+
+    toggleJarvis(forceState = null) {
+        const btn = document.getElementById('jarvisToggleBtn');
+        if (!this.recognition) {
+            alert('Il tuo browser non supporta i comandi vocali.');
+            return;
+        }
+
+        this.isJarvisMode = forceState !== null ? forceState : !this.isJarvisMode;
+
+        if (this.isJarvisMode) {
+            this.recognition.start();
+            btn.classList.add('jarvis-active');
+            btn.innerHTML = '🛑';
+
+            // Play sound
+            this.speak('Sono in ascolto.');
+        } else {
+            this.recognition.stop();
+            btn.classList.remove('jarvis-active');
+            btn.innerHTML = '🎙️';
+            window.speechSynthesis.cancel();
+        }
+    },
+
+    speak(text) {
+        if (!this.isJarvisMode) return;
+
+        // Remove markdown for speech
+        const cleanText = text.replace(/[*_#`]/g, '');
+
+        const utterance = new SpeechSynthesisUtterance(cleanText);
+        utterance.lang = 'it-IT';
+        utterance.rate = 1.0;
+        utterance.pitch = 1.0;
+
+        window.speechSynthesis.speak(utterance);
     },
 
     toggle() {
@@ -537,6 +634,9 @@ const SimpleChatbot = {
         messagesDiv.appendChild(bubble);
         messagesDiv.scrollTop = messagesDiv.scrollHeight;
         this.history.push({ role: 'ai', content: html });
+
+        // JARVIS SPEAK
+        if (this.isJarvisMode) this.speak(html);
     },
 
     addActionButton(messagesDiv, label, onClick) {
@@ -803,6 +903,9 @@ Scrivi in modo CHIARO e EDUCATIVO. Sii PRECISO e COMPLETO.`;
                     }
                 }
             }
+
+            // JARVIS SPEAK (Streaming complete)
+            if (this.isJarvisMode) this.speak(fullText);
 
             this.history.push({ role: 'ai', content: fullText });
         } catch (error) {

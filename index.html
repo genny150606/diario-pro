@@ -82,246 +82,256 @@
         </div>
     </section>
 
-    <!-- ═══════════ FEATURES ═══════════ -->
-    <section class="landing-section" id="features">
-        <div class="reveal">
-            <div class="section-label">⚡ Funzionalità</div>
-            <h2 class="section-heading">Tutto quello di cui hai bisogno per eccellere.</h2>
-            <p class="section-desc">
-                Sei strumenti potenti in un'unica interfaccia. Pensato per studenti che vogliono il massimo.
-            </p>
-        </div>
+    <!-- All post-hero content wrapped for full-width background coverage -->
+    <div class="page-body">
 
-        <div class="features-grid">
-            <div class="feature-card reveal reveal-delay-1">
-                <div class="feature-icon">📚</div>
-                <h3 class="feature-title">Note Intelligenti</h3>
-                <p class="feature-desc">
-                    Organizza i tuoi appunti per materia con editor avanzato. Ricerca fulminea e sincronizzazione cloud.
+        <!-- ═══════════ FEATURES ═══════════ -->
+        <section class="landing-section" id="features">
+            <div class="reveal">
+                <div class="section-label">⚡ Funzionalità</div>
+                <h2 class="section-heading">Tutto quello di cui hai bisogno per eccellere.</h2>
+                <p class="section-desc">
+                    Sei strumenti potenti in un'unica interfaccia. Pensato per studenti che vogliono il massimo.
                 </p>
             </div>
-            <div class="feature-card reveal reveal-delay-2">
-                <div class="feature-icon">🤖</div>
-                <h3 class="feature-title">Flashcard con AI</h3>
-                <p class="feature-desc">
-                    Genera flashcard istantaneamente dai tuoi appunti grazie a Gemini AI. Studio attivo mai così facile.
-                </p>
-            </div>
-            <div class="feature-card reveal reveal-delay-3">
-                <div class="feature-icon">✅</div>
-                <h3 class="feature-title">Gestione Compiti</h3>
-                <p class="feature-desc">
-                    Traccia scadenze, priorità e progressi. Non dimenticare mai più un compito con notifiche
-                    intelligenti.
-                </p>
-            </div>
-            <div class="feature-card reveal reveal-delay-4">
-                <div class="feature-icon">⭐</div>
-                <h3 class="feature-title">Registro Voti</h3>
-                <p class="feature-desc">
-                    Monitora i tuoi voti per materia, calcola medie automatiche e visualizza i trend di miglioramento.
-                </p>
-            </div>
-            <div class="feature-card reveal reveal-delay-5">
-                <div class="feature-icon">📊</div>
-                <h3 class="feature-title">Statistiche Avanzate</h3>
-                <p class="feature-desc">
-                    Dashboard interattiva con grafici e analytics. Capisci i tuoi punti di forza e dove migliorare.
-                </p>
-            </div>
-            <div class="feature-card reveal reveal-delay-6">
-                <div class="feature-icon">💬</div>
-                <h3 class="feature-title">AI Tutor</h3>
-                <p class="feature-desc">
-                    Un assistente AI sempre disponibile per rispondere alle tue domande e aiutarti nello studio.
-                </p>
-            </div>
-        </div>
-    </section>
 
-    <!-- ═══════════ STATS BANNER (REAL DATA) ═══════════ -->
-    <div class="stats-banner">
-        <div class="stats-banner-inner reveal">
-            <div class="stat-item">
-                <div class="stat-number" id="statUsers">—</div>
-                <div class="stat-label-landing">Utenti registrati</div>
-            </div>
-            <div class="stat-item">
-                <div class="stat-number" id="statNotes">—</div>
-                <div class="stat-label-landing">Note create</div>
-            </div>
-            <div class="stat-item">
-                <div class="stat-number" id="statFlashcards">—</div>
-                <div class="stat-label-landing">Flashcard generate</div>
-            </div>
-            <div class="stat-item">
-                <div class="stat-number" id="statReviews">—</div>
-                <div class="stat-label-landing">Recensioni</div>
-            </div>
-        </div>
-    </div>
-
-    <!-- ═══════════ HOW IT WORKS ═══════════ -->
-    <section class="landing-section">
-        <div class="reveal">
-            <div class="section-label">🎯 Come Funziona</div>
-            <h2 class="section-heading">Tre passi verso il successo.</h2>
-            <p class="section-desc">
-                Iniziare è semplicissimo. In meno di un minuto stai già studiando in modo più intelligente.
-            </p>
-        </div>
-
-        <div class="timeline reveal">
-            <div class="timeline-step">
-                <div class="step-number">1</div>
-                <h3 class="step-title">Crea il tuo Account</h3>
-                <p class="step-desc">Registrati gratuitamente e accedi alla tua dashboard personale in pochi secondi.
-                </p>
-            </div>
-            <div class="timeline-step">
-                <div class="step-number">2</div>
-                <h3 class="step-title">Aggiungi i tuoi Appunti</h3>
-                <p class="step-desc">Scrivi le tue note, organizzale per materia e lascia che l'AI crei le flashcard per
-                    te.</p>
-            </div>
-            <div class="timeline-step">
-                <div class="step-number">3</div>
-                <h3 class="step-title">Studia e Migliora</h3>
-                <p class="step-desc">Monitora i progressi con statistiche avanzate e raggiungi i tuoi obiettivi.</p>
-            </div>
-        </div>
-    </section>
-
-    <!-- ═══════════ REVIEWS (REAL FROM DB) ═══════════ -->
-    <section class="landing-section" id="reviews">
-        <div class="reveal">
-            <div class="section-label">💬 Recensioni</div>
-            <h2 class="section-heading">Cosa dicono gli studenti.</h2>
-            <p class="section-desc">
-                Recensioni vere dai nostri utenti. Vuoi lasciarne una anche tu?
-            </p>
-        </div>
-
-        <div class="testimonials-grid" id="reviewsContainer">
-            <p class="empty-state" style="grid-column: 1/-1;">Caricamento recensioni...</p>
-        </div>
-
-        <!-- Write Review Button -->
-        <div style="text-align: center; margin-top: var(--space-8);" class="reveal">
-            <button class="btn-hero btn-hero-secondary" onclick="openReviewModal()" id="writeReviewBtn">
-                ✍️ Lascia una Recensione
-            </button>
-        </div>
-    </section>
-
-    <!-- ═══════════ REVIEW MODAL ═══════════ -->
-    <div class="review-modal-overlay" id="reviewModal">
-        <div class="review-modal">
-            <div class="review-modal-header">
-                <h3>Lascia una Recensione ✨</h3>
-                <button onclick="closeReviewModal()" class="review-modal-close">✕</button>
-            </div>
-            <div class="review-modal-body">
-                <div id="reviewAuthNotice" style="display: none;">
-                    <p
-                        style="color: var(--color-warning); margin-bottom: var(--space-4); font-size: var(--font-size-sm);">
-                        ⚠️ Devi essere registrato nell'app per lasciare una recensione.
-                        <a href="app.html" style="color: var(--color-accent);">Accedi qui →</a>
+            <div class="features-grid">
+                <div class="feature-card reveal reveal-delay-1">
+                    <div class="feature-icon">📚</div>
+                    <h3 class="feature-title">Note Intelligenti</h3>
+                    <p class="feature-desc">
+                        Organizza i tuoi appunti per materia con editor avanzato. Ricerca fulminea e sincronizzazione
+                        cloud.
                     </p>
                 </div>
-
-                <label for="reviewName">Il tuo nome</label>
-                <input type="text" id="reviewName" placeholder="Es. Marco R." maxlength="50">
-
-                <label for="reviewRole">Chi sei</label>
-                <input type="text" id="reviewRole" placeholder="Es. Liceo Scientifico, 4° anno" maxlength="80">
-
-                <label>Valutazione</label>
-                <div class="star-rating" id="starRating">
-                    <span class="star" data-value="1">★</span>
-                    <span class="star" data-value="2">★</span>
-                    <span class="star" data-value="3">★</span>
-                    <span class="star" data-value="4">★</span>
-                    <span class="star" data-value="5">★</span>
+                <div class="feature-card reveal reveal-delay-2">
+                    <div class="feature-icon">🤖</div>
+                    <h3 class="feature-title">Flashcard con AI</h3>
+                    <p class="feature-desc">
+                        Genera flashcard istantaneamente dai tuoi appunti grazie a Gemini AI. Studio attivo mai così
+                        facile.
+                    </p>
                 </div>
+                <div class="feature-card reveal reveal-delay-3">
+                    <div class="feature-icon">✅</div>
+                    <h3 class="feature-title">Gestione Compiti</h3>
+                    <p class="feature-desc">
+                        Traccia scadenze, priorità e progressi. Non dimenticare mai più un compito con notifiche
+                        intelligenti.
+                    </p>
+                </div>
+                <div class="feature-card reveal reveal-delay-4">
+                    <div class="feature-icon">⭐</div>
+                    <h3 class="feature-title">Registro Voti</h3>
+                    <p class="feature-desc">
+                        Monitora i tuoi voti per materia, calcola medie automatiche e visualizza i trend di
+                        miglioramento.
+                    </p>
+                </div>
+                <div class="feature-card reveal reveal-delay-5">
+                    <div class="feature-icon">📊</div>
+                    <h3 class="feature-title">Statistiche Avanzate</h3>
+                    <p class="feature-desc">
+                        Dashboard interattiva con grafici e analytics. Capisci i tuoi punti di forza e dove migliorare.
+                    </p>
+                </div>
+                <div class="feature-card reveal reveal-delay-6">
+                    <div class="feature-icon">💬</div>
+                    <h3 class="feature-title">AI Tutor</h3>
+                    <p class="feature-desc">
+                        Un assistente AI sempre disponibile per rispondere alle tue domande e aiutarti nello studio.
+                    </p>
+                </div>
+            </div>
+        </section>
 
-                <label for="reviewText">La tua recensione</label>
-                <textarea id="reviewText" placeholder="Racconta la tua esperienza con StudyJournal Pro..."
-                    style="min-height: 100px;" maxlength="500"></textarea>
+        <!-- ═══════════ STATS BANNER (REAL DATA) ═══════════ -->
+        <div class="stats-banner">
+            <div class="stats-banner-inner reveal">
+                <div class="stat-item">
+                    <div class="stat-number" id="statUsers">—</div>
+                    <div class="stat-label-landing">Utenti registrati</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number" id="statNotes">—</div>
+                    <div class="stat-label-landing">Note create</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number" id="statFlashcards">—</div>
+                    <div class="stat-label-landing">Flashcard generate</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number" id="statReviews">—</div>
+                    <div class="stat-label-landing">Recensioni</div>
+                </div>
+            </div>
+        </div>
 
-                <p id="reviewError"
-                    style="display: none; color: var(--color-error); font-size: var(--font-size-sm); margin-bottom: var(--space-3);">
+        <!-- ═══════════ HOW IT WORKS ═══════════ -->
+        <section class="landing-section">
+            <div class="reveal">
+                <div class="section-label">🎯 Come Funziona</div>
+                <h2 class="section-heading">Tre passi verso il successo.</h2>
+                <p class="section-desc">
+                    Iniziare è semplicissimo. In meno di un minuto stai già studiando in modo più intelligente.
                 </p>
-                <p id="reviewSuccess"
-                    style="display: none; color: var(--color-success); font-size: var(--font-size-sm); margin-bottom: var(--space-3);">
-                </p>
+            </div>
 
-                <button class="btn-hero btn-hero-primary" onclick="submitReview()" id="submitReviewBtn"
-                    style="width: 100%; justify-content: center;">
-                    Pubblica Recensione ✨
+            <div class="timeline reveal">
+                <div class="timeline-step">
+                    <div class="step-number">1</div>
+                    <h3 class="step-title">Crea il tuo Account</h3>
+                    <p class="step-desc">Registrati gratuitamente e accedi alla tua dashboard personale in pochi
+                        secondi.
+                    </p>
+                </div>
+                <div class="timeline-step">
+                    <div class="step-number">2</div>
+                    <h3 class="step-title">Aggiungi i tuoi Appunti</h3>
+                    <p class="step-desc">Scrivi le tue note, organizzale per materia e lascia che l'AI crei le flashcard
+                        per
+                        te.</p>
+                </div>
+                <div class="timeline-step">
+                    <div class="step-number">3</div>
+                    <h3 class="step-title">Studia e Migliora</h3>
+                    <p class="step-desc">Monitora i progressi con statistiche avanzate e raggiungi i tuoi obiettivi.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- ═══════════ REVIEWS (REAL FROM DB) ═══════════ -->
+        <section class="landing-section" id="reviews">
+            <div class="reveal">
+                <div class="section-label">💬 Recensioni</div>
+                <h2 class="section-heading">Cosa dicono gli studenti.</h2>
+                <p class="section-desc">
+                    Recensioni vere dai nostri utenti. Vuoi lasciarne una anche tu?
+                </p>
+            </div>
+
+            <div class="testimonials-grid" id="reviewsContainer">
+                <p class="empty-state" style="grid-column: 1/-1;">Caricamento recensioni...</p>
+            </div>
+
+            <!-- Write Review Button -->
+            <div style="text-align: center; margin-top: var(--space-8);" class="reveal">
+                <button class="btn-hero btn-hero-secondary" onclick="openReviewModal()" id="writeReviewBtn">
+                    ✍️ Lascia una Recensione
                 </button>
             </div>
-        </div>
-    </div>
+        </section>
 
-    <!-- ═══════════ FINAL CTA ═══════════ -->
-    <section class="cta-section">
-        <div class="cta-card reveal">
-            <h2 class="cta-heading">Pronto a trasformare il tuo studio?</h2>
-            <p class="cta-desc">
-                Unisciti agli studenti che studiano in modo più intelligente. Completamente gratuito.
-            </p>
-            <a href="app.html" class="btn-hero btn-hero-primary">
-                Inizia Ora — È Gratis ✨
-            </a>
-        </div>
-    </section>
+        <!-- ═══════════ REVIEW MODAL ═══════════ -->
+        <div class="review-modal-overlay" id="reviewModal">
+            <div class="review-modal">
+                <div class="review-modal-header">
+                    <h3>Lascia una Recensione ✨</h3>
+                    <button onclick="closeReviewModal()" class="review-modal-close">✕</button>
+                </div>
+                <div class="review-modal-body">
+                    <div id="reviewAuthNotice" style="display: none;">
+                        <p
+                            style="color: var(--color-warning); margin-bottom: var(--space-4); font-size: var(--font-size-sm);">
+                            ⚠️ Devi essere registrato nell'app per lasciare una recensione.
+                            <a href="app.html" style="color: var(--color-accent);">Accedi qui →</a>
+                        </p>
+                    </div>
 
-    <!-- ═══════════ FOOTER ═══════════ -->
-    <footer class="landing-footer">
-        <div class="footer-container">
-            <div class="footer-col brand-col">
-                <a href="#" class="footer-logo">
-                    <span>StudyJournal Pro</span>
-                </a>
-                <p>La piattaforma definitiva per studenti ambiziosi. Organizza, studia e trionfa con l'aiuto dell'AI.
+                    <label for="reviewName">Il tuo nome</label>
+                    <input type="text" id="reviewName" placeholder="Es. Marco R." maxlength="50">
+
+                    <label for="reviewRole">Chi sei</label>
+                    <input type="text" id="reviewRole" placeholder="Es. Liceo Scientifico, 4° anno" maxlength="80">
+
+                    <label>Valutazione</label>
+                    <div class="star-rating" id="starRating">
+                        <span class="star" data-value="1">★</span>
+                        <span class="star" data-value="2">★</span>
+                        <span class="star" data-value="3">★</span>
+                        <span class="star" data-value="4">★</span>
+                        <span class="star" data-value="5">★</span>
+                    </div>
+
+                    <label for="reviewText">La tua recensione</label>
+                    <textarea id="reviewText" placeholder="Racconta la tua esperienza con StudyJournal Pro..."
+                        style="min-height: 100px;" maxlength="500"></textarea>
+
+                    <p id="reviewError"
+                        style="display: none; color: var(--color-error); font-size: var(--font-size-sm); margin-bottom: var(--space-3);">
+                    </p>
+                    <p id="reviewSuccess"
+                        style="display: none; color: var(--color-success); font-size: var(--font-size-sm); margin-bottom: var(--space-3);">
+                    </p>
+
+                    <button class="btn-hero btn-hero-primary" onclick="submitReview()" id="submitReviewBtn"
+                        style="width: 100%; justify-content: center;">
+                        Pubblica Recensione ✨
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ═══════════ FINAL CTA ═══════════ -->
+        <section class="cta-section">
+            <div class="cta-card reveal">
+                <h2 class="cta-heading">Pronto a trasformare il tuo studio?</h2>
+                <p class="cta-desc">
+                    Unisciti agli studenti che studiano in modo più intelligente. Completamente gratuito.
                 </p>
-                <div class="social-links">
-                    <a href="#" aria-label="Instagram">📸</a>
-                    <a href="#" aria-label="Twitter">🐦</a>
-                    <a href="#" aria-label="LinkedIn">💼</a>
+                <a href="app.html" class="btn-hero btn-hero-primary">
+                    Inizia Ora — È Gratis ✨
+                </a>
+            </div>
+        </section>
+
+        <!-- ═══════════ FOOTER ═══════════ -->
+        <footer class="landing-footer">
+            <div class="footer-container">
+                <div class="footer-col brand-col">
+                    <a href="#" class="footer-logo">
+                        <span>StudyJournal Pro</span>
+                    </a>
+                    <p>La piattaforma definitiva per studenti ambiziosi. Organizza, studia e trionfa con l'aiuto
+                        dell'AI.
+                    </p>
+                    <div class="social-links">
+                        <a href="#" aria-label="Instagram">📸</a>
+                        <a href="#" aria-label="Twitter">🐦</a>
+                        <a href="#" aria-label="LinkedIn">💼</a>
+                    </div>
+                </div>
+
+                <div class="footer-col">
+                    <h4>Prodotto</h4>
+                    <a href="#features">Funzionalità</a>
+                    <a href="#">Prezzi</a>
+                    <a href="app.html">Accedi</a>
+                    <a href="#">Download App</a>
+                </div>
+
+                <div class="footer-col">
+                    <h4>Risorse</h4>
+                    <a href="#">Blog</a>
+                    <a href="#">Guida allo Studio</a>
+                    <a href="#">Community</a>
+                    <a href="#">Supporto</a>
+                </div>
+
+                <div class="footer-col">
+                    <h4>Note Legali</h4>
+                    <a href="#">Privacy Policy</a>
+                    <a href="#">Termini di Servizio</a>
+                    <a href="#">Cookie Policy</a>
                 </div>
             </div>
 
-            <div class="footer-col">
-                <h4>Prodotto</h4>
-                <a href="#features">Funzionalità</a>
-                <a href="#">Prezzi</a>
-                <a href="app.html">Accedi</a>
-                <a href="#">Download App</a>
+            <div class="footer-bottom">
+                <p>&copy; 2026 StudyJournal Pro. Tutti i diritti riservati.</p>
+                <p>Designed by <strong>Gennaro Pascale</strong></p>
             </div>
-
-            <div class="footer-col">
-                <h4>Risorse</h4>
-                <a href="#">Blog</a>
-                <a href="#">Guida allo Studio</a>
-                <a href="#">Community</a>
-                <a href="#">Supporto</a>
-            </div>
-
-            <div class="footer-col">
-                <h4>Note Legali</h4>
-                <a href="#">Privacy Policy</a>
-                <a href="#">Termini di Servizio</a>
-                <a href="#">Cookie Policy</a>
-            </div>
-        </div>
-
-        <div class="footer-bottom">
-            <p>&copy; 2026 StudyJournal Pro. Tutti i diritti riservati.</p>
-            <p>Designed by <strong>Gennaro Pascale</strong></p>
-        </div>
-    </footer>
+        </footer>
+    </div><!-- end .page-body -->
 
     <!-- ═══════════ SCRIPTS ═══════════ -->
     <script>

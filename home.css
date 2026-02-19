@@ -373,12 +373,8 @@
 }
 
 /* ── SECTIONS COMMON ── */
-/* Full-width background wrapper that covers hero overflow */
-#features,
-#how-it-works,
-#testimonials,
-#pricing,
-.landing-section-wrapper {
+/* page-body covers any hero overflow with the page background */
+.page-body {
     position: relative;
     z-index: 2;
     background: var(--color-bg);
@@ -387,7 +383,6 @@
 
 .landing-section {
     position: relative;
-    z-index: 2;
     padding: 120px var(--space-8);
     max-width: 1200px;
     margin: 0 auto;

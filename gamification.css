@@ -1,8 +1,8 @@
 /* ============================================
-   GAMIFICATION UI
+   GAMIFICATION UI (POPOVER)
    ============================================ */
 
-/* HEADER LEVEL BADGE (Moved from Sidebar) */
+/* HEADER LEVEL BADGE */
 .header-level-badge {
     display: flex;
     align-items: center;
@@ -15,448 +15,185 @@
     cursor: pointer;
     transition: all 0.2s ease;
     margin-right: 12px;
-}
-
-.header-level-badge:hover {
-    background: rgba(255, 255, 255, 0.2);
-    transform: translateY(-1px);
-    border-color: var(--color-accent);
-}
-
-.header-level-ring {
-    width: 28px;
-    height: 28px;
     position: relative;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    /* Anchor for popup if needed */
 }
 
-.circular-chart {
-    width: 100%;
-    height: 100%;
-    transform: rotate(-90deg);
-}
-
-.circle-bg {
-    fill: none;
-    stroke: rgba(255, 255, 255, 0.2);
-    stroke-width: 3;
-}
-
-.circle {
-    fill: none;
-    stroke: var(--color-accent);
-    stroke-width: 3;
-    stroke-linecap: round;
-    transition: stroke-dasharray 0.5s ease;
-}
-
-.header-level-text {
+/* POPOVER CONTAINER */
+.gamification-popup {
     position: absolute;
-    font-size: 10px;
-    font-weight: 800;
-    color: var(--text-primary);
+    top: 70px;
+    /* Adjust based on header height */
+    right: 20px;
+    width: 320px;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-radius: 20px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2), 0 0 0 1px rgba(255, 255, 255, 0.5);
+    z-index: 9999;
+    padding: 20px;
+    animation: popupFadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    border: 1px solid rgba(255, 255, 255, 0.3);
 }
 
-.header-level-label {
-    font-size: 12px;
-    font-weight: 700;
-    color: var(--text-primary);
-}
+@keyframes popupFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px) scale(0.98);
+    }
 
-/* Hide label on mobile */
-@media (max-width: 480px) {
-    .header-level-label {
-        display: none;
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
     }
 }
 
-/* Sidebar Badge (Legacy - Removed from HTML but style kept just in case) */
-.level-badge-container {
-    padding: 12px;
-    background: var(--bg-secondary);
-    border-radius: 12px;
-    margin-bottom: 24px;
+.gamification-popup.hidden {
+    display: none;
+}
+
+/* MINI HERO SECTION */
+.gamification-hero-mini {
+    background: linear-gradient(135deg, #4f46e5, #ec4899);
+    border-radius: 16px;
+    padding: 16px;
+    color: white;
+    margin-bottom: 16px;
+    box-shadow: 0 8px 16px rgba(79, 70, 229, 0.25);
+}
+
+.hero-header-mini {
     display: flex;
     align-items: center;
     gap: 12px;
-    border: 1px solid var(--border);
-    cursor: pointer;
-    transition: all 0.2s ease;
+    margin-bottom: 12px;
 }
 
-.level-badge-container:hover {
-    transform: translateY(-2px);
-    border-color: var(--color-accent);
-    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.15);
-}
-
-.level-circle {
+.hero-level-circle-mini {
     width: 48px;
     height: 48px;
     border-radius: 50%;
-    background: linear-gradient(135deg, var(--color-accent), var(--color-accent-hover));
+    background: rgba(255, 255, 255, 0.2);
     display: flex;
-    flex-direction: column;
     align-items: center;
     justify-content: center;
-    color: white;
-    box-shadow: 0 4px 8px rgba(99, 102, 241, 0.3);
+    font-weight: 800;
+    font-size: 20px;
+    border: 2px solid rgba(255, 255, 255, 0.5);
 }
 
-.level-number {
+.hero-info-mini h2 {
     font-size: 18px;
-    font-weight: 800;
-    line-height: 1;
-}
-
-.level-label-mini {
-    font-size: 8px;
-    font-weight: 600;
-    opacity: 0.9;
-    text-transform: uppercase;
-}
-
-.level-info {
-    flex: 1;
-}
-
-.level-title {
-    font-size: 14px;
+    margin: 0;
     font-weight: 700;
-    margin-bottom: 4px;
-    color: var(--text-primary);
 }
 
-.xp-bar-container {
-    height: 6px;
-    background: var(--bg-tertiary);
-    border-radius: 3px;
-    overflow: hidden;
-    margin-bottom: 4px;
-}
-
-.xp-bar-fill {
-    height: 100%;
-    background: var(--color-accent);
-    border-radius: 3px;
-    transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.xp-text {
-    font-size: 10px;
-    color: var(--text-secondary);
-    display: flex;
-    justify-content: space-between;
-}
-
-/* ═══════════ GAMIFICATION PAGE ═══════════ */
-.gamification-hero {
-    background: linear-gradient(135deg, #4f46e5, #ec4899);
-    border-radius: 24px;
-    padding: 40px;
-    color: white;
-    text-align: center;
-    margin-bottom: 32px;
-    position: relative;
-    overflow: hidden;
-    box-shadow: 0 10px 30px rgba(79, 70, 229, 0.3);
-}
-
-.gamification-hero h1 {
-    font-size: 32px;
-    font-weight: 800;
-    margin-bottom: 8px;
-    color: white;
-}
-
-.gamification-hero p {
-    font-size: 16px;
-    opacity: 0.9;
-    margin-bottom: 24px;
-}
-
-.hero-level-circle {
-    width: 120px;
-    height: 120px;
-    border-radius: 50%;
-    background: rgba(255, 255, 255, 0.2);
-    backdrop-filter: blur(10px);
-    border: 4px solid rgba(255, 255, 255, 0.5);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    margin: 0 auto 24px;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
-}
-
-.hero-level-number {
-    font-size: 48px;
-    font-weight: 900;
-    line-height: 1;
-}
-
-.hero-level-label {
+.hero-info-mini p {
     font-size: 12px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 1px;
+    margin: 0;
+    opacity: 0.9;
 }
 
-.hero-xp-bar {
-    max-width: 400px;
-    margin: 0 auto;
-    background: rgba(255, 255, 255, 0.2);
-    border-radius: 8px;
-    height: 12px;
+.hero-xp-bar-mini {
+    height: 6px;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 3px;
     overflow: hidden;
+    margin-bottom: 6px;
 }
 
-.hero-xp-fill {
-    height: 100%;
-    background: white;
-    border-radius: 8px;
-    width: 50%;
-    transition: width 1s ease;
-    box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+.hero-xp-text-mini {
+    font-size: 10px;
+    text-align: right;
+    opacity: 0.9;
+    font-weight: 600;
 }
 
+/* COMPACT STATS GRID */
 .stats-grid-gamification {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 16px;
-    margin-bottom: 32px;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 16px;
 }
 
 .stat-card-game {
-    background: var(--bg-secondary);
-    border-radius: 16px;
-    padding: 20px;
+    background: rgba(255, 255, 255, 0.5);
+    border-radius: 12px;
+    padding: 10px;
     text-align: center;
-    border: 1px solid var(--border);
-    transition: transform 0.2s ease;
-}
-
-.stat-card-game:hover {
-    transform: translateY(-4px);
-    border-color: var(--color-accent);
+    border: 1px solid rgba(0, 0, 0, 0.05);
 }
 
 .stat-game-value {
-    font-size: 24px;
-    font-weight: 800;
+    font-size: 16px;
+    font-weight: 700;
     color: var(--text-primary);
-    margin-bottom: 4px;
+    margin-bottom: 2px;
 }
 
 .stat-game-label {
-    font-size: 12px;
+    font-size: 10px;
     color: var(--text-secondary);
     text-transform: uppercase;
-    font-weight: 600;
+    letter-spacing: 0.5px;
 }
 
-/* ═══════════ ACHIEVEMENTS ═══════════ */
+/* COMPACT ACHIEVEMENTS */
 .achievements-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-    gap: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    max-height: 150px;
+    overflow-y: auto;
+    padding-right: 4px;
 }
 
 .achievement-card {
-    background: var(--bg-secondary);
-    border-radius: 16px;
-    padding: 16px;
-    text-align: center;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px;
+    background: white;
+    border-radius: 10px;
     border: 1px solid var(--border);
-    opacity: 0.6;
-    filter: grayscale(1);
-    transition: all 0.3s ease;
-    position: relative;
-    overflow: hidden;
-}
-
-.achievement-card.unlocked {
-    opacity: 1;
-    filter: grayscale(0);
-    border-color: #fbbf24;
-    background: linear-gradient(to bottom, var(--bg-secondary), rgba(251, 191, 36, 0.05));
-    box-shadow: 0 4px 12px rgba(251, 191, 36, 0.15);
 }
 
 .achievement-icon {
-    font-size: 32px;
-    margin-bottom: 8px;
-    display: block;
+    font-size: 20px;
+    background: var(--bg-secondary);
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
 }
 
 .achievement-title {
-    font-size: 12px;
-    font-weight: 700;
-    margin-bottom: 4px;
-    color: var(--text-primary);
+    font-size: 13px;
+    font-weight: 600;
 }
 
 .achievement-desc {
-    font-size: 10px;
+    font-size: 11px;
     color: var(--text-secondary);
-    line-height: 1.4;
-}
-
-/* LEVEL UP MODAL */
-.level-up-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.8);
     display: none;
-    align-items: center;
-    justify-content: center;
-    z-index: 2000;
-    backdrop-filter: blur(8px);
+    /* Hide desc in compact view */
 }
 
-.level-up-overlay.active {
-    display: flex;
-    animation: fadeIn 0.4s ease forwards;
+/* Dark Mode Overrides */
+body.dark-mode .gamification-popup {
+    background: rgba(30, 30, 35, 0.95);
+    border-color: rgba(255, 255, 255, 0.1);
 }
 
-.level-up-card {
-    background: linear-gradient(135deg, #1e1b4b, #312e81);
-    padding: 40px;
-    border-radius: 32px;
-    text-align: center;
-    width: 90%;
-    max-width: 400px;
-    border: 2px solid rgba(255, 255, 255, 0.1);
-    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
-    transform: scale(0.8);
-    opacity: 0;
-    animation: popIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards 0.2s;
-    position: relative;
-    overflow: hidden;
+body.dark-mode .stat-card-game {
+    background: rgba(255, 255, 255, 0.05);
 }
 
-.level-up-card::before {
-    content: '';
-    position: absolute;
-    top: -50%;
-    left: -50%;
-    width: 200%;
-    height: 200%;
-    background: conic-gradient(transparent, rgba(255, 255, 255, 0.1), transparent);
-    animation: rotate 4s linear infinite;
-}
-
-.level-up-content {
-    position: relative;
-    z-index: 2;
-}
-
-.level-up-badge {
-    font-size: 80px;
-    margin-bottom: 16px;
-    display: inline-block;
-    animation: float 3s ease-in-out infinite;
-}
-
-.level-up-title {
-    font-size: 32px;
-    font-weight: 900;
-    color: #fff;
-    text-transform: uppercase;
-    margin-bottom: 8px;
-    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
-}
-
-.level-up-number {
-    font-size: 64px;
-    font-weight: 900;
-    background: linear-gradient(to right, #fbbf24, #f59e0b);
-    background-clip: text;
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    display: block;
-    margin: -10px 0 10px;
-}
-
-.level-up-btn {
-    background: white;
-    color: #312e81;
-    border: none;
-    padding: 12px 32px;
-    border-radius: 50px;
-    font-weight: 700;
-    font-size: 16px;
-    cursor: pointer;
-    margin-top: 24px;
-    transition: transform 0.2s;
-}
-
-.level-up-btn:hover {
-    transform: scale(1.05);
-}
-
-@keyframes popIn {
-    to {
-        opacity: 1;
-        transform: scale(1);
-    }
-}
-
-@keyframes rotate {
-    to {
-        transform: rotate(360deg);
-    }
-}
-
-.confetti {
-    position: absolute;
-    width: 10px;
-    height: 10px;
-    background: #ffd700;
-    animation: fall linear forwards;
-}
-
-@keyframes fall {
-    to {
-        transform: translateY(100vh) rotate(720deg);
-    }
-}
-
-/* ═══════════ TOAST ═══════════ */
-.xp-toast {
-    position: fixed;
-    bottom: 32px;
-    right: 32px;
-    background: var(--bg-card);
-    border: 1px solid var(--border);
-    padding: 12px 20px;
-    border-radius: 12px;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-    transform: translateY(100px);
-    opacity: 0;
-    transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
-    z-index: 1000;
-}
-
-.xp-toast.show {
-    transform: translateY(0);
-    opacity: 1;
-}
-
-.xp-amount {
-    background: linear-gradient(135deg, #fbbf24, #f59e0b);
-    color: white;
-    font-weight: 800;
-    padding: 4px 8px;
-    border-radius: 6px;
-    font-size: 14px;
+body.dark-mode .achievement-card {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(255, 255, 255, 0.1);
 }

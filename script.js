@@ -616,6 +616,21 @@ const GamificationManager = {
 
     init() {
         this.updateUI();
+    },
+
+    toggleGamification() {
+        const popup = document.getElementById('gamificationPopup');
+        if (!popup) return;
+
+        const isHidden = popup.classList.contains('hidden');
+        if (isHidden) {
+            popup.classList.remove('hidden');
+            popup.style.display = 'block';
+            this.updateUI(); // Ensure fresh data
+        } else {
+            popup.classList.add('hidden');
+            popup.style.display = 'none';
+        }
     }
 };
 
@@ -1127,9 +1142,7 @@ const AppManager = {
             case 'pomodoro':
                 this.renderPomodoro();
                 break;
-            case 'gamification':
-                GamificationManager.renderGamificationPage();
-                break;
+
         }
 
         // Close sidebar on mobile
@@ -1469,14 +1482,19 @@ document.addEventListener('DOMContentLoaded', () => {
         console.log('Gamification Badge found, attaching listener');
         badge.addEventListener('click', (e) => {
             e.preventDefault();
+            e.stopPropagation(); // Prevent immediate closing
             console.log('Gamification Badge Clicked');
-            if (typeof AppManager !== 'undefined') {
-                AppManager.showSection('gamification');
-            } else {
-                console.error('AppManager not defined on click');
-                // Fallback attempt
-                if (typeof UIManager !== 'undefined') {
-                    UIManager.showSection('gamification');
+            GamificationManager.toggleGamification();
+        });
+
+        // Close when clicking outside
+        document.addEventListener('click', (e) => {
+            const popup = document.getElementById('gamificationPopup');
+            const badge = document.getElementById('headerLevelBadge');
+            if (popup && !popup.classList.contains('hidden')) {
+                if (!popup.contains(e.target) && !badge.contains(e.target)) {
+                    popup.classList.add('hidden');
+                    popup.style.display = 'none';
                 }
             }
         });

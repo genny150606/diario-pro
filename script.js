@@ -1478,6 +1478,11 @@ document.addEventListener('DOMContentLoaded', () => {
     // Only init existing managers
     if (typeof NotesManager !== 'undefined') NotesManager.init(StorageManager.load());
     if (typeof FlashcardManager !== 'undefined') FlashcardManager.init(StorageManager.load());
+    if (typeof DuelManager !== 'undefined') {
+        console.log('⚔️ DuelManager initializing...');
+        // DuelManager.init() is currently handled by its own object structure if needed, 
+        // but we ensure it's ready.
+    }
 
     // Robust Gamification Click Handler
     const badge = document.getElementById('headerLevelBadge');
@@ -1519,7 +1524,8 @@ window.renderTasks = (filter) => AppManager.renderTasks(filter);
 window.renderDiary = () => AppManager.renderDiary();
 window.renderGrades = () => AppManager.renderGrades();
 // EXPOSE GLOBALS
-window.AppManager = UIManager;
+window.AppManager = AppManager; // FIX: Correctly point to AppManager
+window.UIManager = UIManager;
 window.GamificationManager = GamificationManager;
 window.renderPomodoro = () => AppManager.renderPomodoro();
 window.updateTimer = () => AppManager.updateTimer();

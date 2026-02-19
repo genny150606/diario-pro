@@ -10,7 +10,9 @@ const DuelManager = {
     score: 0,
     subscription: null,
     isHost: false,
-
+    playerName: null,
+    inviting: false,
+    countdownStarted: false,
     async init() {
         console.log('⚔️ Duel Manager initialized');
     },
@@ -47,7 +49,8 @@ const DuelManager = {
             document.getElementById('roomCodeDisplay').textContent = code;
 
             // 3. Add Host as first player
-            await this.joinPlayer(room.id, AuthManager.user?.email?.split('@')[0] || 'Player 1');
+            this.playerName = AuthManager.user?.email?.split('@')[0] || 'Player 1';
+            await this.joinPlayer(room.id, this.playerName);
 
             this.subscribeToRoom(room.id);
             return code;
@@ -76,6 +79,7 @@ const DuelManager = {
 
             this.currentRoom = room;
             this.isHost = false;
+            this.playerName = username;
             this.questions = room.ai_data;
 
             // UI Update
@@ -109,7 +113,7 @@ const DuelManager = {
     async joinPlayer(roomId, username) {
         const { data, error } = await supabaseClient
             .from('quiz_players')
-            .insert([{ room_id: roomId, username, score: 0, is_ready: true }])
+            .insert([{ room_id: roomId, username, score: 0, is_ready: false }])
             .select()
             .single();
 
@@ -317,11 +321,7 @@ const DuelManager = {
     },
 
     getPlayerName() {
-        if (this.isHost) {
-            return AuthManager.user?.email?.split('@')[0] || 'Player 1';
-        }
-        const name = document.getElementById('duelUsername')?.value;
-        return name || 'Ospite';
+        return this.playerName || 'Ospite';
     },
 
     // ── UI RENDERING ──

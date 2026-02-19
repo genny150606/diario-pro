@@ -1082,7 +1082,9 @@ const StorageManager = {
 
             // Update nav
             document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
-            document.querySelector(`[data-section="${sectionName}"]`).classList.add('active');
+            // Safely try to find nav link (might not exist for gamification)
+            const activeNav = document.querySelector(`[data-section="${sectionName}"]`);
+            if (activeNav) activeNav.classList.add('active');
 
             this.currentSection = sectionName;
 

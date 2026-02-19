@@ -87,12 +87,12 @@
 }
 
 .hero-logo-img {
-    width: 100px;
-    height: 100px;
+    width: 180px;
+    height: auto;
     border-radius: var(--radius-xl);
     box-shadow: 0 10px 40px rgba(0, 122, 255, 0.4);
     animation: floatLogo 6s ease-in-out infinite;
-    object-fit: cover;
+    object-fit: contain;
 }
 
 @keyframes floatLogo {

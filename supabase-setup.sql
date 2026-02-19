@@ -108,6 +108,6 @@ CREATE POLICY "Public manage quiz_rooms" ON public.quiz_rooms FOR ALL USING (tru
 DROP POLICY IF EXISTS "Public manage quiz_players" ON public.quiz_players;
 CREATE POLICY "Public manage quiz_players" ON public.quiz_players FOR ALL USING (true) WITH CHECK (true);
 
--- IMPORTANT: Enable Realtime for these tables in Supabase Dashboard:
--- 1. Database -> Replication -> Click '0 tables' under Source
--- 2. Toggle 'quiz_rooms' and 'quiz_players'
+-- IMPORTANT: Enable Realtime for these tables
+-- You can run this SQL command right here to enable it (instead of using the UI):
+ALTER PUBLICATION supabase_realtime ADD TABLE quiz_rooms, quiz_players;

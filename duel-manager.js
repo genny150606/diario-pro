@@ -126,7 +126,6 @@ const DuelManager = {
             supabaseClient.removeChannel(this.subscription);
         }
 
-        // Defensive: Fetch current players immediately
         this.updatePlayersList();
 
         this.subscription = supabaseClient
@@ -137,8 +136,8 @@ const DuelManager = {
                 table: 'quiz_players',
                 filter: `room_id=eq.${roomId}`
             }, payload => {
-                console.log('🔄 Player Sync Event:', payload.eventType, payload.new);
-                this.updatePlayersList();
+                console.log('🔄 Player Update:', payload.new);
+                this.handlePlayerSync(payload.new);
             })
             .on('postgres_changes', {
                 event: 'UPDATE',
@@ -153,7 +152,6 @@ const DuelManager = {
                 }
             })
             .subscribe((status) => {
-                console.log('📶 Realtime Status:', status);
                 if (status === 'SUBSCRIBED') {
                     this.updatePlayersList();
                 }
@@ -163,12 +161,54 @@ const DuelManager = {
         if (this.lobbyInterval) clearInterval(this.lobbyInterval);
         this.lobbyInterval = setInterval(() => {
             if (this.currentRoom && this.currentRoom.status === 'waiting') {
-                console.log('🕒 Fallback lobby refresh...');
                 this.updatePlayersList();
             } else {
                 clearInterval(this.lobbyInterval);
             }
         }, 5000);
+    },
+
+    async handlePlayerSync(player) {
+        await this.updatePlayersList();
+
+        // Logic for Battle Invitation
+        const me = this.players.find(p => p.username === this.getPlayerName());
+        const opponent = this.players.find(p => p.username !== this.getPlayerName());
+
+        if (opponent && opponent.is_ready && me && !me.is_ready) {
+            this.showDuelInvitation(opponent.username);
+        }
+
+        // Logic for Countdown (Both ready)
+        if (this.players.length === 2 && this.players.every(p => p.is_ready)) {
+            if (!this.countdownStarted) {
+                this.startCountdown();
+            }
+        }
+    },
+
+    async showDuelInvitation(opponentName) {
+        if (this.inviting) return;
+        this.inviting = true;
+        const confirmed = await UIManager.confirm(
+            `${opponentName} è pronto per la sfida! Sei pronto anche tu?`,
+            '⚔️ SFIDA IN ARRIVO'
+        );
+        this.inviting = false;
+        if (confirmed) {
+            this.setReady();
+        }
+    },
+
+    async setReady() {
+        console.log('✅ Setting player as READY');
+        const { error } = await supabaseClient
+            .from('quiz_players')
+            .update({ is_ready: true })
+            .eq('room_id', this.currentRoom.id)
+            .eq('username', this.getPlayerName());
+
+        if (error) console.error('SetReady error:', error);
     },
 
     async updatePlayersList() {
@@ -211,28 +251,48 @@ const DuelManager = {
 
     // ── GAME LOGIC ──
     async startBattle() {
-        if (!this.isHost) return;
-
-        const confirmed = await UIManager.confirm(
-            'Sei pronto a sfidare il tuo avversario? La battaglia inizierà per entrambi!',
-            '⚔️ PREPARATI ALLA SFIDA'
-        );
-
-        if (!confirmed) return;
-
-        console.log('⚔️ Starting Battle...');
-        const { error } = await supabaseClient
-            .from('quiz_rooms')
-            .update({ status: 'active' })
-            .eq('id', this.currentRoom.id);
-
-        if (error) {
-            console.error('Start error:', error);
-            alert('Errore nell\'avvio della battaglia. Riprova.');
-        } else {
-            this.currentRoom.status = 'active';
-            this.startQuizUI();
+        if (!this.players.find(p => p.username === this.getPlayerName())?.is_ready) {
+            const confirmed = await UIManager.confirm(
+                'Sei pronto a sfidare il tuo avversario? Verrai contrassegnato come PRONTO.',
+                '⚔️ PREPARATI ALLA SFIDA'
+            );
+            if (confirmed) {
+                this.setReady();
+            }
         }
+    },
+
+    startCountdown() {
+        if (this.countdownStarted) return;
+        this.countdownStarted = true;
+
+        const overlay = document.getElementById('duelCountdownOverlay');
+        const value = document.getElementById('countdownValue');
+        if (!overlay || !value) return;
+
+        overlay.classList.remove('hidden');
+        let count = 3;
+        value.textContent = count;
+
+        const interval = setInterval(async () => {
+            count--;
+            if (count > 0) {
+                value.textContent = count;
+            } else if (count === 0) {
+                value.textContent = 'VIA!';
+            } else {
+                clearInterval(interval);
+                overlay.classList.add('hidden');
+
+                // Only host triggers room status update
+                if (this.isHost) {
+                    await supabaseClient
+                        .from('quiz_rooms')
+                        .update({ status: 'active' })
+                        .eq('id', this.currentRoom.id);
+                }
+            }
+        }, 1000);
     },
 
     async submitAnswer(isCorrect) {

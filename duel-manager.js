@@ -119,11 +119,15 @@ const DuelManager = {
 
     // ── REALTIME SYNC ──
     subscribeToRoom(roomId) {
+        if (!roomId) return;
         console.log('📡 Subscribing to Room Realtime:', roomId);
-        if (this.subscription) supabaseClient.removeChannel(this.subscription);
+
+        if (this.subscription) {
+            supabaseClient.removeChannel(this.subscription);
+        }
 
         this.subscription = supabaseClient
-            .channel(`room_${roomId}`)
+            .channel(`duel_room_${roomId}`)
             .on('postgres_changes', {
                 event: '*',
                 schema: 'public',
@@ -156,6 +160,7 @@ const DuelManager = {
     async updatePlayersList() {
         if (!this.currentRoom) return;
 
+        console.log('🔄 Fetching players for room:', this.currentRoom.id);
         const { data, error } = await supabaseClient
             .from('quiz_players')
             .select('*')
@@ -168,7 +173,14 @@ const DuelManager = {
         }
 
         this.players = data || [];
-        console.log('👥 Players Updated:', this.players.length);
+        console.log('👥 Players Data:', this.players);
+
+        // Ensure UI is visible
+        const lobbySection = document.getElementById('duelWaitingLobby');
+        if (lobbySection && lobbySection.classList.contains('hidden')) {
+            lobbySection.classList.remove('hidden');
+        }
+
         this.renderLobby();
 
         // If in battle, refresh progress bars
@@ -181,6 +193,13 @@ const DuelManager = {
     async startBattle() {
         if (!this.isHost) return;
 
+        const confirmed = await UIManager.confirm(
+            'Sei pronto a sfidare il tuo avversario? La battaglia inizierà per entrambi!',
+            '⚔️ PREPARATI ALLA SFIDA'
+        );
+
+        if (!confirmed) return;
+
         console.log('⚔️ Starting Battle...');
         const { error } = await supabaseClient
             .from('quiz_rooms')
@@ -189,6 +208,7 @@ const DuelManager = {
 
         if (error) {
             console.error('Start error:', error);
+            alert('Errore nell\'avvio della battaglia. Riprova.');
         } else {
             this.currentRoom.status = 'active';
             this.startQuizUI();

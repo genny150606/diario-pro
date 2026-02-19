@@ -25,14 +25,9 @@ function setupHamburgerMenu() {
     }
     hamburgerBtn.id = 'hamburgerBtn';
 
-    // Crea l'overlay per mobile
-    const overlay = document.createElement('div');
-    overlay.className = 'navbar-overlay';
-    document.body.appendChild(overlay);
-
     // Event listeners
     hamburgerBtn.addEventListener('click', toggleNavbar);
-    overlay.addEventListener('click', closeNavbar);
+
     sidebar.querySelectorAll('button, a').forEach(item => {
         item.addEventListener('click', closeNavbar);
     });
@@ -44,7 +39,7 @@ function setupHamburgerMenu() {
         }
     });
 
-    console.log('✅ Hamburger menu setup completo');
+    console.log('✅ Hamburger menu setup completo (overlay rimosso)');
 }
 
 function toggleNavbar() {
@@ -61,23 +56,18 @@ function toggleNavbar() {
 
 function openNavbar() {
     const sidebar = document.querySelector('.sidebar');
-    const overlay = document.querySelector('.navbar-overlay');
 
     if (sidebar) sidebar.classList.add('open');
 
-    // Overlay solo su mobile
+    // Su mobile blocca lo scroll
     if (window.innerWidth < 768) {
-        if (overlay) overlay.classList.add('active');
         document.body.style.overflow = 'hidden';
     }
 }
 
 function closeNavbar() {
     const sidebar = document.querySelector('.sidebar');
-    const overlay = document.querySelector('.navbar-overlay');
 
     if (sidebar) sidebar.classList.remove('open');
-    if (overlay) overlay.classList.remove('active');
-
     document.body.style.overflow = '';
 }

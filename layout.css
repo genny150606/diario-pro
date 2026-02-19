@@ -104,24 +104,6 @@ header,
     background: var(--color-accent);
 }
 
-/* ── NAVBAR OVERLAY ── */
-.navbar-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.5);
-    /* Solid semi-transparent background for clarity */
-    z-index: 9998;
-    display: none;
-    /* Default state */
-    transition: opacity var(--duration-base) var(--ease-out);
-}
-
-.navbar-overlay.active {
-    display: block !important;
-}
 
 /* ── MOBILE SIDEBAR (off-canvas) ── */
 @media (max-width: 1023px) {

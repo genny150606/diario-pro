@@ -81,8 +81,8 @@ if (!process.env.GEMINI_API_KEY) {
 // RATE LIMITING & RETRY
 // ============================================
 
-const RETRY_DELAY = 2000; // 2 secondi tra i retry
-const MAX_RETRIES = 3;
+const RETRY_DELAY = 1000; // 1 secondo tra i retry
+const MAX_RETRIES = 2;
 
 async function callGeminiWithRetry(
     prompt,

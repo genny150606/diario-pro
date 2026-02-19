@@ -589,7 +589,10 @@ const SimpleChatbot = {
                 })
             });
 
-            if (!response.ok) throw new Error(`Server error: ${response.status}`);
+            if (!response.ok) {
+                if (response.status === 503) throw new Error('Il server è molto carico. Riprova tra poco!');
+                throw new Error(`Server error: ${response.status}`);
+            }
 
             const data = await response.json();
             if (!data.flashcards || data.flashcards.length === 0) throw new Error('Nessuna flashcard generata');
@@ -724,7 +727,10 @@ Scrivi in modo CHIARO e EDUCATIVO. Sii PRECISO e COMPLETO.`;
                 body: JSON.stringify({ message: prompt, history: [], context: 'Generazione appunti', stream: true })
             });
 
-            if (!response.ok) throw new Error(`Server error: ${response.status}`);
+            if (!response.ok) {
+                if (response.status === 503) throw new Error('Il server è molto carico. Riprova tra poco!');
+                throw new Error(`Server error: ${response.status}`);
+            }
             skeletonBubble.remove();
 
             const aiBubble = document.createElement('div');
@@ -831,7 +837,10 @@ Scrivi in modo CHIARO e EDUCATIVO. Sii PRECISO e COMPLETO.`;
                 })
             });
 
-            if (!response.ok) throw new Error(`Server error: ${response.status}`);
+            if (!response.ok) {
+                if (response.status === 503) throw new Error('Il server è molto carico. Riprova tra poco!');
+                throw new Error(`Server error: ${response.status}`);
+            }
             const data = await response.json();
             if (!data.flashcards || data.flashcards.length === 0) throw new Error('Nessuna flashcard generata');
 
@@ -901,7 +910,13 @@ Scrivi in modo CHIARO e EDUCATIVO. Sii PRECISO e COMPLETO.`;
                 body: JSON.stringify({ message, history: historyPayload, context: contextStr, stream: true })
             });
 
-            if (!response.ok) throw new Error(`Error ${response.status}`);
+            if (!response.ok) {
+                if (response.status === 503) {
+                    loadingBubble.innerHTML = '😓 **Il server è molto carico.**<br>Per favore riprova tra qualche secondo.';
+                    return;
+                }
+                throw new Error(`Error ${response.status}`);
+            }
             loadingBubble.remove();
 
             const aiBubble = document.createElement('div');

@@ -118,6 +118,9 @@ const SimpleChatbot = {
         input.value = '';
         input.focus();
 
+        // Track interaction in Supabase (non-blocking)
+        if (typeof incrementChatbotStat === 'function') incrementChatbotStat();
+
         // Detect intent
         const intent = this.detectIntent(text);
         console.log('🧠 Intent detected:', intent.type);

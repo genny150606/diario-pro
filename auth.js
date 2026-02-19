@@ -33,37 +33,35 @@ const AuthManager = {
                     // Hide auth overlay, reveal app
                     this.hideAuthGate();
 
-                    if (sessionStorage.getItem('cloudSyncDone')) return;
-
-                    if (typeof StorageManager !== 'undefined' && StorageManager.loadFromCloud) {
-                        sessionStorage.setItem('cloudSyncDone', 'true');
-                        StorageManager.loadFromCloud();
-                    } else {
-                        supabaseClient
-                            .from('users_data')
-                            .select('data')
-                            .eq('id', session.user.id)
-                            .single()
-                            .then(({ data, error }) => {
-                                if (!error && data && data.data) {
-                                    localStorage.setItem('studyjournal_data', JSON.stringify(data.data));
-                                    sessionStorage.setItem('cloudSyncDone', 'true');
-                                    location.reload();
-                                }
-                            });
+                    // Load this user's data from Supabase into user-scoped cache
+                    if (typeof CloudStorage !== 'undefined') {
+                        CloudStorage._clearLegacy(); // remove shared key
+                        CloudStorage.load(session.user.id).then(() => {
+                            // Refresh UI after cloud data is loaded
+                            if (typeof updateDashboard === 'function') updateDashboard();
+                            if (typeof loadNotes === 'function') loadNotes();
+                            if (typeof loadTasks === 'function') loadTasks();
+                            if (typeof loadGrades === 'function') loadGrades();
+                            if (typeof loadFlashcards === 'function') loadFlashcards();
+                        });
                     }
                 }
 
                 if (event === 'INITIAL_SESSION' && session) {
-                    if (sessionStorage.getItem('cloudSyncDone')) return;
-                    if (typeof StorageManager !== 'undefined' && StorageManager.loadFromCloud) {
-                        sessionStorage.setItem('cloudSyncDone', 'true');
-                        StorageManager.loadFromCloud();
+                    // Load this user's data from Supabase on page load
+                    if (typeof CloudStorage !== 'undefined') {
+                        CloudStorage._clearLegacy();
+                        CloudStorage.load(session.user.id);
                     }
                 }
 
                 if (event === 'SIGNED_OUT') {
                     sessionStorage.removeItem('cloudSyncDone');
+                    // Clear THIS user's local cache so next account starts fresh
+                    if (typeof CloudStorage !== 'undefined' && this.user) {
+                        CloudStorage.clearCache(this.user.id);
+                    }
+                    CloudStorage?._clearLegacy?.();
                     if (window.location.pathname.includes('app')) {
                         this.showAuthGate();
                     }

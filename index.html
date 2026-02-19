@@ -161,6 +161,10 @@
                     <div class="stat-label-landing">Flashcard generate</div>
                 </div>
                 <div class="stat-item">
+                    <div class="stat-number" id="statChatbot">—</div>
+                    <div class="stat-label-landing">Interazioni AI</div>
+                </div>
+                <div class="stat-item">
                     <div class="stat-number" id="statReviews">—</div>
                     <div class="stat-label-landing">Recensioni</div>
                 </div>
@@ -355,12 +359,12 @@
         // ============================================
         async function loadRealStats() {
             try {
-                // Count users (rows in users_data table)
+                // 1. Count distinct users
                 const { count: userCount } = await sb
                     .from('users_data')
                     .select('*', { count: 'exact', head: true });
 
-                // Aggregate notes & flashcards from all users' data
+                // 2. Sum notes & flashcards across all users' JSON blobs
                 const { data: allUsersData } = await sb
                     .from('users_data')
                     .select('data');
@@ -372,24 +376,33 @@
                     allUsersData.forEach(row => {
                         const d = row.data;
                         if (d) {
-                            if (d.notes) totalNotes += d.notes.length;
-                            if (d.flashcards) totalFlashcards += d.flashcards.length;
+                            if (Array.isArray(d.notes)) totalNotes += d.notes.length;
+                            if (Array.isArray(d.flashcards)) totalFlashcards += d.flashcards.length;
                         }
                     });
                 }
 
-                // Count reviews
+                // 3. Chatbot interactions from site_stats table
+                const { data: chatbotStat } = await sb
+                    .from('site_stats')
+                    .select('value')
+                    .eq('key', 'chatbot_interactions')
+                    .single();
+                const chatbotCount = (chatbotStat && chatbotStat.value) ? Number(chatbotStat.value) : 0;
+
+                // 4. Count reviews
                 const { count: reviewCount } = await sb
                     .from('reviews')
                     .select('*', { count: 'exact', head: true });
 
-                // Update DOM
+                // Update stat banner
                 animateNumber('statUsers', userCount || 0);
                 animateNumber('statNotes', totalNotes);
                 animateNumber('statFlashcards', totalFlashcards);
+                animateNumber('statChatbot', chatbotCount);
                 animateNumber('statReviews', reviewCount || 0);
 
-                // Preview cards
+                // Update hero preview cards
                 const previewNotes = document.getElementById('previewNotes');
                 const previewFlashcards = document.getElementById('previewFlashcards');
                 const previewUsers = document.getElementById('previewUsers');
@@ -398,14 +411,15 @@
                 if (previewUsers) previewUsers.textContent = userCount || 0;
 
             } catch (err) {
-                console.error('Stats load error:', err);
-                // Fallback: show 0 instead of "—"
-                ['statUsers', 'statNotes', 'statFlashcards', 'statReviews'].forEach(id => {
-                    const el = document.getElementById(id);
-                    if (el && el.textContent === '—') el.textContent = '0';
-                });
+                console.warn('Stats load error:', err);
+                ['statUsers', 'statNotes', 'statFlashcards', 'statChatbot', 'statReviews']
+                    .forEach(id => {
+                        const el = document.getElementById(id);
+                        if (el && el.textContent === '—') el.textContent = '0';
+                    });
             }
         }
+
 
         function animateNumber(elementId, target) {
             const el = document.getElementById(elementId);

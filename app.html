@@ -27,6 +27,7 @@
 
     <!-- Supabase & Auth -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="cloud-storage.js" defer></script>
     <script src="auth.js" defer></script>
     <script src="user-profile.js" defer></script>
     <script src="ui-manager.js" defer></script>
@@ -853,49 +854,22 @@
         }
 
         // ==================== FLASHCARD FUNCTIONS ====================
-        function loadData() {
-            try {
-                const data = localStorage.getItem('studyjournal_data');
-                return data ? JSON.parse(data) : {};
-            } catch (e) {
-                console.error('Errore caricamento dati:', e);
-                return {};
-            }
+        // loadData() and saveData() are provided by cloud-storage.js (per-user Supabase sync).
+        // These fallbacks only run if cloud-storage.js hasn't loaded yet.
+        if (typeof loadData === 'undefined') {
+            window.loadData = function () {
+                if (!AuthManager?.user) return {};
+                const key = 'sj_data_' + AuthManager.user.id;
+                try { return JSON.parse(localStorage.getItem(key) || '{}'); } catch (e) { return {}; }
+            };
         }
-
-        function saveData(data) {
-            if (!AuthManager || !AuthManager.user) {
-                const authModal = document.getElementById('authModal');
-                if (authModal) {
-                    authModal.style.display = 'flex';
-                    const errorEl = document.getElementById('authError');
-                    if (errorEl) {
-                        errorEl.textContent = 'Accedi o registrati per salvare i tuoi dati.';
-                        errorEl.style.display = 'block';
-                    }
-                }
-                return;
-            }
-
-            try {
-                localStorage.setItem('studyjournal_data', JSON.stringify(data));
-
-                // Cloud Sync
-                if (typeof supabaseClient !== 'undefined') {
-                    supabaseClient
-                        .from('users_data')
-                        .upsert({
-                            id: AuthManager.user.id,
-                            data: data,
-                            updated_at: new Date()
-                        })
-                        .then(({ error }) => {
-                            if (error) console.error('Cloud Sync Error:', error);
-                        });
-                }
-            } catch (e) {
-                console.error('Errore salvataggio dati:', e);
-            }
+        if (typeof saveData === 'undefined') {
+            window.saveData = function (data) {
+                if (!AuthManager?.user) return;
+                const key = 'sj_data_' + AuthManager.user.id;
+                localStorage.setItem(key, JSON.stringify(data));
+                supabaseClient?.from('users_data').upsert({ id: AuthManager.user.id, data, updated_at: new Date().toISOString() }, { onConflict: 'id' });
+            };
         }
 
 

@@ -614,7 +614,9 @@ const GamificationManager = {
         }
     },
 
-
+    init() {
+        this.updateUI();
+    }
 };
 
 // Initialize Gamification

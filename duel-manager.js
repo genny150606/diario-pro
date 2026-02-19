@@ -49,7 +49,7 @@ const DuelManager = {
             document.getElementById('roomCodeDisplay').textContent = code;
 
             // 3. Add Host as first player
-            this.playerName = AuthManager.user?.email?.split('@')[0] || 'Player 1';
+            this.playerName = (AuthManager.user?.email?.split('@')[0] || 'Host').trim();
             await this.joinPlayer(room.id, this.playerName);
 
             this.subscribeToRoom(room.id);
@@ -79,7 +79,7 @@ const DuelManager = {
 
             this.currentRoom = room;
             this.isHost = false;
-            this.playerName = username;
+            this.playerName = username.trim();
             this.questions = room.ai_data;
 
             // UI Update

@@ -142,6 +142,8 @@
             <a href="#" data-section="grades" class="sidebar-item nav-link" id="navGrades">Voti</a>
             <a href="#" data-section="stats" class="sidebar-item nav-link" id="navStats">Statistiche</a>
             <a href="#" data-section="presences" class="sidebar-item nav-link" id="navPresences">Presenze</a>
+            <a href="#" data-section="duel" class="sidebar-item nav-link" id="navDuel"
+                style="color: #f59e0b; font-weight: bold;">⚔️ Duello AI</a>
 
             <a href="#" data-section="settings" class="sidebar-item nav-link" id="navSettings">Impostazioni</a>
         </nav>
@@ -233,6 +235,14 @@
                         <div class="stat-label">Media Voti</div>
                         <div class="stat-value" id="dashboardAverage">-</div>
                         <div class="stat-change">media generale</div>
+                    </div>
+
+                    <div class="stat-card" style="border: 2px solid #f59e0b; cursor: pointer;"
+                        onclick="AppManager.showSection('duel')">
+                        <span class="stat-icon">⚔️</span>
+                        <div class="stat-label" style="color: #f59e0b; font-weight: bold;">Duello AI</div>
+                        <div class="stat-value">SFIDA!</div>
+                        <div class="stat-change">Gareggia con un amico</div>
                     </div>
                 </div>
             </section>
@@ -805,6 +815,75 @@
 
 
 
+
+
+            <!-- SEZIONE DUELLO -->
+            <section id="duel" class="content-section" style="display: none;">
+                <div class="duel-container">
+
+                    <!-- LOBBY -->
+                    <div id="duelLobbySection" class="duel-card">
+                        <span class="duel-badge">⚔️ Lobby del Duello</span>
+
+                        <div id="duelCreateForm">
+                            <h2>Nuova Sfida AI</h2>
+                            <p>Scegli una materia per generare le domande</p>
+                            <input type="text" id="duelSubjectInput" placeholder="es. Storia Romana"
+                                style="padding: 12px; border-radius: 8px; border: 1px solid var(--border); width: 80%; margin: 1rem 0;">
+                            <br>
+                            <button class="btn-primary"
+                                onclick="DuelManager.createRoom(document.getElementById('duelSubjectInput').value)">Crea
+                                Stanza</button>
+
+                            <div style="margin: 2rem 0; border-top: 1px solid var(--border); padding-top: 2rem;">
+                                <p>Hai già un codice?</p>
+                                <div style="display: flex; gap: 8px; justify-content: center; margin-top: 1rem;">
+                                    <input type="text" id="duelJoinCode" placeholder="Codice"
+                                        style="padding: 12px; border-radius: 8px; width: 120px; text-transform: uppercase; border: 1px solid var(--border);">
+                                    <input type="text" id="duelUsername" placeholder="Tuo Nome"
+                                        style="padding: 12px; border-radius: 8px; width: 160px; border: 1px solid var(--border);">
+                                </div>
+                                <button class="btn-secondary" style="margin-top: 1rem;"
+                                    onclick="DuelManager.joinRoom(document.getElementById('duelJoinCode').value, document.getElementById('duelUsername').value)">Partecipa
+                                    alla Sfida</button>
+                            </div>
+                        </div>
+
+                        <div id="duelWaitingLobby" class="hidden">
+                            <div class="duel-code-box">
+                                <p>Codice per l'avversario:</p>
+                                <h2 id="roomCodeDisplay">----</h2>
+                            </div>
+                            <h3>Giocatori in attesa:</h3>
+                            <div class="player-list" id="duelLobbyList">
+                                <!-- Players will appear here -->
+                            </div>
+                            <button id="startDuelBtn" class="btn-primary" disabled
+                                onclick="DuelManager.startBattle()">INIZIA BATTAGLIA!</button>
+                        </div>
+                    </div>
+
+                    <!-- ARENA -->
+                    <div id="duelArenaSection" class="duel-card hidden">
+                        <div class="duel-arena">
+                            <div id="duelQuestionContainer">
+                                <!-- Questions will appear here -->
+                            </div>
+                            <div class="duel-progress-bars" id="duelProgressBars">
+                                <!-- Bars will appear here -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- RESULTS -->
+                    <div id="duelResultsSection" class="duel-card hidden">
+                        <div id="duelResultsSummary">
+                            <!-- Summary here -->
+                        </div>
+                    </div>
+
+                </div>
+            </section>
 
             <!-- FOOTER INSIDE CONTENT -->
             <footer class="landing-footer">
@@ -2282,6 +2361,7 @@
     <script src="onboarding.js" defer></script>
     <script src="gemini-features.js" defer></script>
     <script src="flashcard-local-generator.js" defer></script>
+    <script src="duel-manager.js" defer></script>
 
     <!-- UI ELEMENTS FOR GAMIFICATION -->
     <div id="xpToast" class="xp-toast">

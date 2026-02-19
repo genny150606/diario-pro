@@ -237,6 +237,43 @@ RISPOSTA: Solo JSON array, niente altro!
 });
 
 // ============================================
+// ENDPOINT DUEL QUIZ GENERATION
+// ============================================
+app.post("/api/generate-duel-quiz", async (req, res) => {
+    try {
+        const { subject, difficulty = 'media' } = req.body;
+
+        console.log(`📨 Duel Quiz request: ${subject} (${difficulty})`);
+
+        const prompt = `Crea un quiz di 10 domande a risposta multipla su: ${subject || "Cultura Generale"}.
+Difficoltà: ${difficulty}.
+
+REGOLE:
+1. Devi fornire 4 opzioni per ogni domanda.
+2. Indica l'indice della risposta corretta (0-3).
+3. Sii vario e interessante.
+
+RISPOSTA: Solo JSON array, niente testo extra.
+Formato: [{"question": "Domanda?", "options": ["A", "B", "C", "D"], "answer": 0}]`;
+
+        const text = await callGeminiWithRetry(prompt, "Sei un generatore di quiz scolastici preciso e professionale.");
+
+        if (!text) throw new Error("Generazione fallita");
+
+        let cleanText = text.replace(/```json\n?/g, "").replace(/```\n?/g, "").trim();
+        const jsonMatch = cleanText.match(/\[[\s\S]*\]/);
+
+        if (!jsonMatch) throw new Error("Formato JSON non trovato");
+
+        const quiz = JSON.parse(jsonMatch[0]);
+        res.json({ quiz });
+    } catch (error) {
+        console.error("❌ Errore Duel Quiz:", error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// ============================================
 // ENDPOINT CHATBOT
 // ============================================
 app.post("/api/chat", async (req, res) => {

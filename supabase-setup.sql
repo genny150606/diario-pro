@@ -64,3 +64,40 @@ CREATE POLICY "Anyone can read reviews" ON public.reviews
 
 CREATE POLICY "Auth users can insert reviews" ON public.reviews
     FOR INSERT WITH CHECK (auth.uid() IS NOT NULL);
+
+-- ============================================================
+-- 4. quiz_rooms and quiz_players (for Real-time Duel)
+-- ============================================================
+
+CREATE TABLE IF NOT EXISTS public.quiz_rooms (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    code TEXT UNIQUE NOT NULL,
+    subject TEXT,
+    status TEXT DEFAULT 'waiting', -- waiting, active, finished
+    ai_data JSONB DEFAULT '[]', -- [{question, options, answer}]
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    expires_at TIMESTAMPTZ DEFAULT (NOW() + INTERVAL '2 hours')
+);
+
+CREATE TABLE IF NOT EXISTS public.quiz_players (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    room_id UUID REFERENCES public.quiz_rooms(id) ON DELETE CASCADE,
+    user_id UUID, -- Optional: references auth.users(id) if logged in
+    username TEXT NOT NULL,
+    score INTEGER DEFAULT 0,
+    current_question_index INTEGER DEFAULT 0,
+    is_ready BOOLEAN DEFAULT false,
+    updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Enable RLS
+ALTER TABLE public.quiz_rooms ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.quiz_players ENABLE ROW LEVEL SECURITY;
+
+-- Allow anyone to manage duel rooms/players for now (anon access)
+CREATE POLICY "Public manage quiz_rooms" ON public.quiz_rooms FOR ALL USING (true) WITH CHECK (true);
+CREATE POLICY "Public manage quiz_players" ON public.quiz_players FOR ALL USING (true) WITH CHECK (true);
+
+-- IMPORTANT: Enable Realtime for these tables in Supabase Dashboard:
+-- 1. Database -> Replication -> Click '0 tables' under Source
+-- 2. Toggle 'quiz_rooms' and 'quiz_players'

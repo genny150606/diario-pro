@@ -172,8 +172,21 @@ const SimpleChatbot = {
         const win = document.getElementById('geminiChatWindow');
         if (!win) return;
         this.isOpen = !this.isOpen;
-        win.style.display = this.isOpen ? 'flex' : 'none';
-        if (this.isOpen && this.history.length === 0) this.displayWelcomeMessage();
+
+        if (this.isOpen) {
+            win.style.display = 'flex';
+            // Slight delay to allow display:flex to apply before adding class for transition
+            requestAnimationFrame(() => {
+                win.classList.add('open');
+            });
+            if (this.history.length === 0) this.displayWelcomeMessage();
+        } else {
+            win.classList.remove('open');
+            // Wait for animation to finish before hiding
+            setTimeout(() => {
+                win.style.display = 'none';
+            }, 500);
+        }
     },
 
     displayWelcomeMessage() {

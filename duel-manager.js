@@ -175,16 +175,21 @@ const DuelManager = {
     async handlePlayerSync(player) {
         await this.updatePlayersList();
 
-        // Logic for Battle Invitation
-        const me = this.players.find(p => p.username === this.getPlayerName());
-        const opponent = this.players.find(p => p.username !== this.getPlayerName());
+        const myName = this.getPlayerName();
+        const me = this.players.find(p => p.username === myName);
+        const opponent = this.players.find(p => p.username !== myName);
 
+        console.log(`🔍 [Sync] Me: ${myName} (${me?.is_ready}), Opponent: ${opponent?.username} (${opponent?.is_ready})`);
+
+        // Trigger invitation if opponent is ready and I am not
         if (opponent && opponent.is_ready && me && !me.is_ready) {
+            console.log('📢 Opponent is ready. Showing invitation...');
             this.showDuelInvitation(opponent.username);
         }
 
-        // Logic for Countdown (Both ready)
+        // Trigger countdown if both are ready
         if (this.players.length === 2 && this.players.every(p => p.is_ready)) {
+            console.log('🚀 Both players ready! Starting countdown...');
             if (!this.countdownStarted) {
                 this.startCountdown();
             }

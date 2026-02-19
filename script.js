@@ -1034,142 +1034,163 @@ const AppManager = {
         document.getElementById('pauseBtn').disabled = true;
     },
 
-    handleExamPlan() {
-        const examName = document.getElementById('examName').value;
-        const examDays = document.getElementById('examDays').value;
-        const examTopics = document.getElementById('examTopics').value;
-
-        const plan = ExamPlanner.generatePlan(examName, examDays, examTopics);
-        this.displayExamPlan(plan);
+    init() {
+        console.log('UI Manager Initialized');
     },
 
-    displayExamPlan(plan) {
-        const planContent = document.getElementById('planContent');
-        planContent.innerHTML = `
+    alert(message, title = 'Avviso') {
+
+        handleExamPlan() {
+            const examName = document.getElementById('examName').value;
+            const examDays = document.getElementById('examDays').value;
+            const examTopics = document.getElementById('examTopics').value;
+
+            const plan = ExamPlanner.generatePlan(examName, examDays, examTopics);
+            this.displayExamPlan(plan);
+        },
+
+        displayExamPlan(plan) {
+            const planContent = document.getElementById('planContent');
+            planContent.innerHTML = `
             <div class="exam-plan-details">
                 <h4>${plan.examName}</h4>
                 <p>Generato il ${plan.generatedAt}</p>
                 <div style="margin-top: 1rem;">
         `;
 
-        plan.plan.forEach(item => {
-            planContent.innerHTML += `
+            plan.plan.forEach(item => {
+                planContent.innerHTML += `
                 <div style="background: linear-gradient(135deg, rgba(99, 102, 241, 0.05), rgba(244, 114, 182, 0.05)); padding: 1rem; border-radius: 8px; margin-bottom: 0.8rem; border-left: 4px solid #6366f1;">
                     <h5 style="margin-bottom: 0.5rem;">${item.topic}</h5>
                     <p style="font-size: 0.9rem; color: #666; margin-bottom: 0.5rem;">Giorni ${item.startDay}-${item.endDay}</p>
                     <p style="font-weight: 600; color: #6366f1;">📚 ${item.recommendedHours} ore consigliate</p>
                 </div>
             `;
-        });
+            });
 
-        planContent.innerHTML += `</div></div>`;
-        document.getElementById('examPlan').classList.remove('hidden');
-    },
+            planContent.innerHTML += `</div></div>`;
+            document.getElementById('examPlan').classList.remove('hidden');
+        },
 
-    savData() {
-        const appData = StorageManager.load();
-        appData.diaryEntries = DiaryManager.data;
-        appData.tasks = TaskManager.data;
-        appData.grades = GradeManager.data;
-        appData.pomodoroSessions = PomodoroManager.data;
-        appData.stats.totalHours = DiaryManager.getTotalHours() + PomodoroManager.getTotalHours();
-        appData.stats.currentLevel = GamificationManager.getCurrentLevel();
-        StorageManager.save(appData);
-    },
+        savData() {
+            const appData = StorageManager.load();
+            appData.diaryEntries = DiaryManager.data;
+            appData.tasks = TaskManager.data;
+            appData.grades = GradeManager.data;
+            appData.pomodoroSessions = PomodoroManager.data;
+            appData.stats.totalHours = DiaryManager.getTotalHours() + PomodoroManager.getTotalHours();
+            appData.stats.currentLevel = GamificationManager.getCurrentLevel();
+            StorageManager.save(appData);
+        },
 
-    showSection(sectionName) {
-        // Hide all sections
-        document.querySelectorAll('.section').forEach(s => s.classList.add('hidden'));
-        // Show selected section
-        document.getElementById(sectionName).classList.remove('hidden');
+        showSection(sectionName) {
+            // Hide all sections
+            document.querySelectorAll('.section').forEach(s => s.classList.add('hidden'));
+            // Show selected section
+            document.getElementById(sectionName).classList.remove('hidden');
 
-        // Update nav
-        document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
-        // Safely try to find nav link (might not exist for gamification)
-        const activeNav = document.querySelector(`[data-section="${sectionName}"]`);
-        if (activeNav) activeNav.classList.add('active');
+            // Update nav
+            document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+            // Safely try to find nav link (might not exist for gamification)
+            const activeNav = document.querySelector(`[data-section="${sectionName}"]`);
+            if (activeNav) activeNav.classList.add('active');
 
-        this.currentSection = sectionName;
+            this.currentSection = sectionName;
 
-        // Render section
-        switch (sectionName) {
-            case 'dashboard':
-                this.renderDashboard();
-                break;
-            case 'diary':
-                this.renderDiary();
-                break;
-            case 'tasks':
-                this.renderTasks('all');
-                break;
-            case 'grades':
-                this.renderGrades();
-                break;
-            case 'pomodoro':
-                this.renderPomodoro();
-                break;
-            case 'gamification':
-                GamificationManager.renderGamificationPage();
-                break;
-        }
+            // Render section
+            switch (sectionName) {
+                case 'dashboard':
+                    this.renderDashboard();
+                    break;
+                case 'diary':
+                    this.renderDiary();
+                    break;
+                case 'tasks':
+                    this.renderTasks('all');
+                    break;
+                case 'grades':
+                    this.renderGrades();
+                    break;
+                case 'pomodoro':
+                    this.renderPomodoro();
+                    break;
+                case 'gamification':
+                    GamificationManager.renderGamificationPage();
+                    break;
+            }
 
-        // Close sidebar on mobile
-        document.querySelector('.sidebar').classList.remove('open');
-    },
+            // Close sidebar on mobile
+            document.querySelector('.sidebar').classList.remove('open');
+        },
 
-    renderDashboard() {
-        // Update metrics
-        document.getElementById('userLevel').textContent = GamificationManager.getCurrentLevel();
-        document.getElementById('currentHours').textContent = (DiaryManager.getTotalHours() + PomodoroManager.getTotalHours()).toFixed(1);
-        const currentLevel = GamificationManager.getCurrentLevel();
-        const nextThreshold = GamificationManager.levelThresholds[currentLevel + 1] || GamificationManager.levelThresholds[currentLevel] + 100;
-        document.getElementById('nextLevelHours').textContent = nextThreshold;
-        document.getElementById('levelProgress').style.width = GamificationManager.getProgressToNextLevel() + '%';
+        renderDashboard() {
+            // Update metrics
+            const userLevel = document.getElementById('userLevel');
+            if (userLevel) userLevel.textContent = GamificationManager.getCurrentLevel();
 
-        document.getElementById('averageGrade').textContent = GradeManager.getWeightedAverage() || '-';
-        document.getElementById('weekHours').textContent = DiaryManager.getThisWeekHours().toFixed(1);
-        document.getElementById('urgentTasks').textContent = TaskManager.getUrgentTasks().length;
+            const currentHoursEl = document.getElementById('currentHours');
+            if (currentHoursEl) currentHoursEl.textContent = (DiaryManager.getTotalHours() + PomodoroManager.getTotalHours()).toFixed(1);
 
-        // Upcoming tasks
-        const tasksPreview = document.getElementById('tasksPreview');
-        const upcomingTasks = TaskManager.getActiveTasks().slice(0, 3);
-        if (upcomingTasks.length === 0) {
-            tasksPreview.innerHTML = '<p class="empty-state">Nessun compito urgente!</p>';
-        } else {
-            tasksPreview.innerHTML = upcomingTasks.map(task => `
-                <div class="task-item" style="margin-bottom: 1rem;">
-                    <div class="task-content">
-                        <div class="task-title">${task.subject}</div>
-                        <span class="task-subject">${task.subject}</span>
-                        <div class="task-due">📅 ${new Date(task.dueDate).toLocaleDateString('it-IT')}</div>
+            const currentLevel = GamificationManager.getCurrentLevel();
+            const nextThreshold = GamificationManager.levelThresholds[currentLevel + 1] || GamificationManager.levelThresholds[currentLevel] + 100;
+
+            const nextLevelHoursEl = document.getElementById('nextLevelHours');
+            if (nextLevelHoursEl) nextLevelHoursEl.textContent = nextThreshold;
+
+            const levelProgressEl = document.getElementById('levelProgress');
+            if (levelProgressEl) levelProgressEl.style.width = GamificationManager.getProgressToNextLevel() + '%';
+
+            const averageGradeEl = document.getElementById('averageGrade');
+            if (averageGradeEl) averageGradeEl.textContent = GradeManager.getWeightedAverage() || '-';
+
+            const weekHoursEl = document.getElementById('weekHours');
+            if (weekHoursEl) weekHoursEl.textContent = DiaryManager.getThisWeekHours().toFixed(1);
+
+            const urgentTasksEl = document.getElementById('urgentTasks');
+            if (urgentTasksEl) urgentTasksEl.textContent = TaskManager.getUrgentTasks().length;
+
+            // Upcoming tasks
+            const tasksPreview = document.getElementById('tasksPreview');
+            if (tasksPreview) {
+                const upcomingTasks = TaskManager.getActiveTasks().slice(0, 3);
+                if (upcomingTasks.length === 0) {
+                    tasksPreview.innerHTML = '<p class="empty-state">Nessun compito urgente!</p>';
+                } else {
+                    tasksPreview.innerHTML = upcomingTasks.map(task => `
+                    <div class="task-item" style="margin-bottom: 1rem;">
+                        <div class="task-content">
+                            <div class="task-title">${task.subject}</div>
+                            <span class="task-subject">${task.subject}</span>
+                            <div class="task-due">📅 ${new Date(task.dueDate).toLocaleDateString('it-IT')}</div>
+                        </div>
                     </div>
-                </div>
-            `).join('');
-        }
+                `).join('');
+                }
+            }
 
-        // Insights
-        const insightsContainer = document.getElementById('insights-container');
-        const insights = InsightsManager.generateInsights();
-        if (insights.length === 0) {
-            insightsContainer.innerHTML = '<p class="empty-state">Aggiungi dati nel diario per ricevere insight!</p>';
-        } else {
-            insightsContainer.innerHTML = insights.map(insight => `
+            // Insights
+            const insightsContainer = document.getElementById('insights-container');
+            const insights = InsightsManager.generateInsights();
+            if (insights.length === 0) {
+                insightsContainer.innerHTML = '<p class="empty-state">Aggiungi dati nel diario per ricevere insight!</p>';
+            } else {
+                insightsContainer.innerHTML = insights.map(insight => `
                 <div class="insight-item">
                     <span style="font-size: 1.25rem; margin-right: 0.5rem;">${insight.emoji}</span>
                     <span>${insight.text}</span>
                 </div>
             `).join('');
-        }
-    },
+            }
+        },
 
-    renderDiary() {
-        const container = document.getElementById('diaryEntries');
-        if (DiaryManager.data.length === 0) {
-            container.innerHTML = '<p class="empty-state">Nessuna entry ancora.</p>';
-            return;
-        }
+        renderDiary() {
+            const container = document.getElementById('diaryEntries');
+            if (DiaryManager.data.length === 0) {
+                container.innerHTML = '<p class="empty-state">Nessuna entry ancora.</p>';
+                return;
+            }
 
-        container.innerHTML = DiaryManager.data.map(entry => `
+            container.innerHTML = DiaryManager.data.map(entry => `
             <div class="entry-item">
                 <div class="entry-content">
                     <div class="entry-title">${entry.subject}</div>
@@ -1183,27 +1204,28 @@ const AppManager = {
                 <button class="btn btn-delete btn-small" onclick="UIManager.handleDiaryDelete(${entry.id})">🗑️</button>
             </div>
         `).join('');
-    },
+        },
 
-    handleDiaryDelete(id) {
-        DiaryManager.deleteEntry(id);
-        this.savData();
-        this.renderDiary();
-        this.renderDashboard();
-    },
+        handleDiaryDelete(id) {
+            DiaryManager.deleteEntry(id);
+            this.savData();
+            this.renderDiary();
+            this.renderDashboard();
+        },
 
-    renderTasks(filter = 'all') {
-        let tasks = TaskManager.data;
-        if (filter === 'active') tasks = TaskManager.getActiveTasks();
-        if (filter === 'completed') tasks = TaskManager.getCompletedTasks();
+        renderTasks(filter = 'all') {
+            let tasks = TaskManager.data;
+            if (filter === 'active') tasks = TaskManager.getActiveTasks();
+            if (filter === 'completed') tasks = TaskManager.getCompletedTasks();
 
-        const container = document.getElementById('tasksList');
-        if (tasks.length === 0) {
-            container.innerHTML = '<p class="empty-state">Nessun compito in questa categoria.</p>';
-            return;
-        }
+            const container = document.getElementById('tasksList');
+            if (!container) return;
+            if (tasks.length === 0) {
+                container.innerHTML = '<p class="empty-state">Nessun compito in questa categoria.</p>';
+                return;
+            }
 
-        container.innerHTML = tasks.map(task => `
+            container.innerHTML = tasks.map(task => `
             <div class="task-item ${task.completed ? 'completed' : ''}">
                 <div style="display: flex; gap: 1rem; flex: 1;">
                     <input type="checkbox" class="task-checkbox" ${task.completed ? 'checked' : ''} onchange="UIManager.handleTaskToggle(${task.id})">
@@ -1217,141 +1239,141 @@ const AppManager = {
                 <button class="btn btn-delete btn-small" onclick="UIManager.handleTaskDelete(${task.id})">🗑️</button>
             </div>
         `).join('');
-    },
+        },
 
-    renderGrades() {
-        // Update stats
-        document.getElementById('weightedAverage').textContent = GradeManager.getWeightedAverage() || '-';
-        const trend = GradeManager.getGradeTrend();
-        document.getElementById('gradeTrend').textContent = (trend > 0 ? '+' : '') + trend;
+        renderGrades() {
+            // Update stats
+            document.getElementById('weightedAverage').textContent = GradeManager.getWeightedAverage() || '-';
+            const trend = GradeManager.getGradeTrend();
+            document.getElementById('gradeTrend').textContent = (trend > 0 ? '+' : '') + trend;
 
-        // Chart andamento voti
-        this.updateGradeChart();
+            // Chart andamento voti
+            this.updateGradeChart();
 
-        // Chart correlazione
-        this.updateCorrelationChart();
+            // Chart correlazione
+            this.updateCorrelationChart();
 
-        // Voti per materia
-        const container = document.getElementById('gradesBySubject');
-        const subjects = GradeManager.getSubjects();
-        if (subjects.length === 0) {
-            container.innerHTML = '<p class="empty-state">Nessun voto ancora.</p>';
-            return;
-        }
+            // Voti per materia
+            const container = document.getElementById('gradesBySubject');
+            const subjects = GradeManager.getSubjects();
+            if (subjects.length === 0) {
+                container.innerHTML = '<p class="empty-state">Nessun voto ancora.</p>';
+                return;
+            }
 
-        container.innerHTML = subjects.map(subject => {
-            const subjectGrades = GradeManager.data.filter(g => g.subject === subject);
-            const avg = GradeManager.getAverageBySubject(subject);
-            return `
+            container.innerHTML = subjects.map(subject => {
+                const subjectGrades = GradeManager.data.filter(g => g.subject === subject);
+                const avg = GradeManager.getAverageBySubject(subject);
+                return `
                 <div class="subject-card">
                     <div class="subject-name">${subject}</div>
                     <div class="subject-grades">${subjectGrades.length} voto${subjectGrades.length > 1 ? 'i' : ''}</div>
                     <div class="subject-average">${avg}</div>
                 </div>
             `;
-        }).join('');
-    },
+            }).join('');
+        },
 
-    updateGradeChart() {
-        const ctx = document.getElementById('gradeChart');
-        if (!ctx) return;
+        updateGradeChart() {
+            const ctx = document.getElementById('gradeChart');
+            if (!ctx) return;
 
-        const grades = GradeManager.data.slice().reverse();
-        const labels = grades.map((g, i) => `${g.subject.substring(0, 3)} ${i + 1}`);
-        const data = grades.map(g => g.value);
+            const grades = GradeManager.data.slice().reverse();
+            const labels = grades.map((g, i) => `${g.subject.substring(0, 3)} ${i + 1}`);
+            const data = grades.map(g => g.value);
 
-        if (this.gradeChart) {
-            this.gradeChart.destroy();
-        }
-
-        this.gradeChart = new Chart(ctx, {
-            type: 'line',
-            data: {
-                labels,
-                datasets: [{
-                    label: 'Voti',
-                    data,
-                    borderColor: '#6366f1',
-                    backgroundColor: 'rgba(99, 102, 241, 0.1)',
-                    borderWidth: 3,
-                    tension: 0.4,
-                    fill: true,
-                    pointRadius: 5,
-                    pointBackgroundColor: '#6366f1',
-                    pointBorderColor: '#fff',
-                    pointBorderWidth: 2
-                }]
-            },
-            options: {
-                responsive: true,
-                plugins: {
-                    legend: { display: false }
-                },
-                scales: {
-                    y: { min: 0, max: 10 }
-                }
+            if (this.gradeChart) {
+                this.gradeChart.destroy();
             }
-        });
-    },
 
-    updateCorrelationChart() {
-        const ctx = document.getElementById('correlationChart');
-        if (!ctx) return;
-
-        const entries = DiaryManager.data;
-        if (entries.length === 0) return;
-
-        // Prepare data
-        const hours = entries.map(e => e.hours);
-        const comprehension = entries.map(e => e.comprehension);
-
-        if (this.correlationChart) {
-            this.correlationChart.destroy();
-        }
-
-        this.correlationChart = new Chart(ctx, {
-            type: 'scatter',
-            data: {
-                datasets: [{
-                    label: 'Ore vs Comprensione',
-                    data: entries.map((e, i) => ({
-                        x: e.hours,
-                        y: e.comprehension
-                    })),
-                    backgroundColor: 'rgba(244, 114, 182, 0.6)',
-                    borderColor: '#f472b6',
-                    pointRadius: 6
-                }]
-            },
-            options: {
-                responsive: true,
-                plugins: {
-                    legend: { display: true }
+            this.gradeChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels,
+                    datasets: [{
+                        label: 'Voti',
+                        data,
+                        borderColor: '#6366f1',
+                        backgroundColor: 'rgba(99, 102, 241, 0.1)',
+                        borderWidth: 3,
+                        tension: 0.4,
+                        fill: true,
+                        pointRadius: 5,
+                        pointBackgroundColor: '#6366f1',
+                        pointBorderColor: '#fff',
+                        pointBorderWidth: 2
+                    }]
                 },
-                scales: {
-                    x: { title: { display: true, text: 'Ore di Studio' } },
-                    y: { title: { display: true, text: 'Comprensione (1-10)' }, min: 0, max: 10 }
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        y: { min: 0, max: 10 }
+                    }
                 }
+            });
+        },
+
+        updateCorrelationChart() {
+            const ctx = document.getElementById('correlationChart');
+            if (!ctx) return;
+
+            const entries = DiaryManager.data;
+            if (entries.length === 0) return;
+
+            // Prepare data
+            const hours = entries.map(e => e.hours);
+            const comprehension = entries.map(e => e.comprehension);
+
+            if (this.correlationChart) {
+                this.correlationChart.destroy();
             }
-        });
-    },
 
-    renderPomodoro() {
-        // Set values
-        document.getElementById('studyDuration').value = PomodoroManager.studyDuration;
-        document.getElementById('shortBreakDuration').value = PomodoroManager.shortBreakDuration;
-        document.getElementById('longBreakDuration').value = PomodoroManager.longBreakDuration;
+            this.correlationChart = new Chart(ctx, {
+                type: 'scatter',
+                data: {
+                    datasets: [{
+                        label: 'Ore vs Comprensione',
+                        data: entries.map((e, i) => ({
+                            x: e.hours,
+                            y: e.comprehension
+                        })),
+                        backgroundColor: 'rgba(244, 114, 182, 0.6)',
+                        borderColor: '#f472b6',
+                        pointRadius: 6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: { display: true }
+                    },
+                    scales: {
+                        x: { title: { display: true, text: 'Ore di Studio' } },
+                        y: { title: { display: true, text: 'Comprensione (1-10)' }, min: 0, max: 10 }
+                    }
+                }
+            });
+        },
 
-        document.getElementById('completedSessions').textContent = PomodoroManager.sessionsCompleted;
-        document.getElementById('totalPomodoro').textContent = PomodoroManager.getTotalHours().toFixed(1);
-        document.getElementById('weekPomodoro').textContent = PomodoroManager.getThisWeekHours().toFixed(1);
+        renderPomodoro() {
+            // Set values
+            document.getElementById('studyDuration').value = PomodoroManager.studyDuration;
+            document.getElementById('shortBreakDuration').value = PomodoroManager.shortBreakDuration;
+            document.getElementById('longBreakDuration').value = PomodoroManager.longBreakDuration;
 
-        // History
-        const history = document.getElementById('pomodoroHistory');
-        if (PomodoroManager.data.length === 0) {
-            history.innerHTML = '<p class="empty-state">Nessuna sessione completata.</p>';
-        } else {
-            history.innerHTML = PomodoroManager.data.slice().reverse().slice(0, 10).map(session => `
+            document.getElementById('completedSessions').textContent = PomodoroManager.sessionsCompleted;
+            document.getElementById('totalPomodoro').textContent = PomodoroManager.getTotalHours().toFixed(1);
+            document.getElementById('weekPomodoro').textContent = PomodoroManager.getThisWeekHours().toFixed(1);
+
+            // History
+            const history = document.getElementById('pomodoroHistory');
+            if (PomodoroManager.data.length === 0) {
+                history.innerHTML = '<p class="empty-state">Nessuna sessione completata.</p>';
+            } else {
+                history.innerHTML = PomodoroManager.data.slice().reverse().slice(0, 10).map(session => `
                 <div class="task-item" style="margin-bottom: 0.8rem;">
                     <div class="task-content">
                         <div class="task-title">Sessione Completata</div>
@@ -1361,71 +1383,72 @@ const AppManager = {
                     </div>
                 </div>
             `).join('');
+            }
+
+            this.updateTimer();
+        },
+
+        updateTimer() {
+            const minutes = Math.floor(PomodoroManager.timeLeft / 60);
+            const seconds = PomodoroManager.timeLeft % 60;
+            document.getElementById('timerDisplay').textContent =
+                `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+
+            const modeLabels = { study: 'Studio', shortBreak: 'Pausa Breve', longBreak: 'Pausa Lunga' };
+            document.getElementById('timerMode').textContent = modeLabels[PomodoroManager.mode];
+
+            // Aggiorna barra SVG
+            const totalTime = PomodoroManager.mode === 'study'
+                ? PomodoroManager.studyDuration * 60
+                : PomodoroManager.mode === 'shortBreak'
+                    ? PomodoroManager.shortBreakDuration * 60
+                    : PomodoroManager.longBreakDuration * 60;
+
+            const progress = ((totalTime - PomodoroManager.timeLeft) / totalTime) * 565;
+            const circle = document.querySelector('.timer-progress');
+            if (circle) {
+                circle.style.strokeDashoffset = 565 - progress;
+            }
+        }
+    };
+
+    /* ============================================
+       INIZIALIZZAZIONE
+       ============================================ */
+
+    document.addEventListener('DOMContentLoaded', () => {
+        // Load dark mode preference
+        if (localStorage.getItem('darkMode') === 'true') {
+            document.body.classList.add('dark-mode');
         }
 
-        this.updateTimer();
-    },
+        // Load data
+        const appData = StorageManager.load();
 
-    updateTimer() {
-        const minutes = Math.floor(PomodoroManager.timeLeft / 60);
-        const seconds = PomodoroManager.timeLeft % 60;
-        document.getElementById('timerDisplay').textContent =
-            `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+        // Initialize managers
+        DiaryManager.init(appData);
+        TaskManager.init(appData);
+        GradeManager.init(appData);
+        PomodoroManager.init(appData);
 
-        const modeLabels = { study: 'Studio', shortBreak: 'Pausa Breve', longBreak: 'Pausa Lunga' };
-        document.getElementById('timerMode').textContent = modeLabels[PomodoroManager.mode];
-
-        // Aggiorna barra SVG
-        const totalTime = PomodoroManager.mode === 'study'
-            ? PomodoroManager.studyDuration * 60
-            : PomodoroManager.mode === 'shortBreak'
-                ? PomodoroManager.shortBreakDuration * 60
-                : PomodoroManager.longBreakDuration * 60;
-
-        const progress = ((totalTime - PomodoroManager.timeLeft) / totalTime) * 565;
-        const circle = document.querySelector('.timer-progress');
-        if (circle) {
-            circle.style.strokeDashoffset = 565 - progress;
+        // Initialize UI
+        if (typeof UIManager.init === 'function') {
+            UIManager.init();
         }
+    });
+
+    // Auto-save every 5 seconds
+    setInterval(() => {
+    if (typeof UIManager.savData === 'function') {
+        UIManager.savData();
     }
-};
-
-/* ============================================
-   INIZIALIZZAZIONE
-   ============================================ */
-
-document.addEventListener('DOMContentLoaded', () => {
-    // Load dark mode preference
-    if (localStorage.getItem('darkMode') === 'true') {
-        document.body.classList.add('dark-mode');
-    }
-
-    // Load data
-    const appData = StorageManager.load();
-
-    // Initialize managers
-    DiaryManager.init(appData);
-    TaskManager.init(appData);
-    GradeManager.init(appData);
-    PomodoroManager.init(appData);
-
-    // Initialize UI
-    UIManager.init();
-});
-
-// Auto-save every 5 seconds
-setInterval(() => {
-    UIManager.savData();
 }, 5000);
 
 // Inizializza nuovi managers quando carica la pagina
 document.addEventListener('DOMContentLoaded', () => {
-    const appData = StorageManager.load();
-    NotesManager.init(appData);
-    FlashcardManager.init(appData);
-    GoalsManager.init(appData);
-    ResourcesManager.init(appData);
-    WellnessManager.init(appData);
+    // Only init existing managers
+    if (typeof NotesManager !== 'undefined') NotesManager.init(StorageManager.load());
+    if (typeof FlashcardManager !== 'undefined') FlashcardManager.init(StorageManager.load());
 });
 /* ============================================
    GLOBAL ALIASES FOR COMPATIBILITY

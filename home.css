@@ -112,18 +112,15 @@
 .landing-hero {
     position: relative;
     z-index: 1;
-    /* fallback for older browsers */
     min-height: 100vh;
-    /* modern: respects Chrome tabs, address bar, iOS notch */
     min-height: 100dvh;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: flex-start;
-    /* Prevents logo cutoff on small desktop screens */
     text-align: center;
     padding: 100px var(--space-6) 80px;
-    overflow: hidden;
+    /* Do NOT use overflow:hidden — it clips the preview window */
 }
 
 .hero-badge {
@@ -365,12 +362,13 @@
 .preview-glow {
     position: absolute;
     width: 60%;
-    height: 40%;
+    height: 60%;
     background: radial-gradient(circle, rgba(0, 122, 255, 0.15), transparent 70%);
-    bottom: 0;
+    bottom: -10%;
     left: 20%;
     pointer-events: none;
     filter: blur(40px);
+    z-index: 0;
 }
 
 /* ── SECTIONS COMMON ── */
@@ -380,6 +378,8 @@
     padding: 120px var(--space-8);
     max-width: 1200px;
     margin: 0 auto;
+    /* Ensure section background covers any glow from hero */
+    background: transparent;
 }
 
 .section-label {

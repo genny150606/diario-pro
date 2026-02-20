@@ -1294,6 +1294,9 @@ const AppManager = {
         // Voti per materia
         const container = document.getElementById('gradesBySubject');
         const subjects = GradeManager.getSubjects();
+
+        if (!container) return; // FIX: Exit if container is missing (e.g. on homepage)
+
         if (subjects.length === 0) {
             container.innerHTML = '<p class="empty-state">Nessun voto ancora.</p>';
             return;

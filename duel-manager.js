@@ -11,6 +11,8 @@ const DuelManager = {
     subscription: null,
     isHost: false,
     playerName: null,
+    opponentData: null,
+    pollInterval: null, // Holds the interval ID for HTTP polling
 
     // New State
     currentSource: 'subject', // subject, notes, pdf
@@ -163,6 +165,16 @@ const DuelManager = {
             document.getElementById('duelWaitingLobby').classList.remove('hidden');
             document.getElementById('roomCodeDisplay').textContent = code;
 
+            // 1) Cerca stanza attiva
+            // Manteniamo la fetch normale che andrà sul proxy
+            const { data: rooms, error: roomsError } = await supabaseClient
+                .from('quiz_rooms')
+                .select('*')
+                .eq('id', room.id) // Use room.id here, not roomCode which is undefined
+                .eq('status', 'waiting');
+
+            if (roomsError) throw roomsError; // Handle error if any
+
             // 3. Add Host as first player
             this.playerName = (AuthManager.user?.email?.split('@')[0] || 'Host').trim();
             await this.joinPlayer(room.id, this.playerName);
@@ -252,46 +264,74 @@ const DuelManager = {
         return data;
     },
 
-    // ── REALTIME SYNC ──
+    // ── REALTIME SYNC VIA HTTP POLLING ──
+    // Vercel Proxy does not support WebSockets. We poll the database every 2.5s.
     subscribeToRoom(roomId) {
         if (!roomId) return;
 
-        if (this.subscription) supabaseClient.removeChannel(this.subscription);
+        if (this.pollInterval) clearInterval(this.pollInterval);
 
-        this.updatePlayersList();
+        const pollData = async () => {
+            try {
+                // 1. Fetch Room State
+                const { data: roomData, error: roomError } = await supabaseClient
+                    .from('quiz_rooms')
+                    .select('*')
+                    .eq('id', roomId)
+                    .single();
 
-        this.subscription = supabaseClient
-            .channel(`duel_${roomId}`)
-            .on('postgres_changes', { event: '*', schema: 'public', table: 'quiz_players', filter: `room_id=eq.${roomId}` },
-                () => this.updatePlayersList())
-            .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'quiz_rooms', filter: `id=eq.${roomId}` },
-                (payload) => this.handleRoomUpdate(payload.new))
-            .subscribe();
+                if (roomError) return;
+                if (!roomData) return;
+
+                // 2. Fetch Players State
+                const { data: playersData, error: playersError } = await supabaseClient
+                    .from('quiz_players')
+                    .select('*')
+                    .eq('room_id', roomId)
+                    .order('created_at', { ascending: true });
+
+                if (playersError) return;
+
+                this.players = playersData || [];
+
+                // 3. Handle Status Changes
+                const previousStatus = this.currentRoom ? this.currentRoom.status : null;
+                this.currentRoom = roomData;
+
+                // Opponent Left or Room Closed
+                if (roomData.status === 'abandoned' && previousStatus !== 'abandoned') {
+                    this.handleOpponentLeft();
+                    return; // Stop polling
+                }
+
+                // Check Start Time (Host clicked start)
+                if (roomData.start_time && !this.countdownStarted) {
+                    console.log('⏰ Start time received! Game starting...');
+                    this.scheduleStart(roomData.start_time);
+                }
+
+                // 4. Update UI
+                this.renderLobby();
+                this.checkReadyStatus();
+                this.renderDuelProgress();
+
+            } catch (err) {
+                console.warn("Polling Warning:", err);
+            }
+        };
+
+        // Initial fetch then loop
+        pollData();
+        this.pollInterval = setInterval(pollData, 2500);
     },
 
     async updatePlayersList() {
-        if (!this.currentRoom) return;
-
-        const { data } = await supabaseClient
-            .from('quiz_players')
-            .select('*')
-            .eq('room_id', this.currentRoom.id)
-            .order('created_at', { ascending: true });
-
-        this.players = data || [];
-        this.renderLobby();
-        this.checkReadyStatus();
-        this.renderDuelProgress(); // Update progress bars during game
+        // Redundant method, kept for legacy compatibility if called externally.
+        // Polling loop handles this now.
     },
 
     handleRoomUpdate(update) {
-        this.currentRoom = update;
-
-        // SYNC START: Check if start_time is set
-        if (update.start_time && !this.countdownStarted) {
-            console.log('⏰ Start time received:', update.start_time);
-            this.scheduleStart(update.start_time);
-        }
+        // Redundant method, incorporated directly into the poll loop.
     },
 
     checkReadyStatus() {
@@ -363,6 +403,44 @@ const DuelManager = {
         }, 100); // 100ms precision
     },
 
+    handleOpponentLeft() {
+        if (this.pollInterval) clearInterval(this.pollInterval);
+        alert("L'avversario ha abbandonato la stanza.");
+        this.resetDuel();
+        const lobbyModal = document.getElementById('duel-lobby-modal');
+        if (lobbyModal) lobbyModal.classList.remove('active');
+        const searchModal = document.getElementById('duel-search-modal');
+        if (searchModal) searchModal.classList.add('active');
+    },
+
+    resetDuel() {
+        if (this.pollInterval) clearInterval(this.pollInterval);
+        // The original `this.currentChannel` is not defined, and we are using polling instead of channels.
+        // So, this part of the instruction is not directly applicable.
+        // if (this.currentChannel) {
+        //     supabase.removeChannel(this.currentChannel);
+        //     this.currentChannel = null;
+        // }
+        // Reset other duel state variables
+        this.currentRoom = null;
+        this.players = [];
+        this.questions = [];
+        this.currentIndex = 0;
+        this.score = 0;
+        this.isHost = false;
+        this.playerName = null;
+        this.opponentData = null;
+        this.countdownStarted = false;
+        if (this.timerInterval) clearInterval(this.timerInterval);
+        this.timerInterval = null;
+        this.timeLeft = 15;
+        // Hide game sections and show initial form
+        document.getElementById('duelArenaSection').classList.add('hidden');
+        document.getElementById('duelWaitingLobby').classList.add('hidden');
+        document.getElementById('duelResultsSection').classList.add('hidden');
+        document.getElementById('duelCreateForm').classList.remove('hidden');
+    },
+
     startQuizSession() {
         this.currentIndex = 0;
         this.score = 0;
@@ -410,7 +488,7 @@ const DuelManager = {
     },
 
     async submitAnswer(isCorrect) {
-        clearInterval(this.timerInterval);
+        if (this.timerInterval) clearInterval(this.timerInterval);
 
         // Disable buttons
         document.querySelectorAll('.duel-opt-btn').forEach(b => b.disabled = true);
@@ -423,16 +501,19 @@ const DuelManager = {
 
         this.currentIndex++;
 
-        // Sync Score
-        await supabaseClient
-            .from('quiz_players')
-            .update({
-                score: this.score,
-                current_question_index: this.currentIndex,
-                updated_at: new Date()
-            })
-            .eq('room_id', this.currentRoom.id)
-            .eq('username', this.playerName);
+        try {
+            // Sync Score
+            await supabaseClient
+                .from('quiz_players')
+                .update({
+                    score: this.score,
+                    current_question_index: this.currentIndex
+                })
+                .eq('room_id', this.currentRoom.id)
+                .eq('username', this.playerName);
+        } catch (e) {
+            console.error("Failed to sync score:", e);
+        }
 
         setTimeout(() => {
             if (this.currentIndex >= this.questions.length) {

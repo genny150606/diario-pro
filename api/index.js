@@ -268,8 +268,10 @@ REGOLE:
 1. Le domande devono essere basate ESCLUSIVAMENTE sul testo fornito.
 2. 4 opzioni per domanda.
 3. Indica l'indice corretto (0-3).
-4. Risposta formato JSON Array identico a prima.
-            `;
+4. Risposta formato JSON Array.
+
+RISPOSTA: Solo JSON array, niente testo extra.
+Formato: [{"question": "Domanda?", "options": ["A", "B", "C", "D"], "answer": 0}]`;
         } else {
             // SUBJECT-BASED GENERATION
             prompt = `Crea un quiz di 10 domande a risposta multipla su: ${subject || "Cultura Generale"}.

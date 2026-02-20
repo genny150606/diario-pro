@@ -477,8 +477,20 @@ const DuelManager = {
     },
 
     renderQuestion() {
+        if (!this.questions || !this.questions[this.currentIndex]) {
+            console.error("❌ Errore: Nessuna domanda trovata all'indice", this.currentIndex, this.questions);
+            return alert("Errore nel caricamento della domanda. La gara potrebbe essere interrotta.");
+        }
+
         const q = this.questions[this.currentIndex];
         const container = document.getElementById('duelQuestionContainer');
+
+        // Safety check for options
+        const options = q.options || [];
+        if (options.length === 0) {
+            console.warn("⚠️ Domanda senza opzioni:", q);
+        }
+
         container.innerHTML = `
             <div class="duel-q-header">
                 <div>
@@ -486,9 +498,9 @@ const DuelManager = {
                     <div class="timer-bar"><div id="qTimerFill" style="width: 100%"></div></div>
                 </div>
             </div>
-            <p class="duel-q-text">${q.question}</p>
+            <p class="duel-q-text">${q.question || "Domanda non disponibile"}</p>
             <div class="duel-options">
-                ${q.options.map((opt, i) => `
+                ${options.map((opt, i) => `
                     <button class="duel-opt-btn" onclick="DuelManager.submitAnswer(${i === q.answer})">${opt}</button>
                 `).join('')}
             </div>

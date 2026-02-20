@@ -86,6 +86,11 @@ const StorageManager = {
             localStorage.removeItem('studyjournal_data');
             location.reload();
         }
+    },
+
+    // Stub for Realtime Sync (prevent crash)
+    initRealtime() {
+        console.log('📡 Realtime sync initialized (Stub)');
     }
 };
 
@@ -1196,16 +1201,18 @@ const AppManager = {
 
         // Insights
         const insightsContainer = document.getElementById('insights-container');
-        const insights = InsightsManager.generateInsights();
-        if (insights.length === 0) {
-            insightsContainer.innerHTML = '<p class="empty-state">Aggiungi dati nel diario per ricevere insight!</p>';
-        } else {
-            insightsContainer.innerHTML = insights.map(insight => `
-                <div class="insight-item">
-                    <span style="font-size: 1.25rem; margin-right: 0.5rem;">${insight.emoji}</span>
-                    <span>${insight.text}</span>
-                </div>
-            `).join('');
+        if (insightsContainer) {
+            const insights = InsightsManager.generateInsights();
+            if (insights.length === 0) {
+                insightsContainer.innerHTML = '<p class="empty-state">Aggiungi dati nel diario per ricevere insight!</p>';
+            } else {
+                insightsContainer.innerHTML = insights.map(insight => `
+                    <div class="insight-item">
+                        <span style="font-size: 1.25rem; margin-right: 0.5rem;">${insight.emoji}</span>
+                        <span>${insight.text}</span>
+                    </div>
+                `).join('');
+            }
         }
     },
 
@@ -1269,9 +1276,14 @@ const AppManager = {
 
     renderGrades() {
         // Update stats
-        document.getElementById('weightedAverage').textContent = GradeManager.getWeightedAverage() || '-';
-        const trend = GradeManager.getGradeTrend();
-        document.getElementById('gradeTrend').textContent = (trend > 0 ? '+' : '') + trend;
+        const avgEl = document.getElementById('weightedAverage');
+        if (avgEl) avgEl.textContent = GradeManager.getWeightedAverage() || '-';
+
+        const trendEl = document.getElementById('gradeTrend');
+        if (trendEl) {
+            const trend = GradeManager.getGradeTrend();
+            trendEl.textContent = (trend > 0 ? '+' : '') + trend;
+        }
 
         // Chart andamento voti
         this.updateGradeChart();

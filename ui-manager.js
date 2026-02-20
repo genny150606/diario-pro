@@ -3,7 +3,7 @@
    Replaces native browser alerts with custom Glass UI
    ============================================ */
 
-const UIManager = {
+const UIManager = window.UIManager || {
     // === ALERT ===
     alert(message, title = 'Avviso') {
         return new Promise((resolve) => {

@@ -315,6 +315,11 @@ const DuelManager = {
                 this.checkReadyStatus();
                 this.renderDuelProgress();
 
+                // 5. Host Check: If all are ready, start the game
+                if (this.isHost && this.currentRoom.status === 'waiting') {
+                    this._checkAndLaunchDuel();
+                }
+
             } catch (err) {
                 console.warn("Polling Warning:", err);
             }
@@ -364,16 +369,28 @@ const DuelManager = {
         // Only host triggers start
         if (!this.isHost) return;
 
-        // Calculate start time: Now + 5 seconds buffer
-        const startTime = new Date(Date.now() + 5000).toISOString();
+        // Change host to ready first. 
+        // Note: The opponent's poll loop will detect this and show the "Opponent is ready! Are you?" popup.
+        await this.setReady();
+    },
 
-        await supabaseClient
-            .from('quiz_rooms')
-            .update({
-                status: 'active',
-                start_time: startTime
-            })
-            .eq('id', this.currentRoom.id);
+    async _checkAndLaunchDuel() {
+        // Find if everyone is ready
+        if (!this.isHost || !this.currentRoom || this.currentRoom.status !== 'waiting') return;
+
+        const allReady = this.players.length > 1 && this.players.every(p => p.is_ready);
+        if (allReady && !this.countdownStarted) {
+            this.countdownStarted = true; // prevent multiple triggers
+            const startTime = new Date(Date.now() + 5000).toISOString();
+
+            await supabaseClient
+                .from('quiz_rooms')
+                .update({
+                    status: 'active',
+                    start_time: startTime
+                })
+                .eq('id', this.currentRoom.id);
+        }
     },
 
     scheduleStart(isoStartTime) {

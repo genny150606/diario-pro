@@ -829,11 +829,11 @@
 
                 <div class="card">
                     <h3>Trova Studenti</h3>
-                    <div style="display: flex; gap: 10px;">
+                    <div class="search-container-relative" style="position: relative;">
                         <input type="text" id="userSearchInput" placeholder="Cerca username (min 3 caratteri)..."
-                            oninput="SocialManager.searchUsers()">
+                            oninput="SocialManager.searchUsers()" autocomplete="off">
+                        <div id="searchResults" class="search-results-list dropdown-results"></div>
                     </div>
-                    <div id="searchResults" class="search-results-list"></div>
                 </div>
 
                 <div class="social-layout">

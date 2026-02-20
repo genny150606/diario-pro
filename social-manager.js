@@ -16,6 +16,17 @@ window.SocialManager = {
 
         this.startPolling();
         this.loadSocialData();
+        this.setupClickOutside();
+    },
+
+    setupClickOutside() {
+        document.addEventListener('click', (e) => {
+            const container = document.querySelector('.search-container-relative');
+            const searchResults = document.getElementById('searchResults');
+            if (container && !container.contains(e.target)) {
+                if (searchResults) searchResults.innerHTML = '';
+            }
+        });
     },
 
     async syncUsername() {
@@ -81,8 +92,15 @@ window.SocialManager = {
     },
 
     async searchUsers() {
-        const query = document.getElementById('userSearchInput').value.trim();
-        if (query.length < 3) return;
+        const input = document.getElementById('userSearchInput');
+        if (!input) return;
+
+        const query = input.value.trim();
+        if (query.length < 3) {
+            const container = document.getElementById('searchResults');
+            if (container) container.innerHTML = '';
+            return;
+        }
 
         const { data, error } = await supabaseClient
             .from('users_data')

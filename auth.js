@@ -12,9 +12,12 @@ const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
         autoRefreshToken: true,
         detectSessionInUrl: true
     },
+    // ANTI-BOT FIX: Cloudflare 520 errors on Virgin browsers are often triggered
+    // by Supabase's own tracking headers like `x-client-info`. AdGuard strips them,
+    // which is why the extension browser works! Here we strip them natively.
     global: {
         headers: {
-            'x-client-info': 'supabase-js/2.0.0'
+            'x-client-info': ''
         }
     }
 });

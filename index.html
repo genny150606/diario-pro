@@ -351,9 +351,10 @@
                 autoRefreshToken: true,
                 detectSessionInUrl: true
             },
+            // ANTI-BOT FIX: Supabase tracking headers get flagged by Cloudflare on clean IPs.
             global: {
                 headers: {
-                    'x-client-info': 'supabase-js/2.0.0'
+                    'x-client-info': ''
                 }
             }
         });

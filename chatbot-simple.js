@@ -911,11 +911,15 @@ Scrivi in modo CHIARO e EDUCATIVO. Sii PRECISO e COMPLETO.`;
             });
 
             if (!response.ok) {
+                const errorData = await response.json().catch(() => ({}));
+                console.error("Server Error Response:", errorData);
+
                 if (response.status === 503) {
                     loadingBubble.innerHTML = '😓 **Il server è molto carico.**<br>Per favore riprova tra qualche secondo.';
                     return;
                 }
-                throw new Error(`Error ${response.status}`);
+
+                throw new Error(errorData.error || `HTTP Error ${response.status}`);
             }
             loadingBubble.remove();
 

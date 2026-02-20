@@ -530,7 +530,7 @@ app.post("/api/supabase-proxy", async (req, res) => {
         const supabaseUrl = 'https://rzdpntvojpibbndhsrlz.supabase.co';
         const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ6ZHBudHZvanBpYmJuZGhzcmx6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEzNzg1MjEsImV4cCI6MjA4Njk1NDUyMX0.QwnT9Okp8CkN_LxGIeBKWrroo3letL8OhSvaqdQVW7M';
 
-        const safeHeaders = ['apikey', 'authorization', 'content-type', 'prefer', 'range', 'x-client-info', 'accept', 'user-agent', 'accept-language'];
+        const safeHeaders = ['apikey', 'authorization', 'content-type', 'prefer'];
         const finalHeaders = {};
         for (const [key, value] of Object.entries(headers || {})) {
             if (safeHeaders.includes(key.toLowerCase())) {
@@ -538,16 +538,7 @@ app.post("/api/supabase-proxy", async (req, res) => {
             }
         }
 
-        // Always ensure a User-Agent is present (Forward from client or spoof) to bypass Cloudflare bot-protection
-        if (!finalHeaders['user-agent'] && !finalHeaders['User-Agent']) {
-            finalHeaders['User-Agent'] = req.headers['user-agent'] || 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36';
-        }
-
-        // Ensure Accept is present to look like a real browser
-        if (!finalHeaders['accept'] && !finalHeaders['Accept']) {
-            finalHeaders['Accept'] = '*/*';
-        }
-
+        // Apply critical auth headers if not present
         if (!finalHeaders['apikey'] && !finalHeaders['apikey'.toLowerCase()]) {
             finalHeaders['apikey'] = supabaseKey;
         }

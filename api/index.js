@@ -530,8 +530,16 @@ app.post("/api/supabase-proxy", async (req, res) => {
         const supabaseUrl = 'https://rzdpntvojpibbndhsrlz.supabase.co';
         const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ6ZHBudHZvanBpYmJuZGhzcmx6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEzNzg1MjEsImV4cCI6MjA4Njk1NDUyMX0.QwnT9Okp8CkN_LxGIeBKWrroo3letL8OhSvaqdQVW7M';
 
-        const finalHeaders = { ...headers };
-        if (!finalHeaders['apikey']) finalHeaders['apikey'] = supabaseKey;
+        const safeHeaders = ['apikey', 'authorization', 'content-type', 'prefer', 'range', 'x-client-info', 'accept'];
+        const finalHeaders = {};
+        for (const [key, value] of Object.entries(headers || {})) {
+            if (safeHeaders.includes(key.toLowerCase())) {
+                finalHeaders[key] = value;
+            }
+        }
+        if (!finalHeaders['apikey'] && !finalHeaders['apikey'.toLowerCase()]) {
+            finalHeaders['apikey'] = supabaseKey;
+        }
         if (!finalHeaders['Authorization'] && !finalHeaders['authorization']) {
             finalHeaders['Authorization'] = `Bearer ${supabaseKey}`;
         }

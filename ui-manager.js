@@ -3,7 +3,7 @@
    Replaces native browser alerts with custom Glass UI
    ============================================ */
 
-// Prevent redeclaration error
+// Prevent redeclaration error by checking window property first
 if (typeof window.UIManager === 'undefined') {
     window.UIManager = {
         // === ALERT ===
@@ -25,6 +25,7 @@ if (typeof window.UIManager === 'undefined') {
                 modal.style.display = 'flex';
                 modal.classList.add('active');
 
+                // Clone button to remove old listeners
                 const newOkBtn = okBtn.cloneNode(true);
                 okBtn.parentNode.replaceChild(newOkBtn, okBtn);
 
@@ -38,6 +39,7 @@ if (typeof window.UIManager === 'undefined') {
             });
         },
 
+        // === CONFIRM ===
         confirm(message, title = 'Conferma Azione') {
             return new Promise((resolve) => {
                 const modal = document.getElementById('confirmModal');
@@ -56,6 +58,7 @@ if (typeof window.UIManager === 'undefined') {
                 modal.style.display = 'flex';
                 modal.classList.add('active');
 
+                // Clone buttons to remove old listeners
                 const newOkBtn = okBtn.cloneNode(true);
                 const newCancelBtn = cancelBtn.cloneNode(true);
                 okBtn.parentNode.replaceChild(newOkBtn, okBtn);
@@ -77,7 +80,4 @@ if (typeof window.UIManager === 'undefined') {
             });
         }
     };
-
-    // Make it global if needed, though 'const' does not attach to window automatically in modules, 
-    // strictly speaking in non-module scripts it's global.
-    window.UIManager = UIManager;
+}

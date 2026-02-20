@@ -25,7 +25,13 @@ const StorageManager = {
     load() {
         try {
             const data = localStorage.getItem('studyjournal_data');
-            return data ? JSON.parse(data) : this.defaultData;
+            const parsed = data ? JSON.parse(data) : {};
+            // Deep merge with defaults to ensure structure exists
+            return {
+                ...this.defaultData,
+                ...parsed,
+                stats: { ...this.defaultData.stats, ...(parsed.stats || {}) }
+            };
         } catch {
             return this.defaultData;
         }
@@ -430,7 +436,7 @@ const GamificationManager = {
 
     getCurrentLevel() {
         const appData = StorageManager.load();
-        return appData.stats.level || 1;
+        return (appData && appData.stats && appData.stats.level) ? appData.stats.level : 1;
     },
 
     getXP() {

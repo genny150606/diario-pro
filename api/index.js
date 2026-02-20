@@ -423,9 +423,21 @@ app.post("/api/supabase-proxy", async (req, res) => {
             'Accept-Encoding': 'identity'
         };
 
-        if (headers && headers['content-type']) cleanHeaders['Content-Type'] = headers['content-type'];
-        if (headers && headers['prefer']) cleanHeaders['Prefer'] = headers['prefer'];
-        if (headers && headers['range']) cleanHeaders['Range'] = headers['range'];
+        if (headers) {
+            const hasHeader = (key) => Object.keys(headers).find(k => k.toLowerCase() === key.toLowerCase());
+
+            const ctKey = hasHeader('content-type');
+            if (ctKey) cleanHeaders['Content-Type'] = headers[ctKey];
+            else cleanHeaders['Content-Type'] = 'application/json'; // Default to JSON for POST/PATCH
+
+            const preferKey = hasHeader('prefer');
+            if (preferKey) cleanHeaders['Prefer'] = headers[preferKey];
+
+            const rangeKey = hasHeader('range');
+            if (rangeKey) cleanHeaders['Range'] = headers[rangeKey];
+        } else {
+            cleanHeaders['Content-Type'] = 'application/json';
+        }
 
         const fetchOptions = {
             method: method || 'GET',

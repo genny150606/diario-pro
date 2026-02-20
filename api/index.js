@@ -451,17 +451,21 @@ app.post("/api/supabase-proxy", async (req, res) => {
         const cleanPath = path.startsWith('/') ? path : `/${path}`;
         const fetchRes = await fetch(`${supabaseUrl}${cleanPath}`, fetchOptions);
 
-        const contentType = fetchRes.headers.get('content-type');
-        let data;
+        // Forward EXACT headers back to the original client so supabase-js can parse correctly
+        fetchRes.headers.forEach((value, key) => {
+            // Vercel/Node fetch automatically decompresses gzip. We must strip 'content-encoding'
+            // otherwise the browser will think the plain buffer is zipped and fail to decode it.
+            if (key.toLowerCase() !== 'content-encoding') {
+                res.setHeader(key, value);
+            }
+        });
 
-        if (contentType && contentType.includes('application/json')) {
-            const rawText = await fetchRes.text();
-            try { data = JSON.parse(rawText); } catch (e) { data = rawText; }
-            return res.status(fetchRes.status).json(data);
-        } else {
-            data = await fetchRes.text();
-            return res.status(fetchRes.status).send(data);
-        }
+        // Some Express JSON interpreters mangle the raw response stream. 
+        // We will pipe the raw fetch body (or buffer it) directly back to the client.
+        const arrayBuffer = await fetchRes.arrayBuffer();
+        const buffer = Buffer.from(arrayBuffer);
+
+        return res.status(fetchRes.status).send(buffer);
 
     } catch (error) {
         console.error("❌ Errore proxy Supabase:", error);

@@ -71,8 +71,11 @@ function sanitizeInput(str, maxLength = 2000) {
 const { GoogleGenerativeAI: GoogleGenAI } = require("@google/generative-ai");
 
 console.log("🚀 Backend initialized. Checking API Key...");
+
+// FAIL FAST: Check API Key immediately
 if (!process.env.GEMINI_API_KEY) {
-    console.warn("⚠️ WARNING: GEMINI_API_KEY is missing in process.env!");
+    console.error("❌ CRITICAL: GEMINI_API_KEY is missing in process.env!");
+    console.error("Please add GEMINI_API_KEY to Netlify Environment Variables.");
 } else {
     console.log("✅ GEMINI_API_KEY found (length: " + process.env.GEMINI_API_KEY.length + ")");
 }
@@ -278,6 +281,14 @@ Formato: [{"question": "Domanda?", "options": ["A", "B", "C", "D"], "answer": 0}
 // ============================================
 app.post("/api/chat", async (req, res) => {
     try {
+        if (!process.env.GEMINI_API_KEY) {
+            console.error("❌ Attempted to call Chat API without GEMINI_API_KEY");
+            return res.status(500).json({
+                error: "Server configuration error: GEMINI_API_KEY is missing.",
+                type: "config_error"
+            });
+        }
+
         const { message, history = [], context = "", stream = false } = req.body;
 
         if (!message || message.trim().length === 0) {
@@ -366,7 +377,7 @@ ${context ? `CONTESTO: ${context}` : ""}`;
         }
 
         res.status(500).json({
-            error: error.message,
+            error: error.message || "Unknown error during chat generation",
             type: "chat_error",
         });
     }

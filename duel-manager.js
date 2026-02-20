@@ -185,20 +185,28 @@ const DuelManager = {
         if (!code) return alert('Inserisci il codice!');
 
         try {
-            console.log('🔍 Joining room via Proxy:', code);
+            console.log('🔍 Joining room:', code);
+            const { data: room, error } = await supabaseClient
+                .from('quiz_rooms')
+                .select('*')
+                .eq('code', code.toUpperCase().trim())
+                .maybeSingle();
 
-            // BYPASS AD-BLOCKERS: Use API Proxy instead of direct Supabase SDK
-            const response = await fetch(`/api/sync-quiz-room?code=${code.toUpperCase().trim()}`);
-
-            if (!response.ok) {
-                if (response.status === 404) {
-                    throw new Error(`Codice ${code} non trovato o partita già iniziata.`);
-                }
-                const errText = await response.text();
-                throw new Error('Errore connessione API: ' + errText);
+            if (error) {
+                console.error('Database Error:', error);
+                throw new Error('Errore connessione: ' + error.message);
             }
 
-            const room = await response.json();
+            if (!room) {
+                // Debugging: check if any room with this code exists regardless of status
+                const { count } = await supabaseClient
+                    .from('quiz_rooms')
+                    .select('*', { count: 'exact', head: true })
+                    .eq('code', code.toUpperCase().trim());
+
+                if (count > 0) throw new Error('Stanza trovata ma non accessibile (Status diverso da waiting?)');
+                throw new Error(`Codice ${code} non trovato.`);
+            }
 
             if (room.status !== 'waiting') {
                 throw new Error(`La partita è già iniziata (Status: ${room.status})`);

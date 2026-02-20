@@ -15,6 +15,30 @@ const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
     global: {
         headers: {
             'x-client-info': 'supabase-js/2.0.0'
+        },
+        fetch: async (url, options) => {
+            if (url.includes('/rest/v1/')) {
+                const targetPath = url.replace('https://rzdpntvojpibbndhsrlz.supabase.co', '');
+
+                let headersObj = {};
+                if (options.headers instanceof Headers) {
+                    options.headers.forEach((value, key) => headersObj[key] = value);
+                } else if (options.headers) {
+                    headersObj = options.headers;
+                }
+
+                return fetch('/api/supabase-proxy', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        path: targetPath,
+                        method: options.method || 'GET',
+                        headers: headersObj,
+                        body: options.body || null
+                    })
+                });
+            }
+            return fetch(url, options);
         }
     }
 });
@@ -44,19 +68,19 @@ const AuthManager = {
                     // Hide auth overlay, reveal app
                     if (event === 'SIGNED_IN') this.hideAuthGate();
 
-                    // SELF-HEALING: Ensure users_data row exists via Proxy
+                    // SELF-HEALING: Ensure users_data row exists
                     if (session && session.user) {
                         const uid = session.user.id;
-                        fetch(`/api/sync-user-data?id=${uid}`)
-                            .then(res => {
-                                if (res.status === 404) {
-                                    // Row missing? Create it now via proxy
+                        supabaseClient
+                            .from('users_data')
+                            .select('id')
+                            .eq('id', uid)
+                            .maybeSingle()
+                            .then(({ data }) => {
+                                if (!data) {
+                                    // Row missing? Create it now.
                                     console.log('🚧 Fixing missing users_data row for:', uid);
-                                    return fetch('/api/sync-user-data', {
-                                        method: 'POST',
-                                        headers: { 'Content-Type': 'application/json' },
-                                        body: JSON.stringify({ id: uid, data: {} })
-                                    });
+                                    return supabaseClient.from('users_data').insert([{ id: uid, data: {}, updated_at: new Date() }]);
                                 }
                             })
                             .catch(err => console.warn('User row check failed', err));
@@ -148,17 +172,17 @@ const AuthManager = {
         });
         if (error) throw error;
 
-        // CRITICAL: Immediately create users_data row via Proxy so homepage stats update instantly
+        // CRITICAL: Immediately create users_data row so homepage stats update instantly
         if (data && data.user) {
-            try {
-                await fetch('/api/sync-user-data', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ id: data.user.id, data: {} })
-                });
-            } catch (insertError) {
-                console.error("Error creating user stats row:", insertError);
-            }
+            const { error: insertError } = await supabaseClient.from('users_data').insert([
+                {
+                    id: data.user.id,
+                    data: {},
+                    updated_at: new Date().toISOString()
+                }
+            ]);
+
+            if (insertError) console.error("Error creating user stats row:", insertError);
         }
 
         return data;

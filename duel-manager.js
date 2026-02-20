@@ -188,12 +188,29 @@ const DuelManager = {
             console.log('🔍 Joining room:', code);
             const { data: room, error } = await supabaseClient
                 .from('quiz_rooms')
-                .select()
+                .select('*')
                 .eq('code', code.toUpperCase().trim())
-                .eq('status', 'waiting')
-                .single();
+                .maybeSingle();
 
-            if (error || !room) throw new Error('Stanza non trovata o già iniziata.');
+            if (error) {
+                console.error('Database Error:', error);
+                throw new Error('Errore connessione: ' + error.message);
+            }
+
+            if (!room) {
+                // Debugging: check if any room with this code exists regardless of status
+                const { count } = await supabaseClient
+                    .from('quiz_rooms')
+                    .select('*', { count: 'exact', head: true })
+                    .eq('code', code.toUpperCase().trim());
+
+                if (count > 0) throw new Error('Stanza trovata ma non accessibile (Status diverso da waiting?)');
+                throw new Error(`Codice ${code} non trovato.`);
+            }
+
+            if (room.status !== 'waiting') {
+                throw new Error(`La partita è già iniziata (Status: ${room.status})`);
+            }
 
             this.currentRoom = room;
             this.isHost = false;

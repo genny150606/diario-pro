@@ -403,6 +403,60 @@ ${context ? `CONTESTO: ${context}` : ""}`;
     }
 });
 
+// ============================================
+// PRISTINE SUPABASE BACKEND PROXY
+// ============================================
+app.post("/api/supabase-proxy", async (req, res) => {
+    try {
+        const { path, method, headers, body } = req.body;
+        if (!path) return res.status(400).json({ error: "Missing path" });
+
+        const supabaseUrl = 'https://rzdpntvojpibbndhsrlz.supabase.co';
+        const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ6ZHBudHZvanBpYmJuZGhzcmx6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEzNzg1MjEsImV4cCI6MjA4Njk1NDUyMX0.QwnT9Okp8CkN_LxGIeBKWrroo3letL8OhSvaqdQVW7M';
+
+        // STRICT HEADER WHITELIST: We only send auth and content-type.
+        // Sending browser headers (user-agent, referer, x-client-info) triggers Cloudflare 520.
+        const cleanHeaders = {
+            'apikey': supabaseKey,
+            'Authorization': `Bearer ${supabaseKey}`,
+            'Connection': 'close',
+            'Accept-Encoding': 'identity'
+        };
+
+        if (headers && headers['content-type']) cleanHeaders['Content-Type'] = headers['content-type'];
+        if (headers && headers['prefer']) cleanHeaders['Prefer'] = headers['prefer'];
+        if (headers && headers['range']) cleanHeaders['Range'] = headers['range'];
+
+        const fetchOptions = {
+            method: method || 'GET',
+            headers: cleanHeaders
+        };
+
+        if (body && method !== 'GET' && method !== 'HEAD') {
+            fetchOptions.body = typeof body === 'string' ? body : JSON.stringify(body);
+        }
+
+        const cleanPath = path.startsWith('/') ? path : `/${path}`;
+        const fetchRes = await fetch(`${supabaseUrl}${cleanPath}`, fetchOptions);
+
+        const contentType = fetchRes.headers.get('content-type');
+        let data;
+
+        if (contentType && contentType.includes('application/json')) {
+            const rawText = await fetchRes.text();
+            try { data = JSON.parse(rawText); } catch (e) { data = rawText; }
+            return res.status(fetchRes.status).json(data);
+        } else {
+            data = await fetchRes.text();
+            return res.status(fetchRes.status).send(data);
+        }
+
+    } catch (error) {
+        console.error("❌ Errore proxy Supabase:", error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
 // Export for Vercel
 module.exports = app;
 

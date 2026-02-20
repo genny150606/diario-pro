@@ -351,13 +351,26 @@
                 autoRefreshToken: true,
                 detectSessionInUrl: true
             },
-            // ANTI-BOT FIX: Virgin browsers send Vercel's URL as Origin, which Cloudflare
-            // sometimes flags as CSRF for DB requests.
-            // We force the Origin/Referer to look like it's coming from Supabase itself.
+            // ANTI-BOT FIX: Use our new PRISTINE Vercel Proxy to bypass Cloudflare 520
             global: {
-                headers: {
-                    'Origin': 'https://rzdpntvojpibbndhsrlz.supabase.co',
-                    'Referer': 'https://rzdpntvojpibbndhsrlz.supabase.co/'
+                fetch: async (url, options) => {
+                    const urlStr = url.toString();
+                    if (urlStr.includes('/rest/v1/')) {
+                        const path = urlStr.split('/rest/v1/')[1];
+                        const proxyUrl = '/api/supabase-proxy';
+                        const proxyBody = {
+                            path: `/rest/v1/${path}`,
+                            method: options.method,
+                            headers: options.headers,
+                            body: options.body
+                        };
+                        return fetch(proxyUrl, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(proxyBody)
+                        });
+                    }
+                    return fetch(url, options);
                 }
             }
         });

@@ -358,6 +358,7 @@ body.dark-mode .xp-guide-item {
     font-size: 8rem;
     font-weight: 800;
     background: linear-gradient(135deg, #facc15, #f59e0b);
+    background-clip: text;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     animation: countdownPulse 0.9s infinite;

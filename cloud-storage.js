@@ -25,26 +25,27 @@ const CloudStorage = {
     },
 
     // ── LOAD DATA FOR A USER ──
-    // First tries Supabase (source of truth), falls back to user-scoped cache
+    // First tries Proxy -> Supabase (source of truth), falls back to user-scoped cache
     async load(userId) {
         if (!userId) return {};
 
         try {
-            const { data, error } = await supabaseClient
-                .from('users_data')
-                .select('data')
-                .eq('id', userId)
-                .single();
+            // Bypass aggressive frontend blockers by routing through Vercel
+            const response = await fetch(`/api/sync-user-data?id=${userId}`);
 
-            if (error && error.code !== 'PGRST116') {
-                // PGRST116 = row not found, that's fine for new users
-                console.warn('CloudStorage load error:', error);
-            }
-
-            if (data && data.data) {
-                // Hydrate cache
-                localStorage.setItem(this._cacheKey(userId), JSON.stringify(data.data));
-                return data.data;
+            if (!response.ok) {
+                if (response.status === 404) {
+                    console.log('No cloud data yet for user.');
+                } else {
+                    console.warn(`CloudStorage load error (${response.status}):`, await response.text());
+                }
+            } else {
+                const data = await response.json();
+                if (data && data.data) {
+                    // Hydrate cache
+                    localStorage.setItem(this._cacheKey(userId), JSON.stringify(data.data));
+                    return data.data;
+                }
             }
 
             // No cloud data: check user-scoped local cache
@@ -60,26 +61,21 @@ const CloudStorage = {
     },
 
     // ── SAVE DATA FOR A USER ──
-    // Writes to user-scoped cache + Supabase (non-blocking)
+    // Writes to user-scoped cache + Supabase Proxy (non-blocking)
     save(userId, data) {
         if (!userId) return;
 
         // 1. Write-through cache (instant)
         localStorage.setItem(this._cacheKey(userId), JSON.stringify(data));
 
-        // 2. Cloud sync (async, non-blocking)
-        if (typeof supabaseClient !== 'undefined') {
-            supabaseClient
-                .from('users_data')
-                .upsert({
-                    id: userId,
-                    data: data,
-                    updated_at: new Date().toISOString()
-                }, { onConflict: 'id' })
-                .then(({ error }) => {
-                    if (error) console.error('CloudStorage save error:', error);
-                });
-        }
+        // 2. Cloud sync via Proxy (async, non-blocking)
+        fetch('/api/sync-user-data', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id: userId, data: data })
+        }).catch(error => {
+            console.error('CloudStorage Proxy save error:', error);
+        });
     },
 
     // ── LOAD FROM CACHE ONLY (sync, for immediate reads) ──

@@ -403,6 +403,84 @@ ${context ? `CONTESTO: ${context}` : ""}`;
     }
 });
 
+// ============================================
+// ENDPOINT USER DATA SYNC (PROXY)
+// ============================================
+// Proxies Supabase REST calls to bypass frontend 520 / CORS blocks
+// often caused by AdBlockers or strict browser tracking protection
+// on the vercel.app domain calling supabase.co.
+
+app.get("/api/sync-user-data", async (req, res) => {
+    try {
+        const { id } = req.query;
+        if (!id) return res.status(400).json({ error: "Missing user ID" });
+
+        const supabaseUrl = 'https://rzdpntvojpibbndhsrlz.supabase.co';
+        const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ6ZHBudHZvanBpYmJuZGhzcmx6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEzNzg1MjEsImV4cCI6MjA4Njk1NDUyMX0.QwnT9Okp8CkN_LxGIeBKWrroo3letL8OhSvaqdQVW7M';
+
+        // Usiamo l'API REST di Supabase per ignorare i problemi di connessione del Client JS
+        const fetchRes = await fetch(`${supabaseUrl}/rest/v1/users_data?select=data&id=eq.${id}`, {
+            method: 'GET',
+            headers: {
+                'apikey': supabaseKey,
+                'Authorization': `Bearer ${supabaseKey}`,
+                'Content-Type': 'application/json'
+            }
+        });
+
+        if (!fetchRes.ok) throw new Error("Supabase fetch failed: " + fetchRes.statusTag);
+
+        const data = await fetchRes.json();
+
+        if (data && data.length > 0) {
+            res.json(data[0]);
+        } else {
+            res.status(404).json({ error: "No data found for this user" });
+        }
+
+    } catch (error) {
+        console.error("❌ Errore proxy GET user data:", error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+app.post("/api/sync-user-data", async (req, res) => {
+    try {
+        const { id, data } = req.body;
+        if (!id || !data) return res.status(400).json({ error: "Missing user ID or data payload" });
+
+        const supabaseUrl = 'https://rzdpntvojpibbndhsrlz.supabase.co';
+        const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ6ZHBudHZvanBpYmJuZGhzcmx6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEzNzg1MjEsImV4cCI6MjA4Njk1NDUyMX0.QwnT9Okp8CkN_LxGIeBKWrroo3letL8OhSvaqdQVW7M';
+
+        // Upsert via REST API
+        const fetchRes = await fetch(`${supabaseUrl}/rest/v1/users_data?columns=%22id%22%2C%22data%22%2C%22updated_at%22`, {
+            method: 'POST',
+            headers: {
+                'apikey': supabaseKey,
+                'Authorization': `Bearer ${supabaseKey}`,
+                'Content-Type': 'application/json',
+                'Prefer': 'return=minimal,resolution=merge-duplicates'
+            },
+            body: JSON.stringify({
+                id: id,
+                data: data,
+                updated_at: new Date().toISOString()
+            })
+        });
+
+        if (!fetchRes.ok) {
+            const errRes = await fetchRes.text();
+            throw new Error(`Supabase upsert failed (${fetchRes.status}): ` + errRes);
+        }
+
+        res.json({ success: true });
+
+    } catch (error) {
+        console.error("❌ Errore proxy POST user data:", error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
 // Export for Vercel
 module.exports = app;
 

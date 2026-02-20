@@ -431,7 +431,11 @@ app.post("/api/supabase-proxy", async (req, res) => {
             else cleanHeaders['Content-Type'] = 'application/json'; // Default to JSON for POST/PATCH
 
             const preferKey = hasHeader('prefer');
-            if (preferKey) cleanHeaders['Prefer'] = headers[preferKey];
+            let preferVal = preferKey ? headers[preferKey] : '';
+            if ((method === 'POST' || method === 'PATCH') && !preferVal.includes('return=')) {
+                preferVal = preferVal ? `${preferVal}, return=representation` : 'return=representation';
+            }
+            if (preferVal) cleanHeaders['Prefer'] = preferVal;
 
             const rangeKey = hasHeader('range');
             if (rangeKey) cleanHeaders['Range'] = headers[rangeKey];

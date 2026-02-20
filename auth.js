@@ -12,12 +12,13 @@ const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
         autoRefreshToken: true,
         detectSessionInUrl: true
     },
-    // ANTI-BOT FIX: Cloudflare 520 errors on Virgin browsers are often triggered
-    // by Supabase's own tracking headers like `x-client-info`. AdGuard strips them,
-    // which is why the extension browser works! Here we strip them natively.
+    // ANTI-BOT FIX: Virgin browsers send Vercel's URL as Origin, which Cloudflare
+    // sometimes flags as CSRF for DB requests. AdGuard often masks this.
+    // We force the Origin/Referer to look like it's coming from Supabase itself.
     global: {
         headers: {
-            'x-client-info': ''
+            'Origin': 'https://rzdpntvojpibbndhsrlz.supabase.co',
+            'Referer': 'https://rzdpntvojpibbndhsrlz.supabase.co/'
         }
     }
 });

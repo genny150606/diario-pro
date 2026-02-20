@@ -351,10 +351,13 @@
                 autoRefreshToken: true,
                 detectSessionInUrl: true
             },
-            // ANTI-BOT FIX: Supabase tracking headers get flagged by Cloudflare on clean IPs.
+            // ANTI-BOT FIX: Virgin browsers send Vercel's URL as Origin, which Cloudflare
+            // sometimes flags as CSRF for DB requests.
+            // We force the Origin/Referer to look like it's coming from Supabase itself.
             global: {
                 headers: {
-                    'x-client-info': ''
+                    'Origin': 'https://rzdpntvojpibbndhsrlz.supabase.co',
+                    'Referer': 'https://rzdpntvojpibbndhsrlz.supabase.co/'
                 }
             }
         });

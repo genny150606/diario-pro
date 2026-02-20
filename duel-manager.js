@@ -393,6 +393,7 @@ const DuelManager = {
 
         if (allReady && !this.countdownStarted) {
             this.countdownStarted = true; // prevent multiple triggers
+            console.log(`[_checkAndLaunchDuel] Both players ready. Launching!`);
 
             await supabaseClient
                 .from('quiz_rooms')
@@ -400,6 +401,9 @@ const DuelManager = {
                     status: 'active'
                 })
                 .eq('id', this.currentRoom.id);
+
+            // Host triggers local countdown immediately
+            this.scheduleStart();
         }
     },
 
@@ -501,7 +505,7 @@ const DuelManager = {
             <p class="duel-q-text">${q.question || "Domanda non disponibile"}</p>
             <div class="duel-options">
                 ${options.map((opt, i) => `
-                    <button class="duel-opt-btn" onclick="DuelManager.submitAnswer(${i === q.answer})">${opt}</button>
+                    <button class="duel-opt-btn" onclick="DuelManager.submitAnswer(${i === q.answer}, ${i})">${opt}</button>
                 `).join('')}
             </div>
         `;
@@ -526,11 +530,17 @@ const DuelManager = {
         }, 100);
     },
 
-    async submitAnswer(isCorrect) {
+    async submitAnswer(isCorrect, btnIndex = -1) {
         if (this.timerInterval) clearInterval(this.timerInterval);
 
-        // Disable buttons
-        document.querySelectorAll('.duel-opt-btn').forEach(b => b.disabled = true);
+        // Disable all buttons and show feedback
+        const buttons = document.querySelectorAll('.duel-opt-btn');
+        buttons.forEach((b, i) => {
+            b.disabled = true;
+            if (i === btnIndex) {
+                b.classList.add(isCorrect ? 'correct' : 'wrong');
+            }
+        });
 
         // Scoring: Base 10 + Time Bonus (up to 5)
         if (isCorrect) {
@@ -572,8 +582,9 @@ const DuelManager = {
         const startBtn = document.getElementById('startDuelBtn');
 
         container.innerHTML = this.players.map(p => `
-            <div class="player-card">
-                <span>👤 ${p.username} ${p.username === this.playerName ? '(Tu)' : ''}</span>
+            <div class="player-card ${p.username === this.playerName ? 'is-me' : ''}">
+                <span style="font-size: 2.5rem; margin-bottom: 1rem;">${p.username === this.playerName ? '👑' : '⚔️'}</span>
+                <span style="font-weight: 800; color: #FFF">${p.username} ${p.username === this.playerName ? '(Tu)' : ''}</span>
                 <span class="status-ready ${p.is_ready ? 'ready' : ''}">${p.is_ready ? 'Pronto' : 'In attesa...'}</span>
             </div>
         `).join('');
@@ -623,13 +634,29 @@ const DuelManager = {
         const winner = ranked[0];
 
         const results = document.getElementById('duelResultsSummary');
+        results.className = 'results-card'; // Add container class
         results.innerHTML = `
-            <h2>🏆 Vittoria per ${winner.username}!</h2>
-            <div class="final-scores">
-                ${ranked.map((p, i) => `<div class="result-row"><span>#${i + 1} ${p.username}</span> <span>${p.score} pt</span></div>`).join('')}
+            <div style="margin-bottom: 2rem;">
+                <span class="duel-badge" style="background: #fbbf24; color: #000;">🏆 Battaglia Terminata</span>
+                <h1 style="font-size: 2.5rem; font-weight: 900; margin: 1rem 0;">
+                    ${winner.username === this.playerName ? 'Hai Vinto Tu!' : winner.username + ' Trionfa!'}
+                </h1>
+                <p style="color: rgba(255,255,255,0.6)">Livello di competenza: Leggendario ⚔️</p>
             </div>
-            <br>
-            <button class="btn-primary" onclick="location.reload()">Torna alla Home</button>
+
+            <div class="final-scores">
+                ${ranked.map((p, i) => `
+                    <div class="result-row ${i === 0 ? 'winner' : ''}">
+                        <span class="rank">#${i + 1}</span>
+                        <span class="username">${p.username} ${p.username === this.playerName ? '(Tu)' : ''}</span>
+                        <span class="score">${p.score} PT</span>
+                    </div>
+                `).join('')}
+            </div>
+
+            <div style="margin-top: 2rem; display: flex; gap: 1rem; justify-content: center;">
+                <button class="btn-primary" onclick="location.reload()" style="padding: 1rem 2rem;">Rivincita</button>
+            </div>
         `;
 
         // Grant XP for finishing

@@ -340,18 +340,28 @@ const DuelManager = {
     },
 
     checkReadyStatus() {
-        if (this.currentRoom.status !== 'waiting') return;
+        if (!this.currentRoom || this.currentRoom.status !== 'waiting') return;
 
         const me = this.players.find(p => p.username === this.playerName);
         const opponent = this.players.find(p => p.username !== this.playerName);
 
+        console.log(`[checkReadyStatus] me ready: ${me?.is_ready}, str: ${JSON.stringify(me)}`);
+        console.log(`[checkReadyStatus] opp ready: ${opponent?.is_ready}, str: ${JSON.stringify(opponent)}`);
+
         // Invitation Logic
+        // Se non sono l'host, l'host è "opponent" per me.
         if (opponent && opponent.is_ready && me && !me.is_ready && !this.inviting) {
             this.inviting = true;
-            UIManager.confirm(`${opponent.username} è pronto! Sei pronto?`, '⚔️ SFIDA')
+            console.log(`[checkReadyStatus] Triggering UIManager.confirm per ${me.username}`);
+            UIManager.confirm(`${opponent.username} ti sta sfidando! Sei pronto a iniziare?`, '⚔️ SFIDA')
                 .then(yes => {
                     this.inviting = false;
+                    console.log(`[checkReadyStatus] Risposta UIManager.confirm: ${yes}`);
                     if (yes) this.setReady();
+                })
+                .catch(err => {
+                    this.inviting = false;
+                    console.error(`[checkReadyStatus] Errore UIManager.confirm:`, err);
                 });
         }
     },
@@ -379,6 +389,8 @@ const DuelManager = {
         if (!this.isHost || !this.currentRoom || this.currentRoom.status !== 'waiting') return;
 
         const allReady = this.players.length > 1 && this.players.every(p => p.is_ready);
+        console.log(`[_checkAndLaunchDuel] allReady: ${allReady}, countdownStarted: ${this.countdownStarted}, players: ${this.players.length}`);
+
         if (allReady && !this.countdownStarted) {
             this.countdownStarted = true; // prevent multiple triggers
             const startTime = new Date(Date.now() + 5000).toISOString();
@@ -557,9 +569,18 @@ const DuelManager = {
         `).join('');
 
         if (startBtn) {
-            // Enable start if everyone ready AND I am host
-            startBtn.disabled = !(allReady && this.isHost);
-            if (allReady && this.isHost) startBtn.classList.add('pulse');
+            // Host can click start if there is at least one opponent
+            const canStart = this.isHost && this.players.length > 1;
+            startBtn.disabled = !canStart;
+
+            // Pulse if everyone is ready (optional visual cue)
+            if (allReady && this.isHost) {
+                startBtn.classList.add('pulse');
+                startBtn.textContent = 'INVIA SFIDA';
+            } else if (this.isHost && this.players.length > 1) {
+                startBtn.classList.remove('pulse');
+                startBtn.textContent = 'SFIDA L\'AVVERSARIO';
+            }
         }
     },
 

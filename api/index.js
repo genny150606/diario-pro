@@ -479,6 +479,12 @@ app.post("/api/supabase-proxy", async (req, res) => {
         const arrayBuffer = await fetchRes.arrayBuffer();
         const buffer = Buffer.from(arrayBuffer);
 
+        if (fetchRes.status >= 400) {
+            console.error(`[PROXY ERROR] ${method} ${path} -> ${fetchRes.status}`);
+            console.error(`[PROXY ERROR] Request Body:`, body);
+            console.error(`[PROXY ERROR] Response:`, buffer.toString());
+        }
+
         return res.status(fetchRes.status).send(buffer);
 
     } catch (error) {

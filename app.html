@@ -2383,6 +2383,46 @@
                 😎</button>
         </div>
     </div>
+    <!-- CHATBOT INTERFACE -->
+    <div id="geminiChat">
+        <button id="geminiChatToggle">✨</button>
+
+        <div id="geminiChatWindow">
+            <div id="geminiChatHeader">
+                <div class="chat-header-info">
+                    <div class="chat-avatar">🤖</div>
+                    <div class="chat-title">
+                        <h3>StudyBuddy AI</h3>
+                        <span><span class="status-dot"></span>Tutor Online</span>
+                    </div>
+                </div>
+                <button id="closeChatBtn">✕</button>
+            </div>
+
+            <div id="geminiChatMessages">
+                <div class="chat-bubble ai">
+                    Ciao! 👋 Sono il tuo assistente di studio.
+                    <br><br>
+                    Posso aiutarti a:
+                    <br>• Generare appunti
+                    <br>• Creare flashcard
+                    <br>• Organizzare il piano di studi
+                    <br><br>
+                    Come iniziamo? 🚀
+                </div>
+            </div>
+
+            <div id="geminiChatInput">
+                <button class="chat-attach-btn" onclick="document.getElementById('chatFileUpload').click()"
+                    title="Carica documento">📎</button>
+                <input type="file" id="chatFileUpload" accept=".pdf,.txt" style="display:none;"
+                    onchange="if(window.SimpleChatbot) SimpleChatbot.handleFileUpload(event)">
+                <input type="text" id="chatInputField" placeholder="Chiedi qualcosa...">
+                <button>➤</button>
+            </div>
+        </div>
+    </div>
+
 </body>
 
 </html>

@@ -12,6 +12,7 @@
     <!-- Design System -->
     <link rel="stylesheet" href="theme.css">
     <link rel="stylesheet" href="home.css">
+    <link rel="stylesheet" href="features.css">
 
     <!-- Supabase (for real-time stats & reviews) -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -773,6 +774,63 @@
 
         function wait(ms) {
             return new Promise(resolve => setTimeout(resolve, ms));
+        }
+    </script>
+    <!-- CHATBOT INTERFACE -->
+    <div id="geminiChat">
+        <button id="geminiChatToggle">✨</button>
+
+        <div id="geminiChatWindow">
+            <div id="geminiChatHeader">
+                <div class="chat-header-info">
+                    <div class="chat-avatar">🤖</div>
+                    <div class="chat-title">
+                        <h3>StudyBuddy AI</h3>
+                        <span><span class="status-dot"></span>Tutor Online</span>
+                    </div>
+                </div>
+                <button id="closeChatBtn">✕</button>
+            </div>
+
+            <div id="geminiChatMessages">
+                <div class="chat-bubble ai">
+                    Ciao! 👋 Sono il tuo assistente di studio.
+                    <br><br>
+                    Posso aiutarti a:
+                    <br>• Generare appunti
+                    <br>• Creare flashcard
+                    <br>• Organizzare il piano di studi
+                    <br><br>
+                    Come iniziamo? 🚀
+                </div>
+            </div>
+
+            <div id="geminiChatInput">
+                <button class="chat-attach-btn" onclick="document.getElementById('chatFileUpload').click()"
+                    title="Carica documento">📎</button>
+                <input type="file" id="chatFileUpload" accept=".pdf,.txt" style="display:none;"
+                    onchange="if(window.SimpleChatbot) SimpleChatbot.handleFileUpload(event)">
+                <input type="text" id="chatInputField" placeholder="Chiedi qualcosa...">
+                <button>➤</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="chatbot-simple.js"></script>
+    <script>
+        // Simple shim for dependencies if they are missing on landing page
+        if (typeof UIManager === 'undefined') {
+            window.UIManager = {
+                alert: (msg) => alert(msg),
+                confirm: (msg) => confirm(msg)
+            };
+        }
+        if (typeof loadData === 'undefined') {
+            window.loadData = () => ({});
+        }
+        if (typeof saveData === 'undefined') {
+            window.saveData = () => { };
         }
     </script>
 </body>

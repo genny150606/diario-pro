@@ -15,30 +15,6 @@ const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
     global: {
         headers: {
             'x-client-info': 'supabase-js/2.0.0'
-        },
-        fetch: async (url, options) => {
-            if (url.includes('/rest/v1/')) {
-                const targetPath = url.replace('https://rzdpntvojpibbndhsrlz.supabase.co', '');
-
-                let headersObj = {};
-                if (options.headers instanceof Headers) {
-                    options.headers.forEach((value, key) => headersObj[key] = value);
-                } else if (options.headers) {
-                    headersObj = options.headers;
-                }
-
-                return fetch('/api/supabase-proxy', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        path: targetPath,
-                        method: options.method || 'GET',
-                        headers: headersObj,
-                        body: options.body || null
-                    })
-                });
-            }
-            return fetch(url, options);
         }
     }
 });

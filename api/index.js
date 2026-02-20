@@ -481,6 +481,42 @@ app.post("/api/sync-user-data", async (req, res) => {
     }
 });
 
+// ============================================
+// ENDPOINT QUIZ ROOM SYNC (PROXY)
+// ============================================
+app.get("/api/sync-quiz-room", async (req, res) => {
+    try {
+        const { code } = req.query;
+        if (!code) return res.status(400).json({ error: "Missing room code" });
+
+        const supabaseUrl = 'https://rzdpntvojpibbndhsrlz.supabase.co';
+        const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ6ZHBudHZvanBpYmJuZGhzcmx6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEzNzg1MjEsImV4cCI6MjA4Njk1NDUyMX0.QwnT9Okp8CkN_LxGIeBKWrroo3letL8OhSvaqdQVW7M';
+
+        const fetchRes = await fetch(`${supabaseUrl}/rest/v1/quiz_rooms?select=*&code=eq.${code.toUpperCase()}`, {
+            method: 'GET',
+            headers: {
+                'apikey': supabaseKey,
+                'Authorization': `Bearer ${supabaseKey}`,
+                'Content-Type': 'application/json'
+            }
+        });
+
+        if (!fetchRes.ok) throw new Error("Supabase fetch failed: " + fetchRes.statusTag);
+
+        const data = await fetchRes.json();
+
+        if (data && data.length > 0) {
+            res.json(data[0]); // Return single room
+        } else {
+            res.status(404).json({ error: "Room not found" });
+        }
+
+    } catch (error) {
+        console.error("❌ Errore proxy GET quiz room:", error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
 // Export for Vercel
 module.exports = app;
 

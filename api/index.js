@@ -576,9 +576,25 @@ app.post("/api/supabase-proxy", async (req, res) => {
             } catch (e) {
                 data = rawText;
             }
+            if (fetchRes.status >= 500) {
+                return res.status(fetchRes.status).json({
+                    _debug_proxy: true,
+                    reqOptions: fetchOptions,
+                    url: `${supabaseUrl}${path}`,
+                    response: data
+                });
+            }
             return res.status(fetchRes.status).json(data);
         } else {
             data = await fetchRes.text();
+            if (fetchRes.status >= 500) {
+                return res.status(fetchRes.status).json({
+                    _debug_proxy: true,
+                    reqOptions: fetchOptions,
+                    url: `${supabaseUrl}${path}`,
+                    responseHTML: data
+                });
+            }
             return res.status(fetchRes.status).send(data);
         }
 

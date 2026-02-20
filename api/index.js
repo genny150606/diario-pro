@@ -375,6 +375,10 @@ ${context ? `CONTESTO: ${context}` : ""}`;
 // Export for Vercel
 module.exports = app;
 
+// Export for Netlify
+const serverless = require('serverless-http');
+module.exports.handler = serverless(app);
+
 // Start server if running locally
 if (require.main === module) {
     const PORT = process.env.PORT || 3000;

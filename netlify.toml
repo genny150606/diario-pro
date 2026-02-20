@@ -1,0 +1,25 @@
+[build]
+  command = "cd api && npm install" # Ensure API deps are installed
+  publish = "."
+  functions = "api"
+
+[dev]
+  command = "node api/index.js"
+  publish = "."
+
+[[redirects]]
+  from = "/api/*"
+  to = "/.netlify/functions/index/:splat"
+  status = 200
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "DENY"
+    X-XSS-Protection = "1; mode=block"
+    Referrer-Policy = "strict-origin-when-cross-origin"

@@ -439,8 +439,13 @@ app.post("/api/supabase-proxy", async (req, res) => {
 
             const rangeKey = hasHeader('range');
             if (rangeKey) cleanHeaders['Range'] = headers[rangeKey];
+
+            const acceptKey = hasHeader('accept');
+            if (acceptKey) cleanHeaders['Accept'] = headers[acceptKey];
+            else cleanHeaders['Accept'] = 'application/json';
         } else {
             cleanHeaders['Content-Type'] = 'application/json';
+            cleanHeaders['Accept'] = 'application/json';
         }
 
         const fetchOptions = {

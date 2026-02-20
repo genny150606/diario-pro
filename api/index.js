@@ -26,6 +26,11 @@ setInterval(() => {
 }, 120000);
 
 app.use((req, res, next) => {
+    // Exempt proxy from rate limiting since it's used for real-time polling
+    if (req.path === '/api/supabase-proxy' || req.path === '/supabase-proxy') {
+        return next();
+    }
+
     const ip = req.headers['x-forwarded-for'] || req.ip || 'unknown';
     const now = Date.now();
 

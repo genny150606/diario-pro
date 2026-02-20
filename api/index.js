@@ -244,11 +244,30 @@ RISPOSTA: Solo JSON array, niente altro!
 // ============================================
 app.post("/api/generate-duel-quiz", async (req, res) => {
     try {
-        const { subject, difficulty = 'media' } = req.body;
+        const { subject, context, difficulty = 'media' } = req.body;
 
-        console.log(`📨 Duel Quiz request: ${subject} (${difficulty})`);
+        console.log(`📨 Duel Quiz request: ${subject} (${difficulty}) ${context ? '(with context)' : ''}`);
 
-        const prompt = `Crea un quiz di 10 domande a risposta multipla su: ${subject || "Cultura Generale"}.
+        let prompt = "";
+
+        if (context && context.trim().length > 0) {
+            // CONTEXT-BASED GENERATION (Notes/PDF)
+            prompt = `Analizza il seguente testo e crea un quiz di 10 domande a risposta multipla.
+            
+TESTO DI RIFERIMENTO:
+"${context.substring(0, 15000)}"
+
+DIFFICOLTÀ: ${difficulty}
+
+REGOLE:
+1. Le domande devono essere basate ESCLUSIVAMENTE sul testo fornito.
+2. 4 opzioni per domanda.
+3. Indica l'indice corretto (0-3).
+4. Risposta formato JSON Array identico a prima.
+            `;
+        } else {
+            // SUBJECT-BASED GENERATION
+            prompt = `Crea un quiz di 10 domande a risposta multipla su: ${subject || "Cultura Generale"}.
 Difficoltà: ${difficulty}.
 
 REGOLE:
@@ -258,6 +277,7 @@ REGOLE:
 
 RISPOSTA: Solo JSON array, niente testo extra.
 Formato: [{"question": "Domanda?", "options": ["A", "B", "C", "D"], "answer": 0}]`;
+        }
 
         const text = await callGeminiWithRetry(prompt, "Sei un generatore di quiz scolastici preciso e professionale.");
 

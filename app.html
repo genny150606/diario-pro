@@ -827,12 +827,50 @@
 
                         <div id="duelCreateForm">
                             <h2>Nuova Sfida AI</h2>
-                            <p>Scegli una materia per generare le domande</p>
-                            <input type="text" id="duelSubjectInput" placeholder="es. Storia Romana"
-                                style="padding: 12px; border-radius: 8px; border: 1px solid var(--border); width: 80%; margin: 1rem 0;">
+
+                            <!-- Source Toggles -->
+                            <div class="duel-source-tabs"
+                                style="display: flex; gap: 10px; margin-bottom: 1rem; justify-content: center;">
+                                <button class="btn-tab active"
+                                    onclick="DuelManager.setSource('subject', this)">Materia</button>
+                                <button class="btn-tab" onclick="DuelManager.setSource('notes', this)">Appunti</button>
+                                <button class="btn-tab" onclick="DuelManager.setSource('pdf', this)">PDF</button>
+                            </div>
+
+                            <!-- Subject Input -->
+                            <div id="duelSource_subject" class="duel-source-content">
+                                <p>Scegli una materia per generare le domande</p>
+                                <input type="text" id="duelSubjectInput" placeholder="es. Storia Romana"
+                                    style="padding: 12px; border-radius: 8px; border: 1px solid var(--border); width: 80%; margin: 1rem 0;">
+                            </div>
+
+                            <!-- Notes Selection -->
+                            <div id="duelSource_notes" class="duel-source-content" style="display: none;">
+                                <p>Scegli dai tuoi appunti salvati</p>
+                                <select id="duelNoteSelect"
+                                    style="padding: 12px; border-radius: 8px; border: 1px solid var(--border); width: 80%; margin: 1rem 0;">
+                                    <option value="">-- Caricamento note... --</option>
+                                </select>
+                            </div>
+
+                            <!-- PDF Upload -->
+                            <div id="duelSource_pdf" class="duel-source-content" style="display: none;">
+                                <p>Carica un PDF o incolla del testo</p>
+                                <textarea id="duelManualText" placeholder="Incolla qui il testo..."
+                                    style="width: 80%; height: 80px; padding: 8px; margin-bottom: 10px; border-radius: 8px; border: 1px solid var(--border);"></textarea>
+                                <div style="display: flex; align-items: center; justify-content: center; gap: 10px;">
+                                    <input type="file" id="duelPdfInput" accept=".pdf,.txt" style="display: none;"
+                                        onchange="DuelManager.handleFileUpload(this)">
+                                    <button class="btn-secondary"
+                                        onclick="document.getElementById('duelPdfInput').click()">📂 Carica
+                                        File</button>
+                                    <span id="duelFileName"
+                                        style="font-size: 0.9rem; color: var(--text-secondary);"></span>
+                                </div>
+                            </div>
+
                             <br>
-                            <button class="btn-primary"
-                                onclick="DuelManager.createRoom(document.getElementById('duelSubjectInput').value)">Crea
+                            <button id="duelCreateBtn" class="btn-primary" onclick="DuelManager.createRoom()">Crea
                                 Stanza</button>
 
                             <div style="margin: 2rem 0; border-top: 1px solid var(--border); padding-top: 2rem;">
@@ -840,11 +878,11 @@
                                 <div style="display: flex; gap: 8px; justify-content: center; margin-top: 1rem;">
                                     <input type="text" id="duelJoinCode" placeholder="Codice"
                                         style="padding: 12px; border-radius: 8px; width: 120px; text-transform: uppercase; border: 1px solid var(--border);">
-                                    <input type="text" id="duelUsername" placeholder="Tuo Nome"
-                                        style="padding: 12px; border-radius: 8px; width: 160px; border: 1px solid var(--border);">
+                                    <input type="text" id="duelUsername" placeholder="Tuo Nome" style="display:none">
+                                    <!-- Hidden, auto-filled -->
                                 </div>
                                 <button class="btn-secondary" style="margin-top: 1rem;"
-                                    onclick="DuelManager.joinRoom(document.getElementById('duelJoinCode').value, document.getElementById('duelUsername').value)">Partecipa
+                                    onclick="DuelManager.joinRoom(document.getElementById('duelJoinCode').value)">Partecipa
                                     alla Sfida</button>
                             </div>
                         </div>

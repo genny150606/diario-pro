@@ -33,6 +33,7 @@
     <script src="user-profile.js" defer></script>
     <script src="ui-manager.js" defer></script>
     <script src="hamburger-menu.js" defer></script>
+    <script src="social-manager.js" defer></script>
 
 </head>
 
@@ -143,7 +144,8 @@
             <a href="#" data-section="stats" class="sidebar-item nav-link" id="navStats">Statistiche</a>
             <a href="#" data-section="presences" class="sidebar-item nav-link" id="navPresences">Presenze</a>
             <a href="#" data-section="duel" class="sidebar-item nav-link" id="navDuel"
-                style="color: #f59e0b; font-weight: bold;">⚔️ Duello AI</a>
+                style="border-left: 3px solid #f59e0b; color: #f59e0b;">Duello AI ⚔️</a>
+            <a href="#" data-section="social" class="sidebar-item nav-link" id="navSocial">Social 🤝</a>
 
             <a href="#" data-section="settings" class="sidebar-item nav-link" id="navSettings">Impostazioni</a>
         </nav>
@@ -818,6 +820,34 @@
 
 
             <!-- SEZIONE DUELLO -->
+            <!-- SOCIAL -->
+            <section id="social" class="content-section" style="display: none;">
+                <div class="hero">
+                    <h1>Social & Amici 🤝</h1>
+                    <p>Trova altri studenti e sfidali in tempo reale</p>
+                </div>
+
+                <div class="card">
+                    <h3>Trova Studenti</h3>
+                    <div style="display: flex; gap: 10px;">
+                        <input type="text" id="userSearchInput" placeholder="Cerca username (min 3 caratteri)..."
+                            oninput="SocialManager.searchUsers()">
+                    </div>
+                    <div id="searchResults" class="search-results-list"></div>
+                </div>
+
+                <div class="social-layout">
+                    <div class="social-column">
+                        <h3>Richieste in arrivo</h3>
+                        <div id="pendingRequestsList"></div>
+                    </div>
+                    <div class="social-column">
+                        <h3>I tuoi Amici</h3>
+                        <div id="friendsList"></div>
+                    </div>
+                </div>
+            </section>
+
             <section id="duel" class="content-section" style="display: none;">
                 <div class="duel-container">
 
@@ -1027,6 +1057,8 @@
                 } else if (sectionId === 'presences') {
                     if (typeof renderPresences === 'function') renderPresences();
                     if (typeof updatePresenceStats === 'function') updatePresenceStats();
+                } else if (sectionId === 'social') {
+                    if (window.SocialManager) SocialManager.init();
                 }
             } catch (err) {
                 console.error('❌ Errore durante il rendering della sezione:', err);

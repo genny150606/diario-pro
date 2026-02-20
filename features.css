@@ -538,8 +538,119 @@ body.dark-mode .chat-avatar {
 }
 
 /* ============================================
+   🤝 SOCIAL & FRIENDS STYLES
+   ============================================ */
+
+.social-layout {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-6);
+    margin-top: var(--space-8);
+}
+
+.social-column {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 24px;
+    padding: var(--space-6);
+    backdrop-filter: blur(10px);
+}
+
+.social-column h3 {
+    font-size: 1.1rem;
+    color: var(--color-accent);
+    margin-bottom: var(--space-6);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.social-item {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 16px;
+    padding: var(--space-4) var(--space-6);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--space-4);
+    transition: transform 0.2s ease;
+}
+
+.social-item:hover {
+    background: rgba(255, 255, 255, 0.08);
+    transform: translateX(5px);
+}
+
+.user-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.user-avatar {
+    font-size: 1.5rem;
+}
+
+.username {
+    font-weight: 700;
+    color: #FFF;
+}
+
+.challenge-btn {
+    background: linear-gradient(135deg, #f59e0b, #ea580c);
+    color: #000;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 12px;
+    font-weight: 800;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.challenge-btn:hover {
+    transform: scale(1.05);
+    box-shadow: 0 0 15px rgba(245, 158, 11, 0.4);
+}
+
+.search-results-list {
+    margin-top: var(--space-4);
+}
+
+.search-result-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 16px;
+    background: rgba(255, 255, 255, 0.04);
+    border-radius: 12px;
+    margin-bottom: 8px;
+}
+
+.search-result-item button {
+    background: var(--color-accent);
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    cursor: pointer;
+}
+
+.empty-state {
+    color: rgba(255, 255, 255, 0.4);
+    text-align: center;
+    padding: var(--space-8) 0;
+    font-size: 0.9rem;
+}
+
+@media (max-width: 768px) {
+    .social-layout {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* ============================================
    ⚔️ AI QUIZ DUEL — PREMIUM ARENA
-   Modern Glassmorphism & High-Energy Design
    ============================================ */
 
 .duel-container {

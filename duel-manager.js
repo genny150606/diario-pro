@@ -160,6 +160,9 @@ const DuelManager = {
             this.isHost = true;
             this.questions = quiz;
 
+            // Auto-switch to duel section if not already there
+            if (typeof AppManager !== 'undefined') AppManager.showSection('duel');
+
             // UI Update
             document.getElementById('duelCreateForm').classList.add('hidden');
             document.getElementById('duelWaitingLobby').classList.remove('hidden');
@@ -228,6 +231,9 @@ const DuelManager = {
             this.isHost = false;
             this.playerName = autoName;
             this.questions = room.ai_data;
+
+            // Auto-switch to duel section
+            if (typeof AppManager !== 'undefined') AppManager.showSection('duel');
 
             // UI Update
             document.getElementById('duelCreateForm').classList.add('hidden');

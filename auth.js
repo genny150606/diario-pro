@@ -94,6 +94,7 @@ const AuthManager = {
                             if (typeof loadTasks === 'function') loadTasks();
                             if (typeof loadGrades === 'function') loadGrades();
                             if (typeof loadFlashcards === 'function') loadFlashcards();
+                            if (typeof SocialManager !== 'undefined') SocialManager.init();
                         });
                     }
                 }

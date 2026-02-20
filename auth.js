@@ -18,11 +18,16 @@ const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
             const urlStr = url.toString();
             if (urlStr.includes('/rest/v1/')) {
                 const path = urlStr.split('/rest/v1/')[1];
+                const rawHeaders = {};
+                if (options.headers) {
+                    new Headers(options.headers).forEach((v, k) => rawHeaders[k] = v);
+                }
+
                 const proxyUrl = '/api/supabase-proxy';
                 const proxyBody = {
                     path: `/rest/v1/${path}`,
                     method: options.method,
-                    headers: options.headers,
+                    headers: rawHeaders,
                     body: options.body
                 };
                 return fetch(proxyUrl, {

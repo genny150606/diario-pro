@@ -197,7 +197,7 @@
         <div class="content">
 
             <!-- DASHBOARD -->
-            <section id="dashboard" class="active">
+            <section id="dashboard" class="section active">
                 <div class="hero">
                     <h1><span class="gradient-heading">Benvenuto!</span> 👋</h1>
                     <p>Visualizza il tuo progresso di studio in tempo reale</p>
@@ -250,7 +250,7 @@
             </section>
 
             <!-- NOTES -->
-            <section id="notes">
+            <section id="notes" class="section">
                 <div class="hero">
                     <h1>Note & Flashcard 📚</h1>
                     <p>Organizza i tuoi appunti e crea flashcard per memorizzare</p>
@@ -310,7 +310,7 @@
             </section>
 
             <!-- TASKS -->
-            <section id="tasks">
+            <section id="tasks" class="section">
                 <div class="hero">
                     <h1>Compiti 📝</h1>
                     <p>Gestisci i tuoi compiti e scadenze</p>
@@ -336,7 +336,7 @@
             </section>
 
             <!-- GRADES -->
-            <section id="grades">
+            <section id="grades" class="section">
                 <!-- VIEW LICEO -->
                 <div id="grades-view-liceo">
                     <div class="hero">
@@ -415,7 +415,7 @@
             </section>
 
             <!-- STATS -->
-            <section id="stats">
+            <section id="stats" class="section">
                 <div class="hero">
                     <h1>Statistiche 📊</h1>
                     <p>Analizza i tuoi progressi nel tempo</p>
@@ -546,7 +546,7 @@
             </div>
 
             <!-- PRESENCES -->
-            <section id="presences">
+            <section id="presences" class="section">
                 <!-- VIEW LICEO -->
                 <div id="presences-view-liceo">
                     <div class="hero">
@@ -627,7 +627,7 @@
 
 
             <!-- GAMIFICATION PAGE -->
-            <section id="gamification">
+            <section id="gamification" class="section">
                 <div class="gamification-hero">
                     <div class="hero-level-circle">
                         <span class="hero-level-number" id="gamePageLevel">1</span>
@@ -694,7 +694,7 @@
             </section>
 
             <!-- SETTINGS -->
-            <section id="settings">
+            <section id="settings" class="section">
                 <div class="hero">
                     <h1><span class="gradient-heading">Impostazioni</span> ⚙️</h1>
                     <p>Personalizza la tua esperienza</p>
@@ -821,7 +821,7 @@
 
             <!-- SEZIONE DUELLO -->
             <!-- SOCIAL -->
-            <section id="social" class="content-section" style="display: none;">
+            <section id="social" class="section">
                 <div class="hero">
                     <h1>Social & Amici 🤝</h1>
                     <p>Trova altri studenti e sfidali in tempo reale</p>
@@ -848,7 +848,7 @@
                 </div>
             </section>
 
-            <section id="duel" class="content-section" style="display: none;">
+            <section id="duel" class="section">
                 <div class="duel-container">
 
                     <!-- TIMER OVERLAY -->
@@ -1020,16 +1020,29 @@
         function showSection(sectionId) {
             console.log('🚀 Changing section to:', sectionId);
 
-            // Nasconde tutte le sezioni
-            document.querySelectorAll('section').forEach(s => s.classList.remove('active'));
-            const section = document.getElementById(sectionId);
+            // COMPATIBILITY: If AppManager has a logic to show/hide sections, use it
+            if (window.AppManager && typeof AppManager.showSection === 'function') {
+                // If the section is duel or social, we might need a mix of both systems
+                AppManager.showSection(sectionId);
+            }
 
+            // Standard logic: toggle active class
+            document.querySelectorAll('section').forEach(s => {
+                s.classList.remove('active');
+                if (s.id !== sectionId) {
+                    s.style.display = 'none'; // Force hide other sections
+                }
+            });
+
+            const section = document.getElementById(sectionId);
             if (!section) {
                 console.warn(`⚠️ Sezione #${sectionId} non trovata!`);
                 return;
             }
 
             section.classList.add('active');
+            section.style.display = 'block'; // Force show active section
+            section.classList.remove('hidden'); // Compatibility with script.js
 
             // Aggiorna stato active nei link
             const navLinks = document.querySelectorAll('.sidebar-item');

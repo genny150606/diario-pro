@@ -305,9 +305,9 @@ const DuelManager = {
                 }
 
                 // Check Start Time (Host clicked start)
-                if (roomData.start_time && !this.countdownStarted) {
-                    console.log('⏰ Start time received! Game starting...');
-                    this.scheduleStart(roomData.start_time);
+                if (roomData.status === 'active' && !this.countdownStarted) {
+                    console.log('⏰ Room is active! Game starting...');
+                    this.scheduleStart();
                 }
 
                 // 4. Update UI
@@ -393,21 +393,18 @@ const DuelManager = {
 
         if (allReady && !this.countdownStarted) {
             this.countdownStarted = true; // prevent multiple triggers
-            const startTime = new Date(Date.now() + 5000).toISOString();
 
             await supabaseClient
                 .from('quiz_rooms')
                 .update({
-                    status: 'active',
-                    start_time: startTime
+                    status: 'active'
                 })
                 .eq('id', this.currentRoom.id);
         }
     },
 
-    scheduleStart(isoStartTime) {
+    scheduleStart() {
         this.countdownStarted = true;
-        const targetTime = new Date(isoStartTime).getTime();
 
         // Show Countdown Overlay
         document.getElementById('duelWaitingLobby').classList.add('hidden');
@@ -415,12 +412,13 @@ const DuelManager = {
         const value = document.getElementById('countdownValue');
         overlay.classList.remove('hidden');
 
-        const timer = setInterval(() => {
-            const now = Date.now();
-            const diff = Math.ceil((targetTime - now) / 1000);
+        let secondsLeft = 4;
+        value.textContent = secondsLeft;
 
-            if (diff > 0) {
-                value.textContent = diff;
+        const timer = setInterval(() => {
+            secondsLeft--;
+            if (secondsLeft > 0) {
+                value.textContent = secondsLeft;
             } else {
                 clearInterval(timer);
                 value.textContent = 'VIA!';
@@ -429,7 +427,7 @@ const DuelManager = {
                     this.startQuizSession();
                 }, 1000);
             }
-        }, 100); // 100ms precision
+        }, 1000);
     },
 
     handleOpponentLeft() {

@@ -412,9 +412,15 @@ ${context ? `CONTESTO: ${context}` : ""}`;
 // PRISTINE SUPABASE BACKEND PROXY
 // ============================================
 app.post("/api/supabase-proxy", async (req, res) => {
+    console.log(`[PROXY START] body keys:`, Object.keys(req.body || {}));
+
     try {
-        const { path, method, headers, body } = req.body;
-        if (!path) return res.status(400).json({ error: "Missing path" });
+        const { path, method, headers, body } = req.body || {};
+
+        if (!path) {
+            console.error("[PROXY ERROR] Missing path! req.body:", JSON.stringify(req.body));
+            return res.status(400).json({ error: "Missing path" });
+        }
 
         const supabaseUrl = 'https://rzdpntvojpibbndhsrlz.supabase.co';
         const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ6ZHBudHZvanBpYmJuZGhzcmx6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEzNzg1MjEsImV4cCI6MjA4Njk1NDUyMX0.QwnT9Okp8CkN_LxGIeBKWrroo3letL8OhSvaqdQVW7M';

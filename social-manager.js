@@ -20,14 +20,12 @@ window.SocialManager = {
     },
 
     setupClickOutside() {
-        document.addEventListener('mousedown', (e) => {
+        document.addEventListener('click', (e) => {
             const container = document.querySelector('.search-container-relative');
             const searchResults = document.getElementById('searchResults');
             if (container && !container.contains(e.target)) {
                 console.log("🎯 Clicked outside search. Closing menu.");
                 if (searchResults) searchResults.innerHTML = '';
-            } else {
-                console.log("✅ Clicked inside search container.");
             }
         });
     },
@@ -274,7 +272,12 @@ window.SocialManager = {
         container.innerHTML = users.map(u => `
             <div class="search-result-item">
                 <span>${u.username}</span>
-                <button onclick="SocialManager.sendFriendRequest(event, '${u.id}')">➕ Aggiungi</button>
+                <button 
+                    style="cursor: pointer !important; pointer-events: auto !important;"
+                    onclick="SocialManager.sendFriendRequest(event, '${u.id}')"
+                    onmouseover="console.log('👆 Hover detected on button for ${u.username}')">
+                    ➕ Aggiungi
+                </button>
             </div>
         `).join('');
     }

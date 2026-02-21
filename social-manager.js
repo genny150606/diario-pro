@@ -56,10 +56,10 @@ window.SocialManager = {
     },
 
     async loadFriends() {
-        // FK DISAMBIGUATION: Use !sender_id to specify which relationship to follow
+        // FK DISAMBIGUATION: Use users_data!column_name to resolve ambiguity
         const { data, error } = await supabaseClient
             .from('friendships')
-            .select('id,sender_id,receiver_id,status,sender:sender_id(username),receiver:receiver_id(username)')
+            .select('id,sender_id,receiver_id,status,sender:users_data!sender_id(username),receiver:users_data!receiver_id(username)')
             .or(`sender_id.eq.${AuthManager.user.id},receiver_id.eq.${AuthManager.user.id}`)
             .eq('status', 'accepted');
 
@@ -82,7 +82,7 @@ window.SocialManager = {
     async loadPendingRequests() {
         const { data, error } = await supabaseClient
             .from('friendships')
-            .select('*, sender:users_data!sender_id(username)')
+            .select('id,sender_id,receiver_id,status,sender:users_data!sender_id(username)')
             .eq('receiver_id', AuthManager.user.id)
             .eq('status', 'pending');
 

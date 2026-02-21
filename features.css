@@ -612,8 +612,20 @@ body.dark-mode .chat-avatar {
     box-shadow: 0 0 15px rgba(245, 158, 11, 0.4);
 }
 
-.search-results-list {
-    margin-top: var(--space-4);
+.search-results-list.dropdown-results {
+    position: absolute;
+    top: calc(100% + 5px);
+    left: 0;
+    right: 0;
+    background: rgba(15, 23, 42, 0.95);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    z-index: 10000;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
+    max-height: 250px;
+    overflow-y: auto;
 }
 
 .search-result-item {
@@ -621,9 +633,21 @@ body.dark-mode .chat-avatar {
     justify-content: space-between;
     align-items: center;
     padding: 12px 16px;
-    background: rgba(255, 255, 255, 0.04);
-    border-radius: 12px;
-    margin-bottom: 8px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.search-result-item:last-child {
+    border-bottom: none;
+}
+
+.search-result-item:hover {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.search-result-item span {
+    font-weight: 500;
+    font-size: 0.9rem;
+    color: white;
 }
 
 .search-result-item button {
@@ -632,7 +656,7 @@ body.dark-mode .chat-avatar {
     border: none;
     padding: 6px 12px;
     border-radius: 8px;
-    font-size: 0.85rem;
+    font-size: 0.8rem;
     cursor: pointer;
 }
 

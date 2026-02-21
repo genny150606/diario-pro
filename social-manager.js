@@ -94,6 +94,8 @@ window.SocialManager = {
         if (!input) return;
 
         const query = input.value.trim();
+        console.log("🔍 Search Query:", query);
+
         if (query.length < 3) {
             const container = document.getElementById('searchResults');
             if (container) container.innerHTML = '';
@@ -106,6 +108,9 @@ window.SocialManager = {
             .ilike('username', `%${query}%`)
             .neq('id', AuthManager.user.id)
             .limit(5);
+
+        if (error) console.error("❌ Search Error:", error);
+        console.log("📊 Search Results:", data);
 
         this.renderSearchResults(data || []);
     },
@@ -226,7 +231,15 @@ window.SocialManager = {
     },
 
     renderSearchResults(users) {
+        console.log("🎨 Rendering results:", users);
         const container = document.getElementById('searchResults');
+        if (!container) return;
+
+        if (users.length === 0) {
+            container.innerHTML = '<div class="search-result-item"><span>Nessun utente trovato</span></div>';
+            return;
+        }
+
         container.innerHTML = users.map(u => `
             <div class="search-result-item">
                 <span>${u.username}</span>

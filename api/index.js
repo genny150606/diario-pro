@@ -437,7 +437,10 @@ app.post("/api/supabase-proxy", async (req, res) => {
         // STRICT WHITELIST: Only send absolutely necessary headers to Supabase
         const cleanHeaders = {
             'apikey': supabaseKey,
-            'Authorization': userAuth || `Bearer ${supabaseKey}`
+            'Authorization': userAuth || `Bearer ${supabaseKey}`,
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+            'Referer': 'https://diario-pro.vercel.app/',
+            'Origin': 'https://diario-pro.vercel.app'
         };
 
         if (headers) {
@@ -450,6 +453,8 @@ app.post("/api/supabase-proxy", async (req, res) => {
             });
         }
 
+        console.log(`[PROXY HEADERS]`, Object.keys(cleanHeaders).join(', '));
+
         const fetchOptions = {
             method: method || 'GET',
             headers: cleanHeaders
@@ -459,7 +464,22 @@ app.post("/api/supabase-proxy", async (req, res) => {
             fetchOptions.body = typeof body === 'string' ? body : JSON.stringify(body);
         }
 
-        const fetchRes = await fetch(targetUrl, fetchOptions);
+        // Retry logic for 520/5xx errors
+        let fetchRes;
+        let lastError;
+        for (let attempt = 0; attempt < 2; attempt++) {
+            try {
+                fetchRes = await fetch(targetUrl, fetchOptions);
+                if (fetchRes.status !== 520 && fetchRes.status < 505) break; // Don't retry on non-520 success or client errors
+                console.warn(`[PROXY RETRY] Attempt ${attempt + 1} got status ${fetchRes.status}`);
+            } catch (err) {
+                lastError = err;
+                console.error(`[PROXY RETRY] Attempt ${attempt + 1} failed:`, err.message);
+            }
+            if (attempt < 1) await new Promise(r => setTimeout(r, 500));
+        }
+
+        if (!fetchRes) throw lastError || new Error("Failed to fetch from Supabase after retries");
 
         // Forward ONLY essential headers back to client
         const resWhitelist = ['content-type', 'content-range', 'preference-applied', 'location', 'cache-control'];
@@ -469,16 +489,20 @@ app.post("/api/supabase-proxy", async (req, res) => {
             }
         });
 
+        // Custom header for debugging
+        res.setHeader('X-Proxy-Status', fetchRes.status);
+        res.setHeader('X-Proxy-Retry', 'none');
+
         const arrayBuffer = await fetchRes.arrayBuffer();
         const buffer = Buffer.from(arrayBuffer);
 
         if (fetchRes.status >= 400) {
             console.error(`[PROXY ERROR] ${method} ${path} -> ${fetchRes.status}`);
-            const errorText = buffer.toString();
+            const errorText = buffer.toString().substring(0, 500); // Limit log size
             if (errorText.includes('<!DOCTYPE html>')) {
                 console.error(`[PROXY ERROR] Response is HTML (likely Cloudflare 5xx)`);
             } else {
-                console.error(`[PROXY ERROR] Response:`, errorText);
+                console.error(`[PROXY ERROR] Response Snippet:`, errorText);
             }
         }
 
@@ -486,7 +510,7 @@ app.post("/api/supabase-proxy", async (req, res) => {
 
     } catch (error) {
         console.error("❌ Errore proxy Supabase:", error);
-        res.status(500).json({ error: error.message });
+        res.status(500).json({ error: "Proxy Error", message: error.message });
     }
 });
 

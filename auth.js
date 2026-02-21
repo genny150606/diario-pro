@@ -30,11 +30,28 @@ const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
                     headers: rawHeaders,
                     body: options.body
                 };
-                return fetch(proxyUrl, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(proxyBody)
-                });
+
+                // CLIENT-SIDE RETRY LOGIC
+                let lastRes;
+                for (let attempt = 0; attempt < 3; attempt++) {
+                    try {
+                        lastRes = await fetch(proxyUrl, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(proxyBody)
+                        });
+
+                        if (lastRes.ok || lastRes.status < 500 || lastRes.status === 401 || lastRes.status === 403) {
+                            return lastRes;
+                        }
+
+                        console.warn(`[AUTH RETRY] Proxy attempt ${attempt + 1} got status ${lastRes.status}`);
+                    } catch (err) {
+                        console.error(`[AUTH RETRY] Proxy attempt ${attempt + 1} failed:`, err);
+                    }
+                    if (attempt < 2) await new Promise(r => setTimeout(r, 1000));
+                }
+                return lastRes;
             }
             return fetch(url, options);
         }

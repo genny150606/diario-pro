@@ -20,11 +20,14 @@ window.SocialManager = {
     },
 
     setupClickOutside() {
-        document.addEventListener('click', (e) => {
+        document.addEventListener('mousedown', (e) => {
             const container = document.querySelector('.search-container-relative');
             const searchResults = document.getElementById('searchResults');
             if (container && !container.contains(e.target)) {
+                console.log("🎯 Clicked outside search. Closing menu.");
                 if (searchResults) searchResults.innerHTML = '';
+            } else {
+                console.log("✅ Clicked inside search container.");
             }
         });
     },
@@ -120,27 +123,43 @@ window.SocialManager = {
     },
 
     async sendFriendRequest(event, receiverId) {
-        if (event) event.stopPropagation();
-        console.log("📤 Sending friend request to:", receiverId);
+        if (event) {
+            event.preventDefault();
+            event.stopPropagation();
+        }
 
-        const { error } = await supabaseClient
-            .from('friendships')
-            .insert([{
-                sender_id: AuthManager.user.id,
-                receiver_id: receiverId,
-                status: 'pending'
-            }]);
+        console.log("🚀 START sendFriendRequest to:", receiverId);
 
-        if (error) {
-            if (error.code === '23505') UIManager.alert("Richiesta già inviata!");
-            else {
-                console.error("❌ Request Error:", error);
-                UIManager.alert("Errore nell'invio della richiesta.");
+        if (!AuthManager.user || !AuthManager.user.id) {
+            console.error("❌ No user logged in!");
+            return;
+        }
+
+        try {
+            const { error } = await supabaseClient
+                .from('friendships')
+                .insert([{
+                    sender_id: AuthManager.user.id,
+                    receiver_id: receiverId,
+                    status: 'pending'
+                }]);
+
+            if (error) {
+                console.error("❌ Supabase Request Error:", error);
+                if (error.code === '23505') {
+                    UIManager.alert("Richiesta di amicizia già inviata a questo utente!");
+                } else {
+                    UIManager.alert("Errore nell'invio della richiesta: " + (error.message || "Errore sconosciuto"));
+                }
+            } else {
+                console.log("✅ Request sent successfully!");
+                await UIManager.alert("Richiesta inviata con successo!", "Successo");
+                const container = document.getElementById('searchResults');
+                if (container) container.innerHTML = ''; // Close menu on success
             }
-        } else {
-            UIManager.alert("Richiesta inviata con successo!", "Successo");
-            const container = document.getElementById('searchResults');
-            if (container) container.innerHTML = ''; // Close menu on success
+        } catch (err) {
+            console.error("❌ Catch Error in sendFriendRequest:", err);
+            UIManager.alert("Errore imprevisto durante l'invio della richiesta.");
         }
     },
 

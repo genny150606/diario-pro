@@ -85,12 +85,19 @@ window.SocialManager = {
     },
 
     async loadPendingRequests() {
+        console.log("📥 Loading pending requests for:", AuthManager.user.id);
         const { data, error } = await supabaseClient
             .from('friendships')
             .select('id,sender_id,receiver_id,status,sender:users_data!sender_id(username)')
             .eq('receiver_id', AuthManager.user.id)
             .eq('status', 'pending');
 
+        if (error) {
+            console.error("❌ Pending Requests Error:", error);
+            return;
+        }
+
+        console.log("📥 Pending Requests found:", data?.length || 0);
         this.pendingRequests = data || [];
     },
 
@@ -196,7 +203,10 @@ window.SocialManager = {
         this.isPolling = true;
 
         setInterval(async () => {
-            // Poll for invitations
+            console.log("🔄 Background Social Refresh...");
+            await this.loadSocialData();
+
+            // Poll for duel invitations (already handled by loadSocialData? No, separate table)
             const { data: invs } = await supabaseClient
                 .from('duel_invitations')
                 .select('*')
@@ -205,9 +215,10 @@ window.SocialManager = {
                 .limit(1);
 
             if (invs && invs.length > 0) {
+                console.log("🎮 New challenge detected!");
                 this.handleIncomingInvitation(invs[0]);
             }
-        }, 5000);
+        }, 10000); // Poll every 10s for performance
     },
 
     async handleIncomingInvitation(inv) {
@@ -239,24 +250,27 @@ window.SocialManager = {
 
         if (!friendsList) return;
 
+        console.log("🎨 Current Friends:", this.friends.length);
+        console.log("🎨 Current Pending:", this.pendingRequests.length);
+
         friendsList.innerHTML = this.friends.length ? this.friends.map(f => `
             <div class="social-item">
                 <div class="user-info">
                     <span class="user-avatar">👤</span>
-                    <span class="username">${f.username}</span>
+                    <span class="username">${f.username || 'Utente'}</span>
                 </div>
-                <button class="challenge-btn" onclick="SocialManager.challengeFriend('${f.friendId}', '${f.username}')">⚔️ SFIDA</button>
+                <button class="challenge-btn" onclick="SocialManager.challengeFriend('${f.friendId}', '${f.username || 'Utente'}')">⚔️ SFIDA</button>
             </div>
         `).join('') : '<p class="empty-state">Nessun amico ancora.</p>';
 
         requestsList.innerHTML = this.pendingRequests.length ? this.pendingRequests.map(r => `
             <div class="social-item pending">
-                <span>Richiesta da: <strong>${r.sender.username}</strong></span>
+                <span>Richiesta da: <strong>${r.sender?.username || 'Sconosciuto'}</strong></span>
                 <div class="actions">
-                    <button class="accept-btn" onclick="SocialManager.acceptFriendRequest('${r.id}')">✅</button>
+                    <button class="accept-btn" onclick="SocialManager.acceptFriendRequest('${r.id}')">✅ Accetta</button>
                 </div>
             </div>
-        `).join('') : '';
+        `).join('') : '<p class="empty-state">Nessuna richiesta in attesa.</p>';
     },
 
     renderSearchResults(users) {

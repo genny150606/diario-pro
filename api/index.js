@@ -414,21 +414,15 @@ ${context ? `CONTESTO: ${context}` : ""}`;
 // PRISTINE SUPABASE BACKEND PROXY
 // ============================================
 app.post("/api/supabase-proxy", async (req, res) => {
-    console.log(`[PROXY START] body keys:`, Object.keys(req.body || {}));
-
     try {
         const { path, method, headers, body } = req.body || {};
 
         if (!path) {
-            console.error("[PROXY ERROR] Missing path! req.body:", JSON.stringify(req.body));
             return res.status(400).json({ error: "Missing path parameter" });
         }
 
         const supabaseUrl = 'https://rzdpntvojpibbndhsrlz.supabase.co';
-        const cleanPath = path.startsWith('/') ? path : `/${path}`;
-        const targetUrl = `${supabaseUrl}${cleanPath}`;
-
-        console.log(`[PROXY FETCH] ${method || 'GET'} -> ${targetUrl}`);
+        const targetUrl = `${supabaseUrl}${path.startsWith('/') ? path : `/${path}`}`;
         const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ6ZHBudHZvanBpYmJuZGhzcmx6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEzNzg1MjEsImV4cCI6MjA4Njk1NDUyMX0.QwnT9Okp8CkN_LxGIeBKWrroo3letL8OhSvaqdQVW7M';
 
         // Helper to check for a header in a case-insensitive way
@@ -438,39 +432,22 @@ app.post("/api/supabase-proxy", async (req, res) => {
             return foundKey ? headers[foundKey] : null;
         };
 
-        // Forward user Authorization if provided, otherwise fallback to service key
         const userAuth = getInHeaders('Authorization');
 
+        // STRICT WHITELIST: Only send absolutely necessary headers to Supabase
         const cleanHeaders = {
             'apikey': supabaseKey,
             'Authorization': userAuth || `Bearer ${supabaseKey}`
         };
 
-        // Don't leak unwanted headers to Supabase
-        const skipToSupabase = ['host', 'connection', 'keep-alive', 'content-length', 'transfer-encoding', 'accept-encoding'];
-
         if (headers) {
+            const whitelist = ['content-type', 'prefer', 'range', 'accept', 'x-client-info'];
             Object.keys(headers).forEach(key => {
                 const lowKey = key.toLowerCase();
-                if (!skipToSupabase.includes(lowKey) && lowKey !== 'authorization' && lowKey !== 'apikey') {
+                if (whitelist.includes(lowKey)) {
                     cleanHeaders[key] = headers[key];
                 }
             });
-
-            // Ensure critical overrides
-            const ctVal = getInHeaders('content-type');
-            if (ctVal) cleanHeaders['Content-Type'] = ctVal;
-            else cleanHeaders['Content-Type'] = 'application/json';
-
-            const preferVal = getInHeaders('prefer') || '';
-            let finalPrefer = preferVal;
-            if ((method === 'POST' || method === 'PATCH') && !finalPrefer.includes('return=')) {
-                finalPrefer = finalPrefer ? `${finalPrefer}, return=representation` : 'return=representation';
-            }
-            if (finalPrefer) cleanHeaders['Prefer'] = finalPrefer;
-        } else {
-            cleanHeaders['Content-Type'] = 'application/json';
-            cleanHeaders['Accept'] = 'application/json';
         }
 
         const fetchOptions = {
@@ -484,25 +461,25 @@ app.post("/api/supabase-proxy", async (req, res) => {
 
         const fetchRes = await fetch(targetUrl, fetchOptions);
 
-        // Forward headers back, but skip those handled by Vercel/Express
-        const skipToClient = ['content-encoding', 'transfer-encoding', 'content-length', 'connection', 'keep-alive'];
-
+        // Forward ONLY essential headers back to client
+        const resWhitelist = ['content-type', 'content-range', 'preference-applied', 'location', 'cache-control'];
         fetchRes.headers.forEach((value, key) => {
-            const lowKey = key.toLowerCase();
-            if (!skipToClient.includes(lowKey)) {
+            if (resWhitelist.includes(key.toLowerCase())) {
                 res.setHeader(key, value);
             }
         });
 
-        // Some Express JSON interpreters mangle the raw response stream. 
-        // We will pipe the raw fetch body (or buffer it) directly back to the client.
         const arrayBuffer = await fetchRes.arrayBuffer();
         const buffer = Buffer.from(arrayBuffer);
 
         if (fetchRes.status >= 400) {
             console.error(`[PROXY ERROR] ${method} ${path} -> ${fetchRes.status}`);
-            console.error(`[PROXY ERROR] Request Body:`, body);
-            console.error(`[PROXY ERROR] Response:`, buffer.toString());
+            const errorText = buffer.toString();
+            if (errorText.includes('<!DOCTYPE html>')) {
+                console.error(`[PROXY ERROR] Response is HTML (likely Cloudflare 5xx)`);
+            } else {
+                console.error(`[PROXY ERROR] Response:`, errorText);
+            }
         }
 
         return res.status(fetchRes.status).send(buffer);

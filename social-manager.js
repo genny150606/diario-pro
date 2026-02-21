@@ -228,7 +228,7 @@ window.SocialManager = {
             } catch (err) {
                 console.error("❌ Polling Error:", err);
             }
-        }, 10000); // Poll every 10s for performance
+        }, 30000); // Poll every 30s for performance and stability
     },
 
     async handleIncomingInvitation(inv) {

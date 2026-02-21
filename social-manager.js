@@ -119,7 +119,10 @@ window.SocialManager = {
         this.renderSearchResults(data || []);
     },
 
-    async sendFriendRequest(receiverId) {
+    async sendFriendRequest(event, receiverId) {
+        if (event) event.stopPropagation();
+        console.log("📤 Sending friend request to:", receiverId);
+
         const { error } = await supabaseClient
             .from('friendships')
             .insert([{
@@ -130,9 +133,14 @@ window.SocialManager = {
 
         if (error) {
             if (error.code === '23505') UIManager.alert("Richiesta già inviata!");
-            else console.error(error);
+            else {
+                console.error("❌ Request Error:", error);
+                UIManager.alert("Errore nell'invio della richiesta.");
+            }
         } else {
-            UIManager.alert("Richiesta inviata!", "Successo");
+            UIManager.alert("Richiesta inviata con successo!", "Successo");
+            const container = document.getElementById('searchResults');
+            if (container) container.innerHTML = ''; // Close menu on success
         }
     },
 
@@ -247,7 +255,7 @@ window.SocialManager = {
         container.innerHTML = users.map(u => `
             <div class="search-result-item">
                 <span>${u.username}</span>
-                <button onclick="SocialManager.sendFriendRequest('${u.id}')">➕ Aggiungi</button>
+                <button onclick="SocialManager.sendFriendRequest(event, '${u.id}')">➕ Aggiungi</button>
             </div>
         `).join('');
     }

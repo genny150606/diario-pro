@@ -40,10 +40,14 @@ window.SocialManager = {
             .single();
 
         if (!data?.username) {
+            console.log("✍️ Setting default username:", defaultName);
             await supabaseClient
                 .from('users_data')
-                .update({ username: defaultName })
-                .eq('id', AuthManager.user.id);
+                .upsert({
+                    id: AuthManager.user.id,
+                    username: defaultName,
+                    updated_at: new Date().toISOString()
+                }, { onConflict: 'id' });
         }
     },
 

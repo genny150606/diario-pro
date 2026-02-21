@@ -443,12 +443,21 @@ app.post("/api/supabase-proxy", async (req, res) => {
 
         const cleanHeaders = {
             'apikey': supabaseKey,
-            'Authorization': userAuth || `Bearer ${supabaseKey}`,
-            'Connection': 'close',
-            'Accept-Encoding': 'identity'
+            'Authorization': userAuth || `Bearer ${supabaseKey}`
         };
 
+        // Don't leak unwanted headers to Supabase
+        const skipToSupabase = ['host', 'connection', 'keep-alive', 'content-length', 'transfer-encoding', 'accept-encoding'];
+
         if (headers) {
+            Object.keys(headers).forEach(key => {
+                const lowKey = key.toLowerCase();
+                if (!skipToSupabase.includes(lowKey) && lowKey !== 'authorization' && lowKey !== 'apikey') {
+                    cleanHeaders[key] = headers[key];
+                }
+            });
+
+            // Ensure critical overrides
             const ctVal = getInHeaders('content-type');
             if (ctVal) cleanHeaders['Content-Type'] = ctVal;
             else cleanHeaders['Content-Type'] = 'application/json';
@@ -459,13 +468,6 @@ app.post("/api/supabase-proxy", async (req, res) => {
                 finalPrefer = finalPrefer ? `${finalPrefer}, return=representation` : 'return=representation';
             }
             if (finalPrefer) cleanHeaders['Prefer'] = finalPrefer;
-
-            const rangeVal = getInHeaders('range');
-            if (rangeVal) cleanHeaders['Range'] = rangeVal;
-
-            const acceptVal = getInHeaders('accept');
-            if (acceptVal) cleanHeaders['Accept'] = acceptVal;
-            else cleanHeaders['Accept'] = 'application/json';
         } else {
             cleanHeaders['Content-Type'] = 'application/json';
             cleanHeaders['Accept'] = 'application/json';
@@ -482,11 +484,12 @@ app.post("/api/supabase-proxy", async (req, res) => {
 
         const fetchRes = await fetch(targetUrl, fetchOptions);
 
-        // Forward EXACT headers back to the original client so supabase-js can parse correctly
+        // Forward headers back, but skip those handled by Vercel/Express
+        const skipToClient = ['content-encoding', 'transfer-encoding', 'content-length', 'connection', 'keep-alive'];
+
         fetchRes.headers.forEach((value, key) => {
-            // Vercel/Node fetch automatically decompresses gzip. We must strip 'content-encoding'
-            // otherwise the browser will think the plain buffer is zipped and fail to decode it.
-            if (key.toLowerCase() !== 'content-encoding') {
+            const lowKey = key.toLowerCase();
+            if (!skipToClient.includes(lowKey)) {
                 res.setHeader(key, value);
             }
         });

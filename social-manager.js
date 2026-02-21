@@ -53,6 +53,10 @@ window.SocialManager = {
     },
 
     async loadSocialData() {
+        if (!AuthManager.user) {
+            console.warn("⚠️ loadSocialData skipped: No user logged in.");
+            return;
+        }
         await Promise.all([
             this.loadFriends(),
             this.loadPendingRequests()
@@ -203,20 +207,26 @@ window.SocialManager = {
         this.isPolling = true;
 
         setInterval(async () => {
+            if (!AuthManager.user) return;
+
             console.log("🔄 Background Social Refresh...");
             await this.loadSocialData();
 
-            // Poll for duel invitations (already handled by loadSocialData? No, separate table)
-            const { data: invs } = await supabaseClient
-                .from('duel_invitations')
-                .select('*')
-                .eq('guest_id', AuthManager.user.id)
-                .eq('status', 'pending')
-                .limit(1);
+            // Poll for duel invitations
+            try {
+                const { data: invs, error } = await supabaseClient
+                    .from('duel_invitations')
+                    .select('*')
+                    .eq('guest_id', AuthManager.user.id)
+                    .eq('status', 'pending')
+                    .limit(1);
 
-            if (invs && invs.length > 0) {
-                console.log("🎮 New challenge detected!");
-                this.handleIncomingInvitation(invs[0]);
+                if (invs && invs.length > 0) {
+                    console.log("🎮 New challenge detected!");
+                    this.handleIncomingInvitation(invs[0]);
+                }
+            } catch (err) {
+                console.error("❌ Polling Error:", err);
             }
         }, 10000); // Poll every 10s for performance
     },

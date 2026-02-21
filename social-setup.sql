@@ -9,8 +9,8 @@ ALTER TABLE public.users_data ADD COLUMN IF NOT EXISTS username TEXT UNIQUE;
 -- 2. friendships table
 CREATE TABLE IF NOT EXISTS public.friendships (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    sender_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
-    receiver_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
+    sender_id UUID REFERENCES public.users_data(id) ON DELETE CASCADE,
+    receiver_id UUID REFERENCES public.users_data(id) ON DELETE CASCADE,
     status TEXT DEFAULT 'pending', -- pending, accepted, blocked
     created_at TIMESTAMPTZ DEFAULT NOW(),
     UNIQUE(sender_id, receiver_id)
@@ -19,9 +19,9 @@ CREATE TABLE IF NOT EXISTS public.friendships (
 -- 3. duel_invitations table
 CREATE TABLE IF NOT EXISTS public.duel_invitations (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    host_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
+    host_id UUID REFERENCES public.users_data(id) ON DELETE CASCADE,
     host_name TEXT,
-    guest_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
+    guest_id UUID REFERENCES public.users_data(id) ON DELETE CASCADE,
     room_code TEXT,
     status TEXT DEFAULT 'pending', -- pending, accepted, rejected, expired
     created_at TIMESTAMPTZ DEFAULT NOW()

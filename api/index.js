@@ -431,34 +431,40 @@ app.post("/api/supabase-proxy", async (req, res) => {
         console.log(`[PROXY FETCH] ${method || 'GET'} -> ${targetUrl}`);
         const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ6ZHBudHZvanBpYmJuZGhzcmx6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEzNzg1MjEsImV4cCI6MjA4Njk1NDUyMX0.QwnT9Okp8CkN_LxGIeBKWrroo3letL8OhSvaqdQVW7M';
 
-        // STRICT HEADER WHITELIST: We only send auth and content-type.
-        // Sending browser headers (user-agent, referer, x-client-info) triggers Cloudflare 520.
+        // Helper to check for a header in a case-insensitive way
+        const getInHeaders = (key) => {
+            if (!headers) return null;
+            const foundKey = Object.keys(headers).find(k => k.toLowerCase() === key.toLowerCase());
+            return foundKey ? headers[foundKey] : null;
+        };
+
+        // Forward user Authorization if provided, otherwise fallback to service key
+        const userAuth = getInHeaders('Authorization');
+
         const cleanHeaders = {
             'apikey': supabaseKey,
-            'Authorization': `Bearer ${supabaseKey}`,
+            'Authorization': userAuth || `Bearer ${supabaseKey}`,
             'Connection': 'close',
             'Accept-Encoding': 'identity'
         };
 
         if (headers) {
-            const hasHeader = (key) => Object.keys(headers).find(k => k.toLowerCase() === key.toLowerCase());
+            const ctVal = getInHeaders('content-type');
+            if (ctVal) cleanHeaders['Content-Type'] = ctVal;
+            else cleanHeaders['Content-Type'] = 'application/json';
 
-            const ctKey = hasHeader('content-type');
-            if (ctKey) cleanHeaders['Content-Type'] = headers[ctKey];
-            else cleanHeaders['Content-Type'] = 'application/json'; // Default to JSON for POST/PATCH
-
-            const preferKey = hasHeader('prefer');
-            let preferVal = preferKey ? headers[preferKey] : '';
-            if ((method === 'POST' || method === 'PATCH') && !preferVal.includes('return=')) {
-                preferVal = preferVal ? `${preferVal}, return=representation` : 'return=representation';
+            const preferVal = getInHeaders('prefer') || '';
+            let finalPrefer = preferVal;
+            if ((method === 'POST' || method === 'PATCH') && !finalPrefer.includes('return=')) {
+                finalPrefer = finalPrefer ? `${finalPrefer}, return=representation` : 'return=representation';
             }
-            if (preferVal) cleanHeaders['Prefer'] = preferVal;
+            if (finalPrefer) cleanHeaders['Prefer'] = finalPrefer;
 
-            const rangeKey = hasHeader('range');
-            if (rangeKey) cleanHeaders['Range'] = headers[rangeKey];
+            const rangeVal = getInHeaders('range');
+            if (rangeVal) cleanHeaders['Range'] = rangeVal;
 
-            const acceptKey = hasHeader('accept');
-            if (acceptKey) cleanHeaders['Accept'] = headers[acceptKey];
+            const acceptVal = getInHeaders('accept');
+            if (acceptVal) cleanHeaders['Accept'] = acceptVal;
             else cleanHeaders['Accept'] = 'application/json';
         } else {
             cleanHeaders['Content-Type'] = 'application/json';

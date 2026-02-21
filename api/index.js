@@ -119,27 +119,31 @@ app.post("/api/supabase-proxy", async (req, res) => {
         'apikey': supabaseKey,
         'Authorization': userAuth || `Bearer ${supabaseKey}`,
         'Accept': 'application/json, text/plain, */*',
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/122.0.0.0 Safari/537.36'
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/122.0.0.0 Safari/537.36',
+        'Connection': 'close' // Avoid keep-alive issues causing 520s
     };
 
-    // Only add JSON content-type for write methods
+    // Only add JSON content-type for write methods if body exists
     const isWrite = method && ['POST', 'PUT', 'PATCH', 'DELETE'].includes(method.toUpperCase());
-    if (isWrite) fetchHeaders['Content-Type'] = 'application/json';
+    if (isWrite && body) {
+        fetchHeaders['Content-Type'] = 'application/json';
+    }
 
     // Selective whitelist for other headers
-    const whitelist = ['prefer', 'range', 'x-client-info'];
+    const whitelist = ['prefer', 'range', 'x-client-info', 'content-range'];
     if (clientHeaders) {
         Object.keys(clientHeaders).forEach(k => {
-            if (whitelist.includes(k.toLowerCase())) fetchHeaders[k] = clientHeaders[k];
+            const lowK = k.toLowerCase();
+            if (whitelist.includes(lowK)) fetchHeaders[lowK] = clientHeaders[k];
         });
     }
 
     try {
-        console.log(`[PROXY] ${method || 'GET'} ${path}`);
+        console.log(`[PROXY START] ${method || 'GET'} ${path}`);
 
-        // Use timeout to prevent hanging functions
+        // Use timeout STRICTLY below Vercel's 10s limit
         const controller = new AbortController();
-        const timeout = setTimeout(() => controller.abort(), 12000);
+        const timeout = setTimeout(() => controller.abort(), 8500);
 
         try {
             const fetchRes = await fetch(targetUrl, {
@@ -151,7 +155,7 @@ app.post("/api/supabase-proxy", async (req, res) => {
             });
 
             // Clean up headers coming back
-            const resWhitelist = ['content-type', 'content-range', 'preference-applied', 'location'];
+            const resWhitelist = ['content-type', 'content-range', 'preference-applied', 'location', 'cache-control'];
             fetchRes.headers.forEach((v, k) => {
                 if (resWhitelist.includes(k.toLowerCase())) res.setHeader(k, v);
             });
@@ -162,7 +166,7 @@ app.post("/api/supabase-proxy", async (req, res) => {
             const buffer = Buffer.from(arrayBuffer);
 
             if (fetchRes.status >= 400) {
-                console.error(`[PROXY BACKEND ERROR] ${fetchRes.status} for ${path}`);
+                console.error(`[PROXY BACKEND ERROR] ${fetchRes.status} for ${path}. Body size: ${buffer.length}`);
             }
 
             return res.status(fetchRes.status).send(buffer);
@@ -170,9 +174,9 @@ app.post("/api/supabase-proxy", async (req, res) => {
             clearTimeout(timeout);
         }
     } catch (error) {
-        console.error("❌ Proxy Exception:", error.message);
+        console.error("❌ Proxy Exception:", error.message, "Path:", path);
         const status = error.name === 'AbortError' ? 504 : 500;
-        res.status(status).json({ error: "Proxy Error", message: error.message });
+        res.status(status).json({ error: "Proxy Error", message: error.message, path: path });
     }
 });
 

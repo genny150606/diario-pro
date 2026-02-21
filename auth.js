@@ -31,17 +31,22 @@ const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
                     body: options.body
                 };
 
-                // CLIENT-SIDE RETRY LOGIC (Exponential Backoff)
+                // CLIENT-SIDE RETRY LOGIC (Exponential Backoff with Jitter)
                 let lastRes;
                 for (let attempt = 0; attempt < 4; attempt++) {
                     try {
+                        console.log(`[PROXY REQ] ${proxyBody.method} ${proxyBody.path} (Attempt ${attempt + 1})`);
+
                         lastRes = await fetch(proxyUrl, {
                             method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-Client-Retry-Count': attempt.toString()
+                            },
                             body: JSON.stringify(proxyBody)
                         });
 
-                        // Success or client-side error (4xx) - no use retrying
+                        // Success or client-side error (4xx) - no use retrying generally
                         if (lastRes.ok || (lastRes.status >= 400 && lastRes.status < 500)) {
                             return lastRes;
                         }
@@ -51,7 +56,7 @@ const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
                         console.error(`[AUTH RETRY] Proxy attempt ${attempt + 1} failed:`, err);
                     }
                     if (attempt < 3) {
-                        const delay = 1000 * Math.pow(2, attempt); // 1s, 2s, 4s
+                        const delay = 1000 * Math.pow(2, attempt) + (Math.random() * 500);
                         await new Promise(r => setTimeout(r, delay));
                     }
                 }

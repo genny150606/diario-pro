@@ -421,10 +421,14 @@ app.post("/api/supabase-proxy", async (req, res) => {
 
         if (!path) {
             console.error("[PROXY ERROR] Missing path! req.body:", JSON.stringify(req.body));
-            return res.status(400).json({ error: "Missing path" });
+            return res.status(400).json({ error: "Missing path parameter" });
         }
 
         const supabaseUrl = 'https://rzdpntvojpibbndhsrlz.supabase.co';
+        const cleanPath = path.startsWith('/') ? path : `/${path}`;
+        const targetUrl = `${supabaseUrl}${cleanPath}`;
+
+        console.log(`[PROXY FETCH] ${method || 'GET'} -> ${targetUrl}`);
         const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ6ZHBudHZvanBpYmJuZGhzcmx6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEzNzg1MjEsImV4cCI6MjA4Njk1NDUyMX0.QwnT9Okp8CkN_LxGIeBKWrroo3letL8OhSvaqdQVW7M';
 
         // STRICT HEADER WHITELIST: We only send auth and content-type.
@@ -470,8 +474,7 @@ app.post("/api/supabase-proxy", async (req, res) => {
             fetchOptions.body = typeof body === 'string' ? body : JSON.stringify(body);
         }
 
-        const cleanPath = path.startsWith('/') ? path : `/${path}`;
-        const fetchRes = await fetch(`${supabaseUrl}${cleanPath}`, fetchOptions);
+        const fetchRes = await fetch(targetUrl, fetchOptions);
 
         // Forward EXACT headers back to the original client so supabase-js can parse correctly
         fetchRes.headers.forEach((value, key) => {

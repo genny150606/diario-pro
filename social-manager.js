@@ -56,20 +56,18 @@ window.SocialManager = {
     },
 
     async loadFriends() {
+        // FK DISAMBIGUATION: Use !sender_id to specify which relationship to follow
         const { data, error } = await supabaseClient
             .from('friendships')
-            .select(`
-                id,
-                sender_id,
-                receiver_id,
-                status,
-                sender:sender_id(username),
-                receiver:receiver_id(username)
-            `)
+            .select('id,sender_id,receiver_id,status,sender:sender_id(username),receiver:receiver_id(username)')
             .or(`sender_id.eq.${AuthManager.user.id},receiver_id.eq.${AuthManager.user.id}`)
             .eq('status', 'accepted');
 
-        if (error) return console.error("Friends Error:", error);
+        if (error) {
+            console.error("❌ Friends Fetch Error:", error.message, error.details, error.hint);
+            console.error("Full Error Object:", error);
+            return;
+        }
 
         this.friends = data.map(f => {
             const isSender = f.sender_id === AuthManager.user.id;
@@ -84,7 +82,7 @@ window.SocialManager = {
     async loadPendingRequests() {
         const { data, error } = await supabaseClient
             .from('friendships')
-            .select('*, sender:sender_id(username)')
+            .select('*, sender:users_data!sender_id(username)')
             .eq('receiver_id', AuthManager.user.id)
             .eq('status', 'pending');
 

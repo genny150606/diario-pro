@@ -88,10 +88,10 @@
 }
 
 .hero-logo-img {
-    width: 180px;
+    width: clamp(120px, 15vw, 180px);
     height: auto;
     border-radius: var(--radius-xl);
-    box-shadow: 0 10px 40px rgba(0, 122, 255, 0.4);
+    box-shadow: 0 0.625rem 2.5rem rgba(0, 122, 255, 0.4);
     animation: floatLogo 6s ease-in-out infinite;
     object-fit: contain;
 }
@@ -120,7 +120,7 @@
     justify-content: flex-start;
     text-align: center;
     /* Large bottom padding ensures preview window stays inside hero */
-    padding: 100px var(--space-6) clamp(120px, 18vw, 220px);
+    padding: clamp(4rem, 10vh, 6.25rem) var(--space-6) clamp(7.5rem, 18vw, 13.75rem);
     /* Do NOT use overflow:hidden — it clips the preview window */
 }
 
@@ -321,7 +321,8 @@
     border-radius: var(--radius-2xl);
     overflow: hidden;
     box-shadow: var(--shadow-float);
-    backdrop-filter: blur(10px);
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
 }
 
 .preview-titlebar {
@@ -444,7 +445,7 @@
 /* ── FEATURES GRID ── */
 .features-grid {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(auto-fit, minmax(clamp(250px, 30vw, 320px), 1fr));
     gap: var(--space-8);
 }
 
@@ -574,11 +575,11 @@
     max-width: 1200px;
     margin: 0 auto;
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr));
     gap: var(--space-8);
     background: var(--glass-bg);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
     border: 1px solid var(--color-border);
     border-radius: var(--radius-2xl);
     padding: var(--space-10) var(--space-8);
@@ -607,7 +608,7 @@
 /* ── TESTIMONIALS / REVIEWS ── */
 .testimonials-grid {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr));
     gap: var(--space-6);
 }
 
@@ -1057,7 +1058,7 @@
     }
 
     .stats-banner-inner {
-        grid-template-columns: 1fr 1fr;
+        grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
         padding: var(--space-4);
         gap: var(--space-3);
     }
@@ -1084,11 +1085,11 @@
     .preview-content,
     .features-grid,
     .testimonials-grid {
-        grid-template-columns: 1fr !important;
+        grid-template-columns: 1fr;
     }
 
     .stats-banner-inner {
-        grid-template-columns: 1fr 1fr !important;
+        grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
     }
 
     .timeline {

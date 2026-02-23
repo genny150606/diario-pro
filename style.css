@@ -207,7 +207,15 @@
     align-items: center;
     gap: var(--space-3);
     flex-shrink: 0;
+}
+
+.header-right-actions {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
     margin-left: auto;
+    flex-shrink: 1;
+    min-width: 0;
 }
 
 .theme-toggle,
@@ -251,6 +259,7 @@ section.active {
 .hero h1 {
     font-size: var(--font-size-3xl);
     font-weight: var(--fw-semibold);
+    font-family: var(--font-heading);
     margin-bottom: var(--space-2);
     letter-spacing: var(--tracking-tight);
     line-height: var(--leading-tight);
@@ -274,8 +283,8 @@ section.active {
 /* ── STATS GRID ── */
 .stats-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: var(--space-4);
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr));
+    gap: var(--space-6);
     margin-bottom: var(--space-12);
 }
 
@@ -284,9 +293,9 @@ section.active {
     border: 1px solid var(--color-border);
     border-radius: var(--radius-xl);
     padding: var(--space-6);
-    transition: all var(--duration-base) var(--ease-out);
+    transition: all var(--duration-base) var(--ease-spring);
     cursor: default;
-    box-shadow: var(--shadow-xs);
+    box-shadow: var(--shadow-sm), inset 0 0 0 1px rgba(255, 255, 255, 0.05);
     position: relative;
     overflow: hidden;
 }
@@ -297,16 +306,17 @@ section.active {
     top: 0;
     left: 0;
     right: 0;
-    height: 3px;
-    background: linear-gradient(90deg, var(--color-accent), #5856D6, #AF52DE);
+    height: 4px;
+    background: linear-gradient(90deg, var(--color-accent), #5E5CE6, #BF5AF2);
     opacity: 0;
     transition: opacity var(--duration-base) var(--ease-out);
+    z-index: 2;
 }
 
 .stat-card:hover {
     border-color: var(--color-accent-bg-strong);
-    transform: translateY(-3px);
-    box-shadow: var(--shadow-md), 0 0 20px var(--color-accent-bg);
+    transform: translateY(-5px) scale(1.02);
+    box-shadow: var(--shadow-lg), 0 0 30px var(--color-accent-bg);
 }
 
 .stat-card:hover::before {
@@ -359,6 +369,7 @@ section.active {
     gap: var(--space-3);
     font-size: var(--font-size-xl);
     font-weight: var(--fw-semibold);
+    font-family: var(--font-heading);
 }
 
 /* ── TABS ── */
@@ -405,7 +416,7 @@ section.active {
 /* ── DASHBOARD GRID ── */
 .dashboard-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 200px), 1fr));
     gap: var(--space-4);
     margin-bottom: var(--space-8);
 }
@@ -1192,10 +1203,13 @@ input[type="date"]::-webkit-calendar-picker-indicator {
     -webkit-backdrop-filter: blur(24px);
     border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 24px;
+    font-family: var(--font-ui);
     /* Use clamp so padding shrinks at high zoom / small screens */
-    padding: clamp(20px, 4vw, 40px);
-    max-width: 480px;
+    padding: clamp(1.25rem, 4vw, 2.5rem);
+    max-width: 30rem;
+    /* 480px */
     width: 100%;
+    box-sizing: border-box;
     /* Extra bottom margin so home link stays above taskbar */
     margin: auto 0;
     box-shadow: 0 24px 80px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.08);
@@ -1224,6 +1238,7 @@ input[type="date"]::-webkit-calendar-picker-indicator {
     color: #fff;
     margin: 12px 0 4px;
     font-weight: 700;
+    font-family: var(--font-heading);
 }
 
 .auth-subtitle {
@@ -1365,6 +1380,19 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 
 .auth-home-link:hover {
     color: rgba(255, 255, 255, 0.7);
+}
+
+.sidebar-item.special-duel {
+    color: #f59e0b !important;
+    font-weight: 700;
+}
+
+.sidebar-item.special-duel::after {
+    content: '✨';
+    font-size: 0.6rem;
+    position: absolute;
+    top: 4px;
+    right: 4px;
 }
 
 /* Collapse row layout on narrow screens or high zoom */

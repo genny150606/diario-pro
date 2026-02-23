@@ -3,10 +3,10 @@
    No !important. Clean breakpoints.
    ============================================ */
 
-/* ── MOBILE BASE (< 768px) ── */
-@media (max-width: 767px) {
+/* ── MOBILE BASE (< 48em / 768px) ── */
+@media (max-width: 47.9375em) {
     .hero h1 {
-        font-size: var(--font-size-2xl);
+        font-size: clamp(var(--font-size-2xl), 8vw, var(--font-size-3xl));
     }
 
     .hero p {
@@ -14,7 +14,7 @@
     }
 
     .stats-grid {
-        grid-template-columns: repeat(2, 1fr);
+        grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
         gap: var(--space-3);
     }
 
@@ -27,12 +27,15 @@
     }
 
     .stat-icon {
-        font-size: 22px;
+        font-size: 1.375rem;
+        /* 22px */
         margin-bottom: var(--space-2);
     }
 
     .content {
-        padding: var(--space-4) var(--space-4);
+        padding: var(--space-4);
+        width: 100%;
+        max-width: 100%;
     }
 
     header,
@@ -73,6 +76,7 @@
 
     .calendar-container {
         padding: var(--space-6);
+        max-width: 95vw;
     }
 
     .calendar-day {
@@ -90,28 +94,24 @@
     }
 
     /* Disable hover effects on touch */
-    .stat-card:hover,
-    .card:hover,
-    .metric-card:hover {
-        transform: none;
+    @media (hover: none) {
+
+        .stat-card:hover,
+        .card:hover,
+        .metric-card:hover {
+            transform: none;
+        }
     }
 }
 
-/* Single column on very small screens */
-@media (max-width: 480px) {
-    .stats-grid {
-        grid-template-columns: 1fr;
-    }
-}
-
-/* ── TABLET (768px–1023px) ── */
-@media (min-width: 768px) and (max-width: 1023px) {
+/* ── TABLET (48em–63.9375em / 768px–1023px) ── */
+@media (min-width: 48em) and (max-width: 63.9375em) {
     .content {
         padding: var(--space-8) var(--space-6);
     }
 
     .stats-grid {
-        grid-template-columns: repeat(3, 1fr);
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
     }
 
     .hero h1 {
@@ -119,8 +119,8 @@
     }
 }
 
-/* ── DESKTOP (1024px+) ── */
-@media (min-width: 1024px) {
+/* ── DESKTOP (64em+ / 1024px) ── */
+@media (min-width: 64em) {
 
     header,
     .mobile-top-bar {
@@ -145,10 +145,11 @@
     }
 }
 
-/* ── LARGE DESKTOP (1440px+) ── */
-@media (min-width: 1440px) {
+/* ── LARGE DESKTOP (90em+ / 1440px) ── */
+@media (min-width: 90em) {
     .content {
-        max-width: 1080px;
+        max-width: 67.5rem;
+        /* 1080px */
     }
 }
 

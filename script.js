@@ -584,30 +584,22 @@ const GamificationManager = {
         const progress = Math.min(100, Math.max(0, ((currentXP - prevLevelXP) / (nextLevelXP - prevLevelXP)) * 100));
 
         // HEADER BADGE ELEMENTS
-        const headerLevelText = document.getElementById('headerLevelText');
-        const headerLevelRing = document.getElementById('headerLevelRing');
+        const headerLevelNum = document.getElementById('headerLevelNum');
+        if (headerLevelNum) headerLevelNum.textContent = currentLevel;
 
-        if (headerLevelText) headerLevelText.textContent = currentLevel;
+        // POPUP ELEMENTS (If open)
+        const gamePageLevel = document.getElementById('gamePageLevel');
+        if (gamePageLevel) gamePageLevel.textContent = currentLevel;
 
-        if (headerLevelRing) {
-            // Update ring stroke-dasharray (0, 100) -> (progress, 100)
-            // Note: The stroke-dasharray is "length, gap". 100 is approx circumference for 32px viewbox with radius 15.9155
-            // Radius 15.9155 * 2 * PI = 100. So we can just set the first number to percentage.
-            headerLevelRing.setAttribute('stroke-dasharray', `${progress}, 100`);
-        }
+        const gamePageTitle = document.getElementById('gamePageTitle');
+        if (gamePageTitle) gamePageTitle.textContent = this.levelNames[currentLevel - 1] || 'Studente';
 
-        // LEGACY SIDEBAR ELEMENTS (Just in case they exist)
-        const levelDisplay = document.getElementById('userLevelDisplay');
-        const levelTitle = document.getElementById('userLevelTitle');
-        const xpFill = document.getElementById('sidebarXpFill');
-        const xpText = document.getElementById('userXpDisplay');
-        const nextXpText = document.getElementById('nextLevelXpDisplay');
+        const gamePageXpFill = document.getElementById('gamePageXpFill');
+        if (gamePageXpFill) gamePageXpFill.style.width = `${progress}%`;
 
-        if (levelDisplay) levelDisplay.textContent = currentLevel;
-        if (levelTitle) levelTitle.textContent = this.levelNames[currentLevel - 1] || 'Studente';
-        if (xpFill) xpFill.style.width = `${progress}%`;
-        if (xpText) xpText.textContent = `${currentXP} XP`;
-        if (nextXpText) nextXpText.textContent = `${nextLevelXP} XP`;
+        // SIDEBAR UPDATES (Legacy support)
+        const sidebarLevel = document.getElementById('userLevelDisplay');
+        if (sidebarLevel) sidebarLevel.textContent = currentLevel;
     },
 
     triggerConfetti() {
@@ -630,17 +622,8 @@ const GamificationManager = {
     },
 
     toggleGamification() {
-        const popup = document.getElementById('gamificationPopup');
-        if (!popup) return;
-
-        const isHidden = popup.classList.contains('hidden');
-        if (isHidden) {
-            popup.classList.remove('hidden');
-            popup.style.display = 'block';
-            this.updateUI(); // Ensure fresh data
-        } else {
-            popup.classList.add('hidden');
-            popup.style.display = 'none';
+        if (window.UIManager && window.UIManager.toggleGamification) {
+            window.UIManager.toggleGamification();
         }
     }
 };
@@ -1501,34 +1484,24 @@ document.addEventListener('DOMContentLoaded', () => {
     if (typeof FlashcardManager !== 'undefined') FlashcardManager.init(StorageManager.load());
     if (typeof DuelManager !== 'undefined') {
         console.log('⚔️ DuelManager initializing...');
-        // DuelManager.init() is currently handled by its own object structure if needed, 
+        // DuelManager.init() is currently handled by its own object structure if needed,
         // but we ensure it's ready.
     }
 
-    // Robust Gamification Click Handler
-    const badge = document.getElementById('headerLevelBadge');
+    // Robust Gamification Click Handler (Toggle handled by UIManager.toggleGamification in HTML)
+    const badge = document.getElementById('levelBadge');
     if (badge) {
-        console.log('Gamification Badge found, attaching listener');
-        badge.addEventListener('click', (e) => {
-            e.preventDefault();
-            e.stopPropagation(); // Prevent immediate closing
-            console.log('Gamification Badge Clicked');
-            GamificationManager.toggleGamification();
-        });
+        console.log('Gamification Badge found');
 
-        // Close when clicking outside
+        // Handle closing when clicking outside
         document.addEventListener('click', (e) => {
             const popup = document.getElementById('gamificationPopup');
-            const badge = document.getElementById('headerLevelBadge');
-            if (popup && !popup.classList.contains('hidden')) {
+            if (popup && popup.classList.contains('active')) {
                 if (!popup.contains(e.target) && !badge.contains(e.target)) {
-                    popup.classList.add('hidden');
-                    popup.style.display = 'none';
+                    popup.classList.remove('active');
                 }
             }
         });
-    } else {
-        console.error('Gamification Badge NOT found');
     }
 });
 /* ============================================

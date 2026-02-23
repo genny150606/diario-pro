@@ -4,10 +4,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>StudyJournal Pro</title>
+
+    <!-- FONTS -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Marcellus&family=Outfit:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap"
+        rel="stylesheet">
     <meta http-equiv="Content-Security-Policy"
         content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com blob:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; style-src-elem 'self' 'unsafe-inline' https://fonts.googleapis.com; connect-src 'self' https://rzdpntvojpibbndhsrlz.supabase.co wss://rzdpntvojpibbndhsrlz.supabase.co https://*.supabase.co wss://*.supabase.co https://cdn.jsdelivr.net https://cdnjs.cloudflare.com; img-src 'self' data: blob: https:; font-src 'self' https://fonts.gstatic.com; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self';">
     <meta name="referrer" content="strict-origin-when-cross-origin">
-    <title>StudyJournal Pro</title>
     <link rel="icon" type="image/png" href="favicon.png">
     <meta name="description"
         content="StudyJournal Pro — Il tuo assistente AI per lo studio. Note, flashcard, compiti e voti in un'unica app premium.">
@@ -125,72 +132,58 @@
 
     <!-- HEADER TOP -->
     <header>
+        <button class="menu-toggle" id="hamburgerBtn">☰</button>
+
         <a href="#" class="logo">
             <img src="favicon.png" alt="Logo" class="logo-img">
             <span>StudyJournal</span>
         </a>
 
-        <a href="index.html" class="back-home-link" title="Torna alla Homepage">🏠</a>
-
-        <nav class="sidebar">
-            <div class="nav-indicator"></div>
-
-            <!-- GAMIFICATION BADGE REDIRECTED TO HEADER -->
-
-            <a href="#" data-section="dashboard" class="sidebar-item nav-link active" id="navDashboard">Dashboard</a>
-            <a href="#" data-section="notes" class="sidebar-item nav-link" id="navNotes">Note</a>
-            <a href="#" data-section="tasks" class="sidebar-item nav-link" id="navTasks">Compiti</a>
-            <a href="#" data-section="grades" class="sidebar-item nav-link" id="navGrades">Voti</a>
-            <a href="#" data-section="stats" class="sidebar-item nav-link" id="navStats">Statistiche</a>
-            <a href="#" data-section="presences" class="sidebar-item nav-link" id="navPresences">Presenze</a>
-            <a href="#" data-section="duel" class="sidebar-item nav-link" id="navDuel"
-                style="border-left: 3px solid #f59e0b; color: #f59e0b;">Duello AI ⚔️</a>
-            <a href="#" data-section="social" class="sidebar-item nav-link" id="navSocial">Social 🤝</a>
-
-            <a href="#" data-section="settings" class="sidebar-item nav-link" id="navSettings">Impostazioni</a>
-        </nav>
-
-
-        <div class="header-right">
-            <!-- LEVEL BADGE (Moved from Sidebar) -->
-            <div class="header-level-badge" id="headerLevelBadge" onclick="AppManager.showSection('gamification')"
+        <!-- Study Streak & Level Badge -->
+        <div class="header-right-actions">
+            <div id="streakContainer"></div>
+            <div class="header-level-badge" id="levelBadge" onclick="UIManager.toggleGamification()"
                 title="Il mio Livello">
-                <div class="header-level-ring">
-                    <svg viewBox="0 0 36 36" class="circular-chart">
-                        <path class="circle-bg" d="M18 2.0845
-                            a 15.9155 15.9155 0 0 1 0 31.831
-                            a 15.9155 15.9155 0 0 1 0 -31.831" />
-                        <path class="circle" id="headerLevelRing" stroke-dasharray="0, 100" d="M18 2.0845
-                            a 15.9155 15.9155 0 0 1 0 31.831
-                            a 15.9155 15.9155 0 0 1 0 -31.831" />
-                    </svg>
-                    <span class="header-level-text" id="headerLevelText">1</span>
-                </div>
-                <span class="header-level-label">Lvl</span>
+                <span class="level-icon">⭐</span>
+                <span class="level-number" id="headerLevelNum">--</span>
             </div>
-
-            <!-- Auth UI -->
-            <button id="loginBtn" class="btn-primary" style="padding: 8px 16px; font-size: 14px;"
-                onclick="document.getElementById('authModal').style.display='flex'">
-                Accedi
-            </button>
-            <div id="userProfile" class="user-profile-container" style="display: none;">
-                <button class="account-btn" onclick="toggleAccountMenu()" id="accountBtn">
-                    <span id="userEmailDisplay"></span>
-                    <span class="chevron">▼</span>
-                </button>
-                <div id="accountDropdown" class="account-dropdown">
-                    <button onclick="openChangePasswordModal()">🔑 Cambia Password</button>
-                    <button onclick="AuthManager.signOut()">🚪 Esci</button>
-                </div>
-            </div>
-
-            <button class="theme-toggle" onclick="toggleTheme()" title="Cambia tema">🌙</button>
-            <button class="menu-toggle" id="hamburgerBtn" title="Menu">☰</button>
         </div>
 
-
+        <div class="header-right">
+            <button class="theme-toggle" id="themeToggle" title="Cambia Tema">🌓</button>
+            <div class="user-profile-container">
+                <button class="account-btn" id="accountBtn">
+                    <span id="userEmailDisplay">Caricamento...</span>
+                    <span class="chevron">▼</span>
+                </button>
+                <div class="account-dropdown" id="accountDropdown">
+                    <button id="logoutBtn">❌ Esci</button>
+                </div>
+            </div>
+        </div>
     </header>
+
+    <nav class="sidebar">
+        <div class="sidebar-header"
+            style="padding: var(--space-4); display: flex; align-items: center; justify-content: space-between;">
+            <span style="font-weight: 700; font-family: var(--font-heading);">MENU</span>
+            <button onclick="closeNavbar()" class="btn-close-sidebar"
+                style="background: none; border: none; font-size: 20px; cursor: pointer; display: none;">✕</button>
+        </div>
+
+        <a href="#" data-section="dashboard" class="sidebar-item active" id="navDashboard">🏠 Dashboard</a>
+        <a href="#" data-section="notes" class="sidebar-item" id="navNotes">📚 Note</a>
+        <a href="#" data-section="tasks" class="sidebar-item" id="navTasks">✅ Compiti</a>
+        <a href="#" data-section="grades" class="sidebar-item" id="navGrades">⭐ Voti</a>
+        <a href="#" data-section="stats" class="sidebar-item" id="navStats">📊 Statistiche</a>
+        <a href="#" data-section="presences" class="sidebar-item" id="navPresences">📋 Presenze</a>
+        <a href="#" data-section="duel" class="sidebar-item" id="navDuel">⚔️ Duello AI</a>
+        <a href="#" data-section="social" class="sidebar-item" id="navSocial">🤝 Social</a>
+        <div style="margin-top: auto; padding-top: var(--space-4); border-top: 1px solid var(--glass-border);">
+            <a href="#" data-section="settings" class="sidebar-item" id="navSettings">⚙️ Impostazioni</a>
+            <a href="index.html" class="sidebar-item">🏠 Homepage</a>
+        </div>
+    </nav>
 
     <!-- MAIN CONTENT -->
     <div class="container">
@@ -244,9 +237,11 @@
                         <span class="stat-icon">⚔️</span>
                         <div class="stat-label" style="color: #f59e0b; font-weight: bold;">Duello AI</div>
                         <div class="stat-value">SFIDA!</div>
-                        <div class="stat-change">Gareggia con un amico</div>
                     </div>
                 </div>
+
+                <!-- Sfide del Giorno (Premium Widget) -->
+                <div id="dailyChallengesContainer"></div>
             </section>
 
             <!-- NOTES -->
@@ -446,7 +441,7 @@
             </section>
 
             <!-- GAMIFICATION POPOVER (Changed from SECTION) -->
-            <div id="gamificationPopup" class="gamification-popup hidden">
+            <div id="gamificationPopup" class="gamification-popup">
                 <div class="gamification-hero-mini">
                     <div class="hero-header-mini">
                         <div class="hero-level-circle-mini">
@@ -544,7 +539,6 @@
                     </div>
                 </div>
             </div>
-
             <!-- PRESENCES -->
             <section id="presences" class="section">
                 <!-- VIEW LICEO -->
@@ -626,72 +620,7 @@
             </section>
 
 
-            <!-- GAMIFICATION PAGE -->
-            <section id="gamification" class="section">
-                <div class="gamification-hero">
-                    <div class="hero-level-circle">
-                        <span class="hero-level-number" id="gamePageLevel">1</span>
-                        <span class="hero-level-label">Livello</span>
-                    </div>
-                    <h1 id="gamePageTitle">Principiante</h1>
-                    <p class="section-desc">Continua a studiare per sbloccare nuovi titoli!</p>
 
-                    <div class="hero-xp-bar">
-                        <div class="hero-xp-fill" id="gamePageXpFill" style="width: 0%"></div>
-                    </div>
-                    <div style="margin-top: 8px; font-size: 12px; opacity: 0.8;">
-                        <span id="gamePageXp">0</span> / <span id="gamePageNextXp">100</span> XP
-                    </div>
-                </div>
-
-                <div class="stats-grid-gamification">
-                    <div class="stat-card-game">
-                        <div class="stat-game-value" id="totalXpValue">0</div>
-                        <div class="stat-game-label">XP Totali</div>
-                    </div>
-                    <div class="stat-card-game">
-                        <div class="stat-game-value" id="streakValue">0 ??</div>
-                        <div class="stat-game-label">Giorni di Fila</div>
-                    </div>
-                    <div class="stat-card-game">
-                        <div class="stat-game-value" id="notesXpValue">0</div>
-                        <div class="stat-game-label">Note Create</div>
-                    </div>
-                    <div class="stat-card-game">
-                        <div class="stat-game-value" id="flashcardsXpValue">0</div>
-                        <div class="stat-game-label">Flashcard Generate</div>
-                    </div>
-                </div>
-
-                <h2 class="section-heading">?? Obiettivi</h2>
-                <div class="achievements-grid">
-                    <div class="achievement-card unlocked">
-                        <span class="achievement-icon">??</span>
-                        <div class="achievement-title">Primo Passo</div>
-                        <div class="achievement-desc">Crea il tuo primo account.</div>
-                    </div>
-                    <div class="achievement-card" id="achFirstNote">
-                        <span class="achievement-icon">??</span>
-                        <div class="achievement-title">Scriba</div>
-                        <div class="achievement-desc">Crea la tua prima nota.</div>
-                    </div>
-                    <div class="achievement-card" id="achFirstFlashcard">
-                        <span class="achievement-icon">??</span>
-                        <div class="achievement-title">Memoria di Ferro</div>
-                        <div class="achievement-desc">Genera 5 flashcard.</div>
-                    </div>
-                    <div class="achievement-card" id="achLevel5">
-                        <span class="achievement-icon">?</span>
-                        <div class="achievement-title">Stella Nascente</div>
-                        <div class="achievement-desc">Raggiungi il livello 5.</div>
-                    </div>
-                    <div class="achievement-card" id="achStreak7">
-                        <span class="achievement-icon">??</span>
-                        <div class="achievement-title">Inarrestabile</div>
-                        <div class="achievement-desc">Studia per 7 giorni di fila.</div>
-                    </div>
-                </div>
-            </section>
 
             <!-- SETTINGS -->
             <section id="settings" class="section">
@@ -849,112 +778,177 @@
             </section>
 
             <section id="duel" class="section">
+                <!-- DYNAMIC BG -->
+                <div class="duel-arena-bg" id="duelArenaBg"></div>
+
                 <div class="duel-container">
 
                     <!-- TIMER OVERLAY -->
                     <div id="duelCountdownOverlay" class="duel-overlay hidden">
                         <div class="countdown-content">
-                            <h2>La sfida inizia in...</h2>
+                            <h2 style="font-size: 2rem; margin-bottom: 1rem;">Preparati alla Battaglia</h2>
                             <div id="countdownValue" class="countdown-number">3</div>
                         </div>
                     </div>
 
                     <!-- LOBBY -->
-                    <div id="duelLobbySection" class="duel-card">
-                        <span class="duel-badge">⚔️ Lobby del Duello</span>
+                    <div id="duelLobbySection" class="duel-card premium">
+                        <div class="duel-badge">⚔️ Arena dei Campioni</div>
 
                         <div id="duelCreateForm">
-                            <h2>Nuova Sfida AI</h2>
+                            <h2 style="font-size: 2.5rem; margin-bottom: 2rem;">Nuova Sfida AI</h2>
 
-                            <!-- Source Toggles -->
+                            <!-- Subject Selection -->
                             <div class="duel-source-tabs"
-                                style="display: flex; gap: 10px; margin-bottom: 1rem; justify-content: center;">
-                                <button class="btn-tab active"
-                                    onclick="DuelManager.setSource('subject', this)">Materia</button>
-                                <button class="btn-tab" onclick="DuelManager.setSource('notes', this)">Appunti</button>
-                                <button class="btn-tab" onclick="DuelManager.setSource('pdf', this)">PDF</button>
+                                style="display: flex; gap: 10px; margin-bottom: 2rem; justify-content: center;">
+                                <button class="btn-tab active" onclick="DuelManager.setSource('subject', this)">✨
+                                    Materia</button>
+                                <button class="btn-tab" onclick="DuelManager.setSource('notes', this)">📚
+                                    Appunti</button>
+                                <button class="btn-tab" onclick="DuelManager.setSource('pdf', this)">📂 PDF
+                                    Documento</button>
                             </div>
 
-                            <!-- Subject Input -->
                             <div id="duelSource_subject" class="duel-source-content">
-                                <p>Scegli una materia per generare le domande</p>
-                                <input type="text" id="duelSubjectInput" placeholder="es. Storia Romana"
-                                    style="padding: 12px; border-radius: 8px; border: 1px solid var(--border); width: 80%; margin: 1rem 0;">
+                                <p style="opacity: 0.7; margin-bottom: 1rem;">Scegli una materia per generare domande di
+                                    alto livello</p>
+                                <input type="text" id="duelSubjectInput" placeholder="es. Neuroscienze"
+                                    style="padding: 16px; border-radius: 16px; background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.1); width: 100%; max-width: 400px; color: #FFF; margin: 1rem 0; font-size: 1.1rem; text-align: center;">
                             </div>
 
-                            <!-- Notes Selection -->
                             <div id="duelSource_notes" class="duel-source-content" style="display: none;">
-                                <p>Scegli dai tuoi appunti salvati</p>
+                                <p style="opacity: 0.7; margin-bottom: 1rem;">Sfida l'avversario sui tuoi appunti
+                                    personali</p>
                                 <select id="duelNoteSelect"
-                                    style="padding: 12px; border-radius: 8px; border: 1px solid var(--border); width: 80%; margin: 1rem 0;">
+                                    style="padding: 16px; border-radius: 16px; background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.1); width: 100%; max-width: 400px; color: #FFF; margin: 1rem 0; font-size: 1rem;">
                                     <option value="">-- Caricamento note... --</option>
                                 </select>
                             </div>
 
-                            <!-- PDF Upload -->
                             <div id="duelSource_pdf" class="duel-source-content" style="display: none;">
-                                <p>Carica un PDF o incolla del testo</p>
-                                <textarea id="duelManualText" placeholder="Incolla qui il testo..."
-                                    style="width: 80%; height: 80px; padding: 8px; margin-bottom: 10px; border-radius: 8px; border: 1px solid var(--border);"></textarea>
-                                <div style="display: flex; align-items: center; justify-content: center; gap: 10px;">
-                                    <input type="file" id="duelPdfInput" accept=".pdf,.txt" style="display: none;"
-                                        onchange="DuelManager.handleFileUpload(this)">
-                                    <button class="btn-secondary"
-                                        onclick="document.getElementById('duelPdfInput').click()">📂 Carica
-                                        File</button>
-                                    <span id="duelFileName"
-                                        style="font-size: 0.9rem; color: var(--text-secondary);"></span>
+                                <p style="opacity: 0.7; margin-bottom: 1rem;">Analizza un documento e genera una sfida
+                                    istantanea</p>
+                                <div style="max-width: 500px; margin: 0 auto;">
+                                    <textarea id="duelManualText" placeholder="Incolla qui il testo o carica un file..."
+                                        style="width: 100%; height: 120px; padding: 16px; border-radius: 16px; background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.1); color: #FFF; margin-bottom: 1rem; resize: none;"></textarea>
+                                    <div
+                                        style="display: flex; align-items: center; justify-content: center; gap: 15px;">
+                                        <input type="file" id="duelPdfInput" accept=".pdf,.txt" style="display: none;"
+                                            onchange="DuelManager.handleFileUpload(this)">
+                                        <button class="btn-secondary" style="border-radius: 12px; padding: 10px 20px;"
+                                            onclick="document.getElementById('duelPdfInput').click()">📂 Sfoglia
+                                            File</button>
+                                        <span id="duelFileName" style="font-size: 0.9rem; color: #fbbf24;"></span>
+                                    </div>
                                 </div>
                             </div>
 
                             <br>
-                            <button id="duelCreateBtn" class="btn-primary" onclick="DuelManager.createRoom()">Crea
-                                Stanza</button>
+                            <button id="duelCreateBtn" class="btn-primary"
+                                style="padding: 18px 40px; font-size: 1.2rem; border-radius: 20px; width: 100%; max-width: 300px;"
+                                onclick="DuelManager.createRoom()">GENERA ARENA ⚡</button>
 
-                            <div style="margin: 2rem 0; border-top: 1px solid var(--border); padding-top: 2rem;">
-                                <p>Hai già un codice?</p>
-                                <div style="display: flex; gap: 8px; justify-content: center; margin-top: 1rem;">
-                                    <input type="text" id="duelJoinCode" placeholder="Codice"
-                                        style="padding: 12px; border-radius: 8px; width: 120px; text-transform: uppercase; border: 1px solid var(--border);">
-                                    <input type="text" id="duelUsername" placeholder="Tuo Nome" style="display:none">
-                                    <!-- Hidden, auto-filled -->
+                            <div
+                                style="margin: 3rem 0 1rem; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 2rem;">
+                                <p style="opacity: 0.5; font-size: 0.9rem;">ENTRA IN UNA SESSIONE ESISTENTE</p>
+                                <div style="display: flex; gap: 10px; justify-content: center; margin-top: 1.5rem;">
+                                    <input type="text" id="duelJoinCode" placeholder="CODICE"
+                                        style="padding: 16px; border-radius: 16px; background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.1); width: 140px; text-transform: uppercase; border: 1px solid rgba(251,191,36,0.2); color: #fbbf24; font-weight: 900; font-size: 1.2rem; text-align: center; letter-spacing: 2px;">
                                 </div>
-                                <button class="btn-secondary" style="margin-top: 1rem;"
-                                    onclick="DuelManager.joinRoom(document.getElementById('duelJoinCode').value)">Partecipa
-                                    alla Sfida</button>
+                                <button class="btn-secondary"
+                                    style="margin-top: 1.5rem; padding: 12px 30px; border-radius: 12px;"
+                                    onclick="DuelManager.joinRoom(document.getElementById('duelJoinCode').value)">ENTRA
+                                    ORA ⚔️</button>
                             </div>
                         </div>
 
                         <div id="duelWaitingLobby" class="hidden">
-                            <div class="duel-code-box">
-                                <p>Codice per l'avversario:</p>
-                                <h2 id="roomCodeDisplay">----</h2>
+                            <div class="duel-vs-header">
+                                <div id="myLobbyCard"></div>
+                                <div class="vs-divider">VS</div>
+                                <div id="oppLobbyCard">
+                                    <div class="player-card" style="opacity: 0.4;">
+                                        <span style="font-size: 2.5rem; margin-bottom: 1rem;">⌛</span>
+                                        <span style="font-weight: 800;">In attesa...</span>
+                                    </div>
+                                </div>
                             </div>
-                            <h3>Giocatori in attesa:</h3>
-                            <div class="player-list" id="duelLobbyList">
-                                <!-- Players will appear here -->
+
+                            <div class="duel-code-box" style="display: inline-block; margin-bottom: 2rem;">
+                                <p
+                                    style="font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; opacity: 0.6;">
+                                    Condividi questo codice:</p>
+                                <h2 id="roomCodeDisplay" style="margin: 0;">----</h2>
                             </div>
+
+                            <div id="lobbyPlayerStatus"></div>
+
                             <button id="startDuelBtn" class="btn-primary" disabled
-                                onclick="DuelManager.triggerStart()">INIZIA BATTAGLIA!</button>
+                                style="width: 100%; max-width: 400px; padding: 20px; font-size: 1.4rem;"
+                                onclick="DuelManager.triggerStart()">INIZIA BATTAGLIA! ⚔️</button>
                         </div>
                     </div>
 
                     <!-- ARENA -->
-                    <div id="duelArenaSection" class="duel-card hidden">
+                    <div id="duelArenaSection" class="duel-card premium hidden">
+                        <div class="arena-hud">
+                            <div class="player-hud me">
+                                <h4 id="hudMeName">Tu</h4>
+                                <div class="hud-score" id="hudMeScore">0 pt</div>
+                                <div class="hud-streak" id="hudMeStreak">🔥🔥🔥</div>
+                            </div>
+
+                            <div class="duel-timer-orb">
+                                <div class="duel-timer-fill" id="hudTimerFill"></div>
+                                <span id="hudTimerText">15</span>
+                            </div>
+
+                            <div class="player-hud opponent">
+                                <h4 id="hudOppName">Avversario</h4>
+                                <div class="hud-score" id="hudOppScore">0 pt</div>
+                                <div class="hud-streak" id="hudOppStreak"></div>
+                            </div>
+                        </div>
+
                         <div class="duel-arena">
-                            <div id="duelQuestionContainer">
+                            <div id="duelQuestionContainer" class="duel-q-container">
                                 <!-- Questions will appear here -->
                             </div>
-                            <div class="duel-progress-bars" id="duelProgressBars">
+
+                            <!-- POWERUPS -->
+                            <div class="powerups-container" id="duelPowerups">
+                                <div class="powerup-slot" id="powerup_freeze"
+                                    onclick="DuelManager.usePowerUp('freeze')">
+                                    <span class="powerup-icon">❄️</span>
+                                    <span class="powerup-label">Freeze</span>
+                                </div>
+                                <div class="powerup-slot" id="powerup_shield"
+                                    onclick="DuelManager.usePowerUp('shield')">
+                                    <span class="powerup-icon">🛡️</span>
+                                    <span class="powerup-label">Shield</span>
+                                </div>
+                                <div class="powerup-slot" id="powerup_double"
+                                    onclick="DuelManager.usePowerUp('double')">
+                                    <span class="powerup-icon">⚡</span>
+                                    <span class="powerup-label">2x XP</span>
+                                </div>
+                            </div>
+
+                            <div class="duel-progress-bars" id="duelProgressBars" style="margin-top: 2rem;">
                                 <!-- Bars will appear here -->
                             </div>
                         </div>
                     </div>
 
                     <!-- RESULTS -->
-                    <div id="duelResultsSection" class="duel-card hidden">
+                    <div id="duelResultsSection" class="duel-card premium hidden">
                         <div id="duelResultsSummary">
-                            <!-- Summary here -->
+                            <div class="podium-container" id="duelPodium">
+                                <!-- Podium steps here -->
+                            </div>
+                            <div id="duelResultsStats" style="margin-top: 3rem;"></div>
+                            <button class="btn-primary" onclick="location.reload()"
+                                style="margin-top: 2rem; padding: 15px 40px;">Nuova Sfida</button>
                         </div>
                     </div>
 
@@ -968,7 +962,8 @@
                         <a href="#" class="footer-logo">
                             <span>StudyJournal Pro</span>
                         </a>
-                        <p>La piattaforma definitiva per studenti ambiziosi. Organizza, studia e trionfa con l'aiuto
+                        <p>La piattaforma definitiva per studenti ambiziosi. Organizza, studia e trionfa con
+                            l'aiuto
                             dell'AI.
                         </p>
                         <div class="social-links">

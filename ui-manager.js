@@ -3,7 +3,6 @@
    Replaces native browser alerts with custom Glass UI
    ============================================ */
 
-// Prevent redeclaration error by checking window property first
 if (typeof window.UIManager === 'undefined') {
     window.UIManager = {
         // === ALERT ===
@@ -25,7 +24,6 @@ if (typeof window.UIManager === 'undefined') {
                 modal.style.display = 'flex';
                 modal.classList.add('active');
 
-                // Clone button to remove old listeners
                 const newOkBtn = okBtn.cloneNode(true);
                 okBtn.parentNode.replaceChild(newOkBtn, okBtn);
 
@@ -58,7 +56,6 @@ if (typeof window.UIManager === 'undefined') {
                 modal.style.display = 'flex';
                 modal.classList.add('active');
 
-                // Clone buttons to remove old listeners
                 const newOkBtn = okBtn.cloneNode(true);
                 const newCancelBtn = cancelBtn.cloneNode(true);
                 okBtn.parentNode.replaceChild(newOkBtn, okBtn);
@@ -78,6 +75,109 @@ if (typeof window.UIManager === 'undefined') {
 
                 newCancelBtn.focus();
             });
+        },
+
+        // === STUDY STREAK ===
+        updateStreak() {
+            const now = new Date();
+            const today = now.toISOString().split('T')[0];
+            const lastVisit = localStorage.getItem('lastVisitDate');
+            let streak = parseInt(localStorage.getItem('studyStreak') || '0');
+
+            if (lastVisit === today) {
+                this.renderStreak(streak);
+                return streak;
+            }
+
+            if (lastVisit) {
+                const lastDate = new Date(lastVisit);
+                const diffTime = Math.abs(now - lastDate);
+                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+                if (diffDays === 1) {
+                    streak++;
+                } else if (diffDays > 1) {
+                    streak = 1;
+                }
+            } else {
+                streak = 1;
+            }
+
+            localStorage.setItem('studyStreak', streak);
+            localStorage.setItem('lastVisitDate', today);
+            this.renderStreak(streak);
+            return streak;
+        },
+
+        renderStreak(streak) {
+            const streakContainer = document.getElementById('streakContainer');
+            if (!streakContainer) return;
+
+            if (streak > 0) {
+                streakContainer.innerHTML = `
+                    <div class="streak-badge active" title="Serie di studio: ${streak} giorni">
+                        <span class="streak-fire">🔥</span>
+                        <span class="streak-count">${streak}</span>
+                    </div>
+                `;
+                streakContainer.classList.add('active');
+            } else {
+                streakContainer.innerHTML = '';
+                streakContainer.classList.remove('active');
+            }
+        },
+
+        // === DAILY CHALLENGES ===
+        initDailyChallenges() {
+            const container = document.getElementById('dailyChallengesContainer');
+            if (!container) return;
+
+            const challenges = [
+                { id: 'notes', name: 'Scrivi 3 nuove note', icon: '📝', reward: '+50 XP' },
+                { id: 'flashcards', name: 'Crea 5 flashcard', icon: '🎴', reward: '+100 XP' },
+                { id: 'duel', name: 'Partecipa a un Duello AI', icon: '⚔️', reward: '+150 XP' }
+            ];
+
+            let html = `
+            <div class="daily-challenges-widget">
+                <div class="challenge-header">
+                    <h3>🎯 Sfide del Giorno</h3>
+                    <span class="challenge-reward" style="background: rgba(16,185,129,0.1); padding: 4px 8px; border-radius: 8px;">Guadagna XP extra</span>
+                </div>
+                <div class="challenge-list">
+        `;
+
+            challenges.forEach(c => {
+                html += `
+                <div class="challenge-item" id="challenge-${c.id}">
+                    <div class="challenge-icon-box">${c.icon}</div>
+                    <div class="challenge-info">
+                        <div class="challenge-name">${c.name}</div>
+                        <div class="challenge-reward">${c.reward}</div>
+                    </div>
+                    <div class="challenge-check">✓</div>
+                </div>
+            `;
+            });
+
+            html += `</div></div>`;
+            container.innerHTML = html;
+        },
+
+        // === TOGGLE POPOVER ===
+        toggleGamification() {
+            const popup = document.getElementById('gamificationPopup');
+            if (popup) {
+                popup.classList.toggle('active');
+            }
         }
     };
+
+    // Auto-init features
+    window.addEventListener('DOMContentLoaded', () => {
+        if (window.UIManager) { // Simplified check as UIManager is defined above
+            window.UIManager.updateStreak();
+            window.UIManager.initDailyChallenges();
+        }
+    });
 }

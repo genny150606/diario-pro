@@ -16,41 +16,83 @@
     transition: all 0.2s ease;
     margin-right: 12px;
     position: relative;
-    /* Anchor for popup if needed */
+    font-family: var(--font-ui);
+}
+
+/* STREAK BADGE */
+.streak-badge {
+    display: none;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 14px;
+    background: rgba(255, 69, 0, 0.1);
+    backdrop-filter: blur(12px);
+    border-radius: var(--radius-full);
+    border: 1px solid rgba(255, 69, 0, 0.3);
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    margin-right: 12px;
+    font-family: var(--font-ui);
+}
+
+.streak-badge.active {
+    display: flex;
+}
+
+.streak-badge:hover {
+    transform: scale(1.08);
+    background: rgba(255, 69, 0, 0.2);
+    border-color: rgba(255, 69, 0, 0.5);
+    box-shadow: 0 0 20px rgba(255, 69, 0, 0.4);
+}
+
+.streak-fire {
+    font-size: 1.125rem;
+    filter: drop-shadow(0 0 8px rgba(255, 69, 0, 0.8));
+    animation: firePulse 1.5s infinite ease-in-out;
+}
+
+.streak-count {
+    font-weight: 700;
+    color: #ff4500;
+    font-size: 0.875rem;
+}
+
+@keyframes firePulse {
+
+    0%,
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+
+    50% {
+        transform: scale(1.2);
+        opacity: 0.8;
+    }
 }
 
 /* POPOVER CONTAINER */
 .gamification-popup {
-    position: absolute;
-    top: 70px;
-    /* Adjust based on header height */
+    display: none;
+    position: fixed;
+    /* Changed to fixed for better layering */
+    top: 80px;
     right: 20px;
     width: 320px;
-    background: rgba(255, 255, 255, 0.95);
+    background: var(--surface-popover, #ffffff);
     backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
     border-radius: 20px;
     box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2), 0 0 0 1px rgba(255, 255, 255, 0.5);
-    z-index: 9999;
+    z-index: 10001;
+    /* Higher than header */
     padding: 20px;
-    animation: popupFadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
     border: 1px solid rgba(255, 255, 255, 0.3);
 }
 
-@keyframes popupFadeIn {
-    from {
-        opacity: 0;
-        transform: translateY(-10px) scale(0.98);
-    }
-
-    to {
-        opacity: 1;
-        transform: translateY(0) scale(1);
-    }
-}
-
-.gamification-popup.hidden {
-    display: none;
+.gamification-popup.active {
+    display: block;
+    animation: popupFadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 /* MINI HERO SECTION */
@@ -61,53 +103,14 @@
     color: white;
     margin-bottom: 16px;
     box-shadow: 0 8px 16px rgba(79, 70, 229, 0.25);
-}
-
-.hero-header-mini {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    margin-bottom: 12px;
-}
-
-.hero-level-circle-mini {
-    width: 48px;
-    height: 48px;
-    border-radius: 50%;
-    background: rgba(255, 255, 255, 0.2);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: 800;
-    font-size: 20px;
-    border: 2px solid rgba(255, 255, 255, 0.5);
+    font-family: var(--font-ui);
 }
 
 .hero-info-mini h2 {
     font-size: 18px;
     margin: 0;
     font-weight: 700;
-}
-
-.hero-info-mini p {
-    font-size: 12px;
-    margin: 0;
-    opacity: 0.9;
-}
-
-.hero-xp-bar-mini {
-    height: 6px;
-    background: rgba(0, 0, 0, 0.2);
-    border-radius: 3px;
-    overflow: hidden;
-    margin-bottom: 6px;
-}
-
-.hero-xp-text-mini {
-    font-size: 10px;
-    text-align: right;
-    opacity: 0.9;
-    font-weight: 600;
+    font-family: var(--font-heading);
 }
 
 /* COMPACT STATS GRID */
@@ -118,267 +121,67 @@
     margin-bottom: 16px;
 }
 
-.stat-card-game {
-    background: rgba(255, 255, 255, 0.5);
-    border-radius: 12px;
-    padding: 10px;
-    text-align: center;
-    border: 1px solid rgba(0, 0, 0, 0.05);
-}
-
-.stat-game-value {
-    font-size: 16px;
-    font-weight: 700;
-    color: var(--text-primary);
-    margin-bottom: 2px;
-}
-
-.stat-game-label {
-    font-size: 10px;
-    color: var(--text-secondary);
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-}
-
-/* COMPACT ACHIEVEMENTS */
-.achievements-grid {
+/* DAILY CHALLENGES WIDGET */
+.daily-challenges-widget {
+    background: var(--surface-card);
+    border: 1px solid var(--glass-border);
+    backdrop-filter: var(--glass-blur);
+    border-radius: 24px;
+    padding: var(--space-6);
+    margin-top: var(--space-8);
     display: flex;
     flex-direction: column;
-    gap: 8px;
-    max-height: 150px;
-    overflow-y: auto;
-    padding-right: 4px;
+    gap: var(--space-4);
+    box-shadow: var(--shadow-lg);
+    font-family: var(--font-ui);
+    position: relative;
+    overflow: hidden;
 }
 
-.achievement-card {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 8px;
-    background: white;
-    border-radius: 10px;
-    border: 1px solid var(--border);
-}
-
-.achievement-icon {
-    font-size: 20px;
-    background: var(--bg-secondary);
-    width: 32px;
-    height: 32px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 8px;
-}
-
-.achievement-title {
-    font-size: 13px;
-    font-weight: 600;
-}
-
-.achievement-desc {
-    font-size: 11px;
-    color: var(--text-secondary);
-    display: none;
-    /* Hide desc in compact view */
-}
-
-/* Dark Mode Overrides */
-[data-theme="dark"] .gamification-popup,
-body.dark-mode .gamification-popup {
-    background: rgba(30, 30, 35, 0.95);
-    border-color: rgba(255, 255, 255, 0.1);
-    color: #e0e0e0;
-}
-
-[data-theme="dark"] .stat-card-game,
-body.dark-mode .stat-card-game {
-    background: rgba(255, 255, 255, 0.05);
-    border-color: rgba(255, 255, 255, 0.1);
-}
-
-[data-theme="dark"] .stat-game-value,
-body.dark-mode .stat-game-value {
-    color: #ffffff;
-}
-
-[data-theme="dark"] .achievement-card,
-body.dark-mode .achievement-card {
-    background: rgba(255, 255, 255, 0.05);
-    border-color: rgba(255, 255, 255, 0.1);
-    color: #e0e0e0;
-}
-
-/* OVERLAYS (Hidden by Default) */
-#xpToast {
-    position: fixed;
-    bottom: 20px;
-    right: 20px;
-    background: white;
-    padding: 12px 20px;
-    border-radius: 12px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    transform: translateY(100px);
-    opacity: 0;
-    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-    z-index: 10000;
-}
-
-#xpToast.show {
-    transform: translateY(0);
-    opacity: 1;
-}
-
-#levelUpOverlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.5);
-    backdrop-filter: blur(5px);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 10001;
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 0.3s ease;
-}
-
-#levelUpOverlay.show {
-    opacity: 1;
-    pointer-events: all;
-}
-
-/* XP GUIDE SECTION */
-.xp-guide-section {
-    margin-top: 20px;
-    padding-top: 16px;
-    border-top: 1px solid rgba(0, 0, 0, 0.05);
-}
-
-.xp-guide-section h3 {
-    font-size: 14px;
-    font-weight: 600;
-    margin-bottom: 12px;
-    opacity: 0.8;
-}
-
-.xp-guide-list {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-}
-
-.xp-guide-item {
+.challenge-header {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 8px 12px;
-    background: rgba(0, 0, 0, 0.03);
-    border-radius: 10px;
-    font-size: 13px;
-    transition: transform 0.2s ease;
 }
 
-.xp-guide-item:hover {
-    transform: translateX(4px);
-    background: rgba(0, 0, 0, 0.05);
+.challenge-header h3 {
+    font-family: var(--font-heading);
+    font-size: 1.125rem;
+    margin: 0;
 }
 
-.xp-icon {
-    margin-right: 8px;
-    font-size: 16px;
+.challenge-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px;
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 16px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    transition: all 0.3s ease;
 }
 
-.xp-label {
-    flex: 1;
-    font-weight: 500;
-}
-
-.xp-value {
+.challenge-reward {
+    font-size: 0.75rem;
     color: #10b981;
-    /* Green-500 */
     font-weight: 700;
-    background: rgba(16, 185, 129, 0.1);
-    padding: 2px 8px;
-    border-radius: 12px;
-    font-size: 11px;
 }
 
-/* Dark Mode Overrides */
-body.dark-mode .xp-guide-section {
-    border-top-color: rgba(255, 255, 255, 0.1);
-}
-
-body.dark-mode .xp-guide-item {
-    background: rgba(255, 255, 255, 0.05);
-    color: white;
-}
-
-
-/* ============================================
-   DUEL MODE OVERLAYS
-   ============================================ */
-.duel-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.85);
-    backdrop-filter: blur(10px);
-    z-index: 10000;
+.challenge-check {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    border: 2px solid rgba(255, 255, 255, 0.2);
     display: flex;
     align-items: center;
     justify-content: center;
+    color: transparent;
+}
+
+.challenge-item.completed .challenge-check {
+    background: #10b981;
+    border-color: #10b981;
     color: white;
-    text-align: center;
-    transition: opacity 0.3s ease;
-}
-
-.duel-overlay.hidden {
-    opacity: 0;
-    pointer-events: none;
-}
-
-.countdown-content h2 {
-    font-size: 2rem;
-    margin-bottom: 1rem;
-    color: rgba(255, 255, 255, 0.8);
-    text-transform: uppercase;
-    letter-spacing: 2px;
-}
-
-.countdown-number {
-    font-size: 8rem;
-    font-weight: 800;
-    background: linear-gradient(135deg, #facc15, #f59e0b);
-    background-clip: text;
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    animation: countdownPulse 0.9s infinite;
-}
-
-@keyframes countdownPulse {
-    0% {
-        transform: scale(0.8);
-        opacity: 0.5;
-    }
-
-    50% {
-        transform: scale(1.1);
-        opacity: 1;
-    }
-
-    100% {
-        transform: scale(1);
-        opacity: 1;
-    }
 }
 
 /* Timer Bar in Question */

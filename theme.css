@@ -3,27 +3,34 @@
    Single source of truth for all tokens
    ============================================ */
 
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Marcellus&family=Outfit:wght@400;500;600;700&display=swap');
 
 :root {
     /* ── TYPOGRAPHY ── */
-    --font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+    --font-heading: 'Marcellus', serif;
+    --font-ui: 'Outfit', sans-serif;
+    --font-body: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    --font-family: var(--font-body);
     --font-size-xs: 0.6875rem;
     /* 11px */
     --font-size-sm: 0.8125rem;
     /* 13px */
     --font-size-base: 0.9375rem;
     /* 15px */
-    --font-size-lg: 1.0625rem;
+    --font-size-md: 1.0625rem;
     /* 17px */
-    --font-size-xl: 1.25rem;
-    /* 20px */
+    --font-size-lg: 1.1875rem;
+    /* 19px */
+    --font-size-xl: 1.375rem;
+    /* 22px */
     --font-size-2xl: 1.75rem;
     /* 28px */
-    --font-size-3xl: 2.5rem;
-    /* 40px — hero */
+    --font-size-2_5xl: 2.125rem;
+    /* 34px */
+    --font-size-3xl: 2.625rem;
+    /* 42px */
     --font-size-4xl: 3.25rem;
-    /* 52px — large hero */
+    /* 52px */
     --fw-regular: 400;
     --fw-medium: 500;
     --fw-semibold: 600;
@@ -44,10 +51,10 @@
     --color-text-tertiary: #AEAEB2;
     --color-border: rgba(0, 0, 0, 0.06);
     --color-border-strong: rgba(0, 0, 0, 0.12);
-    --color-accent: #007AFF;
-    --color-accent-hover: #0066D6;
-    --color-accent-bg: rgba(0, 122, 255, 0.08);
-    --color-accent-bg-strong: rgba(0, 122, 255, 0.15);
+    --color-accent: hsl(210, 100%, 55%);
+    --color-accent-hover: hsl(210, 100%, 45%);
+    --color-accent-bg: hsla(210, 100%, 55%, 0.1);
+    --color-accent-bg-strong: hsla(210, 100%, 55%, 0.2);
     --color-success: #30D158;
     --color-warning: #FF9F0A;
     --color-error: #FF3B30;
@@ -78,20 +85,25 @@
     /* 80px */
 
     /* ── RADIUS ── */
-    --radius-sm: 8px;
-    --radius-md: 12px;
-    --radius-lg: 16px;
-    --radius-xl: 20px;
-    --radius-2xl: 28px;
+    --radius-sm: 0.5rem;
+    /* 8px */
+    --radius-md: 0.75rem;
+    /* 12px */
+    --radius-lg: 1rem;
+    /* 16px */
+    --radius-xl: 1.25rem;
+    /* 20px */
+    --radius-2xl: 1.75rem;
+    /* 28px */
     --radius-full: 9999px;
 
     /* ── SHADOWS — APPLE STYLE ── */
-    --shadow-xs: 0 0 1px rgba(0, 0, 0, 0.04), 0 2px 4px rgba(0, 0, 0, 0.04);
-    --shadow-sm: 0 0 1px rgba(0, 0, 0, 0.04), 0 4px 8px rgba(0, 0, 0, 0.06);
-    --shadow-md: 0 0 1px rgba(0, 0, 0, 0.04), 0 8px 24px rgba(0, 0, 0, 0.08);
-    --shadow-lg: 0 0 1px rgba(0, 0, 0, 0.04), 0 16px 40px rgba(0, 0, 0, 0.10);
-    --shadow-xl: 0 0 1px rgba(0, 0, 0, 0.04), 0 24px 64px rgba(0, 0, 0, 0.14);
-    --shadow-float: 0 22px 70px 4px rgba(0, 0, 0, 0.12);
+    --shadow-xs: 0 1px 2px hsla(0, 0%, 0%, 0.05);
+    --shadow-sm: 0 2px 4px hsla(0, 0%, 0%, 0.05), 0 1px 2px hsla(0, 0%, 0%, 0.1);
+    --shadow-md: 0 4px 6px hsla(0, 0%, 0%, 0.07), 0 10px 15px hsla(0, 0%, 0%, 0.03);
+    --shadow-lg: 0 10px 25px hsla(0, 0%, 0%, 0.1), 0 20px 48px hsla(0, 0%, 0%, 0.05);
+    --shadow-xl: 0 20px 25px hsla(0, 0%, 0%, 0.15), 0 30px 60px hsla(0, 0%, 0%, 0.1);
+    --shadow-float: 0 20px 40px hsla(0, 0%, 0%, 0.2), 0 0 0 1px hsla(0, 0%, 0%, 0.05);
 
     /* ── TRANSITIONS ── */
     --ease-out: cubic-bezier(0.25, 0.46, 0.45, 0.94);
@@ -106,9 +118,10 @@
     --glass-blur: blur(20px) saturate(180%);
 
     /* ── LAYOUT ── */
-    --header-height: 56px;
-    --content-max-width: 960px;
-    --sidebar-width: 280px;
+    --header-height: clamp(3rem, 8vh, 4rem);
+    --content-max-width: 67.5rem;
+    /* 1080px */
+    --sidebar-width: clamp(15rem, 20vw, 18rem);
 
     /* ── BACKWARD-COMPAT ALIASES (used by JS — do NOT remove) ── */
     --primary: #1D1D1F;

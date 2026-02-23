@@ -95,6 +95,7 @@
 /* Chat Window — Glassmorphism Masterpiece */
 #geminiChatWindow {
     width: 380px;
+    max-width: calc(100vw - var(--space-12));
     height: 600px;
     max-height: 80vh;
     background: rgba(255, 255, 255, 0.75);
@@ -446,7 +447,7 @@ body.dark-mode .chat-avatar {
 /* ── FLASHCARDS ── */
 .flashcard-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 280px), 1fr));
     gap: var(--space-4);
 }
 
@@ -597,9 +598,10 @@ body.dark-mode .chat-avatar {
 
 .challenge-btn {
     background: linear-gradient(135deg, #f59e0b, #ea580c);
-    color: #000;
+    color: #FFF;
+    /* Changed to white for better contrast */
     border: none;
-    padding: 8px 16px;
+    padding: 0.5rem 1rem;
     border-radius: 12px;
     font-weight: 800;
     font-size: 0.85rem;
@@ -700,14 +702,7 @@ body.dark-mode .chat-avatar {
 }
 
 .duel-card::before {
-    content: '';
-    position: absolute;
-    top: -50%;
-    left: -50%;
-    width: 200%;
-    height: 200%;
-    background: radial-gradient(circle, rgba(245, 158, 11, 0.05) 0%, transparent 70%);
-    pointer-events: none;
+    display: none;
 }
 
 .duel-badge {

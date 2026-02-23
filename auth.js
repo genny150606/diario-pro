@@ -16,7 +16,10 @@ const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
     global: {
         fetch: async (url, options) => {
             const urlStr = url.toString();
-            if (urlStr.includes('/rest/v1/')) {
+            const isLocalFile = window.location.protocol === 'file:';
+
+            // BYPASS PROXY ON LOCAL FILES: /api/ relative paths won't work on file://
+            if (urlStr.includes('/rest/v1/') && !isLocalFile) {
                 const path = urlStr.split('/rest/v1/')[1];
                 const rawHeaders = {};
                 if (options.headers) {

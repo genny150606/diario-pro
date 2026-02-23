@@ -26,6 +26,17 @@
 </head>
 
 <body class="landing-page">
+    <!-- ═══════════ ENV BANNER ═══════════ -->
+    <div id="envBanner"
+        style="display:none; padding:12px; background:linear-gradient(135deg, #f59e0b, #d97706); color:white; text-align:center; font-weight:600; font-size:14px; z-index:99999; position:relative; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
+        ⚠️ Stai usando la pagina come file locale. Per le statistiche in tempo reale e l'accesso all'App è consigliato
+        usare l'URL di Vercel.
+    </div>
+    <script>
+        if (window.location.protocol === 'file:') {
+            document.getElementById('envBanner').style.display = 'block';
+        }
+    </script>
 
     <!-- AURORA BACKGROUND -->
     <div class="aurora-bg" aria-hidden="true">

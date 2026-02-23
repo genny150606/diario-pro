@@ -6,7 +6,7 @@
 
 const SimpleChatbot = {
     isOpen: false,
-    apiUrl: '',
+    apiUrl: window.location.protocol === 'file:' ? 'https://diario-pro.vercel.app' : '',
     currentGeneratedNotes: null,
     history: [],
     recognition: null,

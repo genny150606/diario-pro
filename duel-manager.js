@@ -119,7 +119,8 @@ const DuelManager = {
         createBtn.textContent = '🧠 Generazione Quiz...';
 
         try {
-            const response = await fetch('/api/generate-duel-quiz', {
+            const apiBase = window.location.protocol === 'file:' ? 'https://diario-pro.vercel.app' : '';
+            const response = await fetch(`${apiBase}/api/generate-duel-quiz`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ subject, context })

@@ -73,7 +73,7 @@ window.SocialManager = {
             .eq('status', 'accepted');
 
         if (error) {
-            console.error("❌ Friends Fetch Error:", error.message, error.details, error.hint);
+            console.error("❌ Friends Fetch Error:", error?.message || 'Unknown error', error?.details, error?.hint);
             console.error("Full Error Object:", error);
             return;
         }
@@ -97,7 +97,7 @@ window.SocialManager = {
             .eq('status', 'pending');
 
         if (error) {
-            console.error("❌ Pending Requests Error:", error);
+            console.error("❌ Pending Requests Error:", error?.message || 'Unknown error');
             return;
         }
 

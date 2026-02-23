@@ -3,7 +3,7 @@
    ============================================ */
 
 const GeminiFeatures = {
-    apiUrl: '', // Relative path because backend is on same domain in Vercel
+    apiUrl: window.location.protocol === 'file:' ? 'https://diario-pro.vercel.app' : '', // Use production URL if local file
 
     // ============================================
     // 1️⃣ GENERATORE QUIZ INTELLIGENTE

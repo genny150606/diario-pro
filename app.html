@@ -45,6 +45,18 @@
 </head>
 
 <body>
+    <!-- ═══════════ ENV BANNER ═══════════ -->
+    <div id="envBanner"
+        style="display:none; padding:12px; background:linear-gradient(135deg, #f59e0b, #d97706); color:white; text-align:center; font-weight:600; font-size:14px; z-index:99999; position:relative; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
+        ⚠️ Stai usando l'App come file locale. Alcune funzioni AI ed il Social richiedono un server (Vercel o VS Code
+        Live Server).
+    </div>
+    <script>
+        if (window.location.protocol === 'file:') {
+            document.getElementById('envBanner').style.display = 'block';
+        }
+    </script>
+
     <!-- ═══════════ AUTH GATE OVERLAY ═══════════ -->
     <div id="authModal" class="auth-overlay" style="display:none;">
         <div class="auth-overlay-bg"></div>

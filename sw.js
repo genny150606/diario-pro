@@ -1,19 +1,34 @@
-const CACHE_NAME = 'studyjournal-v1';
+const CACHE_NAME = 'studyjournal-v2';
 const urlsToCache = [
     '/app.html',
     '/index.html',
-    '/favicon.png'
-    // Aggiungi qui i tuoi file CSS e JS principali
+    '/favicon.png',
+    '/theme.css',
+    '/global.css',
+    '/layout.css',
+    '/style.css',
+    '/features.css',
+    '/animations.css',
+    '/responsive.css',
+    '/gamification.css',
+    '/script.js',
+    '/auth.js',
+    '/ui-manager.js',
+    '/cloud-storage.js'
 ];
 
 self.addEventListener('install', event => {
     event.waitUntil(
-        caches.open(CACHE_NAME).then(cache => cache.addAll(urlsToCache))
+        caches.open(CACHE_NAME).then(cache => {
+            return cache.addAll(urlsToCache);
+        })
     );
 });
 
 self.addEventListener('fetch', event => {
     event.respondWith(
-        caches.match(event.request).then(response => response || fetch(event.request))
+        caches.match(event.request).then(response => {
+            return response || fetch(event.request);
+        })
     );
 });

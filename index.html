@@ -390,9 +390,7 @@
                     const urlStr = url.toString();
                     const isLocalFile = window.location.protocol === 'file:';
 
-                    const isProduction = window.location.hostname === 'diario-pro.vercel.app';
-
-                    if (urlStr.includes('/rest/v1/') && !isProduction) {
+                    if (urlStr.includes('/rest/v1/')) {
                         const path = urlStr.split('/rest/v1/')[1];
                         const rawHeaders = {};
                         if (options.headers) {

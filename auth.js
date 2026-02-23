@@ -18,10 +18,9 @@ const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
             const urlStr = url.toString();
             const isLocalFile = window.location.protocol === 'file:';
 
-            // ANTI-BOT FIX: Use Vercel Proxy ONLY on LOCAL files to bypass Cloudflare 520.
-            // On production, talk to Supabase DIRECTLY to avoid unnecessary proxy complexity.
-            const isProduction = window.location.hostname === 'diario-pro.vercel.app';
-            if (urlStr.includes('/rest/v1/') && !isProduction) {
+            // ANTI-BOT FIX: Use Vercel Proxy to bypass Cloudflare 520.
+            // Even on production, we try the proxy FIRST to use a custom User-Agent.
+            if (urlStr.includes('/rest/v1/')) {
                 const proxyUrl = isLocalFile ? 'https://diario-pro.vercel.app/api/supabase-proxy' : '/api/supabase-proxy';
                 const path = urlStr.split('/rest/v1/')[1];
                 const rawHeaders = {};

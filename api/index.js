@@ -123,20 +123,22 @@ app.post("/api/supabase-proxy", async (req, res) => {
 
     const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ6ZHBudHZvanBpYmJuZGhzcmx6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEzNzg1MjEsImV4cCI6MjA4Njk1NDUyMX0.QwnT9Okp8CkN_LxGIeBKWrroo3letL8OhSvaqdQVW7M';
 
-    // 1. Prepare Request Headers
+    // 1. Prepare Request Headers (Sanitized for anti-bot bypass)
     const userAuth = clientHeaders?.Authorization || clientHeaders?.authorization;
     const proxyHeaders = {
         'apikey': supabaseKey,
         'Authorization': userAuth || `Bearer ${supabaseKey}`,
         'Accept': 'application/json',
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-        'X-Client-Info': clientHeaders?.['x-client-info'] || 'studyjournal-pro-proxy'
+        'X-Client-Info': 'studyjournal-pro-proxy-v3'
     };
 
     const isWrite = method && ['POST', 'PUT', 'PATCH', 'DELETE'].includes(method.toUpperCase());
-    if (isWrite && body) proxyHeaders['Content-Type'] = 'application/json';
+    if (isWrite && (body || clientHeaders?.['content-type'])) {
+        proxyHeaders['Content-Type'] = 'application/json';
+    }
 
-    // Whitelist essential Supabase headers
+    // Pass only essential PURE Supabase headers, skip Origin/Referer/Host which are "poisonous"
     ['prefer', 'range', 'content-range'].forEach(k => {
         const v = clientHeaders?.[k] || clientHeaders?.[k.toLowerCase()] || clientHeaders?.[k.toUpperCase()];
         if (v) proxyHeaders[k] = v;

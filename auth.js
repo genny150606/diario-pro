@@ -18,15 +18,16 @@ const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
             const urlStr = url.toString();
             const isLocalFile = window.location.protocol === 'file:';
 
-            // BYPASS PROXY ON LOCAL FILES: /api/ relative paths won't work on file://
-            if (urlStr.includes('/rest/v1/') && !isLocalFile) {
+            // ANTI-BOT FIX: Use Vercel Proxy to bypass Cloudflare 520. 
+            // On file:// we MUST use absolute URL, on web we use relative.
+            if (urlStr.includes('/rest/v1/')) {
+                const proxyUrl = isLocalFile ? 'https://diario-pro.vercel.app/api/supabase-proxy' : '/api/supabase-proxy';
                 const path = urlStr.split('/rest/v1/')[1];
                 const rawHeaders = {};
                 if (options.headers) {
                     new Headers(options.headers).forEach((v, k) => rawHeaders[k] = v);
                 }
 
-                const proxyUrl = '/api/supabase-proxy';
                 const proxyBody = {
                     path: `/rest/v1/${path}`,
                     method: options.method,

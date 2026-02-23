@@ -41,7 +41,7 @@ app.use((req, res, next) => {
         return next();
     }
     data.count++;
-    if (data.count > 100) return res.status(429).json({ error: "Rate limit" });
+    if (data.count > 300) return res.status(429).json({ error: "Rate limit" });
     next();
 });
 
@@ -117,7 +117,7 @@ app.post("/api/chat", async (req, res) => {
 // NATIVE HTTPS SUPABASE PROXY (ULTIMATE 520 FIX)
 // ============================================
 
-app.post("/api/supabase-proxy", (req, res) => {
+app.post("/api/supabase-proxy", async (req, res) => {
     const { path, method, headers: clientHeaders, body } = req.body || {};
     if (!path) return res.status(400).json({ error: "Missing path" });
 
@@ -129,63 +129,48 @@ app.post("/api/supabase-proxy", (req, res) => {
         'apikey': supabaseKey,
         'Authorization': userAuth || `Bearer ${supabaseKey}`,
         'Accept': 'application/json',
-        'Connection': 'close'
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        'X-Client-Info': clientHeaders?.['x-client-info'] || 'studyjournal-pro-proxy'
     };
 
     const isWrite = method && ['POST', 'PUT', 'PATCH', 'DELETE'].includes(method.toUpperCase());
     if (isWrite && body) proxyHeaders['Content-Type'] = 'application/json';
 
     // Whitelist essential Supabase headers
-    ['prefer', 'range', 'x-client-info', 'content-range'].forEach(k => {
+    ['prefer', 'range', 'content-range'].forEach(k => {
         const v = clientHeaders?.[k] || clientHeaders?.[k.toLowerCase()] || clientHeaders?.[k.toUpperCase()];
         if (v) proxyHeaders[k] = v;
     });
 
-    // 2. Execute Request using Native HTTPS
-    const options = {
-        hostname: 'rzdpntvojpibbndhsrlz.supabase.co',
-        port: 443,
-        path: path.startsWith('/') ? path : `/${path}`,
-        method: method || 'GET',
-        headers: proxyHeaders,
-        timeout: 9000 // Stay under Vercel 10s limit
-    };
+    const targetUrl = `https://rzdpntvojpibbndhsrlz.supabase.co${path.startsWith('/') ? path : `/${path}`}`;
 
-    console.log(`[RAW PROXY] ${options.method} ${options.path}`);
+    try {
+        console.log(`[FETCH PROXY] ${method || 'GET'} ${path}`);
 
-    const proxyReq = https.request(options, (proxyRes) => {
-        // Copy back status and minimal headers
-        res.status(proxyRes.statusCode);
-
-        ['content-type', 'content-range', 'preference-applied', 'location'].forEach(k => {
-            if (proxyRes.headers[k]) res.setHeader(k, proxyRes.headers[k]);
+        const fetchRes = await fetch(targetUrl, {
+            method: method || 'GET',
+            headers: proxyHeaders,
+            body: isWrite && body ? (typeof body === 'string' ? body : JSON.stringify(body)) : undefined,
+            cache: 'no-store'
         });
 
-        // Pipe response back to client
-        proxyRes.pipe(res);
-    });
+        res.status(fetchRes.status);
 
-    proxyReq.on('error', (err) => {
-        console.error("[RAW PROXY ERROR]", err.message);
+        // Pass back essential headers
+        ['content-type', 'content-range', 'preference-applied', 'location'].forEach(k => {
+            const v = fetchRes.headers.get(k);
+            if (v) res.setHeader(k, v);
+        });
+
+        const resData = await fetchRes.arrayBuffer();
+        res.send(Buffer.from(resData));
+
+    } catch (err) {
+        console.error("[FETCH PROXY ERROR]", err.message);
         if (!res.headersSent) {
             res.status(502).json({ error: "Proxy Error", message: err.message });
         }
-    });
-
-    proxyReq.on('timeout', () => {
-        console.warn("[RAW PROXY TIMEOUT]");
-        proxyReq.destroy();
-        if (!res.headersSent) {
-            res.status(504).json({ error: "Proxy Timeout" });
-        }
-    });
-
-    // Send body if write method
-    if (isWrite && body) {
-        proxyReq.write(typeof body === 'string' ? body : JSON.stringify(body));
     }
-
-    proxyReq.end();
 });
 
 module.exports = app;

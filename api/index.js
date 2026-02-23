@@ -1,6 +1,5 @@
 const express = require("express");
 const cors = require("cors");
-const fetch = require("node-fetch");
 const { GoogleGenAI } = require("@google/generative-ai");
 
 const app = express();
@@ -37,7 +36,10 @@ app.post("/api/generate-flashcards", async (req, res) => {
         const result = await ai.generateContent(`Genera ${amount} flashcard su "${topic}" in formato JSON: [{"q": "domanda", "a": "risposta"}]`);
         const text = (await result.response).text();
         res.json({ flashcards: safelyParseJSON(text) });
-    } catch (error) { res.status(500).json({ error: error.message }); }
+    } catch (error) {
+        console.error("Flashcards AI Error:", error);
+        res.status(500).json({ error: error.message });
+    }
 });
 
 app.post("/api/generate-duel-quiz", async (req, res) => {
@@ -47,7 +49,10 @@ app.post("/api/generate-duel-quiz", async (req, res) => {
         const result = await ai.generateContent(`Genera 10 domande a risposta multipla su "${topic}" in JSON: [{"question": "...", "options": ["...", "...", "..."], "answer": 0}]`);
         const text = (await result.response).text();
         res.json({ quiz: safelyParseJSON(text) });
-    } catch (error) { res.status(500).json({ error: error.message }); }
+    } catch (error) {
+        console.error("Duel Quiz AI Error:", error);
+        res.status(500).json({ error: error.message });
+    }
 });
 
 app.post("/api/chat", async (req, res) => {
@@ -85,7 +90,7 @@ app.post("/api/chat", async (req, res) => {
 });
 
 // ============================================
-// SUPABASE PROXY (ULTIMATE 520 FIX - v6)
+// SUPABASE PROXY (ULTIMATE 520 FIX - v7 NATIVE)
 // ============================================
 
 app.post("/api/supabase-proxy", async (req, res) => {
@@ -109,16 +114,18 @@ app.post("/api/supabase-proxy", async (req, res) => {
 
         for (let retry = 0; retry < 2; retry++) {
             try {
-                console.log(`[PROXY v6] ${method || 'GET'} ${path} (Attempt ${retry + 1})`);
-                const abortController = new AbortController();
-                const timeoutId = setTimeout(() => abortController.abort(), 3500);
+                console.log(`[PROXY v7] ${method || 'GET'} ${path} (Attempt ${retry + 1})`);
+
+                // Native Node 20 AbortController
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 4000); // 4s timeout
 
                 const proxyHeaders = {
                     'apikey': supabaseKey,
                     'Authorization': userAuth || `Bearer ${supabaseKey}`,
                     'Accept': 'application/json',
                     'User-Agent': userAgents[Math.floor(Math.random() * userAgents.length)],
-                    'X-Client-Info': 'studyjournal-pro-proxy-v6'
+                    'X-Client-Info': 'studyjournal-pro-proxy-v7'
                 };
 
                 const isWrite = method && ['POST', 'PUT', 'PATCH', 'DELETE'].includes(method.toUpperCase());
@@ -131,11 +138,12 @@ app.post("/api/supabase-proxy", async (req, res) => {
                     if (v) proxyHeaders[k] = v;
                 });
 
+                // USE GLOBAL fetch (Node 20 native)
                 const fetchRes = await fetch(targetUrl, {
                     method: method || 'GET',
                     headers: proxyHeaders,
                     body: isWrite && body ? (typeof body === 'string' ? body : JSON.stringify(body)) : undefined,
-                    signal: abortController.signal
+                    signal: controller.signal
                 });
 
                 clearTimeout(timeoutId);
@@ -146,11 +154,13 @@ app.post("/api/supabase-proxy", async (req, res) => {
                         const v = fetchRes.headers.get(k);
                         if (v) res.setHeader(k, v);
                     });
-                    if (fetchRes.status === 204 || fetchRes.status === 304 || fetchRes.headers.get('content-length') === '0') {
+                    if (fetchRes.status === 204 || fetchRes.status === 304) {
                         return res.end();
                     }
-                    const resData = await fetchRes.buffer();
-                    return res.send(resData);
+
+                    // Native fetch uses arrayBuffer() instead of buffer()
+                    const arrayBuffer = await fetchRes.arrayBuffer();
+                    return res.send(Buffer.from(arrayBuffer));
                 }
 
                 throw new Error(`Supabase Status ${fetchRes.status}`);

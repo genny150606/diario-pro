@@ -45,6 +45,7 @@ const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json',
+                                'X-Client-Info': 'studyjournal-pro-client',
                                 'X-Client-Retry-Count': attempt.toString()
                             },
                             body: JSON.stringify(proxyBody)
@@ -64,6 +65,14 @@ const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
                         await new Promise(r => setTimeout(r, delay));
                     }
                 }
+
+                // SMART FALLBACK: If proxy fails on Vercel URL, try direct Supabase
+                const isPublicVercel = window.location.hostname === 'diario-pro.vercel.app';
+                if (isPublicVercel && (!lastRes || lastRes.status >= 500)) {
+                    console.warn("⚠️ Proxy failed on public site. Falling back to DIRECT Supabase connection...");
+                    return fetch(url, options);
+                }
+
                 return lastRes;
             }
             return fetch(url, options);

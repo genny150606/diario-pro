@@ -147,12 +147,18 @@ app.post("/api/supabase-proxy", async (req, res) => {
     try {
         console.log(`[FETCH PROXY] ${method || 'GET'} ${path}`);
 
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 7000); // 7s timeout
+
         const fetchRes = await fetch(targetUrl, {
             method: method || 'GET',
             headers: proxyHeaders,
             body: isWrite && body ? (typeof body === 'string' ? body : JSON.stringify(body)) : undefined,
-            cache: 'no-store'
+            cache: 'no-store',
+            signal: controller.signal
         });
+
+        clearTimeout(timeoutId);
 
         res.status(fetchRes.status);
 
@@ -162,13 +168,19 @@ app.post("/api/supabase-proxy", async (req, res) => {
             if (v) res.setHeader(k, v);
         });
 
+        // HANDLE EMPTY RESPONSES (204 No Content, 304 Not Modified)
+        if (fetchRes.status === 204 || fetchRes.status === 304 || fetchRes.headers.get('content-length') === '0') {
+            return res.end();
+        }
+
         const resData = await fetchRes.arrayBuffer();
         res.send(Buffer.from(resData));
 
     } catch (err) {
-        console.error("[FETCH PROXY ERROR]", err.message);
+        console.error("[FETCH PROXY ERROR]", err.name === 'AbortError' ? 'Timeout' : err.message);
         if (!res.headersSent) {
-            res.status(502).json({ error: "Proxy Error", message: err.message });
+            const status = err.name === 'AbortError' ? 504 : 502;
+            res.status(status).json({ error: "Proxy Error", message: err.message });
         }
     }
 });

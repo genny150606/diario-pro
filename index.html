@@ -427,12 +427,12 @@
                         // SMART FALLBACK
                         const isPublicVercel = window.location.hostname === 'diario-pro.vercel.app';
                         if (isPublicVercel && (!lastRes || lastRes.status >= 500)) {
-                            return fetch(url, options);
+                            return window.fetch(url, options);
                         }
 
                         return lastRes;
                     }
-                    return fetch(url, options);
+                    return window.fetch(url, options);
                 }
             }
         });

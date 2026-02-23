@@ -123,67 +123,75 @@ app.post("/api/supabase-proxy", async (req, res) => {
 
     const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ6ZHBudHZvanBpYmJuZGhzcmx6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEzNzg1MjEsImV4cCI6MjA4Njk1NDUyMX0.QwnT9Okp8CkN_LxGIeBKWrroo3letL8OhSvaqdQVW7M';
 
-    // 1. Prepare Request Headers (Sanitized for anti-bot bypass)
-    const userAuth = clientHeaders?.Authorization || clientHeaders?.authorization;
-    const proxyHeaders = {
-        'apikey': supabaseKey,
-        'Authorization': userAuth || `Bearer ${supabaseKey}`,
-        'Accept': 'application/json',
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-        'X-Client-Info': 'studyjournal-pro-proxy-v3'
-    };
-
-    const isWrite = method && ['POST', 'PUT', 'PATCH', 'DELETE'].includes(method.toUpperCase());
-    if (isWrite && (body || clientHeaders?.['content-type'])) {
-        proxyHeaders['Content-Type'] = 'application/json';
-    }
-
-    // Pass only essential PURE Supabase headers, skip Origin/Referer/Host which are "poisonous"
-    ['prefer', 'range', 'content-range'].forEach(k => {
-        const v = clientHeaders?.[k] || clientHeaders?.[k.toLowerCase()] || clientHeaders?.[k.toUpperCase()];
-        if (v) proxyHeaders[k] = v;
-    });
+    // List of common browser User-Agents for rotation
+    const userAgents = [
+        'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36',
+        'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+    ];
 
     const targetUrl = `https://rzdpntvojpibbndhsrlz.supabase.co${path.startsWith('/') ? path : `/${path}`}`;
+    let lastErr;
 
-    try {
-        console.log(`[FETCH PROXY] ${method || 'GET'} ${path}`);
+    // INTERNAL RETRY on the backend for extra stability
+    for (let retry = 0; retry < 3; retry++) {
+        try {
+            console.log(`[FETCH PROXY] ${method || 'GET'} ${path} (Attempt ${retry + 1})`);
 
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 7000); // 7s timeout
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 8000);
 
-        const fetchRes = await fetch(targetUrl, {
-            method: method || 'GET',
-            headers: proxyHeaders,
-            body: isWrite && body ? (typeof body === 'string' ? body : JSON.stringify(body)) : undefined,
-            cache: 'no-store',
-            signal: controller.signal
-        });
+            const proxyHeaders = {
+                'apikey': supabaseKey,
+                'Authorization': userAuth || `Bearer ${supabaseKey}`,
+                'Accept': 'application/json',
+                'User-Agent': userAgents[Math.floor(Math.random() * userAgents.length)],
+                'X-Client-Info': 'studyjournal-pro-proxy-v4'
+            };
 
-        clearTimeout(timeoutId);
+            const isWrite = method && ['POST', 'PUT', 'PATCH', 'DELETE'].includes(method.toUpperCase());
+            if (isWrite && (body || clientHeaders?.['content-type'])) {
+                proxyHeaders['Content-Type'] = 'application/json';
+            }
 
-        res.status(fetchRes.status);
+            ['prefer', 'range', 'content-range'].forEach(k => {
+                const v = clientHeaders?.[k] || clientHeaders?.[k.toLowerCase()] || clientHeaders?.[k.toUpperCase()];
+                if (v) proxyHeaders[k] = v;
+            });
 
-        // Pass back essential headers
-        ['content-type', 'content-range', 'preference-applied', 'location'].forEach(k => {
-            const v = fetchRes.headers.get(k);
-            if (v) res.setHeader(k, v);
-        });
+            const fetchRes = await fetch(targetUrl, {
+                method: method || 'GET',
+                headers: proxyHeaders,
+                body: isWrite && body ? (typeof body === 'string' ? body : JSON.stringify(body)) : undefined,
+                cache: 'no-store',
+                signal: controller.signal
+            });
 
-        // HANDLE EMPTY RESPONSES (204 No Content, 304 Not Modified)
-        if (fetchRes.status === 204 || fetchRes.status === 304 || fetchRes.headers.get('content-length') === '0') {
-            return res.end();
+            clearTimeout(timeoutId);
+
+            if (fetchRes.status < 500) {
+                res.status(fetchRes.status);
+                ['content-type', 'content-range', 'preference-applied', 'location'].forEach(k => {
+                    const v = fetchRes.headers.get(k);
+                    if (v) res.setHeader(k, v);
+                });
+                if (fetchRes.status === 204 || fetchRes.status === 304 || fetchRes.headers.get('content-length') === '0') {
+                    return res.end();
+                }
+                const resData = await fetchRes.arrayBuffer();
+                return res.send(Buffer.from(resData));
+            }
+
+            throw new Error(`Supabase Status ${fetchRes.status}`);
+        } catch (err) {
+            lastErr = err;
+            console.error(`[PROXY RETRY ${retry + 1}]`, err.message);
+            if (retry < 2) await new Promise(r => setTimeout(r, 500 * (retry + 1)));
         }
+    }
 
-        const resData = await fetchRes.arrayBuffer();
-        res.send(Buffer.from(resData));
-
-    } catch (err) {
-        console.error("[FETCH PROXY ERROR]", err.name === 'AbortError' ? 'Timeout' : err.message);
-        if (!res.headersSent) {
-            const status = err.name === 'AbortError' ? 504 : 502;
-            res.status(status).json({ error: "Proxy Error", message: err.message });
-        }
+    if (!res.headersSent) {
+        res.status(502).json({ error: "Proxy Exhausted", message: lastErr?.message });
     }
 });
 

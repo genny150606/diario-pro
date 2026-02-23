@@ -70,12 +70,12 @@ const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
                 const isPublicVercel = window.location.hostname === 'diario-pro.vercel.app';
                 if (isPublicVercel && (!lastRes || lastRes.status >= 500)) {
                     console.warn("⚠️ Proxy failed on public site. Falling back to DIRECT Supabase connection...");
-                    return fetch(url, options);
+                    return window.fetch(url, options); // Explicitly use native fetch
                 }
 
                 return lastRes;
             }
-            return fetch(url, options);
+            return window.fetch(url, options); // Explicitly use native fetch
         }
     }
 });

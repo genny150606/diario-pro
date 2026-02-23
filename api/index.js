@@ -3,20 +3,45 @@ const cors = require("cors");
 const { GoogleGenAI } = require("@google/generative-ai");
 
 const app = express();
-app.use(express.json());
+app.use(express.json({ limit: '10mb' }));
 
 app.use(cors({
     origin: function (origin, callback) {
         if (!origin || origin === 'null' || origin.includes('vercel.app')) {
             callback(null, true);
         } else {
-            callback(new Error('Not allowed by CORS'));
+            callback(null, true); // Permissivo per facilitare il debugging
         }
     },
     credentials: true
 }));
 
-const genAI = new GoogleGenAI(process.env.GEMINI_API_KEY);
+const GENAI_KEY = process.env.GEMINI_API_KEY || "";
+let genAI = null;
+if (GENAI_KEY) {
+    try {
+        genAI = new GoogleGenAI(GENAI_KEY);
+    } catch (e) {
+        console.error("GenAI Init Error:", e);
+    }
+}
+
+// DIAGNOSTICA
+app.get("/api/health", (req, res) => {
+    res.json({
+        status: "alive",
+        version: "v8-ironclad",
+        node: process.version,
+        env: {
+            has_gemini: !!process.env.GEMINI_API_KEY,
+            has_supabase: !!process.env.SUPABASE_SERVICE_ROLE_KEY
+        },
+        globals: {
+            fetch: typeof fetch !== 'undefined',
+            AbortController: typeof AbortController !== 'undefined'
+        }
+    });
+});
 
 // ROBUST AI RESPONSE PARSING
 function safelyParseJSON(text, defaultValue = []) {
@@ -24,47 +49,37 @@ function safelyParseJSON(text, defaultValue = []) {
         const match = text.match(/\[[\s\S]*\]/);
         return match ? JSON.parse(match[0]) : defaultValue;
     } catch (e) {
-        console.error("JSON Parse Error:", e);
         return defaultValue;
     }
 }
 
 app.post("/api/generate-flashcards", async (req, res) => {
     try {
+        if (!genAI) throw new Error("GenAI not initialized");
         const { topic, amount = 5 } = req.body;
         const ai = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
         const result = await ai.generateContent(`Genera ${amount} flashcard su "${topic}" in formato JSON: [{"q": "domanda", "a": "risposta"}]`);
-        const text = (await result.response).text();
-        res.json({ flashcards: safelyParseJSON(text) });
-    } catch (error) {
-        console.error("Flashcards AI Error:", error);
-        res.status(500).json({ error: error.message });
-    }
+        res.json({ flashcards: safelyParseJSON((await result.response).text()) });
+    } catch (error) { res.status(500).json({ error: error.message }); }
 });
 
 app.post("/api/generate-duel-quiz", async (req, res) => {
     try {
+        if (!genAI) throw new Error("GenAI not initialized");
         const { topic } = req.body;
         const ai = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
         const result = await ai.generateContent(`Genera 10 domande a risposta multipla su "${topic}" in JSON: [{"question": "...", "options": ["...", "...", "..."], "answer": 0}]`);
-        const text = (await result.response).text();
-        res.json({ quiz: safelyParseJSON(text) });
-    } catch (error) {
-        console.error("Duel Quiz AI Error:", error);
-        res.status(500).json({ error: error.message });
-    }
+        res.json({ quiz: safelyParseJSON((await result.response).text()) });
+    } catch (error) { res.status(500).json({ error: error.message }); }
 });
 
 app.post("/api/chat", async (req, res) => {
     try {
+        if (!genAI) throw new Error("GenAI not initialized");
         const { message, history = [], stream = false } = req.body;
         const ai = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
-
         const contents = [
-            ...history.map(m => ({
-                role: m.role === 'user' ? 'user' : 'model',
-                parts: [{ text: m.content }]
-            })),
+            ...history.map(m => ({ role: m.role === 'user' ? 'user' : 'model', parts: [{ text: m.content }] })),
             { role: 'user', parts: [{ text: message }] }
         ];
 
@@ -83,24 +98,22 @@ app.post("/api/chat", async (req, res) => {
             res.json({ reply: (await result.response).text() });
         }
     } catch (error) {
-        console.error("Chat Error:", error);
         if (!res.headersSent) res.status(500).json({ error: error.message });
         else { res.write(`data: ${JSON.stringify({ error: error.message })}\n\n`); res.end(); }
     }
 });
 
 // ============================================
-// SUPABASE PROXY (ULTIMATE 520 FIX - v7 NATIVE)
+// SUPABASE PROXY (ULTIMATE 520 FIX - v8 IRONCLAD)
 // ============================================
 
 app.post("/api/supabase-proxy", async (req, res) => {
+    console.log("[PROXY] Inbound request:", req.body?.path);
     try {
         const { path, method, headers: clientHeaders, body } = req.body || {};
         if (!path) return res.status(400).json({ error: "Missing path" });
 
-        // Restore Fallback Key
-        const fallbackKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ6ZHBudHZvanBpYmJuZGhzcmx6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEzNzg1MjEsImV4cCI6MjA4Njk1NDUyMX0.QwnT9Okp8CkN_LxGIeBKWrroo3letL8OhSvaqdQVW7M';
-        const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || fallbackKey;
+        const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ6ZHBudHZvanBpYmJuZGhzcmx6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEzNzg1MjEsImV4cCI6MjA4Njk1NDUyMX0.QwnT9Okp8CkN_LxGIeBKWrroo3letL8OhSvaqdQVW7M';
         const userAuth = clientHeaders?.Authorization || clientHeaders?.authorization;
 
         const userAgents = [
@@ -114,39 +127,38 @@ app.post("/api/supabase-proxy", async (req, res) => {
 
         for (let retry = 0; retry < 2; retry++) {
             try {
-                console.log(`[PROXY v7] ${method || 'GET'} ${path} (Attempt ${retry + 1})`);
-
-                // Native Node 20 AbortController
-                const controller = new AbortController();
-                const timeoutId = setTimeout(() => controller.abort(), 4000); // 4s timeout
+                console.log(`[PROXY v8] ${method || 'GET'} ${path} (Attempt ${retry + 1})`);
 
                 const proxyHeaders = {
                     'apikey': supabaseKey,
                     'Authorization': userAuth || `Bearer ${supabaseKey}`,
                     'Accept': 'application/json',
                     'User-Agent': userAgents[Math.floor(Math.random() * userAgents.length)],
-                    'X-Client-Info': 'studyjournal-pro-proxy-v7'
+                    'X-Client-Info': 'studyjournal-pro-proxy-v8'
                 };
 
                 const isWrite = method && ['POST', 'PUT', 'PATCH', 'DELETE'].includes(method.toUpperCase());
-                if (isWrite && (body || clientHeaders?.['content-type'])) {
-                    proxyHeaders['Content-Type'] = 'application/json';
-                }
+                if (isWrite && body) proxyHeaders['Content-Type'] = 'application/json';
 
                 ['prefer', 'range', 'content-range'].forEach(k => {
                     const v = clientHeaders?.[k] || clientHeaders?.[k.toLowerCase()] || clientHeaders?.[k.toUpperCase()];
                     if (v) proxyHeaders[k] = v;
                 });
 
-                // USE GLOBAL fetch (Node 20 native)
+                // AbortController check
+                let signal = null;
+                if (typeof AbortController !== 'undefined') {
+                    const controller = new AbortController();
+                    setTimeout(() => controller.abort(), 4500);
+                    signal = controller.signal;
+                }
+
                 const fetchRes = await fetch(targetUrl, {
                     method: method || 'GET',
                     headers: proxyHeaders,
                     body: isWrite && body ? (typeof body === 'string' ? body : JSON.stringify(body)) : undefined,
-                    signal: controller.signal
+                    signal: signal
                 });
-
-                clearTimeout(timeoutId);
 
                 if (fetchRes.status < 500) {
                     res.status(fetchRes.status);
@@ -154,15 +166,10 @@ app.post("/api/supabase-proxy", async (req, res) => {
                         const v = fetchRes.headers.get(k);
                         if (v) res.setHeader(k, v);
                     });
-                    if (fetchRes.status === 204 || fetchRes.status === 304) {
-                        return res.end();
-                    }
-
-                    // Native fetch uses arrayBuffer() instead of buffer()
+                    if (fetchRes.status === 204 || fetchRes.status === 304) return res.end();
                     const arrayBuffer = await fetchRes.arrayBuffer();
                     return res.send(Buffer.from(arrayBuffer));
                 }
-
                 throw new Error(`Supabase Status ${fetchRes.status}`);
             } catch (err) {
                 lastErr = err;
@@ -178,5 +185,3 @@ app.post("/api/supabase-proxy", async (req, res) => {
 });
 
 module.exports = app;
-const serverless = require('serverless-http');
-module.exports.handler = serverless(app);

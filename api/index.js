@@ -1,18 +1,14 @@
 const express = require("express");
 const cors = require("cors");
-const https = require("https");
-require("dotenv").config();
+const { GoogleGenAI } = require("@google/generative-ai");
 
 const app = express();
-const allowedOrigins = [
-    'https://diario-pro.vercel.app',
-    'http://localhost:3000',
-    'null' // For file:// protocol
-];
+app.use(express.json());
 
+// Explicitly allow 'null' origin (for local file access) and vercel domain
 app.use(cors({
-    origin: (origin, callback) => {
-        if (!origin || allowedOrigins.includes(origin)) {
+    origin: function (origin, callback) {
+        if (!origin || origin === 'null' || origin.includes('vercel.app')) {
             callback(null, true);
         } else {
             callback(new Error('Not allowed by CORS'));
@@ -20,53 +16,23 @@ app.use(cors({
     },
     credentials: true
 }));
-app.use(express.json({ limit: "50mb" }));
 
-// ============================================
-// SECURITY — Minimal Rate Limiting
-// ============================================
-const rateLimitMap = new Map();
-app.use((req, res, next) => {
-    if (req.path.includes('proxy')) return next();
-    const ip = req.headers['x-forwarded-for'] || req.ip || 'unknown';
-    const now = Date.now();
-    if (!rateLimitMap.has(ip)) {
-        rateLimitMap.set(ip, { count: 1, windowStart: now });
-        return next();
-    }
-    const data = rateLimitMap.get(ip);
-    if (now - data.windowStart > 60000) {
-        data.count = 1;
-        data.windowStart = now;
-        return next();
-    }
-    data.count++;
-    if (data.count > 300) return res.status(429).json({ error: "Rate limit" });
-    next();
-});
-
-const { GoogleGenerativeAI: GoogleGenAI } = require("@google/generative-ai");
-
-// ============================================
-// ENDPOINTS — Flashcards, Duel, Chat
-// ============================================
+const genAI = new GoogleGenAI(process.env.GEMINI_API_KEY);
 
 app.post("/api/generate-flashcards", async (req, res) => {
     try {
-        const { notes, subject, numberOfCards } = req.body;
-        const genAI = new GoogleGenAI(process.env.GEMINI_API_KEY);
+        const { topic, amount = 5 } = req.body;
         const ai = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
-        const result = await ai.generateContent(`Analizza: "${notes.substring(0, 2000)}"\nCrea ${numberOfCards} flashcard JSON array.`);
+        const result = await ai.generateContent(`Genera ${amount} flashcard su "${topic}" in formato JSON: [{"q": "domanda", "a": "risposta"}]`);
         res.json({ flashcards: JSON.parse((await result.response).text().match(/\[[\s\S]*\]/)[0]) });
     } catch (error) { res.status(500).json({ error: error.message }); }
 });
 
 app.post("/api/generate-duel-quiz", async (req, res) => {
     try {
-        const { subject, context } = req.body;
-        const genAI = new GoogleGenAI(process.env.GEMINI_API_KEY);
+        const { topic } = req.body;
         const ai = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
-        const result = await ai.generateContent(`Crea quiz 10 domande su ${subject || 'cultura'}. Context: ${context?.substring(0, 5000)}. JSON array.`);
+        const result = await ai.generateContent(`Genera 10 domande a risposta multipla su "${topic}" in JSON: [{"question": "...", "options": ["...", "...", "..."], "answer": 0}]`);
         res.json({ quiz: JSON.parse((await result.response).text().match(/\[[\s\S]*\]/)[0]) });
     } catch (error) { res.status(500).json({ error: error.message }); }
 });
@@ -121,7 +87,8 @@ app.post("/api/supabase-proxy", async (req, res) => {
     const { path, method, headers: clientHeaders, body } = req.body || {};
     if (!path) return res.status(400).json({ error: "Missing path" });
 
-    const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ6ZHBudHZvanBpYmJuZGhzcmx6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEzNzg1MjEsImV4cCI6MjA4Njk1NDUyMX0.QwnT9Okp8CkN_LxGIeBKWrroo3letL8OhSvaqdQVW7M';
+    const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || ''; // Use ENV key
+    const userAuth = clientHeaders?.Authorization || clientHeaders?.authorization;
 
     // List of common browser User-Agents for rotation
     const userAgents = [
@@ -133,20 +100,20 @@ app.post("/api/supabase-proxy", async (req, res) => {
     const targetUrl = `https://rzdpntvojpibbndhsrlz.supabase.co${path.startsWith('/') ? path : `/${path}`}`;
     let lastErr;
 
-    // INTERNAL RETRY on the backend for extra stability
-    for (let retry = 0; retry < 3; retry++) {
+    // INTERNAL RETRY on the backend (Keep it short for Vercel 10s limit)
+    for (let retry = 0; retry < 2; retry++) {
         try {
             console.log(`[FETCH PROXY] ${method || 'GET'} ${path} (Attempt ${retry + 1})`);
 
             const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), 8000);
+            const timeoutId = setTimeout(() => controller.abort(), 3500); // 3.5s timeout per attempt
 
             const proxyHeaders = {
                 'apikey': supabaseKey,
                 'Authorization': userAuth || `Bearer ${supabaseKey}`,
                 'Accept': 'application/json',
                 'User-Agent': userAgents[Math.floor(Math.random() * userAgents.length)],
-                'X-Client-Info': 'studyjournal-pro-proxy-v4'
+                'X-Client-Info': 'studyjournal-pro-proxy-v5'
             };
 
             const isWrite = method && ['POST', 'PUT', 'PATCH', 'DELETE'].includes(method.toUpperCase());
@@ -186,7 +153,7 @@ app.post("/api/supabase-proxy", async (req, res) => {
         } catch (err) {
             lastErr = err;
             console.error(`[PROXY RETRY ${retry + 1}]`, err.message);
-            if (retry < 2) await new Promise(r => setTimeout(r, 500 * (retry + 1)));
+            if (retry < 1) await new Promise(r => setTimeout(r, 500));
         }
     }
 

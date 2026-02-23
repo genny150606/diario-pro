@@ -4,7 +4,22 @@ const https = require("https");
 require("dotenv").config();
 
 const app = express();
-app.use(cors());
+const allowedOrigins = [
+    'https://diario-pro.vercel.app',
+    'http://localhost:3000',
+    'null' // For file:// protocol
+];
+
+app.use(cors({
+    origin: (origin, callback) => {
+        if (!origin || allowedOrigins.includes(origin)) {
+            callback(null, true);
+        } else {
+            callback(new Error('Not allowed by CORS'));
+        }
+    },
+    credentials: true
+}));
 app.use(express.json({ limit: "50mb" }));
 
 // ============================================
@@ -58,12 +73,44 @@ app.post("/api/generate-duel-quiz", async (req, res) => {
 
 app.post("/api/chat", async (req, res) => {
     try {
-        const { message, history = [] } = req.body;
+        const { message, history = [], stream = false } = req.body;
         const genAI = new GoogleGenAI(process.env.GEMINI_API_KEY);
         const ai = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
-        const result = await ai.generateContent({ contents: [...history.map(m => ({ role: m.role === 'user' ? 'user' : 'model', parts: [{ text: m.content }] })), { role: 'user', parts: [{ text: message }] }] });
-        res.json({ reply: (await result.response).text() });
-    } catch (error) { res.status(500).json({ error: error.message }); }
+
+        const contents = [
+            ...history.map(m => ({
+                role: m.role === 'user' ? 'user' : 'model',
+                parts: [{ text: m.content }]
+            })),
+            { role: 'user', parts: [{ text: message }] }
+        ];
+
+        if (stream) {
+            res.setHeader('Content-Type', 'text/event-stream');
+            res.setHeader('Cache-Control', 'no-cache');
+            res.setHeader('Connection', 'keep-alive');
+
+            const streamingResult = await ai.generateContentStream({ contents });
+
+            for await (const chunk of streamingResult.stream) {
+                const chunkText = chunk.text();
+                res.write(`data: ${JSON.stringify({ text: chunkText })}\n\n`);
+            }
+            res.write(`data: [DONE]\n\n`);
+            res.end();
+        } else {
+            const result = await ai.generateContent({ contents });
+            res.json({ reply: (await result.response).text() });
+        }
+    } catch (error) {
+        console.error("Chat Error:", error);
+        if (!res.headersSent) {
+            res.status(500).json({ error: error.message });
+        } else {
+            res.write(`data: ${JSON.stringify({ error: error.message })}\n\n`);
+            res.end();
+        }
+    }
 });
 
 // ============================================

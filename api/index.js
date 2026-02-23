@@ -1,11 +1,11 @@
 const express = require("express");
 const cors = require("cors");
+const fetch = require("node-fetch");
 const { GoogleGenAI } = require("@google/generative-ai");
 
 const app = express();
 app.use(express.json());
 
-// Explicitly allow 'null' origin (for local file access) and vercel domain
 app.use(cors({
     origin: function (origin, callback) {
         if (!origin || origin === 'null' || origin.includes('vercel.app')) {
@@ -19,12 +19,24 @@ app.use(cors({
 
 const genAI = new GoogleGenAI(process.env.GEMINI_API_KEY);
 
+// ROBUST AI RESPONSE PARSING
+function safelyParseJSON(text, defaultValue = []) {
+    try {
+        const match = text.match(/\[[\s\S]*\]/);
+        return match ? JSON.parse(match[0]) : defaultValue;
+    } catch (e) {
+        console.error("JSON Parse Error:", e);
+        return defaultValue;
+    }
+}
+
 app.post("/api/generate-flashcards", async (req, res) => {
     try {
         const { topic, amount = 5 } = req.body;
         const ai = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
         const result = await ai.generateContent(`Genera ${amount} flashcard su "${topic}" in formato JSON: [{"q": "domanda", "a": "risposta"}]`);
-        res.json({ flashcards: JSON.parse((await result.response).text().match(/\[[\s\S]*\]/)[0]) });
+        const text = (await result.response).text();
+        res.json({ flashcards: safelyParseJSON(text) });
     } catch (error) { res.status(500).json({ error: error.message }); }
 });
 
@@ -33,14 +45,14 @@ app.post("/api/generate-duel-quiz", async (req, res) => {
         const { topic } = req.body;
         const ai = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
         const result = await ai.generateContent(`Genera 10 domande a risposta multipla su "${topic}" in JSON: [{"question": "...", "options": ["...", "...", "..."], "answer": 0}]`);
-        res.json({ quiz: JSON.parse((await result.response).text().match(/\[[\s\S]*\]/)[0]) });
+        const text = (await result.response).text();
+        res.json({ quiz: safelyParseJSON(text) });
     } catch (error) { res.status(500).json({ error: error.message }); }
 });
 
 app.post("/api/chat", async (req, res) => {
     try {
         const { message, history = [], stream = false } = req.body;
-        const genAI = new GoogleGenAI(process.env.GEMINI_API_KEY);
         const ai = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
 
         const contents = [
@@ -55,12 +67,9 @@ app.post("/api/chat", async (req, res) => {
             res.setHeader('Content-Type', 'text/event-stream');
             res.setHeader('Cache-Control', 'no-cache');
             res.setHeader('Connection', 'keep-alive');
-
             const streamingResult = await ai.generateContentStream({ contents });
-
             for await (const chunk of streamingResult.stream) {
-                const chunkText = chunk.text();
-                res.write(`data: ${JSON.stringify({ text: chunkText })}\n\n`);
+                res.write(`data: ${JSON.stringify({ text: chunk.text() })}\n\n`);
             }
             res.write(`data: [DONE]\n\n`);
             res.end();
@@ -70,102 +79,94 @@ app.post("/api/chat", async (req, res) => {
         }
     } catch (error) {
         console.error("Chat Error:", error);
-        if (!res.headersSent) {
-            res.status(500).json({ error: error.message });
-        } else {
-            res.write(`data: ${JSON.stringify({ error: error.message })}\n\n`);
-            res.end();
-        }
+        if (!res.headersSent) res.status(500).json({ error: error.message });
+        else { res.write(`data: ${JSON.stringify({ error: error.message })}\n\n`); res.end(); }
     }
 });
 
 // ============================================
-// NATIVE HTTPS SUPABASE PROXY (ULTIMATE 520 FIX)
+// SUPABASE PROXY (ULTIMATE 520 FIX - v6)
 // ============================================
 
 app.post("/api/supabase-proxy", async (req, res) => {
-    const { path, method, headers: clientHeaders, body } = req.body || {};
-    if (!path) return res.status(400).json({ error: "Missing path" });
+    try {
+        const { path, method, headers: clientHeaders, body } = req.body || {};
+        if (!path) return res.status(400).json({ error: "Missing path" });
 
-    const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || ''; // Use ENV key
-    const userAuth = clientHeaders?.Authorization || clientHeaders?.authorization;
+        // Restore Fallback Key
+        const fallbackKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ6ZHBudHZvanBpYmJuZGhzcmx6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEzNzg1MjEsImV4cCI6MjA4Njk1NDUyMX0.QwnT9Okp8CkN_LxGIeBKWrroo3letL8OhSvaqdQVW7M';
+        const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || fallbackKey;
+        const userAuth = clientHeaders?.Authorization || clientHeaders?.authorization;
 
-    // List of common browser User-Agents for rotation
-    const userAgents = [
-        'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36',
-        'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-        'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
-    ];
+        const userAgents = [
+            'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36',
+            'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+            'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+        ];
 
-    const targetUrl = `https://rzdpntvojpibbndhsrlz.supabase.co${path.startsWith('/') ? path : `/${path}`}`;
-    let lastErr;
+        const targetUrl = `https://rzdpntvojpibbndhsrlz.supabase.co${path.startsWith('/') ? path : `/${path}`}`;
+        let lastErr;
 
-    // INTERNAL RETRY on the backend (Keep it short for Vercel 10s limit)
-    for (let retry = 0; retry < 2; retry++) {
-        try {
-            console.log(`[FETCH PROXY] ${method || 'GET'} ${path} (Attempt ${retry + 1})`);
+        for (let retry = 0; retry < 2; retry++) {
+            try {
+                console.log(`[PROXY v6] ${method || 'GET'} ${path} (Attempt ${retry + 1})`);
+                const abortController = new AbortController();
+                const timeoutId = setTimeout(() => abortController.abort(), 3500);
 
-            const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), 3500); // 3.5s timeout per attempt
+                const proxyHeaders = {
+                    'apikey': supabaseKey,
+                    'Authorization': userAuth || `Bearer ${supabaseKey}`,
+                    'Accept': 'application/json',
+                    'User-Agent': userAgents[Math.floor(Math.random() * userAgents.length)],
+                    'X-Client-Info': 'studyjournal-pro-proxy-v6'
+                };
 
-            const proxyHeaders = {
-                'apikey': supabaseKey,
-                'Authorization': userAuth || `Bearer ${supabaseKey}`,
-                'Accept': 'application/json',
-                'User-Agent': userAgents[Math.floor(Math.random() * userAgents.length)],
-                'X-Client-Info': 'studyjournal-pro-proxy-v5'
-            };
-
-            const isWrite = method && ['POST', 'PUT', 'PATCH', 'DELETE'].includes(method.toUpperCase());
-            if (isWrite && (body || clientHeaders?.['content-type'])) {
-                proxyHeaders['Content-Type'] = 'application/json';
-            }
-
-            ['prefer', 'range', 'content-range'].forEach(k => {
-                const v = clientHeaders?.[k] || clientHeaders?.[k.toLowerCase()] || clientHeaders?.[k.toUpperCase()];
-                if (v) proxyHeaders[k] = v;
-            });
-
-            const fetchRes = await fetch(targetUrl, {
-                method: method || 'GET',
-                headers: proxyHeaders,
-                body: isWrite && body ? (typeof body === 'string' ? body : JSON.stringify(body)) : undefined,
-                cache: 'no-store',
-                signal: controller.signal
-            });
-
-            clearTimeout(timeoutId);
-
-            if (fetchRes.status < 500) {
-                res.status(fetchRes.status);
-                ['content-type', 'content-range', 'preference-applied', 'location'].forEach(k => {
-                    const v = fetchRes.headers.get(k);
-                    if (v) res.setHeader(k, v);
-                });
-                if (fetchRes.status === 204 || fetchRes.status === 304 || fetchRes.headers.get('content-length') === '0') {
-                    return res.end();
+                const isWrite = method && ['POST', 'PUT', 'PATCH', 'DELETE'].includes(method.toUpperCase());
+                if (isWrite && (body || clientHeaders?.['content-type'])) {
+                    proxyHeaders['Content-Type'] = 'application/json';
                 }
-                const resData = await fetchRes.arrayBuffer();
-                return res.send(Buffer.from(resData));
+
+                ['prefer', 'range', 'content-range'].forEach(k => {
+                    const v = clientHeaders?.[k] || clientHeaders?.[k.toLowerCase()] || clientHeaders?.[k.toUpperCase()];
+                    if (v) proxyHeaders[k] = v;
+                });
+
+                const fetchRes = await fetch(targetUrl, {
+                    method: method || 'GET',
+                    headers: proxyHeaders,
+                    body: isWrite && body ? (typeof body === 'string' ? body : JSON.stringify(body)) : undefined,
+                    signal: abortController.signal
+                });
+
+                clearTimeout(timeoutId);
+
+                if (fetchRes.status < 500) {
+                    res.status(fetchRes.status);
+                    ['content-type', 'content-range', 'preference-applied', 'location'].forEach(k => {
+                        const v = fetchRes.headers.get(k);
+                        if (v) res.setHeader(k, v);
+                    });
+                    if (fetchRes.status === 204 || fetchRes.status === 304 || fetchRes.headers.get('content-length') === '0') {
+                        return res.end();
+                    }
+                    const resData = await fetchRes.buffer();
+                    return res.send(resData);
+                }
+
+                throw new Error(`Supabase Status ${fetchRes.status}`);
+            } catch (err) {
+                lastErr = err;
+                console.error(`[PROXY RETRY ${retry + 1}]`, err.message);
+                if (retry < 1) await new Promise(r => setTimeout(r, 500));
             }
-
-            throw new Error(`Supabase Status ${fetchRes.status}`);
-        } catch (err) {
-            lastErr = err;
-            console.error(`[PROXY RETRY ${retry + 1}]`, err.message);
-            if (retry < 1) await new Promise(r => setTimeout(r, 500));
         }
-    }
-
-    if (!res.headersSent) {
-        res.status(502).json({ error: "Proxy Exhausted", message: lastErr?.message });
+        if (!res.headersSent) res.status(502).json({ error: "Proxy Exhausted", message: lastErr?.message });
+    } catch (globalErr) {
+        console.error("[PROXY GLOBAL ERROR]", globalErr);
+        if (!res.headersSent) res.status(500).json({ error: "Proxy Crash", message: globalErr.message });
     }
 });
 
 module.exports = app;
 const serverless = require('serverless-http');
 module.exports.handler = serverless(app);
-
-if (require.main === module) {
-    app.listen(process.env.PORT || 3000, () => console.log("System Running"));
-}

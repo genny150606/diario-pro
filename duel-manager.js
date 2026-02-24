@@ -130,6 +130,7 @@ const DuelManager = {
 
             const { data: room, error } = await supabaseClient.from('quiz_rooms').insert([{ code, subject, ai_data: quiz, status: 'waiting' }]).select().single();
             if (error) throw error;
+            if (!room || !room.id) throw new Error("Errore creazione stanza: ID non restituito.");
 
             this.currentRoom = room;
             this.isHost = true;
@@ -179,10 +180,12 @@ const DuelManager = {
     },
 
     async joinPlayer(roomId, username) {
+        if (!roomId) { console.error('Aborting joinPlayer: roomId is undefined'); return; }
         await supabaseClient.from('quiz_players').insert([{ room_id: roomId, username, score: 0, is_ready: false }]);
     },
 
     subscribeToRoom(roomId) {
+        if (!roomId) { console.error('Aborting subscribeToRoom: roomId is undefined'); return; }
         if (this.pollInterval) clearInterval(this.pollInterval);
         const pollData = async () => {
             const { data: roomData } = await supabaseClient.from('quiz_rooms').select('*').eq('id', roomId).single();

@@ -589,9 +589,10 @@ const SimpleChatbot = {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
+                    topic: intent.topic,
                     notes: `Genera flashcard complete e dettagliate sull'argomento: ${intent.topic}. Le flashcard devono coprire i concetti principali, definizioni, date importanti e fatti chiave.`,
                     subject: this.extractSubjectFromTask(intent.topic),
-                    numberOfCards: intent.count
+                    amount: intent.count
                 })
             });
 
@@ -850,8 +851,9 @@ Scrivi in modo CHIARO e EDUCATIVO. Sii PRECISO e COMPLETO.`;
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     notes: this.currentGeneratedNotes.content.substring(0, 3000),
+                    topic: this.currentGeneratedNotes.title,
                     subject: this.currentGeneratedNotes.subject || 'Generale',
-                    numberOfCards: num
+                    amount: num
                 })
             });
 

@@ -60,10 +60,26 @@ function safelyParseJSON(text, defaultValue = []) {
 app.post("/api/generate-flashcards", async (req, res) => {
     try {
         if (!genAI) throw new Error("GenAI not initialized");
-        const { topic, amount = 5 } = req.body;
+        const { topic, notes, amount, numberOfCards } = req.body;
+
+        const finalTopic = topic || notes || "Argomento Generale";
+        const finalAmount = amount || numberOfCards || 5;
+
         const ai = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
-        const result = await ai.generateContent(`Genera ${amount} flashcard su "${topic}" in formato JSON: [{"q": "domanda", "a": "risposta"}]`);
-        res.json({ flashcards: safelyParseJSON(await getAIText(result)) });
+
+        let prompt = "";
+        if (notes && !topic) {
+            prompt = `Analizza questi appunti e genera ${finalAmount} flashcard in formato JSON: [{"q": "domanda", "a": "risposta"}].
+            Gli appunti sono: ${notes.substring(0, 4000)}
+            Assicurati che le domande siano chiare e le risposte concise.`;
+        } else {
+            prompt = `Genera ${finalAmount} flashcard su "${finalTopic}" in formato JSON: [{"q": "domanda", "a": "risposta"}].
+            Assicurati di coprire i punti chiave dell'argomento.`;
+        }
+
+        const result = await ai.generateContent(prompt);
+        const aiText = await getAIText(result);
+        res.json({ flashcards: safelyParseJSON(aiText) });
     } catch (e) { res.status(500).json({ error: e.message }); }
 });
 

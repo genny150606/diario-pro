@@ -487,6 +487,9 @@ const SimpleChatbot = {
             // Trigger re-render if function exists
             if (typeof renderGrades === 'function') renderGrades();
 
+            // Stats Tracking
+            if (typeof incrementGlobalStat === 'function') incrementGlobalStat('total_grades_added', 1);
+
         } catch (err) {
             this.addAIBubble(messagesDiv, `❌ Errore nell'aggiunta del voto: ${err.message}`);
         }
@@ -537,6 +540,9 @@ const SimpleChatbot = {
             });
 
             if (typeof renderTasks === 'function') renderTasks();
+
+            // Stats Tracking
+            if (typeof incrementGlobalStat === 'function') incrementGlobalStat('total_tasks_added', 1);
 
         } catch (err) {
             this.addAIBubble(messagesDiv, `❌ Errore nell'aggiunta del compito: ${err.message}`);
@@ -604,11 +610,15 @@ const SimpleChatbot = {
 
             let count = 0;
             data.flashcards.forEach(card => {
-                if (card.front && card.back) {
+                // Support multiple key variations (front/back, question/answer, domanda/risposta)
+                const front = card.front || card.question || card.domanda;
+                const back = card.back || card.answer || card.risposta;
+
+                if (front && back) {
                     appData.flashcards.push({
                         id: Date.now() + Math.random(),
-                        front: card.front,
-                        back: card.back,
+                        front: front,
+                        back: back,
                         subject: this.extractSubjectFromTask(intent.topic),
                         correct: 0,
                         incorrect: 0,
@@ -617,6 +627,11 @@ const SimpleChatbot = {
                     count++;
                 }
             });
+
+            // Stats Tracking
+            if (typeof incrementGlobalStat === 'function' && count > 0) {
+                incrementGlobalStat('total_flashcards_created', count);
+            }
 
             if (typeof saveData === 'function') {
                 saveData(appData);
@@ -777,6 +792,9 @@ Scrivi in modo CHIARO e EDUCATIVO. Sii PRECISO e COMPLETO.`;
 
             if (typeof saveData === 'function') saveData(appData);
 
+            // Stats Tracking
+            if (typeof incrementGlobalStat === 'function') incrementGlobalStat('total_notes_created', 1);
+
             aiBubble.innerHTML = `📝 <strong>Appunti su "${subject}" salvati!</strong><br><br>` + this.formatMarkdown(fullText) + `<br><br><strong>Vuoi che generi flashcard da questi appunti?</strong>`;
             this.history.push({ role: 'ai', content: fullText });
             setTimeout(() => this.addFlashcardButton(messagesDiv), 300);
@@ -850,14 +868,22 @@ Scrivi in modo CHIARO e EDUCATIVO. Sii PRECISO e COMPLETO.`;
 
             let count = 0;
             data.flashcards.forEach(card => {
-                if (card.front && card.back) {
+                const front = card.front || card.question || card.domanda;
+                const back = card.back || card.answer || card.risposta;
+
+                if (front && back) {
                     appData.flashcards.push({
-                        id: Date.now() + Math.random(), front: card.front, back: card.back,
+                        id: Date.now() + Math.random(), front: front, back: back,
                         subject: this.currentGeneratedNotes.subject, correct: 0, incorrect: 0, difficulty: 'medium'
                     });
                     count++;
                 }
             });
+
+            // Stats Tracking
+            if (typeof incrementGlobalStat === 'function' && count > 0) {
+                incrementGlobalStat('total_flashcards_created', count);
+            }
 
             if (typeof saveData === 'function') {
                 saveData(appData);

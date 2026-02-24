@@ -38,40 +38,40 @@
 }
 
 .aurora-bg .orb-2 {
-    width: 500px;
-    height: 500px;
+    width: 600px;
+    height: 600px;
     background: radial-gradient(circle, #5856D6, #AF52DE);
-    top: 40%;
-    right: -12%;
-    animation-duration: 18s;
+    top: 30%;
+    right: -15%;
+    animation-duration: 20s;
     animation-delay: -4s;
 }
 
 .aurora-bg .orb-3 {
-    width: 450px;
-    height: 450px;
+    width: 550px;
+    height: 550px;
     background: radial-gradient(circle, #30D158, #007AFF);
-    bottom: -10%;
-    left: 30%;
-    animation-duration: 16s;
+    bottom: -15%;
+    left: 25%;
+    animation-duration: 18s;
     animation-delay: -8s;
 }
 
 @keyframes orbFloat {
     0% {
-        transform: translate(0, 0) scale(1);
+        transform: translate(0, 0) scale(1) rotate(0deg);
     }
 
     33% {
-        transform: translate(40px, -30px) scale(1.08);
+        transform: translate(60px, -40px) scale(1.1) rotate(5deg);
     }
 
     66% {
-        transform: translate(-20px, 20px) scale(0.95);
+        transform: translate(-30px, 30px) scale(0.9) rotate(-5deg);
     }
 
     100% {
-        transform: translate(30px, 10px) scale(1.04);
+        transform: translate(40px, 20px) scale(1.05) rotate(0deg);
     }
 }
 
@@ -152,13 +152,13 @@
 }
 
 .hero-title {
-    font-size: clamp(2.4rem, 7vw, 5.5rem);
-    font-weight: var(--fw-semibold);
-    letter-spacing: -0.035em;
-    line-height: 1.05;
+    font-size: clamp(2.6rem, 7.5vw, 5.8rem);
+    font-weight: 800;
+    letter-spacing: -0.04em;
+    line-height: 1.0;
     margin-bottom: var(--space-8);
-    max-width: 900px;
-    animation: fadeInUp 0.8s var(--ease-out) 0.15s both;
+    max-width: 1000px;
+    animation: fadeInUp 1s var(--ease-out) 0.1s both;
 }
 
 /* Base animations - only enabled for desktop/tablets (non-mobile) */
@@ -189,27 +189,21 @@
 }
 
 .hero-title .gradient-text {
-    background: linear-gradient(135deg, #007AFF 0%, #5856D6 35%, #AF52DE 65%, #FF2D55 100%);
-    background-size: 200% 200%;
+    background: linear-gradient(135deg, #007AFF 0%, #5856D6 25%, #AF52DE 50%, #FF2D55 75%, #007AFF 100%);
+    background-size: 300% 100%;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
-    animation: gradientFlow 6s ease-in-out infinite;
+    animation: gradientFlow 8s linear infinite;
 }
 
 @keyframes gradientFlow {
-
-    0%,
-    100% {
+    0% {
         background-position: 0% 50%;
     }
 
-    50% {
-        background-position: 100% 50%;
-    }
-
-    50% {
-        background-position: 100% 50%;
+    100% {
+        background-position: 150% 50%;
     }
 }
 
@@ -297,13 +291,15 @@
     background: var(--glass-bg);
     color: var(--color-text);
     border: 1px solid var(--color-border-strong);
-    backdrop-filter: blur(10px);
+    backdrop-filter: blur(12px);
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.1);
 }
 
 .btn-hero-secondary:hover {
     background: var(--color-bg-secondary);
     transform: translateY(-2px);
-    box-shadow: var(--shadow-md);
+    border-color: var(--color-accent);
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
 }
 
 /* ── FLOATING APP PREVIEW ── */
@@ -471,9 +467,9 @@
 }
 
 .feature-card:hover {
-    transform: translateY(-6px);
-    box-shadow: var(--shadow-lg);
-    border-color: var(--color-accent-bg-strong);
+    transform: translateY(-8px) scale(1.02);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1), 0 0 0 1px var(--color-accent-bg-strong);
+    border-color: var(--color-accent);
 }
 
 .feature-card:hover::before {
@@ -575,15 +571,15 @@
     max-width: 1200px;
     margin: 0 auto;
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 200px), 1fr));
     gap: var(--space-8);
-    background: var(--glass-bg);
-    backdrop-filter: var(--glass-blur);
-    -webkit-backdrop-filter: var(--glass-blur);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-2xl);
-    padding: var(--space-10) var(--space-8);
-    box-shadow: var(--shadow-md);
+    background: rgba(var(--glass-bg-rgb, 255, 255, 255), 0.6);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 32px;
+    padding: var(--space-12) var(--space-8);
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.08);
 }
 
 .stat-item {

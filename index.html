@@ -461,9 +461,6 @@
         // ============================================
         // LOAD REAL STATS FROM DB
         // ============================================
-        // ============================================
-        // LOAD REAL STATS FROM DB
-        // ============================================
         async function loadRealStats() {
             try {
                 // 1. Count distinct users
@@ -471,33 +468,22 @@
                     .from('users_data')
                     .select('*', { count: 'exact', head: true });
 
-                // 2. Sum notes & flashcards across all users' JSON blobs
-                const { data: allUsersData } = await sb
-                    .from('users_data')
-                    .select('data');
+                // 2. Fetch all historical stats from site_stats
+                const { data: statsRows } = await sb
+                    .from('site_stats')
+                    .select('key, value');
 
-                let totalNotes = 0;
-                let totalFlashcards = 0;
-
-                if (allUsersData) {
-                    allUsersData.forEach(row => {
-                        const d = row.data;
-                        if (d) {
-                            if (Array.isArray(d.notes)) totalNotes += d.notes.length;
-                            if (Array.isArray(d.flashcards)) totalFlashcards += d.flashcards.length;
-                        }
-                    });
+                const statsMap = {};
+                if (statsRows) {
+                    statsRows.forEach(row => statsMap[row.key] = Number(row.value));
                 }
 
-                // 3. Chatbot interactions from site_stats table
-                const { data: chatbotStat } = await sb
-                    .from('site_stats')
-                    .select('value')
-                    .eq('key', 'chatbot_interactions')
-                    .single();
-                const chatbotCount = (chatbotStat && chatbotStat.value) ? Number(chatbotStat.value) : 0;
+                // Cumulative counters (Historical)
+                const totalNotes = statsMap['total_notes_created'] || 0;
+                const totalFlashcards = statsMap['total_flashcards_created'] || 0;
+                const chatbotCount = statsMap['chatbot_interactions'] || 0;
 
-                // 4. Count reviews
+                // 3. Count reviews
                 const { count: reviewCount } = await sb
                     .from('reviews')
                     .select('*', { count: 'exact', head: true });

@@ -421,4 +421,15 @@ document.addEventListener('click', (e) => {
 });
 
 // Initialize on load
-document.addEventListener('DOMContentLoaded', () => AuthManager.init());
+document.addEventListener('DOMContentLoaded', () => {
+    AuthManager.init();
+
+    // Explicitly attach click handler to account button as a fallback
+    const accountBtn = document.getElementById('accountBtn');
+    if (accountBtn) {
+        accountBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            toggleAccountMenu();
+        });
+    }
+});

@@ -185,7 +185,7 @@
         <div class="header-right">
             <button class="theme-toggle" id="themeToggle" title="Cambia Tema">🌓</button>
             <div class="user-profile-container">
-                <button class="account-btn" id="accountBtn">
+                <button class="account-btn" id="accountBtn" onclick="toggleAccountMenu()">
                     <span id="userEmailDisplay">Caricamento...</span>
                     <span class="chevron">▼</span>
                 </button>
@@ -1431,13 +1431,18 @@
             }
         }
 
-        function deleteSingleFlashcard(index) {
-            let flashcards = loadFlashcards();
+        function saveFlashcards(flashcards) {
+            let data = loadData();
+            const oldCount = (data.flashcards || []).length;
+            data.flashcards = flashcards;
+            saveData(data);
 
-            if (index >= 0 && index < flashcards.length) {
-                flashcards.splice(index, 1);
-                saveFlashcards(flashcards);
-                renderFlashcards(flashcards);
+            // If we added new flashcards, increment global stats
+            const newCount = flashcards.length;
+            if (newCount > oldCount) {
+                if (typeof incrementGlobalStat === 'function') {
+                    incrementGlobalStat('total_flashcards_created', newCount - oldCount);
+                }
             }
         }
 
@@ -1467,6 +1472,11 @@
             saveData(data);
             renderNotes();
             updateDashboard();
+
+            // Stats Tracking
+            if (typeof incrementGlobalStat === 'function') {
+                incrementGlobalStat('total_notes_created', 1);
+            }
 
             document.getElementById('noteTitle').value = '';
             document.getElementById('noteSubject').value = '';
@@ -1534,6 +1544,11 @@
             saveData(data);
             renderTasks();
             updateDashboard();
+
+            // Stats Tracking
+            if (typeof incrementGlobalStat === 'function') {
+                incrementGlobalStat('total_tasks_added', 1);
+            }
 
             document.getElementById('taskTitle').value = '';
             document.getElementById('taskDue').value = '';
@@ -1613,6 +1628,11 @@
             saveData(data);
             renderGrades();
             updateDashboard();
+
+            // Stats Tracking
+            if (typeof incrementGlobalStat === 'function') {
+                incrementGlobalStat('total_grades_added', 1);
+            }
 
             document.getElementById('gradeSubject').value = '';
             document.getElementById('gradeValue').value = '';
@@ -1699,6 +1719,11 @@
 
             saveData(data);
             renderUniGrades();
+
+            // Stats Tracking
+            if (typeof incrementGlobalStat === 'function') {
+                incrementGlobalStat('total_grades_added', 1);
+            }
 
             // Clear inputs
             document.getElementById('uniSubject').value = '';
@@ -1801,6 +1826,11 @@
 
             saveData(data);
             renderUniExams();
+
+            // Stats Tracking
+            if (typeof incrementGlobalStat === 'function') {
+                incrementGlobalStat('total_tasks_added', 1);
+            }
 
             document.getElementById('examName').value = '';
             document.getElementById('examDate').value = '';
@@ -1958,8 +1988,17 @@
             const grades = data.grades || [];
             const presences = data.presences || [];
 
-            document.getElementById('dashboardNotes').textContent = notes.length;
-            document.getElementById('dashboardFlashcards').textContent = flashcards.length;
+            // Use historical counters if available, otherwise fall back to current length
+            const totalNotes = (data.counters && data.counters.totalNotesCreated !== undefined)
+                ? data.counters.totalNotesCreated
+                : notes.length;
+
+            const totalFlashcards = (data.counters && data.counters.totalFlashcardsCreated !== undefined)
+                ? data.counters.totalFlashcardsCreated
+                : flashcards.length;
+
+            document.getElementById('dashboardNotes').textContent = totalNotes;
+            document.getElementById('dashboardFlashcards').textContent = totalFlashcards;
 
             const completedTasks = tasks.filter(t => t.completed).length;
             document.getElementById('dashboardTasksCompleted').textContent = completedTasks;

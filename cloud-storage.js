@@ -64,6 +64,31 @@ const CloudStorage = {
     save(userId, data) {
         if (!userId) return;
 
+        // Ensure historical counts exist
+        if (!data.counters) data.counters = {};
+
+        const currentNotesCount = (data.notes || []).length;
+        const currentFlashcardsCount = (data.flashcards || []).length;
+
+        // Initialize if first time
+        if (data.counters.totalNotesCreated === undefined) {
+            data.counters.totalNotesCreated = currentNotesCount;
+            data.counters.totalFlashcardsCreated = currentFlashcardsCount;
+            data.counters.lastNotesCount = currentNotesCount;
+            data.counters.lastFlashcardsCount = currentFlashcardsCount;
+        } else {
+            // Only increment if we added something (don't decrement if deleted)
+            if (currentNotesCount > data.counters.lastNotesCount) {
+                data.counters.totalNotesCreated += (currentNotesCount - data.counters.lastNotesCount);
+            }
+            if (currentFlashcardsCount > data.counters.lastFlashcardsCount) {
+                data.counters.totalFlashcardsCreated += (currentFlashcardsCount - data.counters.lastFlashcardsCount);
+            }
+            // Update the baseline for next comparison
+            data.counters.lastNotesCount = currentNotesCount;
+            data.counters.lastFlashcardsCount = currentFlashcardsCount;
+        }
+
         // 1. Write-through cache (instant)
         localStorage.setItem(this._cacheKey(userId), JSON.stringify(data));
 
@@ -110,32 +135,37 @@ function saveData(data) {
     CloudStorage.save(AuthManager.user.id, data);
 }
 
-// ── INCREMENT CHATBOT INTERACTIONS COUNTER ──
-// Uses a site_stats table: { key: 'chatbot_interactions', value: number }
-async function incrementChatbotStat() {
+// ── INCREMENT GLOBAL SITE-WIDE STATS ──
+// Used for historical data that never decreases (e.g. total notes created)
+async function incrementGlobalStat(key, amount = 1) {
     try {
         if (typeof supabaseClient === 'undefined') return;
 
-        // Read current value
+        // 1. Get current value
         const { data } = await supabaseClient
             .from('site_stats')
             .select('value')
-            .eq('key', 'chatbot_interactions')
+            .eq('key', key)
             .single();
 
-        const current = (data && data.value) ? Number(data.value) : 0;
+        let current = (data && data.value) ? Number(data.value) : 0;
 
-        // Upsert incremented value
+        // 2. Upsert incremented value
         await supabaseClient
             .from('site_stats')
             .upsert({
-                key: 'chatbot_interactions',
-                value: current + 1,
+                key: key,
+                value: current + amount,
                 updated_at: new Date().toISOString()
             }, { onConflict: 'key' });
 
     } catch (err) {
-        // Silently fail - stats are non-critical
-        console.warn('Chatbot stat increment failed:', err);
+        console.warn(`Global stat increment failed for ${key}:`, err);
     }
+}
+
+// ── INCREMENT CHATBOT INTERACTIONS COUNTER ──
+// Uses a site_stats table: { key: 'chatbot_interactions', value: number }
+async function incrementChatbotStat() {
+    await incrementGlobalStat('chatbot_interactions', 1);
 }

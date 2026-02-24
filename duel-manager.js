@@ -1,22 +1,17 @@
-// ============================================
-// DUEL MANAGER - Spectacular AI Quiz Duel
-// ============================================
-
 const DuelManager = {
     currentRoom: null,
     players: [],
     questions: [],
     currentIndex: 0,
     score: 0,
-    subscription: null,
     isHost: false,
     playerName: null,
-    opponentData: null,
     pollInterval: null,
+    countdownRunning: false, // Prevents dual countdowns
+    gameStarted: false,      // High-level lock
 
-    // ── SPECTACULAR STATE ──
+    // ── SPATIAL STATE ──
     currentSource: 'subject',
-    quizContext: '',
     timerInterval: null,
     timeLeft: 15,
     maxTime: 15,
@@ -30,7 +25,6 @@ const DuelManager = {
         this.loadNotes();
     },
 
-    // ── SOURCE SELECTION UI ──
     setSource(type, btn) {
         this.currentSource = type;
         document.querySelectorAll('.btn-tab').forEach(b => b.classList.remove('active'));
@@ -96,58 +90,55 @@ const DuelManager = {
         }
     },
 
-    // ── ROOM MANAGEMENT ──
     async createRoom() {
-        let subject = 'Generale';
-        let context = '';
-        if (this.currentSource === 'subject') {
-            subject = document.getElementById('duelSubjectInput').value || 'Cultura Generale';
-        } else if (this.currentSource === 'notes') {
-            const select = document.getElementById('duelNoteSelect');
-            if (!select.value) return alert('Seleziona una nota!');
-            subject = select.options[select.selectedIndex].text;
-            context = select.options[select.selectedIndex].dataset.content;
-        } else if (this.currentSource === 'pdf') {
-            context = document.getElementById('duelManualText').value;
-            if (!context.trim()) return alert('Nessun testo trovato!');
-            subject = 'Documento PDF';
-        }
-
-        const code = Math.random().toString(36).substring(2, 6).toUpperCase();
         const createBtn = document.getElementById('duelCreateBtn');
         createBtn.disabled = true;
-        createBtn.textContent = '🧠 Generazione Quiz...';
+        createBtn.innerHTML = '🧠 <span class="loading-dots">Generazione Arena...</span>';
 
         try {
+            let subject = 'Generale';
+            let context = '';
+            if (this.currentSource === 'subject') {
+                subject = document.getElementById('duelSubjectInput').value || 'Cultura Generale';
+            } else if (this.currentSource === 'notes') {
+                const select = document.getElementById('duelNoteSelect');
+                if (!select.value) throw new Error('Seleziona una nota!');
+                subject = select.options[select.selectedIndex].text;
+                context = select.options[select.selectedIndex].dataset.content;
+            } else if (this.currentSource === 'pdf') {
+                context = document.getElementById('duelManualText').value;
+                if (!context.trim()) throw new Error('Carica un documento o incolla il testo!');
+                subject = 'Dall\'ultimo PDF';
+            }
+
+            const code = Math.random().toString(36).substring(2, 6).toUpperCase();
             const apiBase = window.location.protocol === 'file:' ? 'https://diario-pro.vercel.app' : '';
             const response = await fetch(`${apiBase}/api/generate-duel-quiz`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ subject, context })
             });
+
             const { quiz } = await response.json();
-            if (!quiz || quiz.length === 0) throw new Error("Quiz vuoto");
+            if (!quiz || quiz.length === 0) throw new Error("L'AI non ha generato domande. Riprova.");
 
             const { data: room, error } = await supabaseClient.from('quiz_rooms').insert([{ code, subject, ai_data: quiz, status: 'waiting' }]).select().single();
             if (error) throw error;
-            if (!room || !room.id) throw new Error("Errore creazione stanza: ID non restituito.");
 
             this.currentRoom = room;
             this.isHost = true;
             this.questions = quiz;
-            if (typeof AppManager !== 'undefined') AppManager.showSection('duel');
 
             document.getElementById('duelCreateForm').classList.add('hidden');
             document.getElementById('duelWaitingLobby').classList.remove('hidden');
             document.getElementById('roomCodeDisplay').textContent = code;
 
-            this.playerName = (AuthManager.user?.email?.split('@')[0] || 'Host').trim();
+            this.playerName = (AuthManager.user?.email?.split('@')[0] || 'Guerriero').trim();
             await this.joinPlayer(room.id, this.playerName);
             this.subscribeToRoom(room.id);
-            return code;
         } catch (err) {
             console.error('Create error:', err);
-            alert('Errore: ' + err.message);
+            UIManager.alert(err.message, 'Errore Arena');
         } finally {
             createBtn.disabled = false;
             createBtn.textContent = 'GENERA ARENA ⚡';
@@ -155,18 +146,17 @@ const DuelManager = {
     },
 
     async joinRoom(code) {
-        if (!code) return alert('Inserisci il codice!');
+        if (!code) return UIManager.alert('Inserisci il codice!', 'Attenzione');
         try {
             const { data: room, error } = await supabaseClient.from('quiz_rooms').select('*').eq('code', code.toUpperCase().trim()).maybeSingle();
             if (error) throw error;
             if (!room) throw new Error(`Codice ${code} non trovato.`);
-            if (room.status !== 'waiting') throw new Error(`Partita già iniziata.`);
+            if (room.status !== 'waiting') throw new Error(`L'Arena è già attiva!`);
 
             this.currentRoom = room;
             this.isHost = false;
-            this.playerName = (AuthManager.user?.email?.split('@')[0] || 'Ospite').trim();
+            this.playerName = (AuthManager.user?.email?.split('@')[0] || 'Sfidante').trim();
             this.questions = room.ai_data;
-            if (typeof AppManager !== 'undefined') AppManager.showSection('duel');
 
             document.getElementById('duelCreateForm').classList.add('hidden');
             document.getElementById('duelWaitingLobby').classList.remove('hidden');
@@ -175,45 +165,55 @@ const DuelManager = {
             await this.joinPlayer(room.id, this.playerName);
             this.subscribeToRoom(room.id);
         } catch (err) {
-            alert(err.message);
+            UIManager.alert(err.message, 'Entrata Fallita');
         }
     },
 
     async joinPlayer(roomId, username) {
-        if (!roomId) { console.error('Aborting joinPlayer: roomId is undefined'); return; }
+        if (!roomId) return;
         await supabaseClient.from('quiz_players').insert([{ room_id: roomId, username, score: 0, is_ready: false }]);
     },
 
     subscribeToRoom(roomId) {
-        if (!roomId) { console.error('Aborting subscribeToRoom: roomId is undefined'); return; }
+        if (!roomId) return;
         if (this.pollInterval) clearInterval(this.pollInterval);
+
         const pollData = async () => {
-            const { data: roomData } = await supabaseClient.from('quiz_rooms').select('*').eq('id', roomId).single();
-            const { data: playersData } = await supabaseClient.from('quiz_players').select('*').eq('room_id', roomId).order('created_at', { ascending: true });
-            if (!roomData || !playersData) return;
+            const [roomRes, playersRes] = await Promise.all([
+                supabaseClient.from('quiz_rooms').select('*').eq('id', roomId).single(),
+                supabaseClient.from('quiz_players').select('*').eq('room_id', roomId).order('created_at', { ascending: true })
+            ]);
 
-            this.players = playersData;
-            this.currentRoom = roomData;
+            if (!roomRes.data || !playersRes.data) return;
 
-            if (roomData.status === 'abandoned') return this.handleOpponentLeft();
-            if (roomData.status === 'active' && !this.countdownStarted) this.scheduleStart();
+            this.players = playersRes.data;
+            this.currentRoom = roomRes.data;
+
+            if (this.currentRoom.status === 'abandoned') return this.handleOpponentLeft();
+
+            // FIX: Robust check for countdown
+            if (this.currentRoom.status === 'active' && !this.gameStarted && !this.countdownRunning) {
+                this.scheduleStart();
+            }
 
             this.renderLobby();
             this.checkReadyStatus();
-            this.renderDuelProgress();
+            this.syncArenaState();
 
             if (this.isHost && this.currentRoom.status === 'waiting') this._checkAndLaunchDuel();
         };
+
         pollData();
-        this.pollInterval = setInterval(pollData, 2000);
+        this.pollInterval = setInterval(pollData, 1500);
     },
 
     checkReadyStatus() {
+        if (this.gameStarted) return;
         const opponent = this.players.find(p => p.username !== this.playerName);
         const me = this.players.find(p => p.username === this.playerName);
         if (opponent?.is_ready && me && !me.is_ready && !this.inviting) {
             this.inviting = true;
-            UIManager.confirm(`${opponent.username} ti sta sfidando! Sei pronto?`, '⚔️ SFIDA').then(yes => {
+            UIManager.confirm(`⚔️ ${opponent.username} è pronto a sfidarti! Iniziamo?`, 'PREPARATI').then(yes => {
                 this.inviting = false;
                 if (yes) this.setReady();
             });
@@ -229,124 +229,169 @@ const DuelManager = {
     },
 
     async _checkAndLaunchDuel() {
-        if (this.players.length > 1 && this.players.every(p => p.is_ready) && !this.countdownStarted) {
-            this.countdownStarted = true;
+        if (this.players.length > 1 && this.players.every(p => p.is_ready) && !this.gameStarted) {
             await supabaseClient.from('quiz_rooms').update({ status: 'active' }).eq('id', this.currentRoom.id);
         }
     },
 
     scheduleStart() {
-        this.countdownStarted = true;
+        if (this.countdownRunning) return;
+        this.countdownRunning = true;
+        this.gameStarted = true;
+
+        // Reset UI for battle
         document.getElementById('duelWaitingLobby').classList.add('hidden');
-        const overlay = document.getElementById('duelCountdownOverlay');
-        overlay.classList.remove('hidden');
-        let sl = 4;
+        const countdownOverlay = document.getElementById('arenaCountdownOverlay');
+        const countdownVal = document.getElementById('arenaCountdownValue');
+
+        countdownOverlay.classList.add('active');
+
+        let count = 3;
+        countdownVal.textContent = count;
+
         const timer = setInterval(() => {
-            sl--;
-            if (sl > 0) document.getElementById('countdownValue').textContent = sl;
-            else {
+            count--;
+            if (count > 0) {
+                countdownVal.textContent = count;
+            } else if (count === 0) {
+                countdownVal.textContent = 'VIA!';
+            } else {
                 clearInterval(timer);
-                document.getElementById('countdownValue').textContent = 'VIA!';
-                setTimeout(() => { overlay.classList.add('hidden'); this.startQuizSession(); }, 800);
+                countdownOverlay.classList.remove('active');
+                this.countdownRunning = false;
+                setTimeout(() => this.startQuizSession(), 500);
             }
         }, 1000);
-    },
-
-    handleOpponentLeft() {
-        if (this.pollInterval) clearInterval(this.pollInterval);
-        alert("Opponent left.");
-        location.reload();
     },
 
     startQuizSession() {
         this.currentIndex = 0;
         this.score = 0;
-        document.getElementById('duelLobbySection').classList.add('hidden');
-        document.getElementById('duelArenaSection').classList.remove('hidden');
+        this.streak = 0;
+
+        document.getElementById('duelArenaOverlay').classList.add('active');
         this.renderQuestion();
     },
 
     renderQuestion() {
         const q = this.questions[this.currentIndex];
-        const container = document.getElementById('duelQuestionContainer');
-        const options = q.options || [];
-        container.innerHTML = `
-            <p class="duel-q-text">${q.question}</p>
-            <div class="duel-options">
-                ${options.map((opt, i) => `<button class="duel-opt-btn" onclick="DuelManager.submitAnswer(${i === q.answer}, ${i})"><span class="opt-index">${String.fromCharCode(65 + i)}</span> ${opt}</button>`).join('')}
-            </div>
-        `;
+        if (!q) return;
+
+        document.getElementById('arenaQuestionText').textContent = q.question;
+        const grid = document.getElementById('arenaOptionsGrid');
+        grid.innerHTML = '';
+
+        q.options.forEach((opt, i) => {
+            const btn = document.createElement('button');
+            btn.className = 'arena-option-btn';
+            btn.innerHTML = `<span class="opt-key">${String.fromCharCode(65 + i)}</span> <span>${opt}</span>`;
+            btn.onclick = () => this.submitAnswer(i === q.answer, i);
+            grid.appendChild(btn);
+        });
+
         this.startQuestionTimer();
     },
 
     startQuestionTimer() {
         this.timeLeft = this.maxTime;
         if (this.timerInterval) clearInterval(this.timerInterval);
+
         this.timerInterval = setInterval(() => {
             if (!this.frozenLocally) this.timeLeft -= 0.1;
-            const pct = (this.timeLeft / this.maxTime) * 100;
-            document.getElementById('hudTimerFill').style.height = `${pct}%`;
-            document.getElementById('hudTimerText').textContent = Math.ceil(this.timeLeft);
-            if (this.timeLeft <= 0) this.submitAnswer(false);
+
+            document.getElementById('arenaTimerValue').textContent = Math.ceil(this.timeLeft);
+
+            // Visual feedback on timer close to zero
+            if (this.timeLeft < 4) document.getElementById('arenaTimerValue').style.color = '#ef4444';
+            else document.getElementById('arenaTimerValue').style.color = '#fff';
+
+            if (this.timeLeft <= 0) {
+                clearInterval(this.timerInterval);
+                this.submitAnswer(false);
+            }
         }, 100);
     },
 
     async submitAnswer(isCorrect, btnIndex = -1) {
         if (this.timerInterval) clearInterval(this.timerInterval);
-        if (!isCorrect && this.powerUpEffects.shield) { isCorrect = true; this.powerUpEffects.shield = false; UIManager.toast('SCUDO! 🛡️', 'success'); }
 
-        document.querySelectorAll('.duel-opt-btn').forEach((b, i) => {
-            b.disabled = true;
-            if (i === btnIndex) b.classList.add(isCorrect ? 'correct' : 'wrong');
+        if (!isCorrect && this.powerUpEffects.shield) {
+            isCorrect = true;
+            this.powerUpEffects.shield = false;
+            UIManager.toast('SCUDO ATTIVO! 🛡️', 'success');
+        }
+
+        const buttons = document.querySelectorAll('.arena-option-btn');
+        buttons.forEach((btn, i) => {
+            btn.disabled = true;
+            if (i === btnIndex) {
+                btn.classList.add(isCorrect ? 'correct' : 'wrong');
+            }
         });
 
         if (isCorrect) {
-            let pts = 10 + Math.floor(this.timeLeft / 3);
+            let pts = 10 + Math.floor(this.timeLeft / 2);
             if (this.powerUpEffects.doubleXP) { pts *= 2; this.powerUpEffects.doubleXP = false; }
             this.score += pts;
             this.streak++;
             if (this.streak % 3 === 0) this.unlockPowerUp();
-            this.createParticles(btnIndex);
         } else {
             this.streak = 0;
-            document.getElementById('duelArenaSection').classList.add('shake');
-            setTimeout(() => document.getElementById('duelArenaSection').classList.remove('shake'), 400);
+            document.getElementById('duelArenaOverlay').classList.add('shake');
+            setTimeout(() => document.getElementById('duelArenaOverlay').classList.remove('shake'), 400);
         }
 
+        // Sync to DB
         this.currentIndex++;
-        this.renderDuelProgress();
         await supabaseClient.from('quiz_players').update({ score: this.score, current_question_index: this.currentIndex }).eq('room_id', this.currentRoom.id).eq('username', this.playerName);
-        setTimeout(() => this.currentIndex >= this.questions.length ? this.finishDuel() : this.renderQuestion(), 1000);
+
+        setTimeout(() => {
+            if (this.currentIndex >= this.questions.length) {
+                this.finishDuel();
+            } else {
+                this.renderQuestion();
+            }
+        }, 1200);
     },
 
     renderLobby() {
         const me = this.players.find(p => p.username === this.playerName);
         const opponent = this.players.find(p => p.username !== this.playerName);
-        if (me) document.getElementById('myLobbyCard').innerHTML = `<div class="player-card is-me"><span>👑</span><b>${me.username} (Tu)</b><span class="status-ready ${me.is_ready ? 'ready' : ''}">${me.is_ready ? 'Pronto' : 'In attesa'}</span></div>`;
-        if (opponent) document.getElementById('oppLobbyCard').innerHTML = `<div class="player-card"><span>⚔️</span><b>${opponent.username}</b><span class="status-ready ${opponent.is_ready ? 'ready' : ''}">${opponent.is_ready ? 'Pronto' : 'In attesa'}</span></div>`;
-        document.getElementById('lobbyPlayerStatus').innerHTML = opponent ? 'Sfidante trovato!' : 'In attesa di sfidanti...';
+
+        const lobbyMe = document.getElementById('myLobbyCard');
+        const lobbyOpp = document.getElementById('oppLobbyCard');
+
+        if (me) lobbyMe.innerHTML = `<div class="player-card is-me"><span>👑</span><b>${me.username} (Tu)</b><span class="status-ready ${me.is_ready ? 'ready' : ''}">${me.is_ready ? 'Pronto' : 'In attesa'}</span></div>`;
+        if (opponent) lobbyOpp.innerHTML = `<div class="player-card"><span>⚔️</span><b>${opponent.username}</b><span class="status-ready ${opponent.is_ready ? 'ready' : ''}">${opponent.is_ready ? 'Pronto' : 'In attesa'}</span></div>`;
+
+        document.getElementById('lobbyPlayerStatus').innerHTML = opponent ? '⚡ Sfidante in posizione!' : '⌛ In attesa di uno sfidante...';
+
         const startBtn = document.getElementById('startDuelBtn');
         if (startBtn) startBtn.disabled = !this.isHost || !opponent;
     },
 
-    renderDuelProgress() {
+    syncArenaState() {
+        if (!this.gameStarted) return;
         const me = this.players.find(p => p.username === this.playerName);
         const opponent = this.players.find(p => p.username !== this.playerName);
-        if (me) { document.getElementById('hudMeScore').textContent = `${me.score} pt`; document.getElementById('hudMeStreak').textContent = '🔥'.repeat(Math.min(5, this.streak)); }
+
+        if (me) {
+            document.getElementById('arenaMeName').textContent = `${me.username} (Tu)`;
+            document.getElementById('arenaMeScore').textContent = `${me.score} pt`;
+        }
         if (opponent) {
-            document.getElementById('hudOppName').textContent = opponent.username;
-            document.getElementById('hudOppScore').textContent = `${opponent.score} pt`;
+            document.getElementById('arenaOppName').textContent = opponent.username;
+            document.getElementById('arenaOppScore').textContent = `${opponent.score} pt`;
             if (opponent.active_powerup === 'freeze' && !this.frozenLocally) this.applyFreezeEffect();
         }
-        document.getElementById('duelProgressBars').innerHTML = this.players.map(p => {
-            const pct = (p.current_question_index / this.questions.length) * 100;
-            return `<div class="opponent-progress"><span>${p.username} ${Math.round(pct)}%</span><div class="opp-bar-bg"><div class="opp-bar-fill" style="width: ${pct}%"></div></div></div>`;
-        }).join('');
     },
 
     async finishDuel() {
-        document.getElementById('duelArenaSection').classList.add('hidden');
+        const overlay = document.getElementById('duelArenaOverlay');
+        overlay.classList.remove('active');
+
         document.getElementById('duelResultsSection').classList.remove('hidden');
+
         const ranked = [...this.players].sort((a, b) => b.score - a.score);
         const podium = document.getElementById('duelPodium');
         if (podium) {
@@ -354,51 +399,63 @@ const DuelManager = {
             podium.innerHTML = steps.map((p, i) => `<div class="podium-step ${['second', 'first', 'third'][i]}"><span class="podium-rank">#${[2, 1, 3][i]}</span><span>${p.username}</span><span>${p.score} PT</span></div>`).join('');
         }
         document.getElementById('duelResultsStats').innerHTML = ranked.map((p, i) => `<div class="result-row">#${i + 1} ${p.username} <b>${p.score} PT</b></div>`).join('');
-        if (typeof GamificationManager !== 'undefined') GamificationManager.addXP(50 + this.score, 'Duello Completato');
+
+        if (typeof GamificationManager !== 'undefined') {
+            GamificationManager.addXP(50 + this.score, 'Vittoria in Arena ⚔️');
+        }
+
+        if (this.pollInterval) clearInterval(this.pollInterval);
     },
 
     unlockPowerUp() {
         const t = ['freeze', 'shield', 'double'][Math.floor(Math.random() * 3)];
-        document.getElementById(`powerup_${t}`)?.classList.add('active');
+        const puNode = document.getElementById(`pu_${t}`);
+        if (puNode) {
+            puNode.classList.add('active');
+            UIManager.toast(`✨ SBLOCCATO: ${t.toUpperCase()}!`, 'success');
+        }
         this.activePowerUps.push(t);
-        UIManager.toast(`SBLOCCATO: ${t.toUpperCase()}! ⚡`, 'success');
     },
 
     async usePowerUp(type) {
         if (!this.activePowerUps.includes(type)) return;
-        document.getElementById(`powerup_${type}`)?.classList.remove('active');
+
+        document.getElementById(`pu_${type}`)?.classList.remove('active');
+
         if (type === 'double') this.powerUpEffects.doubleXP = true;
         else if (type === 'shield') this.powerUpEffects.shield = true;
         else if (type === 'freeze') await this.syncPowerUp('freeze');
+
         this.activePowerUps = this.activePowerUps.filter(p => p !== type);
     },
 
     async syncPowerUp(type) {
         await supabaseClient.from('quiz_players').update({ active_powerup: type }).eq('room_id', this.currentRoom.id).eq('username', this.playerName);
-        if (type === 'freeze') setTimeout(() => supabaseClient.from('quiz_players').update({ active_powerup: null }).eq('room_id', this.currentRoom.id).eq('username', this.playerName), 5000);
+        if (type === 'freeze') {
+            setTimeout(() => supabaseClient.from('quiz_players').update({ active_powerup: null }).eq('room_id', this.currentRoom.id).eq('username', this.playerName), 5000);
+        }
     },
 
     applyFreezeEffect() {
         this.frozenLocally = true;
         UIManager.toast('CONGELATO! ❄️', 'error');
-        document.querySelector('.duel-timer-orb').style.borderColor = '#60a5fa';
-        setTimeout(() => { this.frozenLocally = false; document.querySelector('.duel-timer-orb').style.borderColor = '#fbbf24'; }, 5000);
+        const ring = document.querySelector('.arena-timer-ring');
+        if (ring) {
+            ring.style.borderColor = '#60a5fa';
+            ring.style.boxShadow = '0 0 30px #60a5fa';
+        }
+        setTimeout(() => {
+            this.frozenLocally = false;
+            if (ring) {
+                ring.style.borderColor = 'rgba(255,255,255,0.1)';
+                ring.style.boxShadow = '0 0 30px rgba(0,0,0,0.5)';
+            }
+        }, 5000);
     },
 
-    createParticles(btnIndex) {
-        const btn = document.querySelectorAll('.duel-opt-btn')[btnIndex];
-        if (!btn) return;
-        const rect = btn.getBoundingClientRect();
-        for (let i = 0; i < 10; i++) {
-            const p = document.createElement('div');
-            p.className = 'particle';
-            p.style.left = (rect.left + rect.width / 2) + 'px';
-            p.style.top = (rect.top + rect.height / 2) + 'px';
-            p.style.setProperty('--x', (Math.random() * 200 - 100) + 'px');
-            p.style.setProperty('--y', (Math.random() * 200 - 100) + 'px');
-            p.style.animation = 'particleFly 0.6s ease-out forwards';
-            document.body.appendChild(p);
-            setTimeout(() => p.remove(), 600);
-        }
+    handleOpponentLeft() {
+        if (this.pollInterval) clearInterval(this.pollInterval);
+        UIManager.alert("Il tuo avversario ha lasciato l'Arena.", 'Arena Chiusa');
+        location.reload();
     }
 };

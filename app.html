@@ -814,15 +814,52 @@
                 <!-- DYNAMIC BG -->
                 <div class="duel-arena-bg" id="duelArenaBg"></div>
 
-                <div class="duel-container">
+                <!-- ⚔️ FULL SCREEN COUNTDOWN -->
+                <div id="arenaCountdownOverlay" class="arena-countdown-overlay">
+                    <div class="countdown-giant-number" id="arenaCountdownValue">3</div>
+                </div>
 
-                    <!-- TIMER OVERLAY -->
-                    <div id="duelCountdownOverlay" class="duel-overlay hidden">
-                        <div class="countdown-content">
-                            <h2 style="font-size: 2rem; margin-bottom: 1rem;">Preparati alla Battaglia</h2>
-                            <div id="countdownValue" class="countdown-number">3</div>
+                <!-- ⚔️ SPATIAL ARENA OVERLAY -->
+                <div id="duelArenaOverlay" class="duel-arena-overlay">
+                    <div class="arena-hud-top">
+                        <div class="arena-player-card is-me">
+                            <span class="arena-playerName" id="arenaMeName">Tu</span>
+                            <span class="arena-playerScore" id="arenaMeScore">0 pt</span>
+                        </div>
+
+                        <div class="arena-center-vitals">
+                            <div class="arena-timer-ring">
+                                <span id="arenaTimerValue">15</span>
+                            </div>
+                        </div>
+
+                        <div class="arena-player-card opponent">
+                            <span class="arena-playerName" id="arenaOppName">Avversario</span>
+                            <span class="arena-playerScore" id="arenaOppScore">0 pt</span>
                         </div>
                     </div>
+
+                    <div class="arena-main-content">
+                        <div class="arena-question-box">
+                            <div class="arena-question-text" id="arenaQuestionText">
+                                Caricamento sfida...
+                            </div>
+                        </div>
+
+                        <div class="arena-options-grid" id="arenaOptionsGrid">
+                            <!-- Options injected here -->
+                        </div>
+                    </div>
+
+                    <!-- POWERUPS -->
+                    <div class="arena-powerups">
+                        <div class="arena-pu-item" id="pu_freeze" onclick="DuelManager.usePowerUp('freeze')">❄️</div>
+                        <div class="arena-pu-item" id="pu_shield" onclick="DuelManager.usePowerUp('shield')">🛡️</div>
+                        <div class="arena-pu-item" id="pu_double" onclick="DuelManager.usePowerUp('double')">⚡</div>
+                    </div>
+                </div>
+
+                <div class="duel-container">
 
                     <!-- LOBBY -->
                     <div id="duelLobbySection" class="duel-card premium">
@@ -919,57 +956,6 @@
                             <button id="startDuelBtn" class="btn-primary" disabled
                                 style="width: 100%; max-width: 400px; padding: 20px; font-size: 1.4rem;"
                                 onclick="DuelManager.triggerStart()">INIZIA BATTAGLIA! ⚔️</button>
-                        </div>
-                    </div>
-
-                    <!-- ARENA -->
-                    <div id="duelArenaSection" class="duel-card premium hidden">
-                        <div class="arena-hud">
-                            <div class="player-hud me">
-                                <h4 id="hudMeName">Tu</h4>
-                                <div class="hud-score" id="hudMeScore">0 pt</div>
-                                <div class="hud-streak" id="hudMeStreak">🔥🔥🔥</div>
-                            </div>
-
-                            <div class="duel-timer-orb">
-                                <div class="duel-timer-fill" id="hudTimerFill"></div>
-                                <span id="hudTimerText">15</span>
-                            </div>
-
-                            <div class="player-hud opponent">
-                                <h4 id="hudOppName">Avversario</h4>
-                                <div class="hud-score" id="hudOppScore">0 pt</div>
-                                <div class="hud-streak" id="hudOppStreak"></div>
-                            </div>
-                        </div>
-
-                        <div class="duel-arena">
-                            <div id="duelQuestionContainer" class="duel-q-container">
-                                <!-- Questions will appear here -->
-                            </div>
-
-                            <!-- POWERUPS -->
-                            <div class="powerups-container" id="duelPowerups">
-                                <div class="powerup-slot" id="powerup_freeze"
-                                    onclick="DuelManager.usePowerUp('freeze')">
-                                    <span class="powerup-icon">❄️</span>
-                                    <span class="powerup-label">Freeze</span>
-                                </div>
-                                <div class="powerup-slot" id="powerup_shield"
-                                    onclick="DuelManager.usePowerUp('shield')">
-                                    <span class="powerup-icon">🛡️</span>
-                                    <span class="powerup-label">Shield</span>
-                                </div>
-                                <div class="powerup-slot" id="powerup_double"
-                                    onclick="DuelManager.usePowerUp('double')">
-                                    <span class="powerup-icon">⚡</span>
-                                    <span class="powerup-label">2x XP</span>
-                                </div>
-                            </div>
-
-                            <div class="duel-progress-bars" id="duelProgressBars" style="margin-top: 2rem;">
-                                <!-- Bars will appear here -->
-                            </div>
                         </div>
                     </div>
 

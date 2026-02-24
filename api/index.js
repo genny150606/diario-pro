@@ -16,10 +16,7 @@ const SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || 'eyJhbGciOiJIUzI1Ni
 
 let genAI = null;
 if (GENAI_KEY) {
-    try {
-        genAI = new GoogleGenerativeAI(GENAI_KEY);
-        console.log("Gemini initialized correctly");
-    }
+    try { genAI = new GoogleGenerativeAI(GENAI_KEY); }
     catch (e) { console.error("GenAI Init Error:", e); }
 }
 
@@ -38,7 +35,7 @@ app.get("/api/health", async (req, res) => {
 
     res.json({
         status: "alive",
-        version: "v11-zeta",
+        version: "v13-omega-max",
         gen_ai: !!genAI,
         env: { has_gemini: !!GENAI_KEY, has_supabase_key: !!process.env.SUPABASE_SERVICE_ROLE_KEY },
         connectivity: { supabase: supabaseStatus }
@@ -62,7 +59,7 @@ function safelyParseJSON(text, defaultValue = []) {
 // AI ENDPOINTS
 app.post("/api/generate-flashcards", async (req, res) => {
     try {
-        if (!genAI) throw new Error("GenAI not initialized - Contact Admin");
+        if (!genAI) throw new Error("GenAI not initialized");
         const { topic, amount = 5 } = req.body;
         const ai = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
         const result = await ai.generateContent(`Genera ${amount} flashcard su "${topic}" in formato JSON: [{"q": "domanda", "a": "risposta"}]`);
@@ -72,7 +69,7 @@ app.post("/api/generate-flashcards", async (req, res) => {
 
 app.post("/api/generate-duel-quiz", async (req, res) => {
     try {
-        if (!genAI) throw new Error("GenAI not initialized - Contact Admin");
+        if (!genAI) throw new Error("GenAI not initialized");
         const { topic } = req.body;
         const ai = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
         const result = await ai.generateContent(`Genera 10 domande a risposta multipla su "${topic}" in JSON: [{"question": "...", "options": ["...", "...", "..."], "answer": 0}]`);
@@ -82,7 +79,7 @@ app.post("/api/generate-duel-quiz", async (req, res) => {
 
 app.post("/api/chat", async (req, res) => {
     try {
-        if (!genAI) throw new Error("GenAI not initialized - Contact Admin");
+        if (!genAI) throw new Error("GenAI not initialized");
         const { message, history = [], stream = false } = req.body;
         const ai = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
         const contents = [...history.map(m => ({ role: m.role === 'user' ? 'user' : 'model', parts: [{ text: m.content }] })), { role: 'user', parts: [{ text: message }] }];
@@ -102,7 +99,7 @@ app.post("/api/chat", async (req, res) => {
 });
 
 // ============================================
-// SUPABASE PROXY (v11 ZETA)
+// SUPABASE PROXY (v13 OMEGA-MAX)
 // ============================================
 
 const USER_AGENTS = [
@@ -124,22 +121,30 @@ app.post("/api/supabase-proxy", async (req, res) => {
             const controller = new AbortController();
             const timeoutId = setTimeout(() => controller.abort(), 4500);
 
+            // Costruiamo gli header dinamicamente
             const headers = {
                 'apikey': SERVICE_KEY,
                 'Authorization': userAuth || `Bearer ${SERVICE_KEY}`,
-                'Accept': 'application/json',
                 'User-Agent': USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)],
-                'X-Client-Info': 'studyjournal-pro-proxy-v11'
+                'X-Client-Info': 'studyjournal-pro-proxy-v13'
             };
 
-            const isWrite = method && ['POST', 'PUT', 'PATCH', 'DELETE'].includes(method.toUpperCase());
-            if (isWrite && body) headers['Content-Type'] = 'application/json';
-
-            // Sanitizzazione header (rimuoviamo host, origin, referer che possono causare 520)
-            ['prefer', 'range', 'content-range'].forEach(k => {
-                const v = clientHeaders?.[k] || clientHeaders?.[k.toLowerCase()] || clientHeaders?.[k.toUpperCase()];
-                if (v && !['host', 'origin', 'referer'].includes(k.toLowerCase())) headers[k] = v;
+            // FOARDING CRITICO DI TUTTI GLI HEADER SUPABASE
+            const allowedHeaders = ['accept', 'prefer', 'range', 'content-range', 'content-type'];
+            Object.keys(clientHeaders || {}).forEach(k => {
+                const lowK = k.toLowerCase();
+                if (allowedHeaders.includes(lowK)) {
+                    headers[lowK] = clientHeaders[k];
+                }
             });
+
+            // Fallback se non specificati
+            if (!headers['accept']) headers['accept'] = 'application/json';
+
+            const isWrite = method && ['POST', 'PUT', 'PATCH', 'DELETE'].includes(method.toUpperCase());
+            if (isWrite && body && !headers['content-type']) {
+                headers['content-type'] = 'application/json';
+            }
 
             const fetchRes = await fetch(targetUrl, {
                 method: method || 'GET',
@@ -152,6 +157,7 @@ app.post("/api/supabase-proxy", async (req, res) => {
 
             if (fetchRes.status < 500) {
                 res.status(fetchRes.status);
+                // Forward delle risposte headers
                 ['content-type', 'content-range', 'preference-applied', 'location'].forEach(k => {
                     const v = fetchRes.headers.get(k);
                     if (v) res.setHeader(k, v);
@@ -171,8 +177,7 @@ app.post("/api/supabase-proxy", async (req, res) => {
         res.status(502).json({
             error: "Proxy Failed",
             message: lastErr?.message,
-            detail: lastErr?.stack ? lastErr.stack.split('\n')[0] : "No detail",
-            version: "v11-zeta"
+            version: "v13-omega-max"
         });
     }
 });

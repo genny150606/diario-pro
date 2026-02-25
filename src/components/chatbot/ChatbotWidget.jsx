@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
+import { Sparkles, Send, X, Bot } from 'lucide-react'
 import { useData } from '../../hooks/useData'
 import './ChatbotWidget.css'
 
@@ -25,7 +26,7 @@ export default function ChatbotWidget() {
             if (messages.length === 0) {
                 setMessages([{
                     role: 'ai',
-                    content: '👋 Ciao! Sono il tuo assistente AI.\n\nPosso aiutarti con:\n• 📝 **Generare appunti** — "Crea appunti su [argomento]"\n• 🎴 **Creare flashcard** — "Genera flashcard su [argomento]"\n• ⭐ **Aggiungere voti** — "Aggiungi 8 in matematica"\n• ✅ **Aggiungere compiti** — "Compito di storia per venerdì"\n• 🧭 **Navigazione** — "Vai ai voti"\n\nChiedi pure!'
+                    content: '👋 Ciao! Sono il tuo assistente AI personale.\n\nSono qui per aiutarti a studiare in modo più intelligente e veloce. Cosa vuoi fare oggi?'
                 }])
             }
         }
@@ -39,8 +40,8 @@ export default function ChatbotWidget() {
             .replace(/\n/g, '<br>')
     }
 
-    const handleSend = useCallback(async () => {
-        const text = input.trim()
+    const handleSend = useCallback(async (forcedText = null) => {
+        const text = (forcedText || input).trim()
         if (!text || loading) return
 
         setInput('')
@@ -75,8 +76,8 @@ export default function ChatbotWidget() {
             let fullText = ''
             const aiMsgId = Date.now()
 
-            // Add empty AI message
-            setMessages(prev => [...prev, { role: 'ai', content: '...', id: aiMsgId }])
+            // Add empty AI message with typing indicator
+            setMessages(prev => [...prev, { role: 'ai', content: '<div class="typing-dots"><span></span><span></span><span></span></div>', id: aiMsgId }])
 
             while (true) {
                 const { done, value } = await reader.read()
@@ -136,14 +137,16 @@ export default function ChatbotWidget() {
                 onClick={() => setIsOpen(!isOpen)}
                 aria-label="AI Chatbot"
             >
-                {isOpen ? '✕' : '🤖'}
+                {isOpen ? <X size={24} strokeWidth={2.5} /> : <Sparkles size={24} strokeWidth={2.5} />}
             </button>
 
             {/* Chat Window */}
             {isOpen && (
                 <div className="chatbot-window">
                     <div className="chatbot-header">
-                        <div className="chatbot-avatar">🤖</div>
+                        <div className="chatbot-avatar">
+                            <Bot size={20} strokeWidth={2.5} color="#fff" />
+                        </div>
                         <div>
                             <h4>StudyJournal AI</h4>
                             <span className="chatbot-status">
@@ -158,6 +161,20 @@ export default function ChatbotWidget() {
                                 <div dangerouslySetInnerHTML={{ __html: formatMarkdown(msg.content) }} />
                             </div>
                         ))}
+
+                        {messages.length === 1 && !loading && (
+                            <div className="chatbot-suggestions">
+                                <button onClick={() => handleSend("Crea degli appunti riassuntivi su...")} className="suggestion-chip">
+                                    📝 Crea Appunti
+                                </button>
+                                <button onClick={() => handleSend("Genera 5 flashcard su...")} className="suggestion-chip">
+                                    🎴 Genera Flashcard
+                                </button>
+                                <button onClick={() => handleSend("Puoi spiegarmi in modo semplice...")} className="suggestion-chip">
+                                    🧠 Spiegami un concetto
+                                </button>
+                            </div>
+                        )}
                         <div ref={messagesEndRef} />
                     </div>
 
@@ -176,7 +193,7 @@ export default function ChatbotWidget() {
                             onClick={handleSend}
                             disabled={loading || !input.trim()}
                         >
-                            {loading ? '⏳' : '➤'}
+                            {loading ? <span className="spinner"></span> : <Send size={18} strokeWidth={2.5} />}
                         </button>
                     </div>
                 </div>

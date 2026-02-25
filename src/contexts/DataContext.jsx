@@ -109,16 +109,23 @@ export function DataProvider({ children }) {
                     let finalData = sanitizeData(row.data)
 
                     if (localData) {
-                        // Compare local vs cloud to see who has more data
+                        // Compare local vs cloud using lastModified timestamp
+                        const cloudModified = finalData.lastModified || 0
+                        const localModified = localData.lastModified || 0
+
                         const cloudNotes = finalData.notes.length
                         const localNotes = localData.notes.length
                         const cloudFlashcards = finalData.flashcards.length
                         const localFlashcards = localData.flashcards.length
 
-                        console.log(`[DataContext] Merge Check - Cloud [Notes: ${cloudNotes}, Flashcards: ${cloudFlashcards}] vs Local [Notes: ${localNotes}, Flashcards: ${localFlashcards}]`)
+                        console.log(`[DataContext] Merge Check - Cloud [Modified: ${cloudModified}, Notes: ${cloudNotes}] vs Local [Modified: ${localModified}, Notes: ${localNotes}]`)
 
-                        if (localNotes > cloudNotes || localFlashcards > cloudFlashcards) {
-                            console.log('[DataContext] Local storage has MORE data! Preferring local storage to prevent data loss.')
+                        // Determine if local is newer (via timestamp) or if missing timestamps, guess by assuming local is newer if lengths are >=
+                        const isLocalNewer = localModified > cloudModified ||
+                            (localModified === 0 && cloudModified === 0 && localNotes >= cloudNotes && localFlashcards >= cloudFlashcards)
+
+                        if (isLocalNewer) {
+                            console.log('[DataContext] Local storage is NEWER! Preferring local storage to prevent data loss.')
                             finalData = localData
 
                             // Re-sync the rich local data back up to the cloud!
@@ -167,6 +174,8 @@ export function DataProvider({ children }) {
 
         // Prevent state mutation bugs! Deep clone before modifying nested counters
         const updated = JSON.parse(JSON.stringify(newData))
+        updated.lastModified = Date.now() // Ensure timestamp exists for merge logic
+
         if (!updated.counters) updated.counters = {}
 
         const currentNotesCount = (updated.notes || []).length

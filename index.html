@@ -71,6 +71,16 @@
                         </div>
                         <div class="stat-divider"></div>
                         <div class="stat-group">
+                            <span class="stat-val" id="previewFlashcards">...</span>
+                            <span class="stat-lab">Flashcard</span>
+                        </div>
+                        <div class="stat-divider"></div>
+                        <div class="stat-group">
+                            <span class="stat-val" id="previewDuels">...</span>
+                            <span class="stat-lab">Duelli</span>
+                        </div>
+                        <div class="stat-divider"></div>
+                        <div class="stat-group">
                             <span class="stat-val" id="previewUsers">...</span>
                             <span class="stat-lab">Menti</span>
                         </div>
@@ -152,9 +162,13 @@
                 const { data: stats } = await sb.from('site_stats').select('key, value');
 
                 const notes = stats?.find(s => s.key === 'total_notes_created')?.value || 0;
+                const flashcards = stats?.find(s => s.key === 'total_flashcards_created')?.value || 0;
+                const duels = stats?.find(s => s.key === 'total_duels_completed')?.value || 0;
 
                 document.getElementById('previewUsers').textContent = users || '0';
                 document.getElementById('previewNotes').textContent = notes || '0';
+                document.getElementById('previewFlashcards').textContent = flashcards || '0';
+                document.getElementById('previewDuels').textContent = duels || '0';
             } catch (err) { console.warn(err); }
         }
 

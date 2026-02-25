@@ -394,45 +394,83 @@
 
     .dynamic-island-nav {
         min-width: calc(100% - 2rem);
+        top: 1rem;
+        padding: 0.5rem 0.8rem;
     }
 
     .nav-content {
         justify-content: space-between;
-        padding: 0 0.5rem;
+        gap: 1rem;
+    }
+
+    .hero-section {
+        padding: 6rem 1.5rem 4rem;
     }
 
     .hero-title-main {
-        font-size: 4rem;
-    }
-
-    .hero-description {
-        font-size: 1.1rem;
-    }
-
-    .card-inner {
-        flex-direction: column;
-        gap: 3rem;
-    }
-
-    .stat-divider {
-        width: 60px;
-        height: 1px;
-    }
-
-    .preview-glass-card {
-        padding: 3rem 2rem;
-    }
-
-    .stat-val {
-        font-size: 3rem;
-    }
-
-    .section-title-minimal {
         font-size: 3.5rem;
     }
 
+    .hero-description {
+        font-size: 1rem;
+        margin-bottom: 3rem;
+    }
+
+    .hero-actions-radical {
+        flex-direction: column;
+        width: 100%;
+        gap: 1rem;
+    }
+
+    .cta-primary-glass {
+        width: 100%;
+        text-align: center;
+        padding: 1.2rem 2rem;
+    }
+
+    .hero-floating-preview {
+        margin-top: 4rem;
+    }
+
+    .card-inner {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 2rem;
+    }
+
+    .stat-divider {
+        display: none;
+    }
+
+    .preview-glass-card {
+        padding: 2.5rem 1.5rem;
+        border-radius: 2rem;
+    }
+
+    .stat-val {
+        font-size: 2.2rem;
+    }
+
+    .section-title-minimal {
+        font-size: 3.2rem;
+    }
+
     .section-desc-minimal {
-        font-size: 1.4rem;
+        font-size: 1.3rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .hero-title-main {
+        font-size: 2.8rem;
+    }
+
+    .card-inner {
+        gap: 1.5rem;
+    }
+
+    .stat-val {
+        font-size: 1.8rem;
     }
 }
 

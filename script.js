@@ -1449,22 +1449,21 @@ document.addEventListener('DOMContentLoaded', async () => {
         document.body.classList.add('dark-mode');
     }
 
-    // ── 1. AWAIT cloud data (source of truth) ──
-    let appData;
-    try {
-        if (window.AuthManager && AuthManager.user && window.CloudStorage) {
-            // Full async load from Supabase → hydrates localStorage cache
-            appData = await StorageManager.loadFromCloud();
-        } else {
-            // Not logged in yet — use sync cache (may be empty, that's OK)
-            appData = StorageManager.load();
-        }
-    } catch (err) {
-        console.error('Init data load error:', err);
-        appData = StorageManager.load();
+    // ── 1. WAIT for auth to fully resolve (session + cloud data) ──
+    // AuthManager.init() is called from auth.js DOMContentLoaded.
+    // Its `ready` promise resolves AFTER cloud data is loaded and
+    // managers are re-initialized via _reinitManagers().
+    // We add a 10-second timeout to prevent hanging if auth fails silently.
+    if (window.AuthManager && AuthManager.ready) {
+        await Promise.race([
+            AuthManager.ready,
+            new Promise(r => setTimeout(r, 10000))
+        ]);
     }
 
-    // ── 2. Initialize ALL managers with cloud-hydrated data ──
+    // ── 2. If auth loaded managers, they're already initialized.
+    //        If not (no user or timeout), init with whatever cache we have. ──
+    const appData = StorageManager.load();
     DiaryManager.init(appData);
     TaskManager.init(appData);
     GradeManager.init(appData);

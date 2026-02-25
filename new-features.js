@@ -552,6 +552,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // Aggiorna storage quando vengono aggiunti dati nuovi
 function saveAllData() {
+    if (typeof _dataReady !== 'undefined' && !_dataReady) return; // Wait for cloud hydration
     const appData = StorageManager.load();
     appData.notes = NotesManager.data;
     appData.flashcards = FlashcardManager.data;

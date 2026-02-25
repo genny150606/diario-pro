@@ -82,8 +82,13 @@ const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
 
 const AuthManager = {
     user: null,
+    _readyResolve: null,
+    ready: null, // Promise that resolves when auth + cloud data are loaded
 
     async init() {
+        // Create the ready promise
+        this.ready = new Promise(resolve => { this._readyResolve = resolve; });
+
         try {
             const { data: { session } } = await supabaseClient.auth.getSession();
             this.user = session?.user || null;
@@ -93,62 +98,48 @@ const AuthManager = {
             // ── AUTH GATE: Show login overlay if not authenticated ──
             if (isAppPage && !this.user) {
                 this.showAuthGate();
+                // Resolve ready even without user (empty data is fine)
+                this._readyResolve();
             }
 
             // Listen for auth changes
-            supabaseClient.auth.onAuthStateChange((event, session) => {
+            supabaseClient.auth.onAuthStateChange(async (event, session) => {
                 console.log('Auth Event:', event);
                 this.user = session?.user || null;
                 this.updateUI();
 
-                if (event === 'SIGNED_IN' || event === 'INITIAL_SESSION') {
-                    // Hide auth overlay, reveal app
+                if ((event === 'SIGNED_IN' || event === 'INITIAL_SESSION') && session) {
                     if (event === 'SIGNED_IN') this.hideAuthGate();
 
                     // SELF-HEALING: Ensure users_data row exists
-                    if (session && session.user) {
-                        const uid = session.user.id;
-                        supabaseClient
-                            .from('users_data')
-                            .select('id')
-                            .eq('id', uid)
-                            .maybeSingle()
-                            .then(({ data }) => {
-                                if (!data) {
-                                    // Row missing? Create it now.
-                                    console.log('🚧 Fixing missing users_data row for:', uid);
-                                    return supabaseClient.from('users_data').insert([{ id: uid, data: {}, updated_at: new Date() }]);
-                                }
-                            })
-                            .catch(err => console.warn('User row check failed', err));
-                    }
+                    const uid = session.user.id;
+                    supabaseClient
+                        .from('users_data')
+                        .select('id')
+                        .eq('id', uid)
+                        .maybeSingle()
+                        .then(({ data }) => {
+                            if (!data) {
+                                console.log('Fixing missing users_data row for:', uid);
+                                return supabaseClient.from('users_data').insert([{ id: uid, data: {}, updated_at: new Date() }]);
+                            }
+                        })
+                        .catch(err => console.warn('User row check failed', err));
 
-                    // Load this user's data from Supabase into user-scoped cache
-                    if (typeof CloudStorage !== 'undefined') {
-                        CloudStorage._clearLegacy(); // remove shared key
-                        CloudStorage.load(session.user.id).then(() => {
-                            // Refresh UI after cloud data is loaded
-                            if (typeof updateDashboard === 'function') updateDashboard();
-                            if (typeof loadNotes === 'function') loadNotes();
-                            if (typeof loadTasks === 'function') loadTasks();
-                            if (typeof loadGrades === 'function') loadGrades();
-                            if (typeof loadFlashcards === 'function') loadFlashcards();
-                            if (typeof SocialManager !== 'undefined') SocialManager.init();
-                        });
-                    }
-                }
-
-                if (event === 'INITIAL_SESSION' && session) {
-                    // Load this user's data from Supabase on page load
+                    // Load cloud data and re-init managers
                     if (typeof CloudStorage !== 'undefined') {
                         CloudStorage._clearLegacy();
-                        CloudStorage.load(session.user.id);
+                        await CloudStorage.load(session.user.id);
+                        // Re-initialize all managers with fresh cloud data
+                        this._reinitManagers();
                     }
+
+                    // Resolve the ready promise
+                    this._readyResolve();
                 }
 
                 if (event === 'SIGNED_OUT') {
                     sessionStorage.removeItem('cloudSyncDone');
-                    // Clear THIS user's local cache so next account starts fresh
                     if (typeof CloudStorage !== 'undefined' && this.user) {
                         CloudStorage.clearCache(this.user.id);
                     }
@@ -162,7 +153,22 @@ const AuthManager = {
             this.updateUI();
         } catch (err) {
             console.error('Auth Init Error:', err);
+            this._readyResolve(); // Resolve even on error to unblock app
         }
+    },
+
+    // Re-initialize all data managers from cloud-hydrated cache
+    _reinitManagers() {
+        if (typeof StorageManager === 'undefined') return;
+        const appData = StorageManager.load();
+        if (typeof DiaryManager !== 'undefined') DiaryManager.init(appData);
+        if (typeof TaskManager !== 'undefined') TaskManager.init(appData);
+        if (typeof GradeManager !== 'undefined') GradeManager.init(appData);
+        if (typeof PomodoroManager !== 'undefined') PomodoroManager.init(appData);
+        if (typeof NotesManager !== 'undefined') NotesManager.init(appData);
+        if (typeof FlashcardManager !== 'undefined') FlashcardManager.init(appData);
+        if (typeof updateDashboard === 'function') updateDashboard();
+        if (typeof SocialManager !== 'undefined') SocialManager.init();
     },
 
     showAuthGate() {

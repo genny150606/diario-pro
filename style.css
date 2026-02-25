@@ -1,21 +1,23 @@
 ﻿/* ── SECTION TRANSITIONS (GPU ACCELERATED) ── */
 .section {
-    opacity: 0;
-    visibility: hidden;
-    position: absolute;
-    transform: translateY(10px);
-    transition: opacity 0.3s ease, transform 0.3s ease, visibility 0s linear 0.3s;
-    pointer-events: none;
-    width: 100%;
+    display: none;
 }
 
 .section.active {
-    opacity: 1;
-    visibility: visible;
-    position: relative;
-    transform: translateY(0);
-    transition: opacity 0.3s ease, transform 0.3s ease, visibility 0s linear 0s;
-    pointer-events: auto;
+    display: block;
+    animation: sectionEnter 0.3s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes sectionEnter {
+    from {
+        opacity: 0;
+        transform: translateY(12px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 /* ── HERO HEADERS (IN-APP) ── */

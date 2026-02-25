@@ -25,7 +25,7 @@ header {
     gap: 0.3rem;
     box-shadow: var(--shadow-lg);
     transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
-    overflow: hidden;
+    overflow: visible;
 }
 
 /* ── Desktop: wide pill ── */
@@ -37,7 +37,6 @@ header {
         height: 3.5rem;
         padding: 0 2rem;
         gap: 2rem;
-        overflow: visible;
     }
 }
 

@@ -116,6 +116,12 @@
     --glass-bg: rgba(255, 255, 255, 0.72);
     --glass-border: rgba(0, 0, 0, 0.06);
     --glass-blur: blur(20px) saturate(180%);
+    --glass-bg-deep: rgba(255, 255, 255, 0.82);
+    --glass-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.07);
+
+    /* ── VIBRANT GRADIENTS ── */
+    --grad-aurora: linear-gradient(135deg, #007AFF, #5856D6, #AF52DE, #FF2D55);
+    --grad-premium: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%);
 
     /* ── LAYOUT ── */
     --header-height: clamp(3rem, 8vh, 4rem);
@@ -163,6 +169,8 @@
 
     --glass-bg: rgba(28, 28, 30, 0.72);
     --glass-border: rgba(255, 255, 255, 0.06);
+    --glass-bg-deep: rgba(20, 20, 22, 0.85);
+    --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
 
     --shadow-xs: 0 0 1px rgba(0, 0, 0, 0.3), 0 2px 4px rgba(0, 0, 0, 0.25);
     --shadow-sm: 0 0 1px rgba(0, 0, 0, 0.3), 0 4px 8px rgba(0, 0, 0, 0.3);

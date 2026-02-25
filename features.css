@@ -98,14 +98,14 @@
     max-width: calc(100vw - var(--space-12));
     height: 600px;
     max-height: 80vh;
-    background: rgba(255, 255, 255, 0.75);
-    backdrop-filter: blur(25px) saturate(180%);
-    -webkit-backdrop-filter: blur(25px) saturate(180%);
-    border: 1px solid rgba(255, 255, 255, 0.5);
+    background: var(--glass-bg);
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
+    border: 1px solid var(--glass-border);
     border-radius: 24px;
     display: flex;
     flex-direction: column;
-    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(255, 255, 255, 0.2);
+    box-shadow: var(--glass-shadow), var(--shadow-xl);
     overflow: hidden;
     transform-origin: bottom right;
     animation: chatOpen 0.5s cubic-bezier(0.16, 1, 0.3, 1);
@@ -452,8 +452,9 @@ body.dark-mode .chat-avatar {
 }
 
 .flashcard {
-    background: var(--color-bg-elevated);
-    border: 1px solid var(--color-border);
+    background: var(--glass-bg);
+    backdrop-filter: var(--glass-blur);
+    border: 1px solid var(--glass-border);
     border-radius: var(--radius-xl);
     padding: var(--space-6);
     min-height: 200px;
@@ -463,14 +464,14 @@ body.dark-mode .chat-avatar {
     align-items: center;
     text-align: center;
     cursor: pointer;
-    transition: all var(--duration-base) var(--ease-out);
-    box-shadow: var(--shadow-xs);
+    transition: all var(--duration-base) var(--ease-spring);
+    box-shadow: var(--glass-shadow);
 }
 
 .flashcard:hover {
     box-shadow: var(--shadow-md), 0 0 20px var(--color-accent-bg);
-    transform: translateY(-4px);
-    border-color: var(--color-accent-bg-strong);
+    transform: translateY(-8px) scale(1.02);
+    border-color: var(--color-accent);
 }
 
 .flashcard-difficulty {
@@ -486,19 +487,20 @@ body.dark-mode .chat-avatar {
 
 /* ── NOTES ── */
 .note-card {
-    background: var(--color-bg-elevated);
-    border: 1px solid var(--color-border);
+    background: var(--glass-bg);
+    backdrop-filter: var(--glass-blur);
+    border: 1px solid var(--glass-border);
     border-radius: var(--radius-xl);
     padding: var(--space-6);
     margin-bottom: var(--space-4);
-    transition: all var(--duration-base) var(--ease-out);
-    box-shadow: var(--shadow-xs);
+    transition: all var(--duration-base) var(--ease-spring);
+    box-shadow: var(--glass-shadow);
 }
 
 .note-card:hover {
     box-shadow: var(--shadow-sm), 0 0 16px var(--color-accent-bg);
-    border-color: var(--color-accent-bg-strong);
-    transform: translateY(-2px);
+    border-color: var(--color-accent);
+    transform: translateY(-5px);
 }
 
 /* Note select item (flashcard gen modal) */

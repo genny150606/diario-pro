@@ -3,6 +3,7 @@ const urlsToCache = [
     '/app.html',
     '/index.html',
     '/favicon.png',
+    '/home.css',
     '/theme.css',
     '/global.css',
     '/layout.css',
@@ -14,6 +15,7 @@ const urlsToCache = [
     '/script.js',
     '/auth.js',
     '/ui-manager.js',
+    '/ui-interactions.js',
     '/cloud-storage.js'
 ];
 

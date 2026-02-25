@@ -125,7 +125,12 @@ const DiaryManager = {
             stress: parseInt(entry.stress),
             notes: entry.notes
         };
-        const appData = StorageManager.load(); if (!appData.diaryEntries) appData.diaryEntries = []; appData.diaryEntries.push(newEntry); StorageManager.save(appData); this.data = appData.diaryEntries; this.sortByDate();
+        const appData = StorageManager.load();
+        if (!appData.diaryEntries) appData.diaryEntries = [];
+        appData.diaryEntries.push(newEntry);
+        StorageManager.save(appData);
+        this.data = appData.diaryEntries;
+        this.sortByDate();
 
         // GAMIFICATION HOOK
         GamificationManager.addXP(15, 'Nuova Pagina di Diario');
@@ -188,7 +193,12 @@ const TaskManager = {
             priority: task.priority,
             completed: false
         };
-        const appData = StorageManager.load(); if (!appData.tasks) appData.tasks = []; appData.tasks.push(newTask); StorageManager.save(appData); this.data = appData.tasks; this.sortByDueDate();
+        const appData = StorageManager.load();
+        if (!appData.tasks) appData.tasks = [];
+        appData.tasks.push(newTask);
+        StorageManager.save(appData);
+        this.data = appData.tasks;
+        this.sortByDueDate();
 
         // GAMIFICATION HOOK
         GamificationManager.addXP(5, 'Nuovo Compito Aggiunto');
@@ -253,7 +263,12 @@ const GradeManager = {
             weight: parseInt(grade.weight),
             date: grade.date
         };
-        const appData = StorageManager.load(); if (!appData.grades) appData.grades = []; appData.grades.push(newGrade); StorageManager.save(appData); this.data = appData.grades; this.sortByDate();
+        const appData = StorageManager.load();
+        if (!appData.grades) appData.grades = [];
+        appData.grades.push(newGrade);
+        StorageManager.save(appData);
+        this.data = appData.grades;
+        this.sortByDate();
 
         // GAMIFICATION HOOK: More XP for good grades!
         const xp = grade.value >= 8 ? 30 : (grade.value >= 6 ? 20 : 10);
@@ -362,7 +377,6 @@ const PomodoroManager = {
 
     tick() {
         this.timeLeft--;
-        this.timeLeft = this.studyDuration * 60;
         AppManager.updateTimer();
 
         if (this.timeLeft <= 0) {
@@ -400,7 +414,6 @@ const PomodoroManager = {
         }
 
         this.isRunning = false;
-        this.timeLeft = this.studyDuration * 60;
         AppManager.updateTimer();
         this.notifyCompletion();
     },

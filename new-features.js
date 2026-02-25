@@ -320,9 +320,17 @@ const UIManagerExtensions = {
                     <p style="margin-top: 0.5rem;">${note.content.substring(0, 100)}...</p>
                     <small style="color: var(--text-secondary);">${new Date(note.date).toLocaleDateString('it-IT')}</small>
                 </div>
-                <button class="btn btn-delete btn-small" onclick="NotesManager.deleteNote(${note.id}); UIManagerExtensions.renderNotes();">🗑️</button>
+                <div style="display:flex;gap:0.4rem;align-items:center;">
+                    <button class="btn btn-small" style="background:none;border:1px solid var(--color-border);border-radius:0.5rem;padding:0.4rem;cursor:pointer;color:var(--color-text-secondary);" onclick="ShareManager.openShareModal('note', ${note.id})" title="Condividi">
+                        <i data-lucide="share-2" style="width:16px;height:16px;"></i>
+                    </button>
+                    <button class="btn btn-delete btn-small" onclick="NotesManager.deleteNote(${note.id}); UIManagerExtensions.renderNotes();">
+                        <i data-lucide="trash-2" style="width:16px;height:16px;"></i>
+                    </button>
+                </div>
             </div>
         `).join('');
+        if (window.lucide) lucide.createIcons();
     },
 
     renderGoals() {

@@ -44,6 +44,7 @@
     <script src="ui-manager.js" defer></script>
     <script src="hamburger-menu.js" defer></script>
     <script src="social-manager.js" defer></script>
+    <script src="share-manager.js" defer></script>
 
 
 
@@ -69,6 +70,20 @@
 </head>
 
 <body>
+    <!-- ═══════════ SHARE RESOURCE MODAL ═══════════ -->
+    <div id="shareResourceModal" class="calendar-modal">
+        <div class="calendar-container" style="max-width:400px;">
+            <div class="calendar-header" style="margin-bottom:1rem;">
+                <h3 style="margin:0;">Condividi con un amico</h3>
+                <button onclick="ShareManager.closeShareModal()"
+                    style="background:none;border:none;color:var(--color-text);opacity:0.5;cursor:pointer;font-size:1.2rem;">&times;</button>
+            </div>
+            <div id="shareFriendsList" class="share-friends-container">
+                <p class="empty-state">Caricamento amici...</p>
+            </div>
+        </div>
+    </div>
+
     <!-- ═══════════ CUSTOM MODALS (UIManager) ═══════════ -->
     <div id="alertModal"
         style="display:none; position:fixed; inset:0; z-index:200000; background:rgba(0,0,0,0.7); backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px); align-items:center; justify-content:center;">
@@ -884,6 +899,21 @@
                         <div id="friendsList"></div>
                     </div>
                 </div>
+
+                <!-- INBOX RISORSE RICEVUTE -->
+                <div class="card" style="margin-top:1.5rem;">
+                    <div class="duel-lobby-header">
+                        <i data-lucide="inbox"></i>
+                        <div>
+                            <h2 class="duel-lobby-title">Inbox Risorse <span id="inboxBadge" class="inbox-badge"
+                                    style="display:none;">0</span></h2>
+                            <p class="duel-lobby-subtitle">Note e flashcard ricevute dai tuoi amici</p>
+                        </div>
+                    </div>
+                    <div id="sharedInboxList">
+                        <p class="empty-state">Caricamento...</p>
+                    </div>
+                </div>
             </section>
 
             <!-- FOOTER -->
@@ -1199,6 +1229,7 @@
                     if (typeof updatePresenceStats === 'function') updatePresenceStats();
                 } else if (sectionId === 'social') {
                     if (window.SocialManager) SocialManager.init();
+                    if (window.ShareManager) ShareManager.fetchInbox();
                 } else if (sectionId === 'gamification') {
                     if (window.GamificationManager) GamificationManager.renderGamificationPage();
                 }

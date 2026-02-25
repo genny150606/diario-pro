@@ -1296,3 +1296,145 @@
         font-size: 0.8rem;
     }
 }
+
+/* ============================================
+   SHARE & INBOX — RESOURCE SHARING
+   ============================================ */
+
+.share-friends-container {
+    max-height: 300px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+}
+
+.share-friend-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.75rem 1rem;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--color-border, rgba(255, 255, 255, 0.06));
+    border-radius: 0.75rem;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.share-friend-item:hover {
+    background: rgba(255, 255, 255, 0.07);
+    border-color: var(--color-accent, #5B9FF3);
+}
+
+.share-friend-info {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-weight: 600;
+    color: var(--color-text, #fff);
+}
+
+.share-friend-info [data-lucide] {
+    width: 18px;
+    height: 18px;
+    color: var(--color-text-secondary, #98989D);
+}
+
+.share-send-icon {
+    width: 16px;
+    height: 16px;
+    color: var(--color-accent, #5B9FF3);
+    opacity: 0;
+    transition: opacity 0.2s;
+}
+
+.share-friend-item:hover .share-send-icon {
+    opacity: 1;
+}
+
+/* ── Inbox Items ── */
+.inbox-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 1rem;
+    margin-bottom: 0.5rem;
+}
+
+.inbox-item-info {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex: 1;
+    min-width: 0;
+}
+
+.inbox-item-icon {
+    width: 2.5rem;
+    height: 2.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(91, 159, 243, 0.1);
+    border-radius: 0.5rem;
+    flex-shrink: 0;
+}
+
+.inbox-item-icon [data-lucide] {
+    width: 18px;
+    height: 18px;
+    color: var(--color-accent, #5B9FF3);
+}
+
+.inbox-item-title {
+    display: block;
+    font-weight: 700;
+    font-size: 0.95rem;
+    color: var(--color-text, #fff);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.inbox-item-sender {
+    display: block;
+    font-size: 0.8rem;
+    color: var(--color-text-tertiary, #636366);
+    margin-top: 0.15rem;
+}
+
+.inbox-item-actions {
+    display: flex;
+    gap: 0.4rem;
+    flex-shrink: 0;
+}
+
+.inbox-item-actions .btn-small {
+    padding: 0.4rem 0.75rem;
+    font-size: 0.8rem;
+    border-radius: 0.5rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+}
+
+.inbox-item-actions .btn-small [data-lucide] {
+    width: 14px;
+    height: 14px;
+}
+
+.inbox-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--color-accent, #5B9FF3);
+    color: #fff;
+    font-size: 0.7rem;
+    font-weight: 800;
+    width: 1.2rem;
+    height: 1.2rem;
+    border-radius: 50%;
+    margin-left: 0.4rem;
+    vertical-align: middle;
+}

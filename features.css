@@ -358,7 +358,7 @@
 /* ── NOTE ITEMS — MINIMAL LIST ── */
 .note-item {
     background: rgba(255, 255, 255, 0.02);
-    border: 1px solid rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--color-border);
     border-radius: 1.5rem;
     padding: 1.5rem;
     margin-bottom: 1rem;
@@ -366,8 +366,8 @@
 }
 
 .note-item:hover {
-    background: rgba(255, 255, 255, 0.05);
-    border-color: rgba(255, 255, 255, 0.1);
+    background: var(--color-bg-secondary);
+    border-color: var(--color-border-strong);
     transform: translateX(10px);
 }
 
@@ -375,14 +375,140 @@
     font-family: 'Outfit', sans-serif;
     font-weight: 700;
     font-size: 1.2rem;
-    color: #fff;
+    color: var(--color-text);
     margin-bottom: 0.5rem;
 }
 
 /* ── DUEL — NEON MINIMALISM ── */
 .duel-card {
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.01) 100%);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: linear-gradient(135deg, var(--color-bg-secondary) 0%, var(--color-bg) 100%);
+    border: 1px solid var(--color-border);
     border-radius: 3rem;
     padding: 3rem;
+}
+
+/* ── MODALS — PREMIUM GLASS ── */
+.calendar-modal {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    z-index: 20000;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+.calendar-container {
+    background: var(--glass-bg-deep);
+    backdrop-filter: var(--glass-blur);
+    border: 1px solid var(--glass-border);
+    border-radius: 2.5rem;
+    padding: 2.5rem;
+    width: 100%;
+    max-width: 450px;
+    box-shadow: var(--shadow-xl);
+}
+
+.calendar-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+}
+
+.calendar-header h3 {
+    margin: 0;
+    font-family: var(--font-ui);
+    font-weight: 800;
+    color: var(--color-text);
+}
+
+.calendar-weekdays {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    text-align: center;
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--color-text-tertiary);
+    margin-bottom: 1rem;
+}
+
+.calendar-days {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 8px;
+}
+
+.calendar-day {
+    aspect-ratio: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: all 0.2s;
+    color: var(--color-text);
+}
+
+.calendar-day:hover {
+    background: var(--color-bg-secondary);
+}
+
+.calendar-day.selected {
+    background: var(--color-accent);
+    color: #fff;
+    font-weight: 700;
+}
+
+.calendar-footer {
+    margin-top: 2rem;
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+}
+
+/* ── NOTIFICATIONS — XP TOAST ── */
+.xp-toast {
+    position: fixed;
+    bottom: 7rem;
+    left: 50%;
+    transform: translateX(-50%) translateY(100px);
+    background: var(--glass-bg-deep);
+    backdrop-filter: var(--glass-blur);
+    border: 1px solid var(--color-accent-bg-strong);
+    padding: 1rem 2rem;
+    border-radius: 5rem;
+    z-index: 30000;
+    display: none;
+    align-items: center;
+    gap: 1rem;
+    box-shadow: var(--shadow-lg);
+    transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+    opacity: 0;
+    pointer-events: none;
+}
+
+.xp-toast.active {
+    display: flex;
+    transform: translateX(-50%) translateY(0);
+    opacity: 1;
+}
+
+.xp-badge {
+    background: var(--color-accent);
+    color: #fff;
+    padding: 0.4rem 0.8rem;
+    border-radius: 2rem;
+    font-weight: 800;
+    font-size: 0.85rem;
+}
+
+#xpToastMessage {
+    font-weight: 600;
+    color: var(--color-text);
+    font-size: 0.9rem;
 }

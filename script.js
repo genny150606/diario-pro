@@ -4,8 +4,12 @@
 // ============================================
 
 /* ============================================
-   STORAGE MANAGER - Gestione LocalStorage
+   STORAGE MANAGER — Unified with CloudStorage
+   Delegates ALL reads/writes to cloud-storage.js
+   which uses user-scoped keys + Supabase sync.
    ============================================ */
+
+let _dataReady = false; // Gate for autosave
 
 const StorageManager = {
     defaultData: {
@@ -22,81 +26,56 @@ const StorageManager = {
         }
     },
 
+    // SYNC read — delegates to loadData() (cloud-storage.js)
     load() {
         try {
-            const data = localStorage.getItem('studyjournal_data');
-            const parsed = data ? JSON.parse(data) : {};
-            // Deep merge with defaults to ensure structure exists
+            const raw = (typeof loadData === 'function') ? loadData() : {};
             return {
                 ...this.defaultData,
-                ...parsed,
-                stats: { ...this.defaultData.stats, ...(parsed.stats || {}) }
+                ...raw,
+                stats: { ...this.defaultData.stats, ...(raw.stats || {}) }
             };
         } catch {
-            return this.defaultData;
+            return { ...this.defaultData };
         }
     },
 
+    // SYNC write — delegates to saveData() (cloud-storage.js)
     save(data) {
-        if (!AuthManager || !AuthManager.user) {
-            const authModal = document.getElementById('authModal');
-            if (authModal) {
-                authModal.style.display = 'flex';
-                const errorEl = document.getElementById('authError');
-                if (errorEl) {
-                    errorEl.textContent = 'Accedi o registrati per salvare i tuoi dati.';
-                    errorEl.style.display = 'block';
-                }
-            } else {
-                alert('Accedi per salvare i tuoi dati.');
-            }
-            return;
-        }
-
-        try {
-            localStorage.setItem('studyjournal_data', JSON.stringify(data));
-            this.saveToCloud(data);
-        } catch {
-            console.error('Errore salvataggio dati');
+        if (!_dataReady) return; // Block saves until cloud data is loaded
+        if (typeof saveData === 'function') {
+            saveData(data);
         }
     },
 
-    async saveToCloud(data) {
-        if (!AuthManager || !AuthManager.user || !supabaseClient) return;
-
-        const { error } = await supabaseClient
-            .from('users_data')
-            .upsert({
-                id: AuthManager.user.id,
-                data: data,
-                updated_at: new Date()
-            });
-
-        if (error) console.error('Cloud Sync Error:', error);
-    },
-
-
+    // ASYNC — full cloud load (used at startup)
     async loadFromCloud() {
-        if (!AuthManager || !AuthManager.user || !supabaseClient) return;
-
-        const { data, error } = await supabaseClient
-            .from('users_data')
-            .select('data')
-            .eq('id', AuthManager.user.id)
-            .single();
-
+        if (!AuthManager || !AuthManager.user) return this.defaultData;
+        try {
+            const cloudData = await CloudStorage.load(AuthManager.user.id);
+            return {
+                ...this.defaultData,
+                ...cloudData,
+                stats: { ...this.defaultData.stats, ...(cloudData.stats || {}) }
+            };
+        } catch (err) {
+            console.error('loadFromCloud error:', err);
+            return this.load(); // fallback to cache
+        }
     },
 
     reset() {
         if (confirm('Sei sicuro? Perderai tutti i dati.')) {
+            if (AuthManager && AuthManager.user) {
+                CloudStorage.clearCache(AuthManager.user.id);
+            }
             localStorage.removeItem('studyjournal_data');
             location.reload();
         }
     },
 
-    // Stub for Realtime Sync (prevent crash)
     initRealtime() {
-        console.log('📡 Realtime sync initialized (Stub)');
+        // Stub — prevent crash
     }
 };
 
@@ -1459,57 +1438,52 @@ const AppManager = {
 };
 
 /* ============================================
-   INIZIALIZZAZIONE
+   INIZIALIZZAZIONE — ASYNC-SAFE
+   Awaits cloud data before initializing managers
+   to prevent empty-state overwrite.
    ============================================ */
 
-document.addEventListener('DOMContentLoaded', () => {
-    // Load dark mode preference
+document.addEventListener('DOMContentLoaded', async () => {
+    // Load dark mode preference (sync, safe)
     if (localStorage.getItem('darkMode') === 'true') {
         document.body.classList.add('dark-mode');
     }
 
-    // Load data
-    const appData = StorageManager.load();
+    // ── 1. AWAIT cloud data (source of truth) ──
+    let appData;
+    try {
+        if (window.AuthManager && AuthManager.user && window.CloudStorage) {
+            // Full async load from Supabase → hydrates localStorage cache
+            appData = await StorageManager.loadFromCloud();
+        } else {
+            // Not logged in yet — use sync cache (may be empty, that's OK)
+            appData = StorageManager.load();
+        }
+    } catch (err) {
+        console.error('Init data load error:', err);
+        appData = StorageManager.load();
+    }
 
-    // Initialize managers
+    // ── 2. Initialize ALL managers with cloud-hydrated data ──
     DiaryManager.init(appData);
     TaskManager.init(appData);
     GradeManager.init(appData);
     PomodoroManager.init(appData);
+    if (typeof NotesManager !== 'undefined') NotesManager.init(appData);
+    if (typeof FlashcardManager !== 'undefined') FlashcardManager.init(appData);
 
-    // Initialize UI
-    if (typeof UIManager.init === 'function') {
+    // ── 3. Initialize UI ──
+    if (typeof UIManager !== 'undefined' && typeof UIManager.init === 'function') {
         UIManager.init();
     }
 
-    // Start Realtime Sync
-    StorageManager.initRealtime();
-});
+    // ── 4. Mark data as ready — unlock autosave ──
+    _dataReady = true;
+    console.log('Data loaded and managers initialized. Autosave enabled.');
 
-// Auto-save every 5 seconds
-setInterval(() => {
-    if (typeof UIManager.savData === 'function') {
-        UIManager.savData();
-    }
-}, 5000);
-
-// Inizializza nuovi managers quando carica la pagina
-document.addEventListener('DOMContentLoaded', () => {
-    // Only init existing managers
-    if (typeof NotesManager !== 'undefined') NotesManager.init(StorageManager.load());
-    if (typeof FlashcardManager !== 'undefined') FlashcardManager.init(StorageManager.load());
-    if (typeof DuelManager !== 'undefined') {
-        console.log('⚔️ DuelManager initializing...');
-        // DuelManager.init() is currently handled by its own object structure if needed,
-        // but we ensure it's ready.
-    }
-
-    // Robust Gamification Click Handler (Toggle handled by UIManager.toggleGamification in HTML)
+    // ── 5. Gamification badge click-outside handler ──
     const badge = document.getElementById('levelBadge');
     if (badge) {
-        console.log('Gamification Badge found');
-
-        // Handle closing when clicking outside
         document.addEventListener('click', (e) => {
             const popup = document.getElementById('gamificationPopup');
             if (popup && popup.classList.contains('active')) {
@@ -1520,6 +1494,14 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 });
+
+// ── AUTOSAVE — gated behind _dataReady flag ──
+setInterval(() => {
+    if (!_dataReady) return; // Skip until cloud data is loaded
+    if (typeof AppManager !== 'undefined' && typeof AppManager.savData === 'function') {
+        AppManager.savData();
+    }
+}, 5000);
 /* ============================================
    GLOBAL ALIASES FOR COMPATIBILITY
    ============================================ */

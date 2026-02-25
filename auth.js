@@ -433,11 +433,14 @@ document.addEventListener('click', (e) => {
     }
 });
 
-// Initialize on load
-document.addEventListener('DOMContentLoaded', () => {
-    AuthManager.init();
+// Initialize auth IMMEDIATELY at script load time (not in DOMContentLoaded).
+// auth.js has `defer`, so it runs after HTML is parsed but BEFORE DOMContentLoaded.
+// This gives getSession + CloudStorage.load time to complete before
+// script.js's DOMContentLoaded handler fires and checks AuthManager.ready.
+AuthManager.init();
 
-    // Explicitly attach click handler to account button as a fallback
+// DOM-dependent setup (needs DOMContentLoaded)
+document.addEventListener('DOMContentLoaded', () => {
     const accountBtn = document.getElementById('accountBtn');
     if (accountBtn) {
         accountBtn.addEventListener('click', (e) => {

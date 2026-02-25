@@ -101,6 +101,7 @@ const AuthManager = {
                 CloudStorage._clearLegacy();
                 await CloudStorage.load(this.user.id);
                 console.log('[AUTH] Cloud data loaded for user:', this.user.id);
+                this._reinitManagers();
             }
 
             // ── AUTH GATE: Show login overlay if not authenticated ──
@@ -167,7 +168,12 @@ const AuthManager = {
     // Re-initialize all data managers from cloud-hydrated cache.
     // This is the SOLE entry point for data initialization.
     _reinitManagers() {
-        if (typeof StorageManager === 'undefined') return;
+        // If script.js hasn't loaded yet, retry after DOMContentLoaded
+        if (typeof StorageManager === 'undefined') {
+            console.log('[AUTH] Managers not loaded yet, deferring to DOMContentLoaded...');
+            document.addEventListener('DOMContentLoaded', () => this._reinitManagers());
+            return;
+        }
         const appData = StorageManager.load();
         if (typeof DiaryManager !== 'undefined') DiaryManager.init(appData);
         if (typeof TaskManager !== 'undefined') TaskManager.init(appData);

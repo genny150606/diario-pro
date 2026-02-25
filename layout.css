@@ -235,28 +235,42 @@ header:hover {
         padding: 0 1rem;
         gap: 1rem;
         border-radius: 2rem;
+        height: 4rem;
+    }
+
+    .header-right {
+        gap: 0.5rem !important;
+    }
+
+    #userEmailDisplay {
+        display: none;
+    }
+
+    .account-btn {
+        padding: 0.5rem !important;
     }
 
     .sidebar {
         left: 1rem;
         right: 1rem;
-        bottom: 1rem;
+        bottom: 1.5rem;
         top: auto;
         transform: none;
         width: calc(100% - 2rem);
-        height: 70px;
+        height: 4.5rem;
         flex-direction: row;
         border-radius: 5rem;
         justify-content: space-around;
-        padding: 0.5rem 1rem;
-        background: rgba(10, 10, 12, 0.8);
-        border: 1px solid rgba(255, 255, 255, 0.1);
+        padding: 0.5rem;
+        background: var(--glass-bg-deep);
+        border: 1px solid var(--glass-border);
         z-index: 10002;
+        box-shadow: 0 1rem 3rem rgba(0, 0, 0, 0.4);
     }
 
     .sidebar:hover {
         width: calc(100% - 2rem);
-        padding: 0.5rem 1rem;
+        padding: 0.5rem;
     }
 
     .sidebar-item {
@@ -264,6 +278,8 @@ header:hover {
         border-radius: 50%;
         aspect-ratio: 1/1;
         justify-content: center;
+        width: 3.5rem;
+        height: 3.5rem;
     }
 
     .sidebar-item span {
@@ -271,13 +287,18 @@ header:hover {
     }
 
     .container {
-        padding-left: 0;
+        padding-left: 0 !important;
         padding-bottom: 100px;
     }
 
     .content {
         padding-top: 6rem;
-        padding-left: 1.5rem;
-        padding-right: 1.5rem;
+        padding-left: 1.25rem;
+        padding-right: 1.25rem;
+        width: 100% !important;
+    }
+
+    .hero h1 {
+        font-size: clamp(2rem, 10vw, 3rem) !important;
     }
 }

@@ -976,100 +976,103 @@
                 <div class="duel-container">
 
                     <!-- LOBBY -->
-                    <div id="duelLobbySection" class="duel-card premium">
-                        <div class="duel-badge">⚔️ Arena dei Campioni</div>
+                    <div id="duelLobbySection" class="card">
+                        <div class="duel-lobby-header">
+                            <i data-lucide="swords"></i>
+                            <div>
+                                <h2 class="duel-lobby-title">Arena dei Campioni</h2>
+                                <p class="duel-lobby-subtitle">Sfida l'AI o un amico in tempo reale</p>
+                            </div>
+                        </div>
 
                         <div id="duelCreateForm">
-                            <h2 style="font-size: 2.5rem; margin-bottom: 2rem;">Nuova Sfida AI</h2>
-
-                            <!-- Subject Selection -->
-                            <div class="duel-source-tabs"
-                                style="display: flex; gap: 10px; margin-bottom: 2rem; justify-content: center;">
-                                <button class="btn-tab active" onclick="DuelManager.setSource('subject', this)">✨
-                                    Materia</button>
-                                <button class="btn-tab" onclick="DuelManager.setSource('notes', this)">📚
-                                    Appunti</button>
-                                <button class="btn-tab" onclick="DuelManager.setSource('pdf', this)">📂 PDF
-                                    Documento</button>
+                            <!-- Source Tabs -->
+                            <div class="tabs" style="margin-bottom:1.5rem;">
+                                <button class="tab-btn active" onclick="DuelManager.setSource('subject', this)">
+                                    <i data-lucide="sparkles"></i> Materia
+                                </button>
+                                <button class="tab-btn" onclick="DuelManager.setSource('notes', this)">
+                                    <i data-lucide="book-open"></i> Appunti
+                                </button>
+                                <button class="tab-btn" onclick="DuelManager.setSource('pdf', this)">
+                                    <i data-lucide="file-text"></i> PDF
+                                </button>
                             </div>
 
+                            <!-- Source: Subject -->
                             <div id="duelSource_subject" class="duel-source-content">
-                                <p style="opacity: 0.7; margin-bottom: 1rem;">Scegli una materia per generare domande di
-                                    alto livello</p>
-                                <input type="text" id="duelSubjectInput" placeholder="es. Neuroscienze"
-                                    style="padding: 16px; border-radius: 16px; background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.1); width: 100%; max-width: 400px; color: #FFF; margin: 1rem 0; font-size: 1.1rem; text-align: center;">
+                                <label class="duel-field-label">Argomento della sfida</label>
+                                <input type="text" id="duelSubjectInput"
+                                    placeholder="es. Neuroscienze, Storia romana..." class="form-input">
                             </div>
 
-                            <div id="duelSource_notes" class="duel-source-content" style="display: none;">
-                                <p style="opacity: 0.7; margin-bottom: 1rem;">Sfida l'avversario sui tuoi appunti
-                                    personali</p>
-                                <select id="duelNoteSelect"
-                                    style="padding: 16px; border-radius: 16px; background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.1); width: 100%; max-width: 400px; color: #FFF; margin: 1rem 0; font-size: 1rem;">
+                            <!-- Source: Notes -->
+                            <div id="duelSource_notes" class="duel-source-content" style="display:none;">
+                                <label class="duel-field-label">Seleziona un appunto</label>
+                                <select id="duelNoteSelect" class="form-input">
                                     <option value="">-- Caricamento note... --</option>
                                 </select>
                             </div>
 
-                            <div id="duelSource_pdf" class="duel-source-content" style="display: none;">
-                                <p style="opacity: 0.7; margin-bottom: 1rem;">Analizza un documento e genera una sfida
-                                    istantanea</p>
-                                <div style="max-width: 500px; margin: 0 auto;">
-                                    <textarea id="duelManualText" placeholder="Incolla qui il testo o carica un file..."
-                                        style="width: 100%; height: 120px; padding: 16px; border-radius: 16px; background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.1); color: #FFF; margin-bottom: 1rem; resize: none;"></textarea>
-                                    <div
-                                        style="display: flex; align-items: center; justify-content: center; gap: 15px;">
-                                        <input type="file" id="duelPdfInput" accept=".pdf,.txt" style="display: none;"
-                                            onchange="DuelManager.handleFileUpload(this)">
-                                        <button class="btn-secondary" style="border-radius: 12px; padding: 10px 20px;"
-                                            onclick="document.getElementById('duelPdfInput').click()">📂 Sfoglia
-                                            File</button>
-                                        <span id="duelFileName" style="font-size: 0.9rem; color: #fbbf24;"></span>
-                                    </div>
+                            <!-- Source: PDF -->
+                            <div id="duelSource_pdf" class="duel-source-content" style="display:none;">
+                                <label class="duel-field-label">Incolla il testo o carica un documento</label>
+                                <textarea id="duelManualText" placeholder="Incolla qui il testo o carica un file..."
+                                    class="form-input" rows="4"></textarea>
+                                <div class="duel-file-row">
+                                    <input type="file" id="duelPdfInput" accept=".pdf,.txt" style="display:none;"
+                                        onchange="DuelManager.handleFileUpload(this)">
+                                    <button class="btn-secondary"
+                                        onclick="document.getElementById('duelPdfInput').click()">
+                                        <i data-lucide="upload"></i> Carica file
+                                    </button>
+                                    <span id="duelFileName" class="duel-file-name"></span>
                                 </div>
                             </div>
 
-                            <br>
-                            <button id="duelCreateBtn" class="btn-primary"
-                                style="padding: 18px 40px; font-size: 1.2rem; border-radius: 20px; width: 100%; max-width: 300px;"
-                                onclick="DuelManager.createRoom()">GENERA ARENA ⚡</button>
+                            <button id="duelCreateBtn" class="btn-primary duel-create-btn"
+                                onclick="DuelManager.createRoom()">
+                                <i data-lucide="zap"></i> Genera Arena
+                            </button>
 
-                            <div
-                                style="margin: 3rem 0 1rem; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 2rem;">
-                                <p style="opacity: 0.5; font-size: 0.9rem;">ENTRA IN UNA SESSIONE ESISTENTE</p>
-                                <div style="display: flex; gap: 10px; justify-content: center; margin-top: 1.5rem;">
+                            <!-- Join Section -->
+                            <div class="duel-join-section">
+                                <p class="duel-join-label">Entra in una sessione esistente</p>
+                                <div class="duel-join-row">
                                     <input type="text" id="duelJoinCode" placeholder="CODICE"
-                                        style="padding: 16px; border-radius: 16px; background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.1); width: 140px; text-transform: uppercase; border: 1px solid rgba(251,191,36,0.2); color: #fbbf24; font-weight: 900; font-size: 1.2rem; text-align: center; letter-spacing: 2px;">
+                                        class="form-input duel-code-input">
+                                    <button class="btn-secondary"
+                                        onclick="DuelManager.joinRoom(document.getElementById('duelJoinCode').value)">
+                                        <i data-lucide="arrow-right"></i> Entra
+                                    </button>
                                 </div>
-                                <button class="btn-secondary"
-                                    style="margin-top: 1.5rem; padding: 12px 30px; border-radius: 12px;"
-                                    onclick="DuelManager.joinRoom(document.getElementById('duelJoinCode').value)">ENTRA
-                                    ORA ⚔️</button>
                             </div>
                         </div>
 
+                        <!-- WAITING LOBBY -->
                         <div id="duelWaitingLobby" class="hidden">
                             <div class="duel-vs-header">
                                 <div id="myLobbyCard"></div>
                                 <div class="vs-divider">VS</div>
                                 <div id="oppLobbyCard">
-                                    <div class="player-card" style="opacity: 0.4;">
-                                        <span style="font-size: 2.5rem; margin-bottom: 1rem;">⌛</span>
-                                        <span style="font-weight: 800;">In attesa...</span>
+                                    <div class="player-card duel-waiting-card">
+                                        <div class="duel-waiting-spinner"></div>
+                                        <span class="duel-waiting-text">In attesa di uno sfidante...</span>
                                     </div>
                                 </div>
                             </div>
 
-                            <div class="duel-code-box" style="display: inline-block; margin-bottom: 2rem;">
-                                <p
-                                    style="font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; opacity: 0.6;">
-                                    Condividi questo codice:</p>
-                                <h2 id="roomCodeDisplay" style="margin: 0;">----</h2>
+                            <div class="duel-code-share">
+                                <p class="duel-code-label">Condividi questo codice</p>
+                                <h2 id="roomCodeDisplay" class="duel-room-code">----</h2>
                             </div>
 
-                            <div id="lobbyPlayerStatus"></div>
+                            <div id="lobbyPlayerStatus" class="duel-lobby-status"></div>
 
-                            <button id="startDuelBtn" class="btn-primary" disabled
-                                style="width: 100%; max-width: 400px; padding: 20px; font-size: 1.4rem;"
-                                onclick="DuelManager.triggerStart()">INIZIA BATTAGLIA! ⚔️</button>
+                            <button id="startDuelBtn" class="btn-primary duel-create-btn" disabled
+                                onclick="DuelManager.triggerStart()">
+                                <i data-lucide="play"></i> Inizia Battaglia
+                            </button>
                         </div>
                     </div>
 

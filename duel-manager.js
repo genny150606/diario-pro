@@ -361,10 +361,14 @@ const DuelManager = {
         const lobbyMe = document.getElementById('myLobbyCard');
         const lobbyOpp = document.getElementById('oppLobbyCard');
 
-        if (me) lobbyMe.innerHTML = `<div class="player-card is-me"><span>👑</span><b>${me.username} (Tu)</b><span class="status-ready ${me.is_ready ? 'ready' : ''}">${me.is_ready ? 'Pronto' : 'In attesa'}</span></div>`;
-        if (opponent) lobbyOpp.innerHTML = `<div class="player-card"><span>⚔️</span><b>${opponent.username}</b><span class="status-ready ${opponent.is_ready ? 'ready' : ''}">${opponent.is_ready ? 'Pronto' : 'In attesa'}</span></div>`;
+        if (me) lobbyMe.innerHTML = `<div class="player-card is-me"><i data-lucide="crown"></i><b>${me.username} (Tu)</b><span class="status-ready ${me.is_ready ? 'ready' : ''}">${me.is_ready ? 'Pronto' : 'In attesa'}</span></div>`;
+        if (opponent) lobbyOpp.innerHTML = `<div class="player-card"><i data-lucide="user"></i><b>${opponent.username}</b><span class="status-ready ${opponent.is_ready ? 'ready' : ''}">${opponent.is_ready ? 'Pronto' : 'In attesa'}</span></div>`;
 
-        document.getElementById('lobbyPlayerStatus').innerHTML = opponent ? '⚡ Sfidante in posizione!' : '⌛ In attesa di uno sfidante...';
+        document.getElementById('lobbyPlayerStatus').innerHTML = opponent
+            ? '<i data-lucide="zap" style="width:16px;height:16px;display:inline;vertical-align:-2px;"></i> Sfidante in posizione!'
+            : '<div class="duel-waiting-spinner" style="width:1rem;height:1rem;display:inline-block;vertical-align:-3px;"></div> In attesa di uno sfidante...';
+
+        if (window.lucide) lucide.createIcons();
 
         const startBtn = document.getElementById('startDuelBtn');
         if (startBtn) startBtn.disabled = !this.isHost || !opponent;

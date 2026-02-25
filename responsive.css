@@ -110,8 +110,9 @@
 
     /* Lift chatbot FAB above the mobile bottom nav */
     #geminiChat {
-        bottom: 7.5rem;
+        bottom: 8.5rem;
         right: 1rem;
+        z-index: 10003;
     }
 
     #geminiChatWindow {

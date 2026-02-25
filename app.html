@@ -899,6 +899,25 @@
                             <span class="arena-playerName" id="arenaOppName">Avversario</span>
                             <span class="arena-playerScore" id="arenaOppScore">0 pt</span>
                         </div>
+
+                        <!-- In-Game Menu -->
+                        <div class="arena-menu-wrapper">
+                            <button class="arena-menu-btn"
+                                onclick="document.getElementById('arenaMenuDropdown').classList.toggle('show')">
+                                <i data-lucide="more-vertical"></i>
+                            </button>
+                            <div id="arenaMenuDropdown" class="arena-menu-dropdown">
+                                <button
+                                    onclick="DuelManager.skipQuestion(); document.getElementById('arenaMenuDropdown').classList.remove('show')">
+                                    <i data-lucide="skip-forward"></i> Salta Domanda <span class="menu-penalty">-5
+                                        pt</span>
+                                </button>
+                                <button class="menu-danger"
+                                    onclick="DuelManager.exitDuel(); document.getElementById('arenaMenuDropdown').classList.remove('show')">
+                                    <i data-lucide="log-out"></i> Abbandona Scontro
+                                </button>
+                            </div>
+                        </div>
                     </div>
 
                     <div class="arena-main-content">

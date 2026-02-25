@@ -455,7 +455,112 @@ const DuelManager = {
 
     handleOpponentLeft() {
         if (this.pollInterval) clearInterval(this.pollInterval);
-        UIManager.alert("Il tuo avversario ha lasciato l'Arena.", 'Arena Chiusa');
-        location.reload();
+        if (this.timerInterval) clearInterval(this.timerInterval);
+
+        // Award victory points to remaining player
+        const bonusPoints = 100;
+        this.score += bonusPoints;
+
+        // Sync final score to DB
+        if (this.currentRoom) {
+            supabaseClient.from('quiz_players')
+                .update({ score: this.score })
+                .eq('room_id', this.currentRoom.id)
+                .eq('username', this.playerName)
+                .then(() => { });
+        }
+
+        UIManager.alert(
+            `🏆 L'avversario si è ritirato per manifesta inferiorità!\nHai vinto a tavolino con +${bonusPoints} punti bonus!\n\nPunteggio finale: ${this.score} PT`,
+            'Vittoria per Abbandono ⚔️'
+        ).then(() => {
+            this.resetArena();
+        });
+    },
+
+    skipQuestion() {
+        if (this.timerInterval) clearInterval(this.timerInterval);
+
+        const penalty = 5;
+        this.score = Math.max(0, this.score - penalty);
+        this.streak = 0;
+        this.currentIndex++;
+
+        // Visual feedback
+        if (typeof UIManager !== 'undefined') {
+            UIManager.toast(`⏭️ Domanda saltata (-${penalty} pt)`, 'warning');
+        }
+
+        // Sync to DB
+        if (this.currentRoom) {
+            supabaseClient.from('quiz_players')
+                .update({ score: this.score, current_question_index: this.currentIndex })
+                .eq('room_id', this.currentRoom.id)
+                .eq('username', this.playerName);
+        }
+
+        // Next question or end
+        if (this.currentIndex >= this.questions.length) {
+            this.finishDuel();
+        } else {
+            this.renderQuestion();
+        }
+    },
+
+    async exitDuel() {
+        const confirmed = await UIManager.confirm(
+            '🚪 Sei sicuro di voler abbandonare lo scontro?\nL\'avversario vincerà automaticamente.',
+            'Abbandona Arena'
+        );
+        if (!confirmed) return;
+
+        if (this.timerInterval) clearInterval(this.timerInterval);
+        if (this.pollInterval) clearInterval(this.pollInterval);
+
+        // Mark room as abandoned in DB
+        if (this.currentRoom) {
+            await supabaseClient.from('quiz_rooms')
+                .update({ status: 'abandoned' })
+                .eq('id', this.currentRoom.id);
+        }
+
+        this.resetArena();
+        UIManager.toast('Hai abbandonato l\'arena', 'error');
+    },
+
+    resetArena() {
+        // Close all overlays
+        const arenaOverlay = document.getElementById('duelArenaOverlay');
+        const countdownOverlay = document.getElementById('arenaCountdownOverlay');
+        if (arenaOverlay) arenaOverlay.classList.remove('active');
+        if (countdownOverlay) countdownOverlay.classList.remove('active');
+
+        // Reset state
+        this.currentRoom = null;
+        this.players = [];
+        this.questions = [];
+        this.currentIndex = 0;
+        this.score = 0;
+        this.isHost = false;
+        this.gameStarted = false;
+        this.countdownRunning = false;
+        this.streak = 0;
+        this.activePowerUps = [];
+        this.powerUpEffects = { doubleXP: false, shield: false };
+        this.frozenLocally = false;
+
+        if (this.timerInterval) clearInterval(this.timerInterval);
+        if (this.pollInterval) clearInterval(this.pollInterval);
+
+        // Show lobby again
+        const createForm = document.getElementById('duelCreateForm');
+        const waitingLobby = document.getElementById('duelWaitingLobby');
+        const resultsSection = document.getElementById('duelResultsSection');
+        if (createForm) createForm.classList.remove('hidden');
+        if (waitingLobby) waitingLobby.classList.add('hidden');
+        if (resultsSection) resultsSection.classList.add('hidden');
+
+        // Navigate back to dashboard
+        if (typeof showSection === 'function') showSection('dashboard');
     }
 };

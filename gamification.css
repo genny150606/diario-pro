@@ -646,3 +646,174 @@
 .duel-arena-overlay.shake {
     animation: arenaShake 0.4s ease;
 }
+
+/* ============================================
+   FULL-SCREEN OVERLAYS
+   ============================================ */
+
+/* ── Arena Overlay — Absolute Fullscreen ── */
+.duel-arena-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 99999;
+    background: linear-gradient(160deg, #0a0a0f 0%, #111127 50%, #0d0d1a 100%);
+    flex-direction: column;
+    overflow-y: auto;
+}
+
+.duel-arena-overlay.active {
+    display: flex;
+}
+
+/* ── Countdown Overlay — Absolute Fullscreen ── */
+.arena-countdown-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 100000;
+    background: rgba(5, 5, 15, 0.92);
+    backdrop-filter: blur(30px) saturate(120%);
+    -webkit-backdrop-filter: blur(30px) saturate(120%);
+    align-items: center;
+    justify-content: center;
+}
+
+.arena-countdown-overlay.active {
+    display: flex;
+}
+
+.countdown-giant-number {
+    font-family: 'Outfit', sans-serif;
+    font-size: clamp(8rem, 25vw, 16rem);
+    font-weight: 900;
+    color: #fff;
+    text-shadow:
+        0 0 60px rgba(91, 159, 243, 0.4),
+        0 0 120px rgba(91, 159, 243, 0.2);
+    animation: countdownPulse 0.8s cubic-bezier(0.16, 1, 0.3, 1) both;
+    line-height: 1;
+    user-select: none;
+}
+
+@keyframes countdownPulse {
+    from {
+        opacity: 0;
+        transform: scale(2.5);
+    }
+
+    50% {
+        opacity: 1;
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+/* ============================================
+   IN-GAME MENU
+   ============================================ */
+
+.arena-menu-wrapper {
+    position: relative;
+    margin-left: 0.75rem;
+    flex-shrink: 0;
+}
+
+.arena-menu-btn {
+    width: 2.5rem;
+    height: 2.5rem;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 0.5rem;
+    color: rgba(255, 255, 255, 0.7);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    padding: 0;
+}
+
+.arena-menu-btn:hover {
+    background: rgba(255, 255, 255, 0.12);
+    border-color: rgba(255, 255, 255, 0.2);
+    color: #fff;
+}
+
+.arena-menu-btn [data-lucide] {
+    width: 18px;
+    height: 18px;
+}
+
+.arena-menu-dropdown {
+    display: none;
+    position: absolute;
+    top: calc(100% + 0.5rem);
+    right: 0;
+    min-width: 220px;
+    background: rgba(15, 15, 25, 0.95);
+    backdrop-filter: blur(30px);
+    -webkit-backdrop-filter: blur(30px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 0.75rem;
+    padding: 0.4rem;
+    box-shadow: 0 16px 48px rgba(0, 0, 0, 0.6);
+    z-index: 100001;
+}
+
+.arena-menu-dropdown.show {
+    display: flex;
+    flex-direction: column;
+    animation: dropdownReveal 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.arena-menu-dropdown button {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    width: 100%;
+    padding: 0.75rem 1rem;
+    background: transparent;
+    border: none;
+    border-radius: 0.5rem;
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s;
+    text-align: left;
+}
+
+.arena-menu-dropdown button:hover {
+    background: rgba(255, 255, 255, 0.08);
+    color: #fff;
+}
+
+.arena-menu-dropdown button.menu-danger {
+    color: #FF453A;
+}
+
+.arena-menu-dropdown button.menu-danger:hover {
+    background: rgba(255, 69, 58, 0.12);
+}
+
+.arena-menu-dropdown .menu-penalty {
+    margin-left: auto;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: #FF9F0A;
+    opacity: 0.8;
+}
+
+.arena-menu-dropdown button [data-lucide] {
+    width: 16px;
+    height: 16px;
+    flex-shrink: 0;
+}

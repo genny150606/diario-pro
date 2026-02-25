@@ -16,31 +16,107 @@ export default function Landing() {
 
     // Load homepage stats
     useEffect(() => {
+        let mounted = true
         async function loadStats() {
             try {
-                const { count: users } = await supabase
+                const { count: users, error: err1 } = await supabase
                     .from('users_data')
                     .select('*', { count: 'exact', head: true })
 
-                const { data: siteStats } = await supabase
+                const { data: siteStats, error: err2 } = await supabase
                     .from('site_stats')
                     .select('key, value')
 
-                const notes = siteStats?.find(s => s.key === 'total_notes_created')?.value || 0
-                const flashcards = siteStats?.find(s => s.key === 'total_flashcards_created')?.value || 0
-                const duels = siteStats?.find(s => s.key === 'total_duels_completed')?.value || 0
+                if (mounted) {
+                    const notes = siteStats?.find(s => s.key === 'total_notes_created')?.value || 0
+                    const flashcards = siteStats?.find(s => s.key === 'total_flashcards_created')?.value || 0
+                    const duels = siteStats?.find(s => s.key === 'total_duels_completed')?.value || 0
 
-                setStats({
-                    notes: notes || '0',
-                    flashcards: flashcards || '0',
-                    duels: duels || '0',
-                    users: users || '0'
-                })
+                    setStats({
+                        notes: notes || '0',
+                        flashcards: flashcards || '0',
+                        duels: duels || '0',
+                        users: users || '0'
+                    })
+                }
             } catch (err) {
                 console.warn('Stats load error:', err)
+                if (mounted) setStats({ notes: '0', flashcards: '0', duels: '0', users: '0' })
             }
         }
         loadStats()
+        return () => { mounted = false }
+    }, [])
+
+    // Animations (Ported from ui-interactions.js)
+    useEffect(() => {
+        // Dynamic Island
+        const nav = document.getElementById('mainNav');
+        const handleScroll = () => {
+            if (!nav) return
+            if (window.scrollY > 50) {
+                nav.style.transform = 'translateX(-50%) translateY(-10px) scale(0.95)';
+                nav.style.background = 'rgba(10, 10, 12, 0.9)';
+            } else {
+                nav.style.transform = 'translateX(-50%) translateY(0) scale(1)';
+                nav.style.background = 'rgba(20, 20, 22, 0.7)';
+            }
+        }
+        window.addEventListener('scroll', handleScroll)
+
+        // Reveal Animations
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('is-visible');
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0.15 });
+
+        document.querySelectorAll('.reveal-section, .feature-large-text').forEach(el => {
+            el.style.opacity = '0';
+            el.style.transform = 'translateY(40px)';
+            el.style.transition = 'all 1.4s cubic-bezier(0.16, 1, 0.3, 1)';
+            observer.observe(el);
+        });
+
+        // Setup Hero Intro Start State
+        const heroTag = document.querySelector('.hero-tag');
+        const lines = document.querySelectorAll('.title-line');
+        const desc = document.querySelector('.hero-description');
+        const actions = document.querySelector('.hero-actions-radical');
+        const preview = document.querySelector('.hero-floating-preview');
+
+        [heroTag, ...lines, desc, actions, preview].forEach(el => {
+            if (!el) return;
+            el.style.opacity = '0';
+            el.style.transform = 'translateY(30px)';
+            el.style.transition = 'all 1.2s cubic-bezier(0.16, 1, 0.3, 1)';
+        });
+
+        // Run Hero Sequence
+        setTimeout(() => { if (heroTag) { heroTag.style.opacity = '1'; heroTag.style.transform = 'translateY(0)'; } }, 400);
+        setTimeout(() => { if (lines[0]) { lines[0].style.opacity = '1'; lines[0].style.transform = 'translateY(0)'; } }, 600);
+        setTimeout(() => { if (lines[1]) { lines[1].style.opacity = '1'; lines[1].style.transform = 'translateY(0)'; } }, 750);
+        setTimeout(() => { if (desc) { desc.style.opacity = '1'; desc.style.transform = 'translateY(0)'; } }, 1050);
+        setTimeout(() => { if (actions) { actions.style.opacity = '1'; actions.style.transform = 'translateY(0)'; } }, 1250);
+        setTimeout(() => { if (preview) { preview.style.opacity = '1'; preview.style.transform = 'rotateX(15deg) translateY(0)'; } }, 1650);
+
+        // Spatial Parallax
+        const handleMouseMove = (e) => {
+            if (!preview) return;
+            const x = (window.innerWidth / 2 - e.pageX) / 40;
+            const y = (window.innerHeight / 2 - e.pageY) / 40;
+            preview.style.transform = `rotateX(${15 + y}deg) rotateY(${-x}deg) translateY(${-y}px)`;
+        }
+        document.addEventListener('mousemove', handleMouseMove);
+
+        return () => {
+            window.removeEventListener('scroll', handleScroll)
+            document.removeEventListener('mousemove', handleMouseMove)
+            observer.disconnect()
+        }
     }, [])
 
     const acceptGDPR = () => {

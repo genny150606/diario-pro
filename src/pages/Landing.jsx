@@ -1,0 +1,237 @@
+import { useState, useEffect } from 'react'
+import { Link, useNavigate } from 'react-router-dom'
+import { useAuth } from '../hooks/useAuth'
+import { supabase } from '../lib/supabase'
+import AuthModal from '../components/auth/AuthModal'
+import '../styles/home.css'
+
+export default function Landing() {
+    const { user } = useAuth()
+    const navigate = useNavigate()
+    const [showAuth, setShowAuth] = useState(false)
+    const [stats, setStats] = useState({ notes: '...', flashcards: '...', duels: '...', users: '...' })
+    const [gdprAccepted, setGdprAccepted] = useState(
+        () => localStorage.getItem('gdpr_accepted') === 'true'
+    )
+
+    // If already logged in, redirect to app
+    useEffect(() => {
+        if (user) navigate('/app')
+    }, [user, navigate])
+
+    // Load homepage stats
+    useEffect(() => {
+        async function loadStats() {
+            try {
+                const { count: users } = await supabase
+                    .from('users_data')
+                    .select('*', { count: 'exact', head: true })
+
+                const { data: siteStats } = await supabase
+                    .from('site_stats')
+                    .select('key, value')
+
+                const notes = siteStats?.find(s => s.key === 'total_notes_created')?.value || 0
+                const flashcards = siteStats?.find(s => s.key === 'total_flashcards_created')?.value || 0
+                const duels = siteStats?.find(s => s.key === 'total_duels_completed')?.value || 0
+
+                setStats({
+                    notes: notes || '0',
+                    flashcards: flashcards || '0',
+                    duels: duels || '0',
+                    users: users || '0'
+                })
+            } catch (err) {
+                console.warn('Stats load error:', err)
+            }
+        }
+        loadStats()
+    }, [])
+
+    const acceptGDPR = () => {
+        localStorage.setItem('gdpr_accepted', 'true')
+        setGdprAccepted(true)
+    }
+
+    return (
+        <div className="landing-page">
+            {/* ═══════════ DYNAMIC ISLAND NAV ═══════════ */}
+            <nav className="dynamic-island-nav" id="mainNav">
+                <div className="nav-content">
+                    <a href="#" className="nav-logo">SJ<span className="dot">.</span></a>
+                    <div className="nav-links">
+                        <a href="#features">Tecnologia</a>
+                        <a href="#philosophy">Filosofia</a>
+                    </div>
+                    <button
+                        className="nav-cta"
+                        onClick={() => setShowAuth(true)}
+                        style={{ border: 'none', cursor: 'pointer' }}
+                    >
+                        Entra Ora
+                    </button>
+                </div>
+            </nav>
+
+            {/* AURORA BACKGROUND */}
+            <div className="aurora-bg" aria-hidden="true">
+                <div className="orb orb-1"></div>
+                <div className="orb orb-2"></div>
+                <div className="orb orb-3"></div>
+            </div>
+
+            {/* ═══════════ RADICAL HERO ═══════════ */}
+            <main className="radical-container">
+                <section className="hero-section">
+                    <div className="hero-content">
+                        <div className="hero-tag">Progettato per eccellere</div>
+                        <h1 className="hero-title-main">
+                            <div className="title-line"><span>Studia meno,</span></div>
+                            <div className="title-line"><span className="accent-text">Impara tutto.</span></div>
+                        </h1>
+                        <p className="hero-description">
+                            Dimentica gli appunti disordinati e le nottate in bianco. Lascia che l'AI trasformi le tue lezioni
+                            in flashcard, quiz e piani di studio perfetti.
+                            Tu metti l'obiettivo, noi tracciamo la strada.
+                        </p>
+                        <div className="hero-actions-radical">
+                            <button
+                                className="cta-primary-glass"
+                                onClick={() => setShowAuth(true)}
+                                style={{ border: 'none', cursor: 'pointer' }}
+                            >
+                                Inizia Gratis
+                            </button>
+                            <a href="#features" className="cta-secondary-minimal">Scopri di più</a>
+                        </div>
+                    </div>
+
+                    <div className="hero-floating-preview">
+                        <div className="preview-glass-card">
+                            <div className="card-inner">
+                                <div className="stat-group">
+                                    <span className="stat-val">{stats.notes}</span>
+                                    <span className="stat-lab">Note</span>
+                                </div>
+                                <div className="stat-divider"></div>
+                                <div className="stat-group">
+                                    <span className="stat-val">{stats.flashcards}</span>
+                                    <span className="stat-lab">Flashcard</span>
+                                </div>
+                                <div className="stat-divider"></div>
+                                <div className="stat-group">
+                                    <span className="stat-val">{stats.duels}</span>
+                                    <span className="stat-lab">Duelli</span>
+                                </div>
+                                <div className="stat-divider"></div>
+                                <div className="stat-group">
+                                    <span className="stat-val">{stats.users}</span>
+                                    <span className="stat-lab">Menti</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                {/* ═══════════ FEATURE REVEAL SECTIONS ═══════════ */}
+                <section id="features" className="reveal-section">
+                    <div className="reveal-content-box">
+                        <div className="feature-large-text">
+                            <h2 className="section-title-minimal">
+                                L'AI che <br /><span className="muted">Studia con te.</span>
+                            </h2>
+                            <p className="section-desc-minimal">
+                                Da semplici appunti a una memoria di ferro in un clic.
+                                Genera flashcard istantanee, chiedi spiegazioni al tuo tutor virtuale e preparati per l'esame
+                                senza perdere un secondo in organizzazione.
+                            </p>
+                        </div>
+                    </div>
+                </section>
+
+                <section id="philosophy" className="reveal-section">
+                    <div className="reveal-content-box">
+                        <div className="feature-large-text">
+                            <h2 className="section-title-minimal">
+                                Zero distrazioni.<br /><span className="muted">Solo deep work.</span>
+                            </h2>
+                            <p className="section-desc-minimal">
+                                Un'interfaccia pulita, modalità scura nativa e un ambiente
+                                progettato per eliminare il rumore di fondo.
+                                Entra nel flow state e lascia il mondo fuori.
+                            </p>
+                        </div>
+                    </div>
+                </section>
+
+                <section className="reveal-section">
+                    <div className="reveal-content-box">
+                        <div className="feature-large-text">
+                            <h2 className="section-title-minimal">
+                                Il tuo sapere <br /><span className="muted">Sempre in tasca.</span>
+                            </h2>
+                            <p className="section-desc-minimal">
+                                I tuoi pensieri, ovunque tu sia. In tempo reale, senza barriere.
+                            </p>
+                        </div>
+                    </div>
+                </section>
+
+                {/* FINAL CTA */}
+                <section className="reveal-section">
+                    <div className="feature-large-text" style={{ textAlign: 'center' }}>
+                        <h2 className="section-title-minimal">Prendi il controllo</h2>
+                        <button
+                            className="cta-primary-glass"
+                            onClick={() => setShowAuth(true)}
+                            style={{ display: 'inline-block', marginTop: '2rem', border: 'none', cursor: 'pointer' }}
+                        >
+                            Accedi ora
+                        </button>
+                    </div>
+                </section>
+
+                <footer className="landing-footer">
+                    <div className="footer-logo">SJ<span className="dot">.</span></div>
+                    <div className="footer-links">
+                        <a href="#features">Tecnologia</a>
+                        <a href="#philosophy">Manifesto</a>
+                        <button
+                            onClick={() => setShowAuth(true)}
+                            style={{
+                                background: 'none', border: 'none', color: 'rgba(255,255,255,0.3)',
+                                fontSize: '0.9rem', cursor: 'pointer', padding: 0
+                            }}
+                        >
+                            App
+                        </button>
+                    </div>
+                    <p className="footer-credits">© 2026 StudyJournal Pro. Realizzato e ideato da Gennaro Pascale</p>
+                </footer>
+            </main>
+
+            {/* GDPR BANNER */}
+            {!gdprAccepted && (
+                <div className="gdpr-banner">
+                    <div className="gdpr-content">
+                        <p>
+                            Utilizziamo i cookie per migliorare la tua esperienza.{' '}
+                            <button
+                                onClick={acceptGDPR}
+                                style={{
+                                    background: 'none', border: 'none',
+                                    color: 'var(--color-accent)', fontWeight: 700, cursor: 'pointer'
+                                }}
+                            >
+                                Accetto ✨
+                            </button>
+                        </p>
+                    </div>
+                </div>
+            )}
+
+            {/* AUTH MODAL */}
+            {showAuth && <AuthModal onClose={() => setShowAuth(false)} />}
+        </div>
+    )
+}

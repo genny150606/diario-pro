@@ -1,0 +1,708 @@
+/* ============================================
+   STUDYJOURNAL PRO — APPLE 2026 DESIGN SYSTEM
+   Single source of truth for all tokens
+   ============================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Marcellus&family=Outfit:wght@400;500;600;700&display=swap');
+
+/* ── ONBOARDING OVERLAY ── */
+.onboarding-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.85);
+    backdrop-filter: blur(25px);
+    -webkit-backdrop-filter: blur(25px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 100000;
+}
+
+.onboarding-card {
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: 1rem;
+    padding: 3rem;
+    max-width: 500px;
+    width: 90%;
+    text-align: center;
+    box-shadow: 0 4rem 100px rgba(0, 0, 0, 0.5);
+    animation: scalePopIn 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.onboarding-title {
+    font-family: 'Outfit', sans-serif;
+    font-size: 2.2rem;
+    font-weight: 900;
+    margin-bottom: 1rem;
+    color: var(--color-text);
+    line-height: 1.1;
+}
+
+.onboarding-desc {
+    color: var(--color-text-secondary);
+    margin-bottom: 2.5rem;
+    font-size: 1.1rem;
+}
+
+.onboarding-options {
+    display: flex;
+    flex-direction: column;
+    gap: 1.2rem;
+}
+
+.onboarding-btn {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    padding: 1.25rem;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--glass-border);
+    border-radius: 0.75rem;
+    cursor: pointer;
+    text-align: left;
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.onboarding-btn:hover {
+    background: rgba(255, 255, 255, 0.08);
+    transform: translateY(-5px);
+    border-color: var(--color-accent);
+}
+
+.onboarding-btn .btn-icon {
+    font-size: 2rem;
+}
+
+.onboarding-btn .btn-text strong {
+    display: block;
+    font-size: 1.1rem;
+    color: var(--color-text);
+}
+
+.onboarding-btn .btn-text small {
+    color: var(--color-text-tertiary);
+}
+
+.onboarding-footer-text {
+    margin-top: 2rem;
+    font-size: 0.85rem;
+    color: var(--color-text-tertiary);
+}
+
+/* ── XP GUIDE STYLES ── */
+.xp-guide-section {
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: 0.75rem;
+    padding: 2rem;
+    margin: 2.5rem 0;
+}
+
+.xp-guide-section h3 {
+    font-family: 'Outfit', sans-serif;
+    font-size: 1.5rem;
+    font-weight: 800;
+    margin-bottom: 2rem;
+    text-align: center;
+}
+
+.xp-guide-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+}
+
+.xp-guide-item {
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid var(--glass-border);
+    border-radius: 0.5rem;
+    padding: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    transition: all 0.25s;
+}
+
+.xp-guide-item:hover {
+    background: rgba(255, 255, 255, 0.05);
+    transform: translateY(-3px);
+}
+
+.xp-guide-item .xp-icon {
+    font-size: 1.5rem;
+}
+
+.xp-guide-item .xp-label {
+    flex: 1;
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+.xp-guide-item .xp-value {
+    color: var(--color-accent);
+    font-weight: 800;
+    font-size: 0.85rem;
+}
+
+:root {
+    /* ── TYPOGRAPHY ── */
+    --font-heading: 'Marcellus', serif;
+    --font-ui: 'Outfit', sans-serif;
+    --font-body: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    --font-family: var(--font-body);
+    --font-size-xs: 0.6875rem;
+    /* 11px */
+    --font-size-sm: 0.8125rem;
+    /* 13px */
+    --font-size-base: 0.9375rem;
+    /* 15px */
+    --font-size-md: 1.0625rem;
+    /* 17px */
+    --font-size-lg: 1.1875rem;
+    /* 19px */
+    --font-size-xl: 1.375rem;
+    /* 22px */
+    --font-size-2xl: 1.75rem;
+    /* 28px */
+    --font-size-2_5xl: 2.125rem;
+    /* 34px */
+    --font-size-3xl: 2.625rem;
+    /* 42px */
+    --font-size-4xl: 3.25rem;
+    /* 52px */
+    --fw-regular: 400;
+    --fw-medium: 500;
+    --fw-semibold: 600;
+    --tracking-tight: -0.025em;
+    --tracking-normal: -0.011em;
+    --tracking-wide: 0.025em;
+    --leading-tight: 1.15;
+    --leading-normal: 1.5;
+    --leading-relaxed: 1.7;
+}
+
+/* ── PROFILE SECTION STYLES ── */
+.profile-card {
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: 0.75rem;
+    padding: 2rem;
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+    margin-bottom: 2rem;
+    box-shadow: var(--shadow-md);
+}
+
+.profile-photo-wrapper {
+    position: relative;
+    width: 6rem;
+    height: 6rem;
+    border-radius: 2rem;
+    overflow: hidden;
+    background: var(--color-bg-secondary);
+    border: 2px solid var(--glass-border);
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.profile-photo-wrapper:hover {
+    border-color: var(--color-accent);
+    transform: scale(1.05);
+}
+
+.profile-photo {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.profile-photo-fallback {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2.5rem;
+    color: var(--color-text-tertiary);
+}
+
+.profile-photo-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.3s;
+    cursor: pointer;
+}
+
+.profile-photo-wrapper:hover .profile-photo-overlay {
+    opacity: 1;
+}
+
+.profile-username {
+    font-family: 'Outfit', sans-serif;
+    font-size: 1.8rem;
+    font-weight: 800;
+    color: var(--color-text);
+    margin-bottom: 0.2rem;
+}
+
+.profile-fullname {
+    color: var(--color-text-secondary);
+    font-size: 1.1rem;
+    margin-bottom: 0.5rem;
+}
+
+.profile-info {
+    flex: 1;
+}
+
+.profile-edit-section {
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: 0.75rem;
+    padding: 2rem;
+}
+
+.profile-edit-title {
+    font-family: 'Outfit', sans-serif;
+    font-size: 1.3rem;
+    font-weight: 700;
+    margin-bottom: 2rem;
+}
+
+.profile-edit-field {
+    margin-bottom: 1.5rem;
+}
+
+.profile-edit-field label {
+    display: block;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--color-text-secondary);
+    margin-bottom: 0.6rem;
+}
+
+.profile-edit-row {
+    display: flex;
+    gap: 1rem;
+}
+
+@media (max-width: 600px) {
+    .profile-card {
+        flex-direction: column;
+        text-align: center;
+        padding: 2rem;
+    }
+
+    .profile-edit-row {
+        flex-direction: column;
+    }
+}
+
+:root {
+    /* ── COLORS — LIGHT ── */
+    --color-bg: #FFFFFF;
+    --color-bg-secondary: #F5F5F7;
+    --color-bg-tertiary: #E8E8ED;
+    --color-bg-elevated: #FFFFFF;
+    --color-text: #1D1D1F;
+    --color-text-secondary: #6E6E73;
+    --color-text-tertiary: #AEAEB2;
+    --color-border: rgba(0, 0, 0, 0.06);
+    --color-border-strong: rgba(0, 0, 0, 0.12);
+    --color-accent: hsl(210, 100%, 55%);
+    --color-accent-hover: hsl(210, 100%, 45%);
+    --color-accent-bg: hsla(210, 100%, 55%, 0.1);
+    --color-accent-bg-strong: hsla(210, 100%, 55%, 0.2);
+    --color-success: #30D158;
+    --color-warning: #FF9F0A;
+    --color-error: #FF3B30;
+    --color-error-bg: rgba(255, 59, 48, 0.08);
+
+    /* ── SPACING (8px grid) ── */
+    --space-1: 0.25rem;
+    /* 4px */
+    --space-2: 0.5rem;
+    /* 8px */
+    --space-3: 0.75rem;
+    /* 12px */
+    --space-4: 1rem;
+    /* 16px */
+    --space-5: 1.25rem;
+    /* 20px */
+    --space-6: 1.5rem;
+    /* 24px */
+    --space-8: 2rem;
+    /* 32px */
+    --space-10: 2.5rem;
+    /* 40px */
+    --space-12: 3rem;
+    /* 48px */
+    --space-16: 4rem;
+    /* 64px */
+    --space-20: 5rem;
+    /* 80px */
+
+    /* ── RADIUS ── */
+    --radius-sm: 0.5rem;
+    /* 8px */
+    --radius-md: 0.75rem;
+    /* 12px */
+    --radius-lg: 1rem;
+    /* 16px */
+    --radius-xl: 1.25rem;
+    /* 20px */
+    --radius-2xl: 1.75rem;
+    /* 28px */
+    --radius-full: 9999px;
+
+    /* ── SHADOWS — APPLE STYLE ── */
+    --shadow-xs: 0 1px 2px hsla(0, 0%, 0%, 0.05);
+    --shadow-sm: 0 2px 4px hsla(0, 0%, 0%, 0.05),
+        0 1px 2px hsla(0, 0%, 0%, 0.1);
+    --shadow-md: 0 4px 6px hsla(0, 0%, 0%, 0.07),
+        0 10px 15px hsla(0, 0%, 0%, 0.03);
+    --shadow-lg: 0 10px 25px hsla(0, 0%, 0%, 0.1),
+        0 20px 48px hsla(0, 0%, 0%, 0.05);
+    --shadow-xl: 0 20px 25px hsla(0, 0%, 0%, 0.15),
+        0 30px 60px hsla(0, 0%, 0%, 0.1);
+    --shadow-float: 0 20px 40px hsla(0, 0%, 0%, 0.2),
+        0 0 0 1px hsla(0, 0%, 0%, 0.05);
+
+    /* ── TRANSITIONS ── */
+    --ease-out: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    --ease-spring: cubic-bezier(0.34, 1.2, 0.64, 1);
+    --duration-fast: 150ms;
+    --duration-base: 250ms;
+    --duration-slow: 400ms;
+
+    /* ── GLASS ── */
+    --glass-bg: rgba(255, 255, 255, 0.72);
+    --glass-border: rgba(0, 0, 0, 0.04);
+    --glass-blur: blur(30px) saturate(180%);
+    --glass-bg-deep: rgba(255, 255, 255, 0.85);
+    --glass-shadow: 0 1rem 3rem rgba(0, 0, 0, 0.05);
+
+    /* ── LAYOUT ── */
+    --header-height: 4.5rem;
+    --content-max-width: 1100px;
+    --sidebar-width: 280px;
+
+    /* ── BACKWARD-COMPAT ALIASES ── */
+    --primary: #1D1D1F;
+    --primary-light: #6E6E73;
+    --accent: #007AFF;
+    --accent-light: #0066D6;
+    --bg-primary: #FFFFFF;
+    --bg-secondary: #F5F5F7;
+    --bg-tertiary: #E8E8ED;
+    --text-primary: #1D1D1F;
+    --text-secondary: #6E6E73;
+    --text-light: #AEAEB2;
+    --border: rgba(0, 0, 0, 0.12);
+    --success: #30D158;
+    --warning: #FF9F0A;
+    --error: #FF3B30;
+}
+
+
+/* ── DARK MODE ── */
+[data-theme="dark"] {
+    --color-bg: #0B0B0B;
+    --color-bg-secondary: #161617;
+    --color-bg-tertiary: #1C1C1E;
+    --color-bg-elevated: #1C1C1E;
+    --color-text: #E5E5E7;
+    --color-text-secondary: #98989D;
+    --color-text-tertiary: #636366;
+    --color-border: rgba(255, 255, 255, 0.06);
+    --color-border-strong: rgba(255, 255, 255, 0.12);
+    --color-accent: #5B9FF3;
+    --color-accent-hover: #78B0F5;
+    --color-accent-bg: rgba(91, 159, 243, 0.12);
+    --color-accent-bg-strong: rgba(91, 159, 243, 0.2);
+    --color-success: #30D158;
+    --color-warning: #FF9F0A;
+    --color-error: #FF453A;
+    --color-error-bg: rgba(255, 69, 58, 0.12);
+
+    --glass-bg: rgba(28, 28, 30, 0.72);
+    --glass-border: rgba(255, 255, 255, 0.06);
+    --glass-bg-deep: rgba(20, 20, 22, 0.85);
+    --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+
+    --shadow-xs: 0 0 1px rgba(0, 0, 0, 0.3), 0 2px 4px rgba(0, 0, 0, 0.25);
+    --shadow-sm: 0 0 1px rgba(0, 0, 0, 0.3), 0 4px 8px rgba(0, 0, 0, 0.3);
+    --shadow-md: 0 0 1px rgba(0, 0, 0, 0.3), 0 8px 24px rgba(0, 0, 0, 0.4);
+    --shadow-lg: 0 0 1px rgba(0, 0, 0, 0.3), 0 16px 40px rgba(0, 0, 0, 0.45);
+    --shadow-xl: 0 0 1px rgba(0, 0, 0, 0.3), 0 24px 64px rgba(0, 0, 0, 0.5);
+    --shadow-float: 0 22px 70px 4px rgba(0, 0, 0, 0.45);
+
+    /* ── BACKWARD-COMPAT ALIASES (dark) ── */
+    --primary: #E5E5E7;
+    --primary-light: #98989D;
+    --accent: #5B9FF3;
+    --accent-light: #78B0F5;
+    --bg-primary: #0B0B0B;
+    --bg-secondary: #161617;
+    --bg-tertiary: #1C1C1E;
+    --text-primary: #E5E5E7;
+    --text-secondary: #98989D;
+    --text-light: #636366;
+    --border: rgba(255, 255, 255, 0.12);
+    --success: #30D158;
+    --warning: #FF9F0A;
+    --error: #FF453A;
+}
+
+/* ── RESET ── */
+*,
+*::before,
+*::after {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html {
+    -webkit-text-size-adjust: 100%;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+}
+
+html,
+body {
+    width: 100%;
+    overflow-x: hidden;
+    background: var(--color-bg);
+    color: var(--color-text);
+    font-family: var(--font-family);
+    font-size: var(--font-size-base);
+    line-height: var(--leading-normal);
+    letter-spacing: var(--tracking-normal);
+}
+
+body {
+    display: flex;
+    flex-direction: column;
+    overflow-x: hidden;
+}
+
+/* ── TYPOGRAPHY ── */
+h1 {
+    font-size: var(--font-size-3xl);
+    font-weight: var(--fw-semibold);
+    letter-spacing: var(--tracking-tight);
+    line-height: var(--leading-tight);
+    color: var(--color-text);
+    margin-bottom: var(--space-3);
+}
+
+h2 {
+    font-size: var(--font-size-2xl);
+    font-weight: var(--fw-semibold);
+    letter-spacing: var(--tracking-tight);
+    line-height: var(--leading-tight);
+    color: var(--color-text);
+    margin-bottom: var(--space-3);
+}
+
+h3 {
+    font-size: var(--font-size-xl);
+    font-weight: var(--fw-semibold);
+    letter-spacing: var(--tracking-normal);
+    color: var(--color-text);
+    margin-bottom: var(--space-2);
+}
+
+h4,
+h5,
+h6 {
+    font-size: var(--font-size-base);
+    font-weight: var(--fw-semibold);
+    color: var(--color-text);
+    margin-bottom: var(--space-2);
+}
+
+p {
+    font-size: var(--font-size-base);
+    line-height: var(--leading-relaxed);
+    color: var(--color-text-secondary);
+}
+
+small {
+    font-size: var(--font-size-sm);
+    color: var(--color-text-tertiary);
+}
+
+a {
+    color: var(--color-accent);
+    text-decoration: none;
+    transition: opacity var(--duration-fast) var(--ease-out);
+}
+
+a:hover {
+    opacity: 0.8;
+}
+
+/* ── BUTTONS ── */
+.btn,
+button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-2);
+    padding: var(--space-3) var(--space-6);
+    font-family: var(--font-family);
+    font-size: var(--font-size-base);
+    font-weight: var(--fw-medium);
+    line-height: 1;
+    border: none;
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    min-height: 44px;
+    transition: all var(--duration-fast) var(--ease-out);
+    -webkit-user-select: none;
+    user-select: none;
+}
+
+.btn-primary {
+    background: var(--color-accent);
+    color: #FFFFFF;
+    box-shadow: var(--shadow-xs);
+}
+
+.btn-primary:hover {
+    background: var(--color-accent-hover);
+    box-shadow: var(--shadow-sm);
+    transform: translateY(-1px);
+}
+
+.btn-primary:active {
+    transform: translateY(0);
+    box-shadow: var(--shadow-xs);
+}
+
+.btn-secondary {
+    background: var(--color-bg-secondary);
+    color: var(--color-text);
+    border: 1px solid var(--color-border-strong);
+}
+
+.btn-secondary:hover {
+    background: var(--color-bg-tertiary);
+}
+
+.btn-secondary:active {
+    background: var(--color-bg-secondary);
+}
+
+/* ── INPUTS ── */
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="number"],
+input[type="date"],
+textarea,
+select {
+    width: 100%;
+    padding: var(--space-3) var(--space-4);
+    font-family: var(--font-family);
+    font-size: var(--font-size-base);
+    color: var(--color-text);
+    background: var(--color-bg-secondary);
+    border: 1px solid var(--color-border-strong);
+    border-radius: var(--radius-md);
+    outline: none;
+    transition: all var(--duration-fast) var(--ease-out);
+    margin-bottom: var(--space-3);
+    min-height: 44px;
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+    border-color: var(--color-accent);
+    background: var(--color-bg);
+    box-shadow: 0 0 0 3px var(--color-accent-bg);
+}
+
+::placeholder {
+    color: var(--color-text-tertiary);
+}
+
+textarea {
+    resize: vertical;
+    line-height: var(--leading-relaxed);
+}
+
+/* ── CARDS ── */
+.card {
+    background: var(--color-bg-elevated);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-xl);
+    padding: var(--space-6);
+    margin-bottom: var(--space-4);
+    box-shadow: var(--shadow-xs);
+    transition: all var(--duration-base) var(--ease-out);
+}
+
+.card:hover {
+    border-color: var(--color-border-strong);
+    box-shadow: var(--shadow-sm);
+}
+
+/* ── ACCESSIBILITY ── */
+.visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border-width: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+
+/* ── SCROLLBAR ── */
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--color-border-strong);
+    border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--color-text-tertiary);
+}
+
+/* Firefox */
+* {
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-border-strong) transparent;
+}

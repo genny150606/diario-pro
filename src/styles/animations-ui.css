@@ -1,0 +1,124 @@
+/* ============================================
+   UI ANIMATIONS — APPLE STYLE UTILITIES
+   ============================================ */
+
+/* ── ENTRANCE CLASSES ── */
+.fade-in {
+    animation: fadeIn var(--duration-base) var(--ease-out);
+}
+
+.slide-in-bottom {
+    animation: fadeInUp var(--duration-slow) var(--ease-out);
+}
+
+.scale-in {
+    animation: scaleIn var(--duration-base) var(--ease-out);
+}
+
+/* ── INTERACTIVE ── */
+.interactive {
+    transition: all var(--duration-fast) var(--ease-out);
+    cursor: pointer;
+}
+
+.interactive:hover {
+    transform: translateY(-1px);
+}
+
+.interactive:active {
+    transform: translateY(0);
+}
+
+/* ── SKELETON LOADING ── */
+.skeleton {
+    background: linear-gradient(90deg,
+            var(--color-bg-secondary) 0%,
+            var(--color-bg-tertiary) 50%,
+            var(--color-bg-secondary) 100%);
+    background-size: 200% 100%;
+    animation: shimmer 2s ease-in-out infinite;
+    border-radius: var(--radius-md);
+}
+
+@keyframes shimmer {
+    0% {
+        background-position: 200% 0;
+    }
+
+    100% {
+        background-position: -200% 0;
+    }
+}
+
+/* ── FEEDBACK ── */
+.shake {
+    animation: shake var(--duration-fast) var(--ease-out);
+}
+
+@keyframes shake {
+
+    0%,
+    100% {
+        transform: translateX(0);
+    }
+
+    20%,
+    60% {
+        transform: translateX(-3px);
+    }
+
+    40%,
+    80% {
+        transform: translateX(3px);
+    }
+}
+
+/* ── PROGRESS ── */
+.progress-bar {
+    background: var(--color-accent);
+    animation: slideProgress var(--duration-slow) var(--ease-out);
+}
+
+@keyframes slideProgress {
+    from {
+        width: 0;
+    }
+}
+
+/* ── TIMING UTILITIES ── */
+.transition-fast {
+    transition: all var(--duration-fast) var(--ease-out);
+}
+
+.transition-base {
+    transition: all var(--duration-base) var(--ease-out);
+}
+
+.transition-slow {
+    transition: all var(--duration-slow) var(--ease-out);
+}
+
+/* ── REDUCE MOTION ── */
+@media (prefers-reduced-motion: reduce) {
+
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+/* JARVIS MODE PULSE ANIMATION */
+@keyframes pulse-ring {
+    0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
+    70% { transform: scale(1); box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); }
+    100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+}
+
+.jarvis-active {
+    animation: pulse-ring 2s infinite;
+    background-color: #ef4444 !important; /* Red when active */
+    color: white !important;
+}
+

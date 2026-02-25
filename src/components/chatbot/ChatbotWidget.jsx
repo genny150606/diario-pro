@@ -1,0 +1,186 @@
+import { useState, useRef, useEffect, useCallback } from 'react'
+import { useData } from '../../hooks/useData'
+import './ChatbotWidget.css'
+
+export default function ChatbotWidget() {
+    const { addNote } = useData()
+    const [isOpen, setIsOpen] = useState(false)
+    const [messages, setMessages] = useState([])
+    const [input, setInput] = useState('')
+    const [loading, setLoading] = useState(false)
+    const messagesEndRef = useRef(null)
+    const inputRef = useRef(null)
+
+    const apiUrl = window.location.protocol === 'file:' ? 'https://diario-pro.vercel.app' : ''
+
+    // Auto-scroll to bottom
+    useEffect(() => {
+        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+    }, [messages])
+
+    // Focus input when opened
+    useEffect(() => {
+        if (isOpen) {
+            inputRef.current?.focus()
+            if (messages.length === 0) {
+                setMessages([{
+                    role: 'ai',
+                    content: '👋 Ciao! Sono il tuo assistente AI.\n\nPosso aiutarti con:\n• 📝 **Generare appunti** — "Crea appunti su [argomento]"\n• 🎴 **Creare flashcard** — "Genera flashcard su [argomento]"\n• ⭐ **Aggiungere voti** — "Aggiungi 8 in matematica"\n• ✅ **Aggiungere compiti** — "Compito di storia per venerdì"\n• 🧭 **Navigazione** — "Vai ai voti"\n\nChiedi pure!'
+                }])
+            }
+        }
+    }, [isOpen])
+
+    const formatMarkdown = (text) => {
+        return text
+            .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+            .replace(/\*(.*?)\*/g, '<em>$1</em>')
+            .replace(/`(.*?)`/g, '<code>$1</code>')
+            .replace(/\n/g, '<br>')
+    }
+
+    const handleSend = useCallback(async () => {
+        const text = input.trim()
+        if (!text || loading) return
+
+        setInput('')
+        setMessages(prev => [...prev, { role: 'user', content: text }])
+        setLoading(true)
+
+        // Check if note generation request
+        const isNoteRequest = /appunti|nota|spieg|riassumi|riassunto|studio|studia/i.test(text)
+
+        try {
+            const response = await fetch(`${apiUrl}/api/chat`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    message: isNoteRequest
+                        ? `Crea appunti COMPLETI su: ${text}\n\nSTRUTTURA:\n1. INTRODUZIONE\n2. CONCETTI PRINCIPALI\n3. SPIEGAZIONE DETTAGLIATA\n4. ESEMPI PRATICI\n5. RIASSUNTO`
+                        : text,
+                    history: messages.slice(-6).map(m => ({
+                        role: m.role === 'user' ? 'user' : 'model',
+                        parts: [{ text: m.content }]
+                    })),
+                    context: 'StudyJournal AI Assistant',
+                    stream: true
+                })
+            })
+
+            if (!response.ok) throw new Error(`Server error: ${response.status}`)
+
+            // Streaming SSE
+            const reader = response.body.getReader()
+            const decoder = new TextDecoder()
+            let fullText = ''
+            const aiMsgId = Date.now()
+
+            // Add empty AI message
+            setMessages(prev => [...prev, { role: 'ai', content: '...', id: aiMsgId }])
+
+            while (true) {
+                const { done, value } = await reader.read()
+                if (done) break
+                const chunk = decoder.decode(value, { stream: true })
+                for (const line of chunk.split('\n')) {
+                    if (line.startsWith('data: ')) {
+                        const dataStr = line.replace('data: ', '').trim()
+                        if (dataStr === '[DONE]') continue
+                        try {
+                            const data = JSON.parse(dataStr)
+                            if (data.text) {
+                                fullText += data.text
+                                setMessages(prev => prev.map(m =>
+                                    m.id === aiMsgId ? { ...m, content: fullText } : m
+                                ))
+                            }
+                        } catch (e) { /* skip parse errors in SSE */ }
+                    }
+                }
+            }
+
+            // Auto-save notes if it was a note generation request
+            if (isNoteRequest && fullText.length > 50) {
+                const subject = text.replace(/crea|appunti|su|spieg|nota|di/gi, '').trim() || 'Appunti AI'
+                addNote({ title: subject, content: fullText, subject: 'AI' })
+                setMessages(prev => [...prev, {
+                    role: 'ai',
+                    content: '📌 **Appunti salvati automaticamente!** Li trovi nella sezione Note.',
+                    id: Date.now()
+                }])
+            }
+
+        } catch (err) {
+            setMessages(prev => [...prev, {
+                role: 'ai',
+                content: `❌ Errore: ${err.message}. Riprova tra poco.`,
+                id: Date.now()
+            }])
+        } finally {
+            setLoading(false)
+        }
+    }, [input, loading, messages, apiUrl, addNote])
+
+    const handleKeyDown = (e) => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault()
+            handleSend()
+        }
+    }
+
+    return (
+        <>
+            {/* FAB Button */}
+            <button
+                className={`chatbot-fab ${isOpen ? 'active' : ''}`}
+                onClick={() => setIsOpen(!isOpen)}
+                aria-label="AI Chatbot"
+            >
+                {isOpen ? '✕' : '🤖'}
+            </button>
+
+            {/* Chat Window */}
+            {isOpen && (
+                <div className="chatbot-window">
+                    <div className="chatbot-header">
+                        <div className="chatbot-avatar">🤖</div>
+                        <div>
+                            <h4>StudyJournal AI</h4>
+                            <span className="chatbot-status">
+                                {loading ? '✍️ Scrivendo...' : '🟢 Online'}
+                            </span>
+                        </div>
+                    </div>
+
+                    <div className="chatbot-messages">
+                        {messages.map((msg, i) => (
+                            <div key={msg.id || i} className={`chat-bubble ${msg.role}`}>
+                                <div dangerouslySetInnerHTML={{ __html: formatMarkdown(msg.content) }} />
+                            </div>
+                        ))}
+                        <div ref={messagesEndRef} />
+                    </div>
+
+                    <div className="chatbot-input-area">
+                        <input
+                            ref={inputRef}
+                            type="text"
+                            placeholder="Chiedi all'AI..."
+                            value={input}
+                            onChange={e => setInput(e.target.value)}
+                            onKeyDown={handleKeyDown}
+                            disabled={loading}
+                        />
+                        <button
+                            className="chatbot-send-btn"
+                            onClick={handleSend}
+                            disabled={loading || !input.trim()}
+                        >
+                            {loading ? '⏳' : '➤'}
+                        </button>
+                    </div>
+                </div>
+            )}
+        </>
+    )
+}

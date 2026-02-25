@@ -1,0 +1,128 @@
+/* ============================================
+   DASHBOARD — Placeholder Styles
+   ============================================ */
+
+.dashboard-container {
+    min-height: 100vh;
+    background: var(--color-bg, #0B0B0B);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+}
+
+.dashboard-welcome {
+    text-align: center;
+    max-width: 600px;
+    width: 100%;
+}
+
+.welcome-icon {
+    font-size: 4rem;
+    margin-bottom: 1.5rem;
+    animation: float 3s ease-in-out infinite;
+}
+
+.dashboard-welcome h1 {
+    font-family: 'Outfit', sans-serif;
+    font-size: 2.2rem;
+    font-weight: 800;
+    color: var(--color-text, #E5E5E7);
+    margin-bottom: 0.5rem;
+}
+
+.welcome-email {
+    color: var(--color-text-secondary, #98989D);
+    font-size: 1rem;
+    margin-bottom: 2.5rem;
+}
+
+.welcome-card {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 1.25rem;
+    padding: 2.5rem;
+    margin-bottom: 2rem;
+    text-align: left;
+}
+
+.construction-badge {
+    display: inline-block;
+    background: rgba(255, 159, 10, 0.15);
+    color: #FF9F0A;
+    padding: 0.4rem 1rem;
+    border-radius: 2rem;
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    margin-bottom: 1.2rem;
+}
+
+.welcome-card h2 {
+    font-family: 'Outfit', sans-serif;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--color-text, #E5E5E7);
+    margin-bottom: 0.8rem;
+}
+
+.welcome-card p {
+    color: var(--color-text-secondary, #98989D);
+    font-size: 0.95rem;
+    line-height: 1.6;
+    margin-bottom: 2rem;
+}
+
+.feature-progress {
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+}
+
+.progress-item {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    padding: 0.6rem 0.8rem;
+    border-radius: 0.5rem;
+    font-size: 0.9rem;
+    color: var(--color-text-tertiary, #636366);
+    transition: background 0.2s;
+}
+
+.progress-item.done {
+    color: var(--color-text, #E5E5E7);
+}
+
+.progress-check {
+    font-size: 1.1rem;
+}
+
+.signout-btn {
+    background: rgba(255, 69, 58, 0.1);
+    color: #FF453A;
+    border: 1px solid rgba(255, 69, 58, 0.2);
+    padding: 0.8rem 2rem;
+    border-radius: 0.75rem;
+    font-weight: 600;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.signout-btn:hover {
+    background: rgba(255, 69, 58, 0.2);
+    transform: translateY(-2px);
+}
+
+@keyframes float {
+
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(-10px);
+    }
+}

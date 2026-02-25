@@ -1,0 +1,256 @@
+/* ============================================
+   ANIMATIONS — APPLE 2026 MINIMAL
+   Subtle, natural, no bounce/glow
+   ============================================ */
+
+/* ── ENTRANCE ── */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(12px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes scaleIn {
+    from {
+        opacity: 0;
+        transform: scale(0.96);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+@keyframes slideInLeft {
+    from {
+        transform: translateX(-100%);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+@keyframes slideUp {
+    from {
+        transform: translateY(16px);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+/* ── SECTIONS ── */
+.section {
+    animation: fadeInUp var(--duration-base) var(--ease-out);
+}
+
+/* ── CARDS ── */
+.card {
+    animation: fadeInUp var(--duration-base) var(--ease-out);
+    animation-fill-mode: both;
+}
+
+.card:nth-child(1) {
+    animation-delay: 0ms;
+}
+
+.card:nth-child(2) {
+    animation-delay: 40ms;
+}
+
+.card:nth-child(3) {
+    animation-delay: 80ms;
+}
+
+.card:nth-child(4) {
+    animation-delay: 120ms;
+}
+
+.card:nth-child(5) {
+    animation-delay: 160ms;
+}
+
+/* ── STAT CARDS ── */
+.stat-card {
+    animation: fadeInUp var(--duration-base) var(--ease-out);
+    animation-fill-mode: both;
+}
+
+.stat-card:nth-child(1) {
+    animation-delay: 0ms;
+}
+
+.stat-card:nth-child(2) {
+    animation-delay: 50ms;
+}
+
+.stat-card:nth-child(3) {
+    animation-delay: 100ms;
+}
+
+.stat-card:nth-child(4) {
+    animation-delay: 150ms;
+}
+
+.stat-card:nth-child(5) {
+    animation-delay: 200ms;
+}
+
+/* ── NAV ITEMS ── */
+.sidebar-item {
+    animation: fadeIn var(--duration-base) var(--ease-out);
+    animation-fill-mode: both;
+}
+
+.sidebar-item:nth-child(1) {
+    animation-delay: 50ms;
+}
+
+.sidebar-item:nth-child(2) {
+    animation-delay: 80ms;
+}
+
+.sidebar-item:nth-child(3) {
+    animation-delay: 110ms;
+}
+
+.sidebar-item:nth-child(4) {
+    animation-delay: 140ms;
+}
+
+.sidebar-item:nth-child(5) {
+    animation-delay: 170ms;
+}
+
+.sidebar-item:nth-child(6) {
+    animation-delay: 200ms;
+}
+
+.sidebar-item:nth-child(7) {
+    animation-delay: 230ms;
+}
+
+/* ── HOVER — SUBTLE ── */
+.stat-card {
+    transition: all var(--duration-base) var(--ease-out);
+}
+
+.stat-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+/* ── PERFORMANCE ── */
+.card,
+.stat-card,
+.btn,
+.sidebar-item,
+.flashcard,
+.note-card {
+    will-change: transform;
+}
+
+/* ── GRADIENT SHIFT (subtle for dark mode accents) ── */
+@keyframes gradientShift {
+
+    0%,
+    100% {
+        background-position: 0% 50%;
+    }
+
+    50% {
+        background-position: 100% 50%;
+    }
+}
+
+/* ── LOGO FLOAT (very subtle) ── */
+@keyframes float {
+
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(-2px);
+    }
+}
+
+.logo-icon {
+    animation: float 4s ease-in-out infinite;
+}
+
+/* ── DUEL COUNTDOWN ── */
+.countdown-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.85);
+    backdrop-filter: blur(15px);
+    z-index: 20000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+}
+
+.countdown-number {
+    font-size: 10rem;
+    font-weight: 800;
+    font-family: 'Inter', sans-serif;
+    animation: countdownPop 1s ease-out infinite;
+}
+
+@keyframes countdownPop {
+    0% {
+        transform: scale(0.5);
+        opacity: 0;
+    }
+
+    30% {
+        transform: scale(1.1);
+        opacity: 1;
+    }
+
+    100% {
+        transform: scale(1);
+        opacity: 0;
+    }
+}
+
+/* ── REDUCE MOTION ── */
+@media (prefers-reduced-motion: reduce) {
+
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}

@@ -1,0 +1,209 @@
+/* ============================================
+   DUEL SECTION — Quiz Arena Styles
+   ============================================ */
+
+.duel-card {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 1.25rem;
+    padding: 2rem;
+}
+
+.duel-start-btn {
+    width: 100%;
+    padding: 1rem;
+    font-size: 1.1rem;
+    font-weight: 800;
+    letter-spacing: 0.05em;
+}
+
+/* Countdown */
+.duel-countdown-screen {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 400px;
+}
+
+.countdown-number {
+    font-size: 8rem;
+    font-weight: 900;
+    color: var(--color-accent, #5B9FF3);
+    animation: countPulse 1s infinite;
+}
+
+@keyframes countPulse {
+
+    0%,
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+
+    50% {
+        transform: scale(1.2);
+        opacity: 0.7;
+    }
+}
+
+/* Game Screen */
+.duel-game-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.duel-progress {
+    font-size: 0.9rem;
+    color: var(--color-text-secondary);
+    font-weight: 600;
+}
+
+.duel-score {
+    font-size: 1.2rem;
+    font-weight: 800;
+    color: #FF9F0A;
+}
+
+.duel-streak {
+    background: rgba(255, 159, 10, 0.15);
+    padding: 0.3rem 0.8rem;
+    border-radius: 2rem;
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: #FF9F0A;
+    animation: streakPop 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes streakPop {
+    from {
+        transform: scale(0.5);
+        opacity: 0;
+    }
+
+    to {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+.duel-timer-bar {
+    width: 100%;
+    height: 6px;
+    border-radius: 3px;
+    background: rgba(255, 255, 255, 0.06);
+    overflow: hidden;
+    margin-bottom: 0.3rem;
+}
+
+.duel-timer-fill {
+    height: 100%;
+    border-radius: 3px;
+    transition: width 1s linear;
+}
+
+.duel-question-card {
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 1rem;
+    padding: 1.5rem;
+    text-align: center;
+    margin-bottom: 1.5rem;
+}
+
+.duel-question-card h3 {
+    font-size: 1.15rem;
+    line-height: 1.5;
+    margin: 0;
+}
+
+.duel-options {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.8rem;
+}
+
+.duel-option {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    padding: 1rem 1.2rem;
+    background: rgba(255, 255, 255, 0.04);
+    border: 2px solid rgba(255, 255, 255, 0.08);
+    border-radius: 0.75rem;
+    color: var(--color-text);
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-align: left;
+    min-height: unset;
+}
+
+.duel-option:hover:not(:disabled) {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: var(--color-accent, #5B9FF3);
+}
+
+.duel-option.correct {
+    background: rgba(48, 209, 88, 0.15);
+    border-color: #30D158;
+    color: #30D158;
+}
+
+.duel-option.wrong {
+    background: rgba(255, 69, 58, 0.15);
+    border-color: #FF453A;
+    color: #FF453A;
+}
+
+.option-letter {
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.06);
+    font-weight: 800;
+    font-size: 0.85rem;
+    flex-shrink: 0;
+}
+
+/* Results */
+.duel-results-screen {
+    text-align: center;
+    padding: 3rem 1rem;
+}
+
+.duel-trophy {
+    font-size: 5rem;
+    margin-bottom: 1rem;
+    animation: trophyBounce 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes trophyBounce {
+    from {
+        transform: scale(0) rotate(-15deg);
+    }
+
+    to {
+        transform: scale(1) rotate(0);
+    }
+}
+
+.duel-final-score {
+    font-size: 4rem;
+    font-weight: 900;
+    background: linear-gradient(135deg, #FF9F0A, #FF453A);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+@media (max-width: 600px) {
+    .duel-options {
+        grid-template-columns: 1fr;
+    }
+}

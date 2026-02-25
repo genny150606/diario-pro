@@ -69,12 +69,16 @@ app.post("/api/generate-flashcards", async (req, res) => {
 
         let prompt = "";
         if (notes && !topic) {
-            prompt = `Analizza questi appunti e genera ${finalAmount} flashcard in formato JSON: [{"q": "domanda", "a": "risposta"}].
-            Gli appunti sono: ${notes.substring(0, 4000)}
-            Assicurati che le domande siano chiare e le risposte concise.`;
+            prompt = `Analizza questi appunti e genera esattamente ${finalAmount} flashcard di studio.
+Restituisci SOLO un array JSON valido, senza testo aggiuntivo, senza markdown, senza spiegazioni.
+Il formato ESATTO richiesto è: [{"front": "domanda", "back": "risposta"}, ...]
+Gli appunti sono: ${notes.substring(0, 4000)}
+Le domande devono essere chiare e le risposte concise. Non aggiungere NULLA fuori dall'array JSON.`;
         } else {
-            prompt = `Genera ${finalAmount} flashcard su "${finalTopic}" in formato JSON: [{"q": "domanda", "a": "risposta"}].
-            Assicurati di coprire i punti chiave dell'argomento.`;
+            prompt = `Genera esattamente ${finalAmount} flashcard di studio sull'argomento: "${finalTopic}".
+Restituisci SOLO un array JSON valido, senza testo aggiuntivo, senza markdown, senza spiegazioni.
+Il formato ESATTO richiesto è: [{"front": "domanda", "back": "risposta"}, ...]
+Copri i punti chiave dell'argomento. Non aggiungere NULLA fuori dall'array JSON.`;
         }
 
         const result = await ai.generateContent(prompt);

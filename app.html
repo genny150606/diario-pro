@@ -69,6 +69,39 @@
 </head>
 
 <body>
+    <!-- ═══════════ CUSTOM MODALS (UIManager) ═══════════ -->
+    <div id="alertModal"
+        style="display:none; position:fixed; inset:0; z-index:200000; background:rgba(0,0,0,0.7); backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px); align-items:center; justify-content:center;">
+        <div
+            style="background:var(--color-bg-elevated, #1C1C1E); border:1px solid rgba(255,255,255,0.1); border-radius:1rem; padding:2rem; max-width:400px; width:90%; text-align:center; box-shadow:0 20px 60px rgba(0,0,0,0.5);">
+            <h3 id="alertTitle"
+                style="margin-bottom:0.75rem; font-family:'Outfit',sans-serif; font-size:1.3rem; font-weight:800; color:var(--color-text, #fff);">
+                Avviso</h3>
+            <p id="alertMessage"
+                style="color:var(--color-text-secondary, #98989D); margin-bottom:1.5rem; line-height:1.6; white-space:pre-line;">
+            </p>
+            <button id="alertOkBtn"
+                style="background:var(--color-accent, #5B9FF3); color:#fff; border:none; padding:0.7rem 2rem; border-radius:0.5rem; font-weight:700; font-size:0.95rem; cursor:pointer; min-width:120px;">OK</button>
+        </div>
+    </div>
+    <div id="confirmModal"
+        style="display:none; position:fixed; inset:0; z-index:200000; background:rgba(0,0,0,0.7); backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px); align-items:center; justify-content:center;">
+        <div
+            style="background:var(--color-bg-elevated, #1C1C1E); border:1px solid rgba(255,255,255,0.1); border-radius:1rem; padding:2rem; max-width:420px; width:90%; text-align:center; box-shadow:0 20px 60px rgba(0,0,0,0.5);">
+            <h3 id="confirmTitle"
+                style="margin-bottom:0.75rem; font-family:'Outfit',sans-serif; font-size:1.3rem; font-weight:800; color:var(--color-text, #fff);">
+                Conferma</h3>
+            <p id="confirmMessage"
+                style="color:var(--color-text-secondary, #98989D); margin-bottom:1.5rem; line-height:1.6;"></p>
+            <div style="display:flex; gap:0.75rem; justify-content:center;">
+                <button id="confirmCancelBtn"
+                    style="background:rgba(255,255,255,0.08); color:var(--color-text-secondary, #98989D); border:1px solid rgba(255,255,255,0.1); padding:0.7rem 1.5rem; border-radius:0.5rem; font-weight:600; cursor:pointer; min-width:100px;">Annulla</button>
+                <button id="confirmOkBtn"
+                    style="background:var(--color-accent, #5B9FF3); color:#fff; border:none; padding:0.7rem 1.5rem; border-radius:0.5rem; font-weight:700; cursor:pointer; min-width:100px;">Conferma</button>
+            </div>
+        </div>
+    </div>
+
     <!-- ═══════════ ENV BANNER ═══════════ -->
     <div id="envBanner"
         style="display:none; padding:12px; background:linear-gradient(135deg, #f59e0b, #d97706); color:white; text-align:center; font-weight:600; font-size:14px; z-index:99999; position:relative; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">

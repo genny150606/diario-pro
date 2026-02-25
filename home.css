@@ -268,6 +268,13 @@
     transform-style: preserve-3d;
     box-shadow: 0 5rem 10rem rgba(0, 0, 0, 0.7);
     transition: transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+    max-width: calc(100vw - 4rem);
+}
+
+@media (max-width: 768px) {
+    .preview-glass-card {
+        box-shadow: 0 2rem 5rem rgba(0, 0, 0, 0.5);
+    }
 }
 
 .card-inner {

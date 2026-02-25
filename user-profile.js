@@ -195,12 +195,16 @@ const UserProfile = {
     },
 
     syncSettingsUI(schoolType) {
+        // Mappa i valori interni ai valori dei radio in HTML
+        const normalized = schoolType?.toLowerCase();
+        let radioValue = 'liceo'; // default
+        if (normalized === 'università' || normalized === 'university' || normalized === 'uni') {
+            radioValue = 'università';
+        }
+
         const radios = document.getElementsByName('school');
         for (const radio of radios) {
-            if (radio.value.toLowerCase() === schoolType.toLowerCase()) {
-                radio.checked = true;
-                break;
-            }
+            radio.checked = (radio.value === radioValue);
         }
     },
 
@@ -214,21 +218,38 @@ const UserProfile = {
     },
 
     async handleSchoolTypeChange(newType) {
-        if (!this.currentUser) return;
-        try {
-            const { error } = await supabaseClient.auth.updateUser({
-                data: { school_type: newType }
-            });
-            if (error) throw error;
-            this.applySchoolMode(newType);
-            if (typeof UIManager !== 'undefined') {
-                await UIManager.alert(`Modalità aggiornata a: ${newType.charAt(0).toUpperCase() + newType.slice(1)}`, 'Impostazioni Aggiornate');
+        // Normalizza il valore (HTML radio usa 'liceo'/'università', 
+        // ma il sistema interno usa anche 'high_school'/'university')
+        const normalizedType = newType.toLowerCase();
+
+        // 1. Salva subito in localStorage come fallback
+        localStorage.setItem('studyjournal_school_type', normalizedType);
+        localStorage.setItem('studyjournal_grade_scale', normalizedType === 'università' || normalizedType === 'university' ? '30' : '10');
+
+        // 2. Applica il modo immediatamente (UX: feedback istantaneo)
+        this.applySchoolMode(normalizedType);
+
+        // 3. Tenta il salvataggio nel cloud (users_data via REST proxy, non auth.updateUser)
+        if (this.currentUser) {
+            try {
+                const { error } = await supabaseClient
+                    .from('users_data')
+                    .update({ school_type: normalizedType })
+                    .eq('user_id', this.currentUser.id);
+
+                if (error) {
+                    console.warn('⚠️ Cloud save failed, but localStorage saved:', error.message);
+                }
+            } catch (err) {
+                console.warn('⚠️ Network error saving school type, using localStorage:', err.message);
             }
-        } catch (err) {
-            console.error('Error updating school type:', err);
-            if (typeof UIManager !== 'undefined') {
-                await UIManager.alert('Errore nel salvataggio delle impostazioni.', 'Errore');
-            }
+        }
+
+        // 4. Feedback positivo (il cambio è già applicato localmente)
+        const displayName = normalizedType === 'università' || normalizedType === 'university'
+            ? 'Università' : 'Liceo';
+        if (typeof UIManager !== 'undefined') {
+            await UIManager.alert(`Modalità aggiornata a: ${displayName}`, 'Impostazioni Aggiornate');
         }
     }
 };

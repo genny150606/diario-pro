@@ -157,6 +157,32 @@
         </div>
     </div>
 
+    <!-- ═══════════ CALENDAR MODAL ═══════════ -->
+    <div id="calendarModal" class="date-picker-modal">
+        <div class="date-picker-content">
+            <div class="date-picker-header">
+                <button type="button" class="date-nav-btn" onclick="previousMonth()">◀</button>
+                <h4 id="calendarTitle">Data</h4>
+                <button type="button" class="date-nav-btn" onclick="nextMonth()">▶</button>
+            </div>
+            <div class="date-picker-weekdays">
+                <div>Do</div>
+                <div>Lu</div>
+                <div>Ma</div>
+                <div>Me</div>
+                <div>Gi</div>
+                <div>Ve</div>
+                <div>Sa</div>
+            </div>
+            <div id="calendarDays" class="date-picker-days"></div>
+            <div style="margin-top: 1.5rem; display: flex; gap: 0.8rem;">
+                <button class="btn-primary" onclick="confirmDate()" style="flex: 1; padding: 0.8rem;">Conferma</button>
+                <button class="btn-secondary" onclick="closeCalendar()"
+                    style="flex: 1; padding: 0.8rem;">Chiudi</button>
+            </div>
+        </div>
+    </div>
+
     <!-- AURORA BACKGROUND (Matched to Homepage) -->
     <div class="aurora-bg" aria-hidden="true">
         <div class="orb orb-1"></div>
@@ -2125,7 +2151,7 @@
             // Giorni del mese precedente
             for (let i = firstDay - 1; i >= 0; i--) {
                 const day = document.createElement('div');
-                day.className = 'calendar-day other-month';
+                day.className = 'date-day other-month';
                 day.textContent = prevLastDay - i;
                 daysContainer.appendChild(day);
             }
@@ -2134,7 +2160,7 @@
             const today = new Date();
             for (let i = 1; i <= lastDay; i++) {
                 const day = document.createElement('div');
-                day.className = 'calendar-day';
+                day.className = 'date-day';
                 day.textContent = i;
 
                 const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(i).padStart(2, '0')}`;
@@ -2163,7 +2189,7 @@
             const remainingCells = 42 - totalCells; // 6 righe × 7 giorni
             for (let i = 1; i <= remainingCells; i++) {
                 const day = document.createElement('div');
-                day.className = 'calendar-day other-month';
+                day.className = 'date-day other-month';
                 day.textContent = i;
                 daysContainer.appendChild(day);
             }

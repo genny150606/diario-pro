@@ -1148,13 +1148,19 @@
     position: fixed;
     inset: 0;
     z-index: 99999;
-    display: flex;
+    display: none;
+    /* Hidden by default */
     align-items: center;
     justify-content: center;
     background: rgba(0, 0, 0, 0.7);
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
     animation: fadeIn 0.2s ease;
+}
+
+.date-picker-modal.active {
+    display: flex;
+    /* Shown when active */
 }
 
 @keyframes fadeIn {

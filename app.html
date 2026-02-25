@@ -13,7 +13,7 @@
         href="https://fonts.googleapis.com/css2?family=Marcellus&family=Outfit:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap"
         rel="stylesheet">
     <meta http-equiv="Content-Security-Policy"
-        content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com blob:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; style-src-elem 'self' 'unsafe-inline' https://fonts.googleapis.com; connect-src 'self' https://diario-pro.vercel.app https://rzdpntvojpibbndhsrlz.supabase.co wss://rzdpntvojpibbndhsrlz.supabase.co https://*.supabase.co wss://*.supabase.co https://cdn.jsdelivr.net https://cdnjs.cloudflare.com; img-src 'self' data: blob: https:; font-src 'self' https://fonts.gstatic.com; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self';">
+        content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://unpkg.com blob:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; style-src-elem 'self' 'unsafe-inline' https://fonts.googleapis.com; connect-src 'self' https://diario-pro.vercel.app https://rzdpntvojpibbndhsrlz.supabase.co wss://rzdpntvojpibbndhsrlz.supabase.co https://*.supabase.co wss://*.supabase.co https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://unpkg.com; img-src 'self' data: blob: https:; font-src 'self' https://fonts.gstatic.com; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self';">
     <meta name="referrer" content="strict-origin-when-cross-origin">
     <link rel="icon" type="image/png" href="favicon.png">
     <meta name="description"
@@ -32,6 +32,9 @@
     <link rel="stylesheet" href="animations-ui.css">
     <link rel="stylesheet" href="responsive.css">
     <link rel="stylesheet" href="gamification.css">
+
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
 
     <!-- Supabase & Auth -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -192,7 +195,7 @@
 
     <!-- HEADER TOP -->
     <header>
-        <button class="menu-toggle" id="hamburgerBtn">☰</button>
+        <button class="menu-toggle" id="hamburgerBtn"><i data-lucide="menu"></i></button>
 
         <a href="#" class="logo">
             <img src="favicon.png" alt="Logo" class="logo-img">
@@ -231,20 +234,29 @@
     </header>
 
     <nav class="sidebar" id="mainSidebar">
-        <a href="#" data-section="dashboard" class="sidebar-item active" id="navDashboard" title="Dashboard">🏠
+        <a href="#" data-section="dashboard" class="sidebar-item active" id="navDashboard" title="Dashboard"><i
+                data-lucide="home"></i>
             <span>Dashboard</span></a>
-        <a href="#" data-section="notes" class="sidebar-item" id="navNotes" title="Note">📚 <span>Note</span></a>
-        <a href="#" data-section="tasks" class="sidebar-item" id="navTasks" title="Compiti">✅ <span>Compiti</span></a>
-        <a href="#" data-section="grades" class="sidebar-item" id="navGrades" title="Voti">⭐ <span>Voti</span></a>
-        <a href="#" data-section="stats" class="sidebar-item" id="navStats" title="Statistiche">📊
+        <a href="#" data-section="notes" class="sidebar-item" id="navNotes" title="Note"><i data-lucide="book-open"></i>
+            <span>Note</span></a>
+        <a href="#" data-section="tasks" class="sidebar-item" id="navTasks" title="Compiti"><i
+                data-lucide="check-square"></i> <span>Compiti</span></a>
+        <a href="#" data-section="grades" class="sidebar-item" id="navGrades" title="Voti"><i data-lucide="star"></i>
+            <span>Voti</span></a>
+        <a href="#" data-section="stats" class="sidebar-item" id="navStats" title="Statistiche"><i
+                data-lucide="bar-chart-2"></i>
             <span>Statistiche</span></a>
-        <a href="#" data-section="social" class="sidebar-item" id="navSocial" title="Social">🤝 <span>Social</span></a>
-        <a href="#" data-section="gamification" class="sidebar-item" id="navGamification" title="Livello & Goal">🏆
+        <a href="#" data-section="social" class="sidebar-item" id="navSocial" title="Social"><i data-lucide="users"></i>
+            <span>Social</span></a>
+        <a href="#" data-section="gamification" class="sidebar-item" id="navGamification" title="Livello & Goal"><i
+                data-lucide="trophy"></i>
             <span>Livello</span></a>
         <div style="margin-top: auto; padding-top: 1rem; border-top: 1px solid rgba(255,255,255,0.05);">
-            <a href="#" data-section="settings" class="sidebar-item" id="navSettings" title="Impostazioni">⚙️
+            <a href="#" data-section="settings" class="sidebar-item" id="navSettings" title="Impostazioni"><i
+                    data-lucide="settings"></i>
                 <span>Impostazioni</span></a>
-            <a href="index.html" class="sidebar-item" title="Homepage">🏠 <span>Esci </span></a>
+            <a href="index.html" class="sidebar-item" title="Homepage"><i data-lucide="log-out"></i> <span>Esci
+                </span></a>
         </div>
     </nav>
 
@@ -339,7 +351,7 @@
                             <span class="calendar-icon-trigger" onclick="openCalendar('noteDate')">📅</span>
                         </div>
 
-                        <button class="btn-primary" onclick="addNote()">Salva Nota</button>
+                        <button class="btn-primary" onclick="addNote()"><i data-lucide="save"></i> Salva Nota</button>
                     </div>
 
                     <div id="notesContainer"></div>
@@ -356,10 +368,10 @@
                             dagli appunti con l'AI</p>
                         <button class="btn-primary" style="width: 100%; margin-bottom: 8px;"
                             onclick="generateFlashcardsWithGemini()">
-                            🤖 Genera Flashcard con Gemini
+                            <i data-lucide="cpu"></i> Genera Flashcard con Gemini
                         </button>
                         <button class="btn-secondary" style="width: 100%;" onclick="deleteAllFlashcards()">
-                            🗑️ Elimina tutte le Flashcard
+                            <i data-lucide="trash-2"></i> Elimina tutte le Flashcard
                         </button>
                     </div>
 
@@ -803,7 +815,7 @@
                         </div>
                     </div>
                     <button class="btn-danger reset-data" onclick="clearAllData()">
-                        🗑️ Elimina tutti i dati
+                        <i data-lucide="trash-2"></i> Elimina tutti i dati
                     </button>
                 </div>
             </section>
@@ -1093,9 +1105,6 @@
             // Standard logic: toggle active class
             document.querySelectorAll('section').forEach(s => {
                 s.classList.remove('active');
-                if (s.id !== sectionId) {
-                    s.style.display = 'none'; // Force hide other sections
-                }
             });
 
             const section = document.getElementById(sectionId);
@@ -1105,7 +1114,6 @@
             }
 
             section.classList.add('active');
-            section.style.display = 'block'; // Force show active section
             section.classList.remove('hidden'); // Compatibility with script.js
 
             // Aggiorna stato active nei link
@@ -1192,6 +1200,9 @@
             }, 600);
 
             setupAuthListeners();
+
+            // Initialize Lucide icons
+            if (window.lucide) lucide.createIcons();
         });
 
         function setupAuthListeners() {

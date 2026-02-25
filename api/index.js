@@ -120,7 +120,7 @@ app.post("/api/chat", async (req, res) => {
         if (!genAI) throw new Error("GenAI not initialized");
         const { message, history = [], stream = false } = req.body;
         const ai = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
-        const contents = [...history.map(m => ({ role: m.role === 'user' ? 'user' : 'model', parts: [{ text: m.content }] })), { role: 'user', parts: [{ text: message }] }];
+        const contents = [...history.map(m => ({ role: m.role === 'user' ? 'user' : 'model', parts: m.parts || [{ text: m.content || '' }] })), { role: 'user', parts: [{ text: message }] }];
         if (stream) {
             res.setHeader('Content-Type', 'text/event-stream');
             const streamingResult = await ai.generateContentStream({ contents });

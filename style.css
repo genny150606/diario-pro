@@ -3,6 +3,18 @@
    Editorial Typography & Deep Space Glass
    ============================================ */
 
+/* ── EMOJI COLOR PRESERVATION ── */
+span[role="img"],
+.emoji,
+h1 span,
+h2 span,
+h3 span {
+    -webkit-text-fill-color: initial !important;
+    background-clip: border-box !important;
+    -webkit-background-clip: border-box !important;
+    background: none !important;
+}
+
 /* ── HERO HEADERS (IN-APP) ── */
 .section .hero {
     padding: 6rem 0 4rem;
@@ -21,6 +33,7 @@
     background: linear-gradient(to bottom, #fff, rgba(255, 255, 255, 0.4));
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
+    background-clip: text;
 }
 
 .section .hero p {

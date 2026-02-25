@@ -183,31 +183,42 @@
             </div>
         </div>
 
-        <div class="header-right">
-            <button class="theme-toggle" id="themeToggle" title="Cambia Tema">🌓</button>
-            <div class="user-profile-container">
-                <button class="account-btn" id="accountBtn" onclick="toggleAccountMenu()">
+        <div class="header-right" id="userProfile"
+            style="position: relative; display: flex; align-items: center; gap: 1rem;">
+            <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()" title="Cambia Tema"
+                style="background: none; border: none; color: #fff; cursor: pointer; font-size: 1.2rem; opacity: 0.6;">🌓</button>
+
+            <div class="user-profile-wrapper" style="position: relative;">
+                <button class="account-btn" id="accountBtn">
                     <span id="userEmailDisplay">Caricamento...</span>
                     <span class="chevron">▼</span>
                 </button>
+
+                <!-- ACCOUNT DROPDOWN -->
                 <div class="account-dropdown" id="accountDropdown">
-                    <button id="logoutBtn">❌ Esci</button>
+                    <a href="#" class="dropdown-item" onclick="showSection('settings')">⚙️ Impostazioni</a>
+                    <a href="#" class="dropdown-item" onclick="openChangePasswordModal()">🔑 Password</a>
+                    <div style="height: 1px; background: rgba(255,255,255,0.05); margin: 0.5rem 0;"></div>
+                    <a href="#" class="dropdown-item" onclick="AuthManager.signOut()" style="color: #FF453A;">🚪
+                        Esci</a>
                 </div>
             </div>
         </div>
     </header>
 
     <nav class="sidebar" id="mainSidebar">
-        <a href="#" data-section="dashboard" class="sidebar-item active" title="Dashboard">🏠 <span>Dashboard</span></a>
-        <a href="#" data-section="notes" class="sidebar-item" title="Note">📚 <span>Note</span></a>
-        <a href="#" data-section="tasks" class="sidebar-item" title="Compiti">✅ <span>Compiti</span></a>
-        <a href="#" data-section="grades" class="sidebar-item" title="Voti">⭐ <span>Voti</span></a>
-        <a href="#" data-section="stats" class="sidebar-item" title="Statistiche">📊 <span>Statistiche</span></a>
-        <a href="#" data-section="social" class="sidebar-item" title="Social">🤝 <span>Social</span></a>
+        <a href="#" data-section="dashboard" class="sidebar-item active" id="navDashboard" title="Dashboard">🏠
+            <span>Dashboard</span></a>
+        <a href="#" data-section="notes" class="sidebar-item" id="navNotes" title="Note">📚 <span>Note</span></a>
+        <a href="#" data-section="tasks" class="sidebar-item" id="navTasks" title="Compiti">✅ <span>Compiti</span></a>
+        <a href="#" data-section="grades" class="sidebar-item" id="navGrades" title="Voti">⭐ <span>Voti</span></a>
+        <a href="#" data-section="stats" class="sidebar-item" id="navStats" title="Statistiche">📊
+            <span>Statistiche</span></a>
+        <a href="#" data-section="social" class="sidebar-item" id="navSocial" title="Social">🤝 <span>Social</span></a>
         <div style="margin-top: auto; padding-top: 1rem; border-top: 1px solid rgba(255,255,255,0.05);">
-            <a href="#" data-section="settings" class="sidebar-item" title="Impostazioni">⚙️
+            <a href="#" data-section="settings" class="sidebar-item" id="navSettings" title="Impostazioni">⚙️
                 <span>Impostazioni</span></a>
-            <a href="index.html" class="sidebar-item" title="Homepage">🏠 <span>Esci dall'App</span></a>
+            <a href="index.html" class="sidebar-item" title="Homepage">🏠 <span>Esci </span></a>
         </div>
     </nav>
 

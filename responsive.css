@@ -5,16 +5,10 @@
 
 /* ── MOBILE HEADER — COMPACT MODE (< 768px) ── */
 @media (max-width: 767px) {
-    header {
-        width: 94%;
-        padding: 0 0.8rem;
-        gap: 0.4rem;
-        height: 3rem;
-    }
 
-    /* Hide logo text, keep only the icon */
+    /* Hide logo text, keep only icon */
     .logo span {
-        display: none;
+        display: none !important;
     }
 
     .logo {
@@ -22,52 +16,58 @@
         flex-shrink: 0;
     }
 
-    /* Compact the right actions (streak/level) */
-    .header-right-actions {
-        display: flex;
-        gap: 0.3rem;
-        flex-shrink: 0;
-    }
-
-    /* Compact the far-right section (theme + account) */
-    .header-right {
-        gap: 0.4rem !important;
-        flex-shrink: 1;
-        min-width: 0;
-    }
-
-    /* Hide the email text inside account button, keep just a small button */
+    /* Hide email text and chevron in account button */
     #userEmailDisplay {
-        display: none;
+        display: none !important;
     }
 
-    /* Hide chevron arrow */
     .account-btn .chevron {
-        display: none;
+        display: none !important;
     }
 
-    /* Make account button smaller on mobile */
     .account-btn {
-        padding: 0.4rem 0.6rem;
-        font-size: 0.75rem;
+        padding: 0.3rem 0.5rem;
+        font-size: 0;
+        /* Hide any leftover text */
+        width: 2rem;
+        height: 2rem;
+        border-radius: 50%;
+        justify-content: center;
     }
 
-    /* Theme toggle always visible */
-    #themeToggle {
-        opacity: 1;
+    /* Show a user icon instead of text */
+    .account-btn::before {
+        content: '👤';
+        font-size: 1rem;
     }
 
-    /* Hamburger always visible on mobile */
+    /* Hamburger: show on mobile */
     .menu-toggle {
         display: flex !important;
         flex-shrink: 0;
+        font-size: 1rem;
+    }
+
+    /* Compact right section */
+    .header-right {
+        gap: 0.3rem !important;
+    }
+
+    .header-right-actions {
+        gap: 0.2rem;
+    }
+
+    /* Theme toggle visible */
+    #themeToggle {
+        opacity: 1;
+        font-size: 1rem;
     }
 }
 
 /* Medium mobile: re-show logo text */
 @media (min-width: 480px) and (max-width: 767px) {
     .logo span {
-        display: inline;
+        display: inline !important;
     }
 }
 

@@ -164,7 +164,8 @@ const AuthManager = {
         }
     },
 
-    // Re-initialize all data managers from cloud-hydrated cache
+    // Re-initialize all data managers from cloud-hydrated cache.
+    // This is the SOLE entry point for data initialization.
     _reinitManagers() {
         if (typeof StorageManager === 'undefined') return;
         const appData = StorageManager.load();
@@ -174,8 +175,13 @@ const AuthManager = {
         if (typeof PomodoroManager !== 'undefined') PomodoroManager.init(appData);
         if (typeof NotesManager !== 'undefined') NotesManager.init(appData);
         if (typeof FlashcardManager !== 'undefined') FlashcardManager.init(appData);
+        if (typeof UIManager !== 'undefined' && typeof UIManager.init === 'function') UIManager.init();
         if (typeof updateDashboard === 'function') updateDashboard();
         if (typeof SocialManager !== 'undefined') SocialManager.init();
+
+        // Unlock autosave — data is now safely loaded
+        if (typeof _dataReady !== 'undefined') _dataReady = true;
+        console.log('[AUTH] Managers initialized with cloud data. Autosave enabled.');
     },
 
     showAuthGate() {

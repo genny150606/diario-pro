@@ -1443,44 +1443,17 @@ const AppManager = {
    to prevent empty-state overwrite.
    ============================================ */
 
-document.addEventListener('DOMContentLoaded', async () => {
+document.addEventListener('DOMContentLoaded', () => {
     // Load dark mode preference (sync, safe)
     if (localStorage.getItem('darkMode') === 'true') {
         document.body.classList.add('dark-mode');
     }
 
-    // ── 1. WAIT for auth to fully resolve (session + cloud data) ──
-    // AuthManager.init() is called from auth.js DOMContentLoaded.
-    // Its `ready` promise resolves AFTER cloud data is loaded and
-    // managers are re-initialized via _reinitManagers().
-    // We add a 10-second timeout to prevent hanging if auth fails silently.
-    if (window.AuthManager && AuthManager.ready) {
-        await Promise.race([
-            AuthManager.ready,
-            new Promise(r => setTimeout(r, 10000))
-        ]);
-    }
+    // ── UI setup only — NO data loading. ──
+    // Data loading is handled entirely by auth.js _reinitManagers()
+    // which fires after CloudStorage.load() completes.
 
-    // ── 2. If auth loaded managers, they're already initialized.
-    //        If not (no user or timeout), init with whatever cache we have. ──
-    const appData = StorageManager.load();
-    DiaryManager.init(appData);
-    TaskManager.init(appData);
-    GradeManager.init(appData);
-    PomodoroManager.init(appData);
-    if (typeof NotesManager !== 'undefined') NotesManager.init(appData);
-    if (typeof FlashcardManager !== 'undefined') FlashcardManager.init(appData);
-
-    // ── 3. Initialize UI ──
-    if (typeof UIManager !== 'undefined' && typeof UIManager.init === 'function') {
-        UIManager.init();
-    }
-
-    // ── 4. Mark data as ready — unlock autosave ──
-    _dataReady = true;
-    console.log('Data loaded and managers initialized. Autosave enabled.');
-
-    // ── 5. Gamification badge click-outside handler ──
+    // Gamification badge click-outside handler
     const badge = document.getElementById('levelBadge');
     if (badge) {
         document.addEventListener('click', (e) => {

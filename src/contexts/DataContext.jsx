@@ -209,7 +209,7 @@ export function DataProvider({ children }) {
                     else console.log('[DataContext] CloudStorage save success')
                 })
         }, 500) // Debounce 500ms to batch rapid changes
-    }, [user, cacheKey])
+    }, [user, cacheKey, data])
 
     // ── CRUD helpers ──
 
@@ -284,6 +284,18 @@ export function DataProvider({ children }) {
         saveData(updated)
     }, [data, saveData])
 
+    // FLASHCARDS & GENERIC UPDATES
+    const updateFlashcards = useCallback((newFlashcards) => {
+        const updated = { ...data, flashcards: newFlashcards }
+        saveData(updated)
+    }, [data, saveData])
+
+    // A generic setter for components that used to call raw setData directly
+    const updateData = useCallback((newDataPartial) => {
+        const updated = { ...data, ...newDataPartial }
+        saveData(updated)
+    }, [data, saveData])
+
     // COMPUTED
     const getWeightedAverage = useCallback(() => {
         const grades = data.grades || []
@@ -302,9 +314,12 @@ export function DataProvider({ children }) {
         data,
         loading,
         saveData,
+        updateData,
         // Notes
         addNote,
         deleteNote,
+        // Flashcards
+        updateFlashcards,
         // Tasks
         addTask,
         deleteTask,

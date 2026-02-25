@@ -42,7 +42,9 @@ export default function AppLayout({ children, activeSection, onSectionChange }) 
     const [sidebarOpen, setSidebarOpen] = useState(false)
     const [menuOpen, setMenuOpen] = useState(false)
     const [theme, setTheme] = useState(() => {
-        return localStorage.getItem('theme') || 'dark'
+        const stored = localStorage.getItem('theme') || 'dark'
+        document.documentElement.setAttribute('data-theme', stored)
+        return stored
     })
 
     const handleSectionChange = useCallback((sectionId) => {

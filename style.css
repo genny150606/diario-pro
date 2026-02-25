@@ -1,6 +1,4 @@
 ﻿/* ── HERO HEADERS (IN-APP) ── */
-
-/* ── HERO HEADERS (IN-APP) ── */
 .section .hero {
     padding: 6rem 0 4rem;
     text-align: left;
@@ -15,12 +13,11 @@
     line-height: 0.95;
     letter-spacing: -0.05em;
     margin-bottom: 1.5rem;
-    color: #fff;
-    /* Baseline color */
+    color: var(--color-text);
 }
 
 .gradient-text {
-    background: linear-gradient(to bottom, #fff, rgba(255, 255, 255, 0.4));
+    background: linear-gradient(to bottom, var(--color-text), var(--color-text-secondary));
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -29,7 +26,7 @@
 
 .section .hero p {
     font-size: 1.2rem;
-    color: rgba(255, 255, 255, 0.4);
+    color: var(--color-text-tertiary);
     max-width: 600px;
     font-weight: 400;
 }
@@ -37,20 +34,20 @@
 /* ── ULTRA MINIMALIST CARDS ── */
 .card,
 .stat-card {
-    background: rgba(255, 255, 255, 0.03);
+    background: var(--color-bg-secondary);
     backdrop-filter: blur(40px) saturate(200%);
     -webkit-backdrop-filter: blur(40px) saturate(200%);
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    border: 1px solid var(--color-border);
     border-radius: 2.5rem;
     padding: 2.5rem;
     transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-    box-shadow: 0 1rem 3rem rgba(0, 0, 0, 0.3);
+    box-shadow: var(--shadow-md);
 }
 
 .card:hover,
 .stat-card:hover {
-    background: rgba(255, 255, 255, 0.05);
-    border-color: rgba(255, 255, 255, 0.15);
+    background: var(--color-bg-tertiary);
+    border-color: var(--color-border-strong);
     transform: translateY(-8px);
 }
 
@@ -68,7 +65,7 @@
     font-weight: 800;
     line-height: 1;
     margin: 1rem 0 0.5rem;
-    color: #fff;
+    color: var(--color-text);
 }
 
 .stat-label {
@@ -76,7 +73,7 @@
     letter-spacing: 0.15rem;
     font-size: 0.75rem;
     font-weight: 700;
-    color: rgba(255, 255, 255, 0.3);
+    color: var(--color-text-tertiary);
 }
 
 /* ── TABS — RADICAL LOOK ── */
@@ -84,11 +81,11 @@
     display: flex;
     gap: 1rem;
     margin-bottom: 3rem;
-    background: rgba(255, 255, 255, 0.03);
+    background: var(--color-bg-secondary);
     padding: 0.5rem;
     border-radius: 3rem;
     width: fit-content;
-    border: 1px solid rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--color-border);
 }
 
 .tab-btn {
@@ -96,43 +93,43 @@
     border-radius: 2.5rem;
     font-weight: 700;
     font-size: 0.9rem;
-    color: rgba(255, 255, 255, 0.4);
+    color: var(--color-text-secondary);
     transition: all 0.3s;
 }
 
 .tab-btn.active {
-    background: #fff;
-    color: #000;
+    background: var(--color-text);
+    color: var(--color-bg);
 }
 
 .tab-btn:hover:not(.active) {
-    color: #fff;
-    background: rgba(255, 255, 255, 0.05);
+    color: var(--color-text);
+    background: var(--color-border);
 }
 
 /* ── FORM ELEMENTS ── */
 input,
 textarea,
 select {
-    background: rgba(255, 255, 255, 0.03) !important;
-    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    background: var(--color-bg-secondary) !important;
+    border: 1px solid var(--color-border) !important;
     border-radius: 1.5rem !important;
-    color: #fff !important;
+    color: var(--color-text) !important;
     padding: 1.2rem !important;
     transition: all 0.3s !important;
 }
 
 input:focus,
 textarea:focus {
-    border-color: rgba(255, 255, 255, 0.3) !important;
-    background: rgba(255, 255, 255, 0.06) !important;
-    box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.05) !important;
+    border-color: var(--color-accent) !important;
+    background: var(--color-bg) !important;
+    box-shadow: 0 0 0 4px var(--color-accent-bg) !important;
 }
 
 /* ── PRIMARY BUTTONS ── */
 .btn-primary {
-    background: #fff !important;
-    color: #000 !important;
+    background: var(--color-text) !important;
+    color: var(--color-bg) !important;
     font-weight: 800 !important;
     padding: 1rem 2.5rem !important;
     border-radius: 3rem !important;
@@ -141,6 +138,6 @@ textarea:focus {
 }
 
 .btn-primary:hover {
-    background: #eee !important;
+    opacity: 0.9 !important;
     transform: scale(1.05);
 }

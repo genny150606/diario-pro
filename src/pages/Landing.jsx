@@ -14,11 +14,6 @@ export default function Landing() {
         () => localStorage.getItem('gdpr_accepted') === 'true'
     )
 
-    // If already logged in, redirect to app
-    useEffect(() => {
-        if (user) navigate('/app')
-    }, [user, navigate])
-
     // Load homepage stats
     useEffect(() => {
         async function loadStats() {
@@ -65,10 +60,10 @@ export default function Landing() {
                     </div>
                     <button
                         className="nav-cta"
-                        onClick={() => setShowAuth(true)}
+                        onClick={() => user ? navigate('/app') : setShowAuth(true)}
                         style={{ border: 'none', cursor: 'pointer' }}
                     >
-                        Entra Ora
+                        {user ? "Vai all'App" : "Entra Ora"}
                     </button>
                 </div>
             </nav>
@@ -97,10 +92,10 @@ export default function Landing() {
                         <div className="hero-actions-radical">
                             <button
                                 className="cta-primary-glass"
-                                onClick={() => setShowAuth(true)}
+                                onClick={() => user ? navigate('/app') : setShowAuth(true)}
                                 style={{ border: 'none', cursor: 'pointer' }}
                             >
-                                Inizia Gratis
+                                {user ? "Apri Dashboard" : "Inizia Gratis"}
                             </button>
                             <a href="#features" className="cta-secondary-minimal">Scopri di più</a>
                         </div>
@@ -183,10 +178,10 @@ export default function Landing() {
                         <h2 className="section-title-minimal">Prendi il controllo</h2>
                         <button
                             className="cta-primary-glass"
-                            onClick={() => setShowAuth(true)}
+                            onClick={() => user ? navigate('/app') : setShowAuth(true)}
                             style={{ display: 'inline-block', marginTop: '2rem', border: 'none', cursor: 'pointer' }}
                         >
-                            Accedi ora
+                            {user ? "Vai all'App" : "Accedi ora"}
                         </button>
                     </div>
                 </section>
@@ -197,7 +192,7 @@ export default function Landing() {
                         <a href="#features">Tecnologia</a>
                         <a href="#philosophy">Manifesto</a>
                         <button
-                            onClick={() => setShowAuth(true)}
+                            onClick={() => user ? navigate('/app') : setShowAuth(true)}
                             style={{
                                 background: 'none', border: 'none', color: 'rgba(255,255,255,0.3)',
                                 fontSize: '0.9rem', cursor: 'pointer', padding: 0

@@ -80,14 +80,15 @@ const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
     }
 });
 
+const _authReadyCallbacks = {};
+_authReadyCallbacks.promise = new Promise(resolve => { _authReadyCallbacks.resolve = resolve; });
+
 const AuthManager = {
     user: null,
-    _readyResolve: null,
-    ready: null, // Promise that resolves when auth + cloud data are loaded
+    _readyResolve: _authReadyCallbacks.resolve,
+    ready: _authReadyCallbacks.promise,
 
     async init() {
-        // Create the ready promise
-        this.ready = new Promise(resolve => { this._readyResolve = resolve; });
 
         try {
             const { data: { session } } = await supabaseClient.auth.getSession();

@@ -532,10 +532,10 @@ const GamificationManager = {
 
             toast.classList.add('show');
 
-            // Hide after 3 seconds
+            // Hide after 2 seconds (faster)
             setTimeout(() => {
                 toast.classList.remove('show');
-            }, 3000);
+            }, 2000);
         }
     },
 
@@ -632,6 +632,9 @@ const GamificationManager = {
 
     init() {
         this.updateUI();
+        // Safety: ensure overlay is hidden on load
+        const overlay = document.getElementById('levelUpOverlay');
+        if (overlay) overlay.classList.remove('active');
     },
 
     toggleGamification() {

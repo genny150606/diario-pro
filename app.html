@@ -215,6 +215,8 @@
         <a href="#" data-section="stats" class="sidebar-item" id="navStats" title="Statistiche">📊
             <span>Statistiche</span></a>
         <a href="#" data-section="social" class="sidebar-item" id="navSocial" title="Social">🤝 <span>Social</span></a>
+        <a href="#" data-section="gamification" class="sidebar-item" id="navGamification" title="Livello & Goal">🏆
+            <span>Livello</span></a>
         <div style="margin-top: auto; padding-top: 1rem; border-top: 1px solid rgba(255,255,255,0.05);">
             <a href="#" data-section="settings" class="sidebar-item" id="navSettings" title="Impostazioni">⚙️
                 <span>Impostazioni</span></a>
@@ -477,8 +479,8 @@
                 </div>
             </section>
 
-            <!-- GAMIFICATION POPOVER (Changed from SECTION) -->
-            <div id="gamificationPopup" class="gamification-popup">
+            <!-- GAMIFICATION SECTION -->
+            <section id="gamification" class="section">
                 <div class="gamification-hero-mini">
                     <div class="hero-header-mini">
                         <div class="hero-level-circle-mini">
@@ -575,7 +577,7 @@
                         </div>
                     </div>
                 </div>
-            </div>
+            </section>
             <!-- PRESENCES -->
             <section id="presences" class="section">
                 <!-- VIEW LICEO -->
@@ -754,7 +756,8 @@
                                     onchange="handleProfilePhotoFile(event)">
                                 <button class="btn-small btn-accent"
                                     onclick="document.getElementById('profilePhotoFile').click()"
-                                    style="flex:0 0 auto;">📷 Carica Foto</button>
+                                    style="flex:0 0 auto;">📷
+                                    Carica Foto</button>
                                 <span
                                     style="color:var(--color-text-secondary);font-size:12px;display:flex;align-items:center;">oppure</span>
                                 <input type="url" id="editPhotoUrl" placeholder="https://esempio.com/foto.jpg"
@@ -1090,6 +1093,8 @@
                     if (typeof updatePresenceStats === 'function') updatePresenceStats();
                 } else if (sectionId === 'social') {
                     if (window.SocialManager) SocialManager.init();
+                } else if (sectionId === 'gamification') {
+                    if (window.GamificationManager) GamificationManager.renderGamificationPage();
                 }
             } catch (err) {
                 console.error('❌ Errore durante il rendering della sezione:', err);

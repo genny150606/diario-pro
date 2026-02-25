@@ -61,14 +61,6 @@ const SimpleChatbot = {
             const micBtn = document.createElement('button');
             micBtn.id = 'jarvisToggleBtn';
             micBtn.innerHTML = '🎙️';
-            micBtn.style.cssText = `
-                background: var(--bg-secondary); border: 1px solid var(--border);
-                border-radius: 50%; width: 40px; height: 40px; cursor: pointer;
-                display: flex; align-items: center; justify-content: center;
-                margin-right: 8px; transition: all 0.2s; font-size: 18px;
-            `;
-            micBtn.title = "Attiva Jarvis Mode (Vocale)";
-
             // Insert before text input
             inputGroup.insertBefore(micBtn, input);
 

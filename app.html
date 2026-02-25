@@ -1608,18 +1608,41 @@
                 return;
             }
 
-            let data = loadData();
-            if (!data.notes) data.notes = [];
-
-            data.notes.push({
-                id: Date.now(),
+            // Create note object
+            const noteObj = {
                 title: title,
                 subject: subject,
                 content: content,
-                createdAt: dateValue ? new Date(dateValue).toLocaleDateString('it-IT') : new Date().toLocaleDateString('it-IT')
-            });
+                date: dateValue ? new Date(dateValue).toISOString() : new Date().toISOString()
+            };
 
-            saveData(data);
+            // Use NotesManager so the in-memory array is updated
+            if (typeof NotesManager !== 'undefined') {
+                NotesManager.addNote(noteObj);
+
+                // Save the whole state through AppManager
+                if (typeof AppManager !== 'undefined' && typeof AppManager.savData === 'function') {
+                    AppManager.savData();
+                } else {
+                    // Fallback
+                    const data = StorageManager.load();
+                    data.notes = NotesManager.data;
+                    StorageManager.save(data);
+                }
+            } else {
+                // Legacy fallback if new-features.js is somehow not loaded
+                let data = loadData();
+                if (!data.notes) data.notes = [];
+                data.notes.push({
+                    id: Date.now(),
+                    title: title,
+                    subject: subject,
+                    content: content,
+                    createdAt: dateValue ? new Date(dateValue).toLocaleDateString('it-IT') : new Date().toLocaleDateString('it-IT')
+                });
+                saveData(data);
+            }
+
             renderNotes();
             updateDashboard();
 
@@ -1636,8 +1659,8 @@
         }
 
         function renderNotes() {
-            const data = loadData();
-            const notes = data.notes || [];
+            // Read from NotesManager directly to get the single source of truth
+            const notes = (typeof NotesManager !== 'undefined') ? NotesManager.data : [];
             const container = document.getElementById('notesContainer');
 
             if (!container) return;
@@ -1647,22 +1670,30 @@
                 return;
             }
 
-            container.innerHTML = notes.map((note, idx) => `
+            container.innerHTML = notes.map((note) => `
                 <div class="card">
                     <h3>${note.title}</h3>
-                    <p style="color: var(--text-secondary); margin: 8px 0; font-size: 13px;">${note.subject} • ${note.createdAt}</p>
+                    <p style="color: var(--text-secondary); margin: 8px 0; font-size: 13px;">${note.subject} • ${note.createdAt || note.date}</p>
                     <p>${note.content}</p>
-                    <button class="btn-secondary" style="margin-top: 12px;" onclick="deleteNote(${idx})">🗑️ Elimina</button>
+                    <button class="btn-secondary" style="margin-top: 12px;" onclick="deleteNote(${note.id})">🗑️ Elimina</button>
                 </div>
             `).join('');
         }
 
-        async function deleteNote(idx) {
+        async function deleteNote(id) {
             const confirmed = await UIManager.confirm('Vuoi eliminare questa nota?', 'Conferma Eliminazione');
             if (confirmed) {
-                let data = loadData();
-                data.notes.splice(idx, 1);
-                saveData(data);
+                if (typeof NotesManager !== 'undefined') {
+                    NotesManager.deleteNote(id);
+                    if (typeof AppManager !== 'undefined' && typeof AppManager.savData === 'function') {
+                        AppManager.savData();
+                    }
+                } else {
+                    // Legacy fallback
+                    let data = loadData();
+                    data.notes = data.notes.filter(n => n.id !== id);
+                    saveData(data);
+                }
                 renderNotes();
                 updateDashboard();
             }
@@ -1679,19 +1710,27 @@
                 return;
             }
 
-            let data = loadData();
-            if (!data.tasks) data.tasks = [];
-
-            data.tasks.push({
+            const newTask = {
                 id: Date.now(),
                 title: title,
                 due: due,
                 subject: subject,
                 completed: false,
                 createdAt: new Date().toLocaleDateString('it-IT')
-            });
+            };
 
-            saveData(data);
+            if (typeof TaskManager !== 'undefined') {
+                TaskManager.data.push(newTask);
+                if (typeof AppManager !== 'undefined' && typeof AppManager.savData === 'function') {
+                    AppManager.savData();
+                }
+            } else {
+                let data = loadData();
+                if (!data.tasks) data.tasks = [];
+                data.tasks.push(newTask);
+                saveData(data);
+            }
+
             renderTasks();
             updateDashboard();
 
@@ -1706,8 +1745,7 @@
         }
 
         function renderTasks() {
-            const data = loadData();
-            const tasks = data.tasks || [];
+            const tasks = (typeof TaskManager !== 'undefined') ? TaskManager.data : [];
             const container = document.getElementById('tasksContainer');
 
             if (!container) return;
@@ -1717,36 +1755,54 @@
                 return;
             }
 
-            container.innerHTML = tasks.map((task, idx) => `
+            container.innerHTML = tasks.map((task) => `
                 <div class="card" style="display: flex; justify-content: space-between; align-items: center;">
                     <div>
-                        <strong>${task.title}</strong>
+                        <strong>${task.title || task.subject}</strong>
                         <p style="color: var(--text-secondary); font-size: 13px; margin-top: 4px;">
-                            ${task.subject} • Scadenza: ${task.due}
+                            ${task.subject || ''} • Scadenza: ${task.due || task.dueDate || ''}
                         </p>
                     </div>
                     <div style="display: flex; gap: 8px; align-items: center;">
-                        <input type="checkbox" onchange="toggleTask(${idx})" ${task.completed ? 'checked' : ''}>
-                        <button class="btn-secondary" onclick="deleteTask(${idx})">🗑️</button>
+                        <input type="checkbox" onchange="toggleTask(${task.id})" ${task.completed ? 'checked' : ''}>
+                        <button class="btn-secondary" onclick="deleteTask(${task.id})">🗑️</button>
                     </div>
                 </div>
             `).join('');
         }
 
-        function toggleTask(idx) {
-            let data = loadData();
-            data.tasks[idx].completed = !data.tasks[idx].completed;
-            saveData(data);
+        function toggleTask(id) {
+            if (typeof TaskManager !== 'undefined') {
+                const task = TaskManager.data.find(t => t.id === id);
+                if (task) {
+                    task.completed = !task.completed;
+                    if (typeof AppManager !== 'undefined' && typeof AppManager.savData === 'function') {
+                        AppManager.savData();
+                    }
+                }
+            } else {
+                let data = loadData();
+                const task = data.tasks.find(t => t.id === id);
+                if (task) task.completed = !task.completed;
+                saveData(data);
+            }
             renderTasks();
             updateDashboard();
         }
 
-        async function deleteTask(idx) {
+        async function deleteTask(id) {
             const confirmed = await UIManager.confirm('Vuoi eliminare questo compito?', 'Conferma Eliminazione');
             if (confirmed) {
-                let data = loadData();
-                data.tasks.splice(idx, 1);
-                saveData(data);
+                if (typeof TaskManager !== 'undefined') {
+                    TaskManager.deleteTask(id);
+                    if (typeof AppManager !== 'undefined' && typeof AppManager.savData === 'function') {
+                        AppManager.savData();
+                    }
+                } else {
+                    let data = loadData();
+                    data.tasks = data.tasks.filter(t => t.id !== id);
+                    saveData(data);
+                }
                 renderTasks();
                 updateDashboard();
             }
@@ -1764,18 +1820,28 @@
                 return;
             }
 
-            let data = loadData();
-            if (!data.grades) data.grades = [];
-
-            data.grades.push({
+            const newGrade = {
                 id: Date.now(),
                 subject: subject,
                 value: value,
                 date: date,
-                notes: notes
-            });
+                notes: notes,
+                weight: 100 // default weight
+            };
 
-            saveData(data);
+            if (typeof GradeManager !== 'undefined') {
+                GradeManager.data.push(newGrade);
+                GradeManager.sortByDate?.();
+                if (typeof AppManager !== 'undefined' && typeof AppManager.savData === 'function') {
+                    AppManager.savData();
+                }
+            } else {
+                let data = loadData();
+                if (!data.grades) data.grades = [];
+                data.grades.push(newGrade);
+                saveData(data);
+            }
+
             renderGrades();
             updateDashboard();
 
@@ -1792,8 +1858,7 @@
         }
 
         function renderGrades() {
-            const data = loadData();
-            const grades = data.grades || [];
+            const grades = (typeof GradeManager !== 'undefined') ? GradeManager.data : [];
             const container = document.getElementById('gradesContainer');
 
             if (!container) return;
@@ -1803,7 +1868,7 @@
                 return;
             }
 
-            container.innerHTML = grades.map((grade, idx) => `
+            container.innerHTML = grades.map((grade) => `
                 <div class="card">
                     <div style="display: flex; justify-content: space-between; align-items: start;">
                         <div>
@@ -1813,19 +1878,26 @@
                         </div>
                         <div style="text-align: right;">
                             <div style="font-size: 24px; font-weight: 700; color: var(--accent);">${grade.value}</div>
-                            <button class="btn-secondary" style="margin-top: 8px;" onclick="deleteGrade(${idx})">🗑️</button>
+                            <button class="btn-secondary" style="margin-top: 8px;" onclick="deleteGrade(${grade.id})">🗑️</button>
                         </div>
                     </div>
                 </div>
             `).join('');
         }
 
-        async function deleteGrade(idx) {
+        async function deleteGrade(id) {
             const confirmed = await UIManager.confirm('Vuoi eliminare questo voto?', 'Conferma Eliminazione');
             if (confirmed) {
-                let data = loadData();
-                data.grades.splice(idx, 1);
-                saveData(data);
+                if (typeof GradeManager !== 'undefined') {
+                    GradeManager.deleteGrade(id);
+                    if (typeof AppManager !== 'undefined' && typeof AppManager.savData === 'function') {
+                        AppManager.savData();
+                    }
+                } else {
+                    let data = loadData();
+                    data.grades = data.grades.filter(g => g.id !== id);
+                    saveData(data);
+                }
                 renderGrades();
                 updateDashboard();
             }
@@ -2113,6 +2185,11 @@
             }
         }
 
+        function safeSetText(id, text) {
+            const el = document.getElementById(id);
+            if (el) el.textContent = text;
+        }
+
         function updatePresenceStats() {
             const data = loadData();
             const presences = data.presences || [];
@@ -2122,9 +2199,9 @@
             const total = count + absences;
             const percentage = total > 0 ? Math.round((count / total) * 100) : 0;
 
-            document.getElementById('presencesCount').textContent = count;
-            document.getElementById('absencesCount').textContent = absences;
-            document.getElementById('presencePercentage').textContent = total > 0 ? `${percentage}%` : '-';
+            safeSetText('presencesCount', count);
+            safeSetText('absencesCount', absences);
+            safeSetText('presencePercentage', total > 0 ? `${percentage}%` : '-');
         }
 
         // ==================== UPDATE DASHBOARD ====================
@@ -2147,25 +2224,25 @@
                 ? data.counters.totalFlashcardsCreated
                 : flashcards.length;
 
-            document.getElementById('dashboardNotes').textContent = totalNotes;
-            document.getElementById('dashboardFlashcards').textContent = totalFlashcards;
+            safeSetText('dashboardNotes', totalNotes);
+            safeSetText('dashboardFlashcards', totalFlashcards);
 
             const completedTasks = tasks.filter(t => t.completed).length;
-            document.getElementById('dashboardTasksCompleted').textContent = completedTasks;
+            safeSetText('dashboardTasksCompleted', completedTasks);
 
             if (grades.length > 0) {
                 const avg = (grades.reduce((sum, g) => sum + g.value, 0) / grades.length).toFixed(1);
-                document.getElementById('dashboardAverage').textContent = avg;
+                safeSetText('dashboardAverage', avg);
             } else {
-                document.getElementById('dashboardAverage').textContent = '-';
+                safeSetText('dashboardAverage', '-');
             }
 
             // Stats page
-            document.getElementById('statsGradesCount').textContent = grades.length;
+            safeSetText('statsGradesCount', grades.length);
 
             const totalTasks = tasks.length;
             const completion = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
-            document.getElementById('statsCompletion').textContent = `${completion}%`;
+            safeSetText('statsCompletion', `${completion}%`);
 
             const presenceCount = presences.filter(p => p.type === 'presence').length;
             document.getElementById('statsPresences').textContent = presenceCount;

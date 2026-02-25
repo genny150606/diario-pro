@@ -3,41 +3,71 @@
     max-width: 100vw;
 }
 
-/* ── MOBILE BASE (< 1024px) ── */
-/* ── MOBILE BASE (< 1024px) ── */
-/* ── MOBILE HEADER OPTIMIZATIONS (< 768px) ── */
+/* ── MOBILE HEADER — COMPACT MODE (< 768px) ── */
 @media (max-width: 767px) {
     header {
         width: 94%;
-        padding: 0 1rem;
-        gap: 0.5rem;
-        justify-content: space-between;
+        padding: 0 0.8rem;
+        gap: 0.4rem;
+        height: 3rem;
     }
 
+    /* Hide logo text, keep only the icon */
     .logo span {
         display: none;
-        /* Only show icon on very small screens */
     }
 
+    .logo {
+        gap: 0;
+        flex-shrink: 0;
+    }
+
+    /* Compact the right actions (streak/level) */
     .header-right-actions {
         display: flex;
-        gap: 0.5rem;
+        gap: 0.3rem;
+        flex-shrink: 0;
     }
 
-    .user-profile-wrapper {
+    /* Compact the far-right section (theme + account) */
+    .header-right {
+        gap: 0.4rem !important;
+        flex-shrink: 1;
+        min-width: 0;
+    }
+
+    /* Hide the email text inside account button, keep just a small button */
+    #userEmailDisplay {
         display: none;
-        /* Hide account button name on mobile, keep just icon if any */
     }
 
+    /* Hide chevron arrow */
+    .account-btn .chevron {
+        display: none;
+    }
+
+    /* Make account button smaller on mobile */
+    .account-btn {
+        padding: 0.4rem 0.6rem;
+        font-size: 0.75rem;
+    }
+
+    /* Theme toggle always visible */
     #themeToggle {
         opacity: 1;
     }
+
+    /* Hamburger always visible on mobile */
+    .menu-toggle {
+        display: flex !important;
+        flex-shrink: 0;
+    }
 }
 
+/* Medium mobile: re-show logo text */
 @media (min-width: 480px) and (max-width: 767px) {
     .logo span {
         display: inline;
-        /* Re-show text on medium mobile */
     }
 }
 

@@ -154,6 +154,11 @@ header:hover {
     transition: opacity 0.3s;
 }
 
+/* Hide hamburger on desktop — only show on mobile */
+.menu-toggle {
+    display: none;
+}
+
 .theme-toggle:hover {
     opacity: 1;
 }

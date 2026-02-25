@@ -512,3 +512,380 @@
     color: var(--color-text);
     font-size: 0.9rem;
 }
+
+/* ══════════════════════════════════════════════
+   AUTH / LOGIN — DEEP SPACE AESTHETIC
+   ══════════════════════════════════════════════ */
+.auth-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 99999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.auth-overlay-bg {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.88);
+    backdrop-filter: blur(40px) saturate(180%);
+    -webkit-backdrop-filter: blur(40px) saturate(180%);
+}
+
+.auth-card {
+    position: relative;
+    z-index: 1;
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: 3rem;
+    padding: 3rem;
+    max-width: 480px;
+    width: 92%;
+    box-shadow: 0 4rem 120px rgba(0, 0, 0, 0.6);
+    animation: scalePopIn 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.auth-logo {
+    text-align: center;
+    margin-bottom: 2.5rem;
+}
+
+.auth-logo img {
+    width: 56px !important;
+    height: 56px !important;
+    border-radius: 1.2rem !important;
+    margin-bottom: 1.2rem;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
+}
+
+.auth-logo h1 {
+    font-family: 'Outfit', sans-serif;
+    font-size: 2rem;
+    font-weight: 900;
+    color: var(--color-text);
+    margin-bottom: 0.4rem;
+}
+
+.auth-subtitle {
+    color: var(--color-text-tertiary);
+    font-size: 0.95rem;
+}
+
+/* ── Auth Tabs ── */
+.auth-tabs {
+    display: flex;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--glass-border);
+    border-radius: 1rem;
+    padding: 0.3rem;
+    margin-bottom: 2rem;
+    gap: 0.3rem;
+}
+
+.auth-tab {
+    flex: 1;
+    padding: 0.7rem 1rem;
+    background: transparent;
+    border: none;
+    border-radius: 0.8rem;
+    color: var(--color-text-secondary);
+    font-weight: 600;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.auth-tab.active {
+    background: var(--color-accent);
+    color: #fff;
+    box-shadow: 0 4px 15px var(--color-accent-bg-strong);
+}
+
+/* ── Auth Fields ── */
+.auth-field {
+    margin-bottom: 1.2rem;
+}
+
+.auth-field label {
+    display: block;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--color-text-secondary);
+    margin-bottom: 0.5rem;
+}
+
+.auth-input {
+    width: 100%;
+    padding: 0.9rem 1.2rem;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--glass-border);
+    border-radius: 1rem;
+    color: var(--color-text);
+    font-size: 0.95rem;
+    transition: all 0.3s;
+}
+
+.auth-input:focus {
+    border-color: var(--color-accent);
+    background: rgba(255, 255, 255, 0.06);
+    box-shadow: 0 0 0 3px var(--color-accent-bg);
+    outline: none;
+}
+
+.auth-input::placeholder {
+    color: var(--color-text-tertiary);
+}
+
+.auth-fields-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+}
+
+@media (max-width: 500px) {
+    .auth-fields-row {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* ── Auth Submit Button ── */
+.auth-submit-btn {
+    width: 100%;
+    padding: 1rem;
+    background: var(--color-accent);
+    color: #fff;
+    border: none;
+    border-radius: 1rem;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    margin-top: 1.5rem;
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    box-shadow: 0 8px 25px var(--color-accent-bg-strong);
+}
+
+.auth-submit-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 35px var(--color-accent-bg-strong);
+}
+
+/* ── Auth Feedback ── */
+.auth-error {
+    background: var(--color-error-bg);
+    color: var(--color-error);
+    padding: 0.8rem 1rem;
+    border-radius: 0.8rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+    margin-top: 1rem;
+}
+
+.auth-success {
+    background: rgba(48, 209, 88, 0.1);
+    color: var(--color-success);
+    padding: 0.8rem 1rem;
+    border-radius: 0.8rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+    margin-top: 1rem;
+}
+
+.auth-home-link {
+    display: block;
+    text-align: center;
+    margin-top: 2rem;
+    color: var(--color-accent);
+    font-size: 0.9rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: opacity 0.3s;
+}
+
+.auth-home-link:hover {
+    opacity: 0.7;
+}
+
+@media (max-width: 500px) {
+    .auth-card {
+        padding: 2rem 1.5rem;
+        border-radius: 2rem;
+    }
+
+    .auth-logo h1 {
+        font-size: 1.6rem;
+    }
+}
+
+/* ══════════════════════════════════════════════
+   SETTINGS — DEEP SPACE AESTHETIC
+   ══════════════════════════════════════════════ */
+.settings-group {
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: 2.5rem;
+    padding: 2.5rem;
+    margin-bottom: 2rem;
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.settings-group:hover {
+    border-color: rgba(255, 255, 255, 0.1);
+}
+
+.settings-group-header {
+    display: flex;
+    align-items: center;
+    gap: 1.2rem;
+    margin-bottom: 2rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid var(--glass-border);
+}
+
+.settings-group-icon {
+    font-size: 2rem;
+    width: 3.5rem;
+    height: 3.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 1rem;
+    box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.2);
+}
+
+.settings-group-title {
+    font-family: 'Outfit', sans-serif;
+    font-size: 1.3rem;
+    font-weight: 800;
+    color: var(--color-text);
+    margin-bottom: 0.2rem;
+}
+
+.settings-group-desc {
+    font-size: 0.85rem;
+    color: var(--color-text-tertiary);
+}
+
+/* ── Settings Options (Radio Cards) ── */
+.settings-options {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+}
+
+.settings-option {
+    cursor: pointer;
+}
+
+.settings-option input[type="radio"] {
+    display: none;
+}
+
+.settings-option-card {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1.5rem;
+    background: rgba(255, 255, 255, 0.02);
+    border: 2px solid var(--glass-border);
+    border-radius: 1.5rem;
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.settings-option-card:hover {
+    background: rgba(255, 255, 255, 0.05);
+    transform: translateY(-3px);
+}
+
+.settings-option input[type="radio"]:checked+.settings-option-card {
+    border-color: var(--color-accent);
+    background: rgba(255, 255, 255, 0.06);
+    box-shadow: 0 0 25px var(--color-accent-bg);
+}
+
+.settings-option-icon {
+    font-size: 2rem;
+}
+
+.settings-option-text strong {
+    display: block;
+    font-size: 1rem;
+    color: var(--color-text);
+    margin-bottom: 0.2rem;
+}
+
+.settings-option-text small {
+    color: var(--color-text-tertiary);
+    font-size: 0.8rem;
+}
+
+/* ── Danger Zone ── */
+.settings-danger {
+    border-color: rgba(255, 69, 58, 0.15);
+}
+
+.settings-danger:hover {
+    border-color: rgba(255, 69, 58, 0.3);
+}
+
+.settings-danger .settings-group-title {
+    color: var(--color-error);
+}
+
+.btn-danger {
+    background: rgba(255, 69, 58, 0.1);
+    color: var(--color-error);
+    border: 1px solid rgba(255, 69, 58, 0.2);
+    padding: 1rem 2rem;
+    border-radius: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s;
+    width: 100%;
+    font-size: 0.95rem;
+}
+
+.btn-danger:hover {
+    background: rgba(255, 69, 58, 0.2);
+    border-color: var(--color-error);
+    transform: translateY(-2px);
+}
+
+/* ── Small Buttons (Settings Edit) ── */
+.btn-small {
+    padding: 0.5rem 1rem;
+    font-size: 0.8rem;
+    font-weight: 700;
+    border-radius: 0.7rem;
+    cursor: pointer;
+    transition: all 0.3s;
+    border: none;
+    white-space: nowrap;
+}
+
+.btn-accent {
+    background: var(--color-accent);
+    color: #fff;
+    box-shadow: 0 4px 12px var(--color-accent-bg);
+}
+
+.btn-accent:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px var(--color-accent-bg-strong);
+}
+
+@media (max-width: 600px) {
+    .settings-group {
+        padding: 1.5rem;
+        border-radius: 2rem;
+    }
+
+    .settings-options {
+        grid-template-columns: 1fr;
+    }
+}

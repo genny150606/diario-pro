@@ -107,6 +107,17 @@
         grid-template-columns: 1fr !important;
         gap: 1.25rem !important;
     }
+
+    /* Lift chatbot FAB above the mobile bottom nav */
+    #geminiChat {
+        bottom: 7.5rem;
+        right: 1rem;
+    }
+
+    #geminiChatWindow {
+        width: calc(100vw - 2rem);
+        max-height: 70vh;
+    }
 }
 
 /* ── TABLET (48em–63.9375em / 768px–1023px) ── */

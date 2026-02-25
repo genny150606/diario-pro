@@ -141,8 +141,10 @@ if (typeof window.UIManager === 'undefined') {
             let html = `
             <div class="daily-challenges-widget">
                 <div class="challenge-header">
-                    <h3>🎯 Sfide del Giorno</h3>
-                    <span class="challenge-reward" style="background: rgba(16,185,129,0.1); padding: 4px 8px; border-radius: 8px;">Guadagna XP extra</span>
+                    <div class="header-text">
+                        <h3>🎯 Sfide del Giorno</h3>
+                        <p class="challenge-subtitle">Guadagna XP extra completando le missioni</p>
+                    </div>
                 </div>
                 <div class="challenge-list">
         `;
@@ -155,7 +157,7 @@ if (typeof window.UIManager === 'undefined') {
                         <div class="challenge-name">${c.name}</div>
                         <div class="challenge-reward">${c.reward}</div>
                     </div>
-                    <div class="challenge-check">✓</div>
+                    <div class="challenge-check-badge">✓</div>
                 </div>
             `;
             });

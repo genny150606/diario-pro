@@ -81,6 +81,17 @@ export default function Landing() {
             observer.observe(el);
         });
 
+        // Inject custom class for the reveal
+        const style = document.createElement('style');
+        style.id = 'landing-dynamic-styles';
+        style.innerHTML = `
+            .is-visible {
+                opacity: 1 !important;
+                transform: translateY(0) !important;
+            }
+        `;
+        document.head.appendChild(style);
+
         // Setup Hero Intro Start State
         const heroTag = document.querySelector('.hero-tag');
         const lines = document.querySelectorAll('.title-line');
@@ -116,6 +127,10 @@ export default function Landing() {
             window.removeEventListener('scroll', handleScroll)
             document.removeEventListener('mousemove', handleMouseMove)
             observer.disconnect()
+
+            // Cleanup injected styles
+            const injectedStyle = document.getElementById('landing-dynamic-styles')
+            if (injectedStyle) injectedStyle.remove()
         }
     }, [])
 

@@ -1,55 +1,40 @@
 <!DOCTYPE html>
-<html lang="it">
+<html lang="it" data-theme="dark">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>StudyJournal Pro | Il tuo assistente AI per lo studio</title>
+    <title>StudyJournal Pro — Rethink Learning</title>
+    <meta name="description" content="Un sistema operativo per la tua mente. Potenziato dall'AI, rifinito dal design.">
 
-    <!-- FONTS -->
+    <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
-        href="https://fonts.googleapis.com/css2?family=Marcellus&family=Outfit:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap"
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;700;800&display=swap"
         rel="stylesheet">
-    <link rel="icon" type="image/png" href="favicon.png">
-    <meta name="description"
-        content="StudyJournal Pro è l'assistente AI definitivo per lo studio. Note intelligenti, flashcard automatiche, gestione compiti, voti e statistiche — tutto in un'unica app premium.">
 
-    <!-- Design System -->
+    <!-- CSS -->
     <link rel="stylesheet" href="theme.css">
     <link rel="stylesheet" href="home.css">
-    <link rel="stylesheet" href="features.css">
 
-    <!-- Supabase (for real-time stats & reviews) -->
+    <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
-    <link rel="manifest" href="manifest.json">
-    <meta name="mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-
-    <script>
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('/sw.js');
-            });
-        }
-    </script>
 </head>
 
 <body class="landing-page">
-    <!-- ═══════════ ENV BANNER ═══════════ -->
-    <div id="envBanner"
-        style="display:none; padding:12px; background:linear-gradient(135deg, #f59e0b, #d97706); color:white; text-align:center; font-weight:600; font-size:14px; z-index:99999; position:relative; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
-        ⚠️ Stai usando la pagina come file locale. Per le statistiche in tempo reale e l'accesso all'App è consigliato
-        usare l'URL di Vercel.
-    </div>
-    <script>
-        if (window.location.protocol === 'file:') {
-            document.getElementById('envBanner').style.display = 'block';
-        }
-    </script>
+
+    <!-- ═══════════ DYNAMIC ISLAND NAV ═══════════ -->
+    <nav class="dynamic-island-nav" id="mainNav">
+        <div class="nav-content">
+            <a href="#" class="nav-logo">SJ<span class="dot">.</span></a>
+            <div class="nav-links">
+                <a href="#features">Tecnologia</a>
+                <a href="#philosophy">Filosofia</a>
+            </div>
+            <a href="app.html" class="nav-cta">Entra Ora</a>
+        </div>
+    </nav>
 
     <!-- AURORA BACKGROUND -->
     <div class="aurora-bg" aria-hidden="true">
@@ -58,739 +43,133 @@
         <div class="orb orb-3"></div>
     </div>
 
-    <!-- ═══════════ HERO ═══════════ -->
-    <section class="landing-hero">
-        <div class="hero-logo-container" id="heroLogo">
-            <img src="logo.webp" alt="StudyJournal Pro Logo" class="hero-logo-img">
-        </div>
-        <div class="hero-badge" id="heroBadge">✨ Potenziato da Intelligenza Artificiale</div>
-
-        <h1 class="hero-title" id="heroTitle">
-            <span class="gradient-text" id="heroTitleLine1">Il Tuo Studio,</span><br>
-            <span id="heroTitleLine2">Rivoluzionato dall'AI.</span>
-        </h1>
-
-        <p class="hero-subtitle" id="heroSubtitle">
-            Note intelligenti, flashcard generate automaticamente, compiti organizzati,
-            voti monitorati e un tutor AI sempre con te. Tutto in un'unica piattaforma premium.
-        </p>
-
-        <div class="hero-actions" id="heroActions">
-            <a href="app.html" class="btn-hero btn-hero-primary">
-                Inizia Gratis 🚀
-            </a>
-            <a href="#features" class="btn-hero btn-hero-secondary">
-                Scopri le Funzionalità
-            </a>
-        </div>
-
-        <!-- Floating App Preview -->
-        <div class="hero-preview" id="heroPreview">
-            <div class="preview-window">
-                <div class="preview-titlebar">
-                    <span class="preview-dot"></span>
-                    <span class="preview-dot"></span>
-                    <span class="preview-dot"></span>
-                </div>
-                <div class="preview-content">
-                    <div class="preview-card">
-                        <div class="preview-card-icon">📝</div>
-                        <div class="preview-card-title">Note Salvate</div>
-                        <div class="preview-card-value" id="previewNotes">—</div>
-                    </div>
-                    <div class="preview-card">
-                        <div class="preview-card-icon">🎴</div>
-                        <div class="preview-card-title">Flashcard</div>
-                        <div class="preview-card-value" id="previewFlashcards">—</div>
-                    </div>
-                    <div class="preview-card">
-                        <div class="preview-card-icon">👥</div>
-                        <div class="preview-card-title">Utenti</div>
-                        <div class="preview-card-value" id="previewUsers">—</div>
-                    </div>
-                </div>
-            </div>
-            <div class="preview-glow"></div>
-        </div>
-    </section>
-
-    <!-- All post-hero content wrapped for full-width background coverage -->
-    <div class="page-body">
-
-        <!-- ═══════════ FEATURES ═══════════ -->
-        <section class="landing-section" id="features">
-            <div class="reveal">
-                <div class="section-label">⚡ Funzionalità</div>
-                <h2 class="section-heading">Tutto quello di cui hai bisogno per eccellere.</h2>
-                <p class="section-desc">
-                    Sei strumenti potenti in un'unica interfaccia. Pensato per studenti che vogliono il massimo.
+    <!-- ═══════════ RADICAL HERO ═══════════ -->
+    <main class="radical-container">
+        <section class="hero-section">
+            <div class="hero-content">
+                <div class="hero-tag" id="heroBadge">Intelligence Study</div>
+                <h1 class="hero-title-main" id="heroTitle">
+                    <div class="title-line"><span>Lo Studio,</span></div>
+                    <div class="title-line"><span class="accent-text">Reimmaginato.</span></div>
+                </h1>
+                <p class="hero-description" id="heroSubtitle">
+                    Un sistema operativo per la tua mente.
+                    Potenziato dall'AI, rifinito dal design minimale.
                 </p>
+                <div class="hero-actions-radical" id="heroActions">
+                    <a href="app.html" class="cta-primary-glass">Inizia Gratis</a>
+                    <a href="#features" class="cta-secondary-minimal">Scopri di più</a>
+                </div>
             </div>
 
-            <div class="features-grid">
-                <div class="feature-card reveal reveal-delay-1">
-                    <div class="feature-icon">📚</div>
-                    <h3 class="feature-title">Note Intelligenti</h3>
-                    <p class="feature-desc">
-                        Organizza i tuoi appunti per materia con editor avanzato. Ricerca fulminea e sincronizzazione
-                        cloud.
-                    </p>
-                </div>
-                <div class="feature-card reveal reveal-delay-2">
-                    <div class="feature-icon">🤖</div>
-                    <h3 class="feature-title">Flashcard con AI</h3>
-                    <p class="feature-desc">
-                        Genera flashcard istantaneamente dai tuoi appunti grazie a Gemini AI. Studio attivo mai così
-                        facile.
-                    </p>
-                </div>
-                <div class="feature-card reveal reveal-delay-3">
-                    <div class="feature-icon">✅</div>
-                    <h3 class="feature-title">Gestione Compiti</h3>
-                    <p class="feature-desc">
-                        Traccia scadenze, priorità e progressi. Non dimenticare mai più un compito con notifiche
-                        intelligenti.
-                    </p>
-                </div>
-                <div class="feature-card reveal reveal-delay-4">
-                    <div class="feature-icon">⭐</div>
-                    <h3 class="feature-title">Registro Voti</h3>
-                    <p class="feature-desc">
-                        Monitora i tuoi voti per materia, calcola medie automatiche e visualizza i trend di
-                        miglioramento.
-                    </p>
-                </div>
-                <div class="feature-card reveal reveal-delay-5">
-                    <div class="feature-icon">📊</div>
-                    <h3 class="feature-title">Statistiche Avanzate</h3>
-                    <p class="feature-desc">
-                        Dashboard interattiva con grafici e analytics. Capisci i tuoi punti di forza e dove migliorare.
-                    </p>
-                </div>
-                <div class="feature-card reveal reveal-delay-6">
-                    <div class="feature-icon">💬</div>
-                    <h3 class="feature-title">AI Tutor</h3>
-                    <p class="feature-desc">
-                        Un assistente AI sempre disponibile per rispondere alle tue domande e aiutarti nello studio.
-                    </p>
+            <div class="hero-floating-preview" id="heroPreview">
+                <div class="preview-glass-card">
+                    <div class="card-inner">
+                        <div class="stat-group">
+                            <span class="stat-val" id="previewNotes">...</span>
+                            <span class="stat-lab">Note</span>
+                        </div>
+                        <div class="stat-divider"></div>
+                        <div class="stat-group">
+                            <span class="stat-val" id="previewUsers">...</span>
+                            <span class="stat-lab">Menti</span>
+                        </div>
+                    </div>
                 </div>
             </div>
         </section>
 
-        <!-- ═══════════ STATS BANNER (REAL DATA) ═══════════ -->
-        <div class="stats-banner">
-            <div class="stats-banner-inner reveal">
-                <div class="stat-item">
-                    <div class="stat-number" id="statUsers">—</div>
-                    <div class="stat-label-landing">Utenti registrati</div>
-                </div>
-                <div class="stat-item">
-                    <div class="stat-number" id="statNotes">—</div>
-                    <div class="stat-label-landing">Note create</div>
-                </div>
-                <div class="stat-item">
-                    <div class="stat-number" id="statFlashcards">—</div>
-                    <div class="stat-label-landing">Flashcard generate</div>
-                </div>
-                <div class="stat-item">
-                    <div class="stat-number" id="statChatbot">—</div>
-                    <div class="stat-label-landing">Interazioni AI</div>
-                </div>
-                <div class="stat-item">
-                    <div class="stat-number" id="statReviews">—</div>
-                    <div class="stat-label-landing">Recensioni</div>
-                </div>
-            </div>
-        </div>
-
-        <!-- ═══════════ HOW IT WORKS ═══════════ -->
-        <section class="landing-section">
-            <div class="reveal">
-                <div class="section-label">🎯 Come Funziona</div>
-                <h2 class="section-heading">Tre passi verso il successo.</h2>
-                <p class="section-desc">
-                    Iniziare è semplicissimo. In meno di un minuto stai già studiando in modo più intelligente.
-                </p>
-            </div>
-
-            <div class="timeline reveal">
-                <div class="timeline-step">
-                    <div class="step-number">1</div>
-                    <h3 class="step-title">Crea il tuo Account</h3>
-                    <p class="step-desc">Registrati gratuitamente e accedi alla tua dashboard personale in pochi
-                        secondi.
-                    </p>
-                </div>
-                <div class="timeline-step">
-                    <div class="step-number">2</div>
-                    <h3 class="step-title">Aggiungi i tuoi Appunti</h3>
-                    <p class="step-desc">Scrivi le tue note, organizzale per materia e lascia che l'AI crei le flashcard
-                        per
-                        te.</p>
-                </div>
-                <div class="timeline-step">
-                    <div class="step-number">3</div>
-                    <h3 class="step-title">Studia e Migliora</h3>
-                    <p class="step-desc">Monitora i progressi con statistiche avanzate e raggiungi i tuoi obiettivi.</p>
+        <!-- ═══════════ FEATURE REVEAL SECTIONS ═══════════ -->
+        <section id="features" class="reveal-section">
+            <div class="reveal-content-box">
+                <div class="feature-large-text">
+                    <h2 class="section-title-minimal">Intelligence <br><span class="muted">Senza Attriti.</span></h2>
+                    <p class="section-desc-minimal">Dalle flashcard automatiche alle note intelligenti, tutto è
+                        progettato per sparire e lasciarti concentrare solo sul sapere.</p>
                 </div>
             </div>
         </section>
 
-        <!-- ═══════════ REVIEWS (REAL FROM DB) ═══════════ -->
-        <section class="landing-section" id="reviews">
-            <div class="reveal">
-                <div class="section-label">💬 Recensioni</div>
-                <h2 class="section-heading">Cosa dicono gli studenti.</h2>
-                <p class="section-desc">
-                    Recensioni vere dai nostri utenti. Vuoi lasciarne una anche tu?
-                </p>
-            </div>
-
-            <div class="testimonials-grid" id="reviewsContainer">
-                <p class="empty-state" style="grid-column: 1/-1;">Caricamento recensioni...</p>
-            </div>
-
-            <!-- Write Review Button -->
-            <div style="text-align: center; margin-top: var(--space-8);" class="reveal">
-                <button class="btn-hero btn-hero-secondary" onclick="openReviewModal()" id="writeReviewBtn">
-                    ✍️ Lascia una Recensione
-                </button>
+        <section id="philosophy" class="reveal-section">
+            <div class="reveal-content-box">
+                <div class="feature-large-text">
+                    <h2 class="section-title-minimal">Design minimale.<br><span class="muted">Impatto massimo.</span>
+                    </h2>
+                    <p class="section-desc-minimal">Riduciamo il rumore per amplificare il segnale. Uno spazio puro per
+                        menti che vogliono eccellere.</p>
+                </div>
             </div>
         </section>
 
-        <!-- ═══════════ REVIEW MODAL ═══════════ -->
-        <div class="review-modal-overlay" id="reviewModal">
-            <div class="review-modal">
-                <div class="review-modal-header">
-                    <h3>Lascia una Recensione ✨</h3>
-                    <button onclick="closeReviewModal()" class="review-modal-close">✕</button>
+        <section class="reveal-section">
+            <div class="reveal-content-box">
+                <div class="feature-large-text">
+                    <h2 class="section-title-minimal">Velocità <br><span class="muted">Sincronizzata.</span></h2>
+                    <p class="section-desc-minimal">I tuoi pensieri, ovunque tu sia. In tempo reale, senza barriere.</p>
                 </div>
-                <div class="review-modal-body">
-                    <div id="reviewAuthNotice" style="display: none;">
-                        <p
-                            style="color: var(--color-warning); margin-bottom: var(--space-4); font-size: var(--font-size-sm);">
-                            ⚠️ Devi essere registrato nell'app per lasciare una recensione.
-                            <a href="app.html" style="color: var(--color-accent);">Accedi qui →</a>
-                        </p>
-                    </div>
-
-                    <label for="reviewName">Il tuo nome</label>
-                    <input type="text" id="reviewName" placeholder="Es. Marco R." maxlength="50">
-
-                    <label for="reviewRole">Chi sei</label>
-                    <input type="text" id="reviewRole" placeholder="Es. Liceo Scientifico, 4° anno" maxlength="80">
-
-                    <label>Valutazione</label>
-                    <div class="star-rating" id="starRating">
-                        <span class="star" data-value="1">★</span>
-                        <span class="star" data-value="2">★</span>
-                        <span class="star" data-value="3">★</span>
-                        <span class="star" data-value="4">★</span>
-                        <span class="star" data-value="5">★</span>
-                    </div>
-
-                    <label for="reviewText">La tua recensione</label>
-                    <textarea id="reviewText" placeholder="Racconta la tua esperienza con StudyJournal Pro..."
-                        style="min-height: 100px;" maxlength="500"></textarea>
-
-                    <p id="reviewError"
-                        style="display: none; color: var(--color-error); font-size: var(--font-size-sm); margin-bottom: var(--space-3);">
-                    </p>
-                    <p id="reviewSuccess"
-                        style="display: none; color: var(--color-success); font-size: var(--font-size-sm); margin-bottom: var(--space-3);">
-                    </p>
-
-                    <button class="btn-hero btn-hero-primary" onclick="submitReview()" id="submitReviewBtn"
-                        style="width: 100%; justify-content: center;">
-                        Pubblica Recensione ✨
-                    </button>
-                </div>
-            </div>
-        </div>
-
-        <!-- ═══════════ FINAL CTA ═══════════ -->
-        <section class="cta-section">
-            <div class="cta-card reveal">
-                <h2 class="cta-heading">Pronto a trasformare il tuo studio?</h2>
-                <p class="cta-desc">
-                    Unisciti agli studenti che studiano in modo più intelligente. Completamente gratuito.
-                </p>
-                <a href="app.html" class="btn-hero btn-hero-primary">
-                    Inizia Ora — È Gratis ✨
-                </a>
             </div>
         </section>
 
-        <!-- ═══════════ FOOTER ═══════════ -->
+        <!-- FINAL CTA -->
+        <section class="reveal-section">
+            <div class="feature-large-text" style="text-align: center;">
+                <h2 class="section-title-minimal">Pronto?</h2>
+                <a href="app.html" class="cta-primary-glass" style="display: inline-block; margin-top: 2rem;">Accedi
+                    ora</a>
+            </div>
+        </section>
+
         <footer class="landing-footer">
-            <div class="footer-container">
-                <div class="footer-col brand-col">
-                    <a href="#" class="footer-logo">
-                        <span>StudyJournal Pro</span>
-                    </a>
-                    <p>La piattaforma definitiva per studenti ambiziosi. Organizza, studia e trionfa con l'aiuto
-                        dell'AI.
-                    </p>
-                    <div class="social-links">
-                        <a href="#" aria-label="Instagram">📸</a>
-                        <a href="#" aria-label="Twitter">🐦</a>
-                        <a href="#" aria-label="LinkedIn">💼</a>
-                    </div>
-                </div>
-
-                <div class="footer-col">
-                    <h4>Prodotto</h4>
-                    <a href="#features">Funzionalità</a>
-                    <a href="#">Prezzi</a>
-                    <a href="app.html">Accedi</a>
-                    <a href="#">Download App</a>
-                </div>
-
-                <div class="footer-col">
-                    <h4>Risorse</h4>
-                    <a href="#">Blog</a>
-                    <a href="#">Guida allo Studio</a>
-                    <a href="#">Community</a>
-                    <a href="#">Supporto</a>
-                </div>
-
-                <div class="footer-col">
-                    <h4>Note Legali</h4>
-                    <a href="#">Privacy Policy</a>
-                    <a href="#">Termini di Servizio</a>
-                    <a href="#">Cookie Policy</a>
-                </div>
+            <div class="footer-logo">SJ<span class="dot">.</span></div>
+            <div class="footer-links">
+                <a href="#features">Tecnologia</a>
+                <a href="#philosophy">Manifesto</a>
+                <a href="app.html">App</a>
             </div>
-
-            <div class="footer-bottom">
-                <p>&copy; 2026 StudyJournal Pro. Tutti i diritti riservati.</p>
-                <p>Designed by <strong>Gennaro Pascale</strong></p>
-            </div>
+            <p class="footer-credits">© 2026 StudyJournal Pro. Rethink everything.</p>
         </footer>
-    </div><!-- end .page-body -->
+    </main>
 
-    <!-- GDPR BANNER -->
+    <!-- GDPR BANNER (MINIMAL) -->
     <div id="gdprBanner" class="gdpr-banner">
         <div class="gdpr-content">
-            <div class="gdpr-text">
-                <h4>🍪 Rispetto della Privacy</h4>
-                <p>Utilizziamo i cookie per migliorare la tua esperienza. Continuando, accetti la nostra <a
-                        href="#">Cookie Policy</a>.</p>
-            </div>
-            <div class="gdpr-actions">
-                <button onclick="acceptGDPR()" class="btn-gdpr btn-gdpr-primary">Accetta Tutto ✨</button>
-                <button onclick="closeGDPR()" class="btn-gdpr btn-gdpr-secondary">Preferenze</button>
-            </div>
+            <p>Utilizziamo i cookie per migliorare la tua esperienza. <button onclick="acceptGDPR()"
+                    style="background:none; border:none; color:var(--color-accent); font-weight:700; cursor:pointer;">Accetto
+                    ✨</button></p>
         </div>
     </div>
 
-    <!-- ═══════════ SCRIPTS ═══════════ -->
+    <!-- SCRIPTS -->
     <script>
-        // ============================================
-        // SUPABASE INIT
-        // ============================================
         const SUPABASE_URL = 'https://rzdpntvojpibbndhsrlz.supabase.co';
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ6ZHBudHZvanBpYmJuZGhzcmx6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEzNzg1MjEsImV4cCI6MjA4Njk1NDUyMX0.QwnT9Okp8CkN_LxGIeBKWrroo3letL8OhSvaqdQVW7M';
-        const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
-            auth: {
-                persistSession: true,
-                autoRefreshToken: true,
-                detectSessionInUrl: true
-            },
-            // ANTI-BOT FIX: Use our new PRISTINE Vercel Proxy to bypass Cloudflare 520
-            global: {
-                fetch: async (url, options) => {
-                    const urlStr = url.toString();
-                    const isLocalFile = window.location.protocol === 'file:';
+        const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-                    if (urlStr.includes('/rest/v1/')) {
-                        const path = urlStr.split('/rest/v1/')[1];
-                        const rawHeaders = {};
-                        if (options.headers) {
-                            new Headers(options.headers).forEach((v, k) => rawHeaders[k] = v);
-                        }
-
-                        const proxyUrl = isLocalFile ? 'https://diario-pro.vercel.app/api/supabase-proxy' : '/api/supabase-proxy';
-                        const proxyBody = {
-                            path: `/rest/v1/${path}`,
-                            method: options.method,
-                            headers: rawHeaders,
-                            body: options.body
-                        };
-
-                        // CLIENT-SIDE RETRY LOGIC (Exponential Backoff)
-                        let lastRes;
-                        for (let attempt = 0; attempt < 4; attempt++) {
-                            try {
-                                lastRes = await fetch(proxyUrl, {
-                                    method: 'POST',
-                                    headers: {
-                                        'Content-Type': 'application/json',
-                                        'X-Client-Info': 'studyjournal-pro-landing-client',
-                                        'X-Client-Retry-Count': attempt.toString()
-                                    },
-                                    body: JSON.stringify(proxyBody)
-                                });
-
-                                if (lastRes.ok || (lastRes.status >= 400 && lastRes.status < 500)) return lastRes;
-                            } catch (err) { }
-                            if (attempt < 3) await new Promise(r => setTimeout(r, 1000 * Math.pow(2, attempt)));
-                        }
-
-                        // SMART FALLBACK
-                        const isPublicVercel = window.location.hostname === 'diario-pro.vercel.app';
-                        if (isPublicVercel && (!lastRes || lastRes.status >= 500)) {
-                            return window.fetch(url, options);
-                        }
-
-                        return lastRes;
-                    }
-                    return window.fetch(url, options);
-                }
-            }
-        });
-
-        // ============================================
-        // THEME
-        // ============================================
-        (function () {
-            const saved = localStorage.getItem('theme');
-            if (saved) document.documentElement.setAttribute('data-theme', saved);
-        })();
-
-        // ============================================
-        // LOAD REAL STATS FROM DB
-        // ============================================
-        async function loadRealStats() {
+        // Load basic counts for the preview
+        async function loadStats() {
             try {
-                // 1. Count distinct users
-                const { count: userCount } = await sb
-                    .from('users_data')
-                    .select('*', { count: 'exact', head: true });
+                const { count: users } = await sb.from('users_data').select('*', { count: 'exact', head: true });
+                const { data: stats } = await sb.from('site_stats').select('key, value');
 
-                // 2. Fetch all historical stats from site_stats
-                const { data: statsRows } = await sb
-                    .from('site_stats')
-                    .select('key, value');
+                const notes = stats?.find(s => s.key === 'total_notes_created')?.value || 0;
 
-                const statsMap = {};
-                if (statsRows) {
-                    statsRows.forEach(row => statsMap[row.key] = Number(row.value));
-                }
-
-                // Cumulative counters (Historical)
-                const totalNotes = statsMap['total_notes_created'] || 0;
-                const totalFlashcards = statsMap['total_flashcards_created'] || 0;
-                const chatbotCount = statsMap['chatbot_interactions'] || 0;
-
-                // 3. Count reviews
-                const { count: reviewCount } = await sb
-                    .from('reviews')
-                    .select('*', { count: 'exact', head: true });
-
-                // Prepare stats for animation
-                setupStatAnimation('statUsers', userCount || 0);
-                setupStatAnimation('statNotes', totalNotes);
-                setupStatAnimation('statFlashcards', totalFlashcards);
-                setupStatAnimation('statChatbot', chatbotCount);
-                setupStatAnimation('statReviews', reviewCount || 0);
-
-                // Update hero preview cards (static update)
-                const previewNotes = document.getElementById('previewNotes');
-                const previewFlashcards = document.getElementById('previewFlashcards');
-                const previewUsers = document.getElementById('previewUsers');
-                if (previewNotes) previewNotes.textContent = totalNotes;
-                if (previewFlashcards) previewFlashcards.textContent = totalFlashcards;
-                if (previewUsers) previewUsers.textContent = userCount || 0;
-
-            } catch (err) {
-                console.warn('Stats load error:', err);
-                ['statUsers', 'statNotes', 'statFlashcards', 'statChatbot', 'statReviews']
-                    .forEach(id => {
-                        const el = document.getElementById(id);
-                        if (el && el.textContent === '—') el.textContent = '0';
-                    });
-            }
+                document.getElementById('previewUsers').textContent = users || '0';
+                document.getElementById('previewNotes').textContent = notes || '0';
+            } catch (err) { console.warn(err); }
         }
 
-        function setupStatAnimation(elementId, target) {
-            const el = document.getElementById(elementId);
-            if (!el) return;
-
-            el.dataset.target = target;
-            el.textContent = '0'; // Reset to 0
-            el.classList.add('animate-stat'); // Marker class
-
-            // Allow observer to catch it
-            statsObserver.observe(el);
+        function acceptGDPR() {
+            document.getElementById('gdprBanner').style.display = 'none';
+            localStorage.setItem('gdpr_accepted', 'true');
         }
 
-        const statsObserver = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    const el = entry.target;
-                    const target = parseInt(el.dataset.target || '0');
-                    animateNumber(el, target);
-                    statsObserver.unobserve(el);
-                }
-            });
-        }, { threshold: 0.5 }); // Trigger when 50% visible
-
-        function animateNumber(el, target) {
-            if (!el) return;
-            // "più il numero è alto più il counter deve essere veloce"
-            // We use a base duration but clamp it.
-            // Actually, fixed duration IMPLIES speed proportional to target.
-            // Target 100 in 2s = 50/sec. Target 1000 in 2s = 500/sec.
-            // We'll use a slightly longer duration for dramatic effect.
-            const duration = 2000;
-            const start = performance.now();
-
-            function step(now) {
-                const progress = Math.min((now - start) / duration, 1);
-                // Ease out expo for a nice "landing" effect
-                const eased = progress === 1 ? 1 : 1 - Math.pow(2, -10 * progress);
-
-                el.textContent = Math.round(eased * target);
-
-                if (progress < 1) {
-                    requestAnimationFrame(step);
-                } else {
-                    el.textContent = target; // Ensure exact final value
-                }
-            }
-            requestAnimationFrame(step);
+        if (localStorage.getItem('gdpr_accepted')) {
+            document.getElementById('gdprBanner').style.display = 'none';
         }
 
-        // ============================================
-        // LOAD REVIEWS FROM DB
-        // ============================================
-        async function loadReviews() {
-            const container = document.getElementById('reviewsContainer');
-            if (!container) return;
-
-            try {
-                const { data: reviews, error } = await sb
-                    .from('reviews')
-                    .select('*')
-                    .order('created_at', { ascending: false })
-                    .limit(9);
-
-                if (error) throw error;
-
-                if (!reviews || reviews.length === 0) {
-                    container.innerHTML = '<p class="empty-state" style="grid-column: 1/-1;">Nessuna recensione ancora. Sii il primo a lasciarne una! ✨</p>';
-                    return;
-                }
-
-                container.innerHTML = reviews.map((r, i) => `
-                    <div class="testimonial-card reveal reveal-delay-${Math.min(i + 1, 6)}" style="transition-delay: ${i * 0.1}s;">
-                        <div class="testimonial-stars">${'★'.repeat(r.rating || 5)}${'☆'.repeat(5 - (r.rating || 5))}</div>
-                        <p class="testimonial-text">"${escapeHtml(r.text)}"</p>
-                        <div class="testimonial-author">
-                            <div class="testimonial-avatar">${(r.name || '?')[0].toUpperCase()}</div>
-                            <div>
-                                <div class="testimonial-name">${escapeHtml(r.name || 'Anonimo')}</div>
-                                <div class="testimonial-role">${escapeHtml(r.role || 'Studente')}</div>
-                            </div>
-                        </div>
-                    </div>
-                `).join('');
-
-                // Re-observe for scroll reveal
-                setTimeout(() => {
-                    container.querySelectorAll('.reveal').forEach(el => observer.observe(el));
-                }, 100);
-
-            } catch (err) {
-                console.error('Reviews load error:', err);
-                container.innerHTML = '<p class="empty-state" style="grid-column: 1/-1;">Nessuna recensione ancora. Sii il primo! ✨</p>';
-            }
-        }
-
-        function escapeHtml(str) {
-            const div = document.createElement('div');
-            div.textContent = str;
-            return div.innerHTML;
-        }
-
-        // ============================================
-        // REVIEW MODAL
-        // ============================================
-        let selectedRating = 5;
-
-        function openReviewModal() {
-            document.getElementById('reviewModal').classList.add('active');
-            document.getElementById('reviewError').style.display = 'none';
-            document.getElementById('reviewSuccess').style.display = 'none';
-            updateStars(5);
-
-            // Check if user is logged in
-            sb.auth.getSession().then(({ data: { session } }) => {
-                const notice = document.getElementById('reviewAuthNotice');
-                const btn = document.getElementById('submitReviewBtn');
-                if (!session) {
-                    notice.style.display = 'block';
-                    btn.disabled = true;
-                    btn.style.opacity = '0.5';
-                } else {
-                    notice.style.display = 'none';
-                    btn.disabled = false;
-                    btn.style.opacity = '1';
-                }
-            });
-        }
-
-        function closeReviewModal() {
-            document.getElementById('reviewModal').classList.remove('active');
-        }
-
-        function updateStars(rating) {
-            selectedRating = rating;
-            document.querySelectorAll('#starRating .star').forEach(star => {
-                const val = parseInt(star.dataset.value);
-                star.classList.toggle('active', val <= rating);
-            });
-        }
-
-        // Star click handlers
-        document.querySelectorAll('#starRating .star').forEach(star => {
-            star.addEventListener('click', () => updateStars(parseInt(star.dataset.value)));
-            star.addEventListener('mouseenter', () => {
-                const val = parseInt(star.dataset.value);
-                document.querySelectorAll('#starRating .star').forEach(s => {
-                    s.classList.toggle('hover', parseInt(s.dataset.value) <= val);
-                });
-            });
-            star.addEventListener('mouseleave', () => {
-                document.querySelectorAll('#starRating .star').forEach(s => s.classList.remove('hover'));
-            });
-        });
-
-        async function submitReview() {
-            const name = document.getElementById('reviewName').value.trim();
-            const role = document.getElementById('reviewRole').value.trim();
-            const text = document.getElementById('reviewText').value.trim();
-            const errorEl = document.getElementById('reviewError');
-            const successEl = document.getElementById('reviewSuccess');
-
-            errorEl.style.display = 'none';
-            successEl.style.display = 'none';
-
-            if (!name || !text) {
-                errorEl.textContent = '❌ Inserisci il tuo nome e la recensione.';
-                errorEl.style.display = 'block';
-                return;
-            }
-
-            if (text.length < 10) {
-                errorEl.textContent = '❌ La recensione deve essere di almeno 10 caratteri.';
-                errorEl.style.display = 'block';
-                return;
-            }
-
-            const { data: { session } } = await sb.auth.getSession();
-            if (!session) {
-                errorEl.textContent = '❌ Devi essere registrato per lasciare una recensione.';
-                errorEl.style.display = 'block';
-                return;
-            }
-
-            const btn = document.getElementById('submitReviewBtn');
-            btn.disabled = true;
-            btn.textContent = 'Pubblicando...';
-
-            try {
-                const { error } = await sb.from('reviews').insert({
-                    user_id: session.user.id,
-                    name: name,
-                    role: role || 'Studente',
-                    text: text,
-                    rating: selectedRating
-                });
-
-                if (error) throw error;
-
-                successEl.textContent = '✅ Recensione pubblicata! Grazie!';
-                successEl.style.display = 'block';
-
-                // Reset form
-                document.getElementById('reviewName').value = '';
-                document.getElementById('reviewRole').value = '';
-                document.getElementById('reviewText').value = '';
-
-                // Reload reviews
-                setTimeout(() => {
-                    closeReviewModal();
-                    loadReviews();
-                    loadRealStats();
-                }, 1500);
-
-            } catch (err) {
-                console.error('Review submit error:', err);
-                errorEl.textContent = '❌ Errore: ' + (err.message || 'Riprova più tardi.');
-                errorEl.style.display = 'block';
-            } finally {
-                btn.disabled = false;
-                btn.textContent = 'Pubblica Recensione ✨';
-            }
-        }
-
-        // Close modal on overlay click
-        document.getElementById('reviewModal').addEventListener('click', (e) => {
-            if (e.target === e.currentTarget) closeReviewModal();
-        });
-
-        // ============================================
-        // SCROLL REVEAL (IntersectionObserver)
-        // ============================================
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    entry.target.classList.add('visible');
-                    observer.unobserve(entry.target);
-                }
-            });
-        }, {
-            threshold: 0.15,
-            rootMargin: '0px 0px -40px 0px'
-        });
-
-        document.addEventListener('DOMContentLoaded', () => {
-            document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
-            loadRealStats();
-            loadReviews();
-        });
-
-        // Smooth scroll for anchor links
-        document.querySelectorAll('a[href^="#"]').forEach(link => {
-            link.addEventListener('click', (e) => {
-                e.preventDefault();
-                const target = document.querySelector(link.getAttribute('href'));
-                if (target) {
-                    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                }
-            });
-        });
+        loadStats();
     </script>
-
-    <!-- ═══════════ SCRIPTS ═══════════ -->
     <script src="ui-interactions.js"></script>
-    <script>
-        // Simple shim for dependencies if they are missing on landing page
-        if (typeof UIManager === 'undefined') {
-            window.UIManager = {
-                alert: (msg) => alert(msg),
-                confirm: (msg) => confirm(msg)
-            };
-        }
-        if (typeof loadData === 'undefined') {
-            window.loadData = () => ({});
-        }
-        if (typeof saveData === 'undefined') {
-            window.saveData = () => { };
-        }
-    </script>
 </body>
 
 </html>

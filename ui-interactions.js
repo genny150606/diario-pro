@@ -1,131 +1,113 @@
 /**
- * STUDYJOURNAL PRO — Landing Page Interactions
- * Handling animations, magnetic effects, and scroll reveals.
+ * STUDYJOURNAL PRO — Radical Landing Page Interactions
  */
 
 document.addEventListener('DOMContentLoaded', () => {
-    initTypingAnimation();
-    initMagneticButtons();
-    initScrollReveal();
-    updateAuroraBackground();
+    initDynamicIsland();
+    initRadicalHero();
+    initSpatialParallax();
+    initRevealAnimations();
 });
 
 /**
- * ── TYPING ANIMATION ──
- * Refined sequence for the hero title and subtitle.
+ * ── DYNAMIC ISLAND ──
+ * Shrink and blur on scroll.
  */
-async function initTypingAnimation() {
+function initDynamicIsland() {
+    const nav = document.getElementById('mainNav');
+    window.addEventListener('scroll', () => {
+        if (window.scrollY > 50) {
+            nav.style.transform = 'translateX(-50%) translateY(-10px) scale(0.95)';
+            nav.style.background = 'rgba(10, 10, 12, 0.9)';
+        } else {
+            nav.style.transform = 'translateX(-50%) translateY(0) scale(1)';
+            nav.style.background = 'rgba(20, 20, 22, 0.7)';
+        }
+    });
+}
+
+/**
+ * ── RADICAL HERO ──
+ * Staggered entrance for the mega-typography.
+ */
+async function initRadicalHero() {
+    const tag = document.getElementById('heroBadge');
     const line1 = document.getElementById('heroTitleLine1');
     const line2 = document.getElementById('heroTitleLine2');
     const subtitle = document.getElementById('heroSubtitle');
     const actions = document.getElementById('heroActions');
     const preview = document.getElementById('heroPreview');
 
-    if (!line1 || !line2) return;
-
-    const text1 = "Il Tuo Studio,";
-    const text2 = "Rivoluzionato dall'AI.";
-    const textSubtitle = subtitle ? subtitle.textContent.trim() : "";
-
-    // Reset
-    line1.textContent = '';
-    line2.textContent = '';
-    if (subtitle) subtitle.textContent = '';
-    if (actions) actions.style.opacity = '0';
-    if (preview) preview.style.opacity = '0';
-
     const wait = (ms) => new Promise(res => setTimeout(res, ms));
 
-    const typeWriter = async (element, text, speed) => {
-        element.classList.add('typing-cursor');
-        for (let i = 0; i < text.length; i++) {
-            element.textContent += text.charAt(i);
-            await wait(speed + (Math.random() * 20));
-        }
-        element.classList.remove('typing-cursor');
-    };
+    // Initial state set in CSS would be better, but we can double down here
+    [tag, line1, line2, subtitle, actions, preview].forEach(el => {
+        if (!el) return;
+        el.style.opacity = '0';
+        el.style.transform = 'translateY(30px)';
+        el.style.transition = 'all 1.2s cubic-bezier(0.16, 1, 0.3, 1)';
+    });
 
-    await wait(800);
-    await typeWriter(line1, text1, 40);
+    await wait(400);
+
+    // Sequence
+    if (tag) { tag.style.opacity = '1'; tag.style.transform = 'translateY(0)'; }
+    await wait(200);
+    if (line1) { line1.parentNode.style.opacity = '1'; line1.style.opacity = '1'; line1.style.transform = 'translateY(0)'; }
+    await wait(150);
+    if (line2) { line2.parentNode.style.opacity = '1'; line2.style.opacity = '1'; line2.style.transform = 'translateY(0)'; }
     await wait(300);
-    await typeWriter(line2, text2, 40);
-
-    if (subtitle) {
-        await wait(200);
-        await typeWriter(subtitle, textSubtitle, 15);
-    }
-
-    // Smooth reveal for buttons and preview
-    if (actions) {
-        actions.style.transition = 'opacity 1s cubic-bezier(0.23, 1, 0.32, 1), transform 1s cubic-bezier(0.23, 1, 0.32, 1)';
-        actions.style.transform = 'translateY(10px)';
-        requestAnimationFrame(() => {
-            actions.style.opacity = '1';
-            actions.style.transform = 'translateY(0)';
-        });
-    }
-
-    if (preview) {
-        setTimeout(() => {
-            preview.style.transition = 'opacity 1.2s cubic-bezier(0.23, 1, 0.32, 1), transform 1.2s cubic-bezier(0.23, 1, 0.32, 1)';
-            preview.style.transform = 'translateY(20px) scale(0.98)';
-            requestAnimationFrame(() => {
-                preview.style.opacity = '1';
-                preview.style.transform = 'translateY(0) scale(1)';
-            });
-        }, 500);
-    }
+    if (subtitle) { subtitle.style.opacity = '1'; subtitle.style.transform = 'translateY(0)'; }
+    await wait(200);
+    if (actions) { actions.style.opacity = '1'; actions.style.transform = 'translateY(0)'; }
+    await wait(400);
+    if (preview) { preview.style.opacity = '1'; preview.style.transform = 'rotateX(15deg) translateY(0)'; }
 }
 
 /**
- * ── MAGNETIC BUTTONS ──
- * Subtle interaction for premium feel.
+ * ── SPATIAL PARALLAX ──
+ * Interactive depth based on mouse position.
  */
-function initMagneticButtons() {
-    const buttons = document.querySelectorAll('.btn-hero-primary, .btn-hero-secondary');
+function initSpatialParallax() {
+    const preview = document.getElementById('heroPreview');
+    if (!preview) return;
 
-    buttons.forEach(btn => {
-        btn.addEventListener('mousemove', (e) => {
-            const rect = btn.getBoundingClientRect();
-            const x = e.clientX - rect.left - rect.width / 2;
-            const y = e.clientY - rect.top - rect.height / 2;
+    document.addEventListener('mousemove', (e) => {
+        const x = (window.innerWidth / 2 - e.pageX) / 40;
+        const y = (window.innerHeight / 2 - e.pageY) / 40;
 
-            btn.style.transform = `translate(${x * 0.2}px, ${y * 0.2}px)`;
-        });
-
-        btn.addEventListener('mouseleave', () => {
-            btn.style.transform = 'translate(0, 0)';
-        });
+        preview.style.transform = `rotateX(${15 + y}deg) rotateY(${-x}deg) translateY(${-y}px)`;
     });
 }
 
 /**
- * ── SCROLL REVEAL ──
- * Better performance and cleaner look than simple CSS reveals.
+ * ── REVEAL ANIMATIONS ──
+ * Smooth opacity/transform transitions for minimalist sections.
  */
-function initScrollReveal() {
+function initRevealAnimations() {
     const observer = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
             if (entry.isIntersecting) {
-                entry.target.classList.add('visible');
+                entry.target.classList.add('is-visible');
                 observer.unobserve(entry.target);
             }
         });
-    }, {
-        threshold: 0.1,
-        rootMargin: '0px 0px -50px 0px'
-    });
+    }, { threshold: 0.15 });
 
-    document.querySelectorAll('.feature-card, .landing-section .reveal, .stats-banner-inner, .timeline-step').forEach(el => {
+    document.querySelectorAll('.reveal-section, .feature-large-text').forEach(el => {
+        el.style.opacity = '0';
+        el.style.transform = 'translateY(40px)';
+        el.style.transition = 'all 1.4s cubic-bezier(0.16, 1, 0.3, 1)';
         observer.observe(el);
     });
-}
 
-/**
- * ── AURORA BACKGROUND ──
- * Dynamic mouse-aware effect if needed, otherwise stay with optimized CSS.
- */
-function updateAuroraBackground() {
-    // Current CSS implementation is efficient. 
-    // We could add mouse-parallax to orbs here if requested.
+    // Custom class for the reveal
+    const style = document.createElement('style');
+    style.innerHTML = `
+        .is-visible {
+            opacity: 1 !important;
+            transform: translateY(0) !important;
+        }
+    `;
+    document.head.appendChild(style);
 }

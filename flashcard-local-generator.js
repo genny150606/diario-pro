@@ -4,37 +4,64 @@
 // UTILITY FUNCTIONS - Caricamento/Salvataggio
 // ============================================
 
-function loadData() {
+function getGlobalData() {
     try {
+        // Usa il sistema centralizzato se disponibile
+        if (window.StorageManager && typeof window.StorageManager.load === 'function') {
+            return window.StorageManager.load();
+        }
+        // Fallback di emergenza
         const data = localStorage.getItem('studyjournal_data');
         return data ? JSON.parse(data) : {};
     } catch (e) {
-        console.error('Errore caricamento dati:', e);
+        console.error('Errore caricamento dati centralizzato:', e);
         return {};
     }
 }
 
-function saveData(data) {
+function saveGlobalData(data) {
     try {
-        localStorage.setItem('studyjournal_data', JSON.stringify(data));
+        // Usa il sistema centralizzato se disponibile
+        if (window.StorageManager && typeof window.StorageManager.save === 'function') {
+            window.StorageManager.save(data);
+        } else {
+            // Fallback di emergenza
+            localStorage.setItem('studyjournal_data', JSON.stringify(data));
+        }
+
+        // Aggiorna immediatamente la UI della dashboard e le statistiche
+        if (typeof updateDashboard === 'function') {
+            updateDashboard();
+        } else if (window.AppManager && typeof window.AppManager.renderDashboard === 'function') {
+            window.AppManager.renderDashboard();
+        }
+
+        if (window.GamificationManager && window.GamificationManager.updateUI) {
+            window.GamificationManager.updateUI();
+        }
     } catch (e) {
-        console.error('Errore salvataggio dati:', e);
+        console.error('Errore salvataggio dati centralizzato:', e);
     }
 }
 
 function loadFlashcards() {
-    const data = loadData();
+    const data = getGlobalData();
     return data.flashcards || [];
 }
 
 function saveFlashcards(flashcards) {
-    const data = loadData();
+    const data = getGlobalData();
     data.flashcards = flashcards;
-    saveData(data);
+    saveGlobalData(data);
+
+    // Aggiorna anche il manager in memoria se esiste (per coerenza)
+    if (typeof FlashcardManager !== 'undefined') {
+        FlashcardManager.data = flashcards;
+    }
 }
 
 function loadNotes() {
-    const data = loadData();
+    const data = getGlobalData();
     return data.notes || [];
 }
 

@@ -23,84 +23,37 @@ const OnboardingSystem = {
     showOnboardingModal() {
         const modal = document.createElement('div');
         modal.id = 'onboardingModal';
-        modal.style.cssText = `
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.7);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 99999;
-            backdrop-filter: blur(5px);
-        `;
+        modal.className = 'onboarding-overlay';
 
         const content = document.createElement('div');
-        content.style.cssText = `
-            background: var(--bg-secondary);
-            padding: clamp(2rem, 5vw, 3rem);
-            border-radius: 20px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-            max-width: 500px;
-            width: 90%;
-            text-align: center;
-            border: 2px solid var(--primary);
-            animation: scalePopIn 0.4s ease;
-        `;
+        content.className = 'onboarding-card';
 
         content.innerHTML = `
-            <h1 style="
-                color: var(--primary);
-                margin-bottom: 1rem;
-                font-size: clamp(1.5rem, 4vw, 2rem);
-            ">📚 Benvenuto in StudyJournal!</h1>
+            <h1 class="onboarding-title">📚 Benvenuto in StudyJournal!</h1>
             
-            <p style="
-                color: var(--text-secondary);
-                margin-bottom: 2rem;
-                font-size: clamp(0.95rem, 2vw, 1.05rem);
-                line-height: 1.6;
-            ">
+            <p class="onboarding-desc">
                 Per personalizzare l'esperienza, dimmi che tipo di studente sei:
             </p>
 
-            <div style="display: flex; flex-direction: column; gap: 1rem;">
-                <button id="highSchoolBtn" style="
-                    padding: clamp(1rem, 2vw, 1.5rem);
-                    font-size: clamp(1rem, 2vw, 1.1rem);
-                    background: linear-gradient(135deg, #6366f1, #4f46e5);
-                    color: white;
-                    border: none;
-                    border-radius: 12px;
-                    cursor: pointer;
-                    font-weight: 600;
-                    transition: all 0.3s ease;
-                ">
-                    🎓 Liceo/Scuola Superiore (Voti 1-10)
+            <div class="onboarding-options">
+                <button id="highSchoolBtn" class="onboarding-btn high-school">
+                    <span class="btn-icon">🏫</span>
+                    <span class="btn-text">
+                        <strong>Liceo/Scuola Superiore</strong>
+                        <small>Voti da 1 a 10</small>
+                    </span>
                 </button>
                 
-                <button id="universityBtn" style="
-                    padding: clamp(1rem, 2vw, 1.5rem);
-                    font-size: clamp(1rem, 2vw, 1.1rem);
-                    background: linear-gradient(135deg, #f472b6, #ec4899);
-                    color: white;
-                    border: none;
-                    border-radius: 12px;
-                    cursor: pointer;
-                    font-weight: 600;
-                    transition: all 0.3s ease;
-                ">
-                    🏫 Università (Voti 18-30 + Lode)
+                <button id="universityBtn" class="onboarding-btn university">
+                    <span class="btn-icon">🎓</span>
+                    <span class="btn-text">
+                        <strong>Università</strong>
+                        <small>Voti da 18 a 30 + Lode</small>
+                    </span>
                 </button>
             </div>
 
-            <p style="
-                color: var(--text-light);
-                margin-top: 1.5rem;
-                font-size: 0.85rem;
-            ">
+            <p class="onboarding-footer-text">
                 Puoi cambiare questa impostazione in qualsiasi momento nelle Impostazioni
             </p>
         `;
@@ -117,27 +70,6 @@ const OnboardingSystem = {
         document.getElementById('universityBtn').addEventListener('click', () => {
             this.selectSchoolType('university');
             modal.remove();
-        });
-
-        // Hover effects
-        document.getElementById('highSchoolBtn').addEventListener('mouseover', function () {
-            this.style.transform = 'translateY(-3px)';
-            this.style.boxShadow = '0 10px 30px rgba(99, 102, 241, 0.4)';
-        });
-
-        document.getElementById('highSchoolBtn').addEventListener('mouseout', function () {
-            this.style.transform = 'translateY(0)';
-            this.style.boxShadow = 'none';
-        });
-
-        document.getElementById('universityBtn').addEventListener('mouseover', function () {
-            this.style.transform = 'translateY(-3px)';
-            this.style.boxShadow = '0 10px 30px rgba(244, 114, 182, 0.4)';
-        });
-
-        document.getElementById('universityBtn').addEventListener('mouseout', function () {
-            this.style.transform = 'translateY(0)';
-            this.style.boxShadow = 'none';
         });
     },
 

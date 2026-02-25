@@ -9,8 +9,8 @@ header {
     top: 1.5rem;
     left: 50%;
     transform: translateX(-50%);
-    width: fit-content;
-    min-width: calc(100% - 320px);
+    width: 90%;
+    max-width: 1200px;
     height: 3.5rem;
     background: var(--glass-bg);
     backdrop-filter: var(--glass-blur);
@@ -20,10 +20,18 @@ header {
     z-index: 10000;
     display: flex;
     align-items: center;
+    justify-content: space-between;
     padding: 0 1.5rem;
-    gap: 2rem;
     box-shadow: var(--shadow-lg);
     transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@media (min-width: 769px) {
+    header {
+        width: fit-content;
+        min-width: calc(100% - 320px);
+        padding: 0 2rem;
+    }
 }
 
 header:hover {
@@ -302,5 +310,75 @@ header:hover {
 
     .hero h1 {
         font-size: clamp(1.8rem, 8vw, 2.5rem) !important;
+    }
+}
+
+/* ── FOOTER — PREMIUM MINIMALIST ── */
+footer {
+    padding: 4rem 2rem;
+    margin-top: 4rem;
+    border-top: 1px solid var(--glass-border);
+    text-align: center;
+    background: rgba(255, 255, 255, 0.01);
+    backdrop-filter: blur(10px);
+    border-radius: 3rem 3rem 0 0;
+}
+
+.footer-content {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.5rem;
+}
+
+.footer-logo {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    font-weight: 800;
+    color: var(--color-text);
+    text-decoration: none;
+    font-size: 1.2rem;
+}
+
+.footer-links {
+    display: flex;
+    gap: 2rem;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.footer-link {
+    color: var(--color-text-secondary);
+    text-decoration: none;
+    font-size: 0.9rem;
+    font-weight: 500;
+    transition: color 0.3s;
+}
+
+.footer-link:hover {
+    color: var(--color-accent);
+}
+
+.footer-bottom {
+    margin-top: 2rem;
+    font-size: 0.8rem;
+    color: var(--color-text-tertiary);
+}
+
+.footer-credit {
+    background: var(--color-accent-60);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    font-weight: 700;
+}
+
+@media (max-width: 768px) {
+    footer {
+        padding: 3rem 1.5rem 8rem;
+        /* Space for bottom nav */
     }
 }

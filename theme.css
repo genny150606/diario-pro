@@ -5,6 +5,146 @@
 
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Marcellus&family=Outfit:wght@400;500;600;700&display=swap');
 
+/* ── ONBOARDING OVERLAY ── */
+.onboarding-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.85);
+    backdrop-filter: blur(25px);
+    -webkit-backdrop-filter: blur(25px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 100000;
+}
+
+.onboarding-card {
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: 3rem;
+    padding: 3.5rem;
+    max-width: 500px;
+    width: 90%;
+    text-align: center;
+    box-shadow: 0 4rem 100px rgba(0, 0, 0, 0.5);
+    animation: scalePopIn 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.onboarding-title {
+    font-family: 'Outfit', sans-serif;
+    font-size: 2.2rem;
+    font-weight: 900;
+    margin-bottom: 1rem;
+    color: var(--color-text);
+    line-height: 1.1;
+}
+
+.onboarding-desc {
+    color: var(--color-text-secondary);
+    margin-bottom: 2.5rem;
+    font-size: 1.1rem;
+}
+
+.onboarding-options {
+    display: flex;
+    flex-direction: column;
+    gap: 1.2rem;
+}
+
+.onboarding-btn {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    padding: 1.5rem;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--glass-border);
+    border-radius: 1.5rem;
+    cursor: pointer;
+    text-align: left;
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.onboarding-btn:hover {
+    background: rgba(255, 255, 255, 0.08);
+    transform: translateY(-5px);
+    border-color: var(--color-accent);
+}
+
+.onboarding-btn .btn-icon {
+    font-size: 2rem;
+}
+
+.onboarding-btn .btn-text strong {
+    display: block;
+    font-size: 1.1rem;
+    color: var(--color-text);
+}
+
+.onboarding-btn .btn-text small {
+    color: var(--color-text-tertiary);
+}
+
+.onboarding-footer-text {
+    margin-top: 2rem;
+    font-size: 0.85rem;
+    color: var(--color-text-tertiary);
+}
+
+/* ── XP GUIDE STYLES ── */
+.xp-guide-section {
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: 2.5rem;
+    padding: 2.5rem;
+    margin: 3rem 0;
+}
+
+.xp-guide-section h3 {
+    font-family: 'Outfit', sans-serif;
+    font-size: 1.5rem;
+    font-weight: 800;
+    margin-bottom: 2rem;
+    text-align: center;
+}
+
+.xp-guide-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+}
+
+.xp-guide-item {
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid var(--glass-border);
+    border-radius: 1.2rem;
+    padding: 1.2rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    transition: all 0.3s;
+}
+
+.xp-guide-item:hover {
+    background: rgba(255, 255, 255, 0.05);
+    transform: translateY(-3px);
+}
+
+.xp-guide-item .xp-icon {
+    font-size: 1.5rem;
+}
+
+.xp-guide-item .xp-label {
+    flex: 1;
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+.xp-guide-item .xp-value {
+    color: var(--color-accent);
+    font-weight: 800;
+    font-size: 0.85rem;
+}
+
 :root {
     /* ── TYPOGRAPHY ── */
     --font-heading: 'Marcellus', serif;
@@ -36,11 +176,135 @@
     --fw-semibold: 600;
     --tracking-tight: -0.025em;
     --tracking-normal: -0.011em;
-    --tracking-wide: 0.04em;
+    --tracking-wide: 0.025em;
     --leading-tight: 1.15;
     --leading-normal: 1.5;
     --leading-relaxed: 1.7;
+}
 
+/* ── PROFILE SECTION STYLES ── */
+.profile-card {
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: 2.5rem;
+    padding: 2.5rem;
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+    margin-bottom: 2.5rem;
+    box-shadow: var(--shadow-xl);
+}
+
+.profile-photo-wrapper {
+    position: relative;
+    width: 6rem;
+    height: 6rem;
+    border-radius: 2rem;
+    overflow: hidden;
+    background: var(--color-bg-secondary);
+    border: 2px solid var(--glass-border);
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.profile-photo-wrapper:hover {
+    border-color: var(--color-accent);
+    transform: scale(1.05);
+}
+
+.profile-photo {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.profile-photo-fallback {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2.5rem;
+    color: var(--color-text-tertiary);
+}
+
+.profile-photo-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.3s;
+    cursor: pointer;
+}
+
+.profile-photo-wrapper:hover .profile-photo-overlay {
+    opacity: 1;
+}
+
+.profile-username {
+    font-family: 'Outfit', sans-serif;
+    font-size: 1.8rem;
+    font-weight: 800;
+    color: var(--color-text);
+    margin-bottom: 0.2rem;
+}
+
+.profile-fullname {
+    color: var(--color-text-secondary);
+    font-size: 1.1rem;
+    margin-bottom: 0.5rem;
+}
+
+.profile-info {
+    flex: 1;
+}
+
+.profile-edit-section {
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: 2rem;
+    padding: 2.5rem;
+}
+
+.profile-edit-title {
+    font-family: 'Outfit', sans-serif;
+    font-size: 1.3rem;
+    font-weight: 700;
+    margin-bottom: 2rem;
+}
+
+.profile-edit-field {
+    margin-bottom: 1.5rem;
+}
+
+.profile-edit-field label {
+    display: block;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--color-text-secondary);
+    margin-bottom: 0.6rem;
+}
+
+.profile-edit-row {
+    display: flex;
+    gap: 1rem;
+}
+
+@media (max-width: 600px) {
+    .profile-card {
+        flex-direction: column;
+        text-align: center;
+        padding: 2rem;
+    }
+
+    .profile-edit-row {
+        flex-direction: column;
+    }
+}
+
+:root {
     /* ── COLORS — LIGHT ── */
     --color-bg: #FFFFFF;
     --color-bg-secondary: #F5F5F7;
@@ -99,11 +363,16 @@
 
     /* ── SHADOWS — APPLE STYLE ── */
     --shadow-xs: 0 1px 2px hsla(0, 0%, 0%, 0.05);
-    --shadow-sm: 0 2px 4px hsla(0, 0%, 0%, 0.05), 0 1px 2px hsla(0, 0%, 0%, 0.1);
-    --shadow-md: 0 4px 6px hsla(0, 0%, 0%, 0.07), 0 10px 15px hsla(0, 0%, 0%, 0.03);
-    --shadow-lg: 0 10px 25px hsla(0, 0%, 0%, 0.1), 0 20px 48px hsla(0, 0%, 0%, 0.05);
-    --shadow-xl: 0 20px 25px hsla(0, 0%, 0%, 0.15), 0 30px 60px hsla(0, 0%, 0%, 0.1);
-    --shadow-float: 0 20px 40px hsla(0, 0%, 0%, 0.2), 0 0 0 1px hsla(0, 0%, 0%, 0.05);
+    --shadow-sm: 0 2px 4px hsla(0, 0%, 0%, 0.05),
+        0 1px 2px hsla(0, 0%, 0%, 0.1);
+    --shadow-md: 0 4px 6px hsla(0, 0%, 0%, 0.07),
+        0 10px 15px hsla(0, 0%, 0%, 0.03);
+    --shadow-lg: 0 10px 25px hsla(0, 0%, 0%, 0.1),
+        0 20px 48px hsla(0, 0%, 0%, 0.05);
+    --shadow-xl: 0 20px 25px hsla(0, 0%, 0%, 0.15),
+        0 30px 60px hsla(0, 0%, 0%, 0.1);
+    --shadow-float: 0 20px 40px hsla(0, 0%, 0%, 0.2),
+        0 0 0 1px hsla(0, 0%, 0%, 0.05);
 
     /* ── TRANSITIONS ── */
     --ease-out: cubic-bezier(0.25, 0.46, 0.45, 0.94);

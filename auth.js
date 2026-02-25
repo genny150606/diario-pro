@@ -168,8 +168,10 @@ const AuthManager = {
     // Re-initialize all data managers from cloud-hydrated cache.
     // This is the SOLE entry point for data initialization.
     _reinitManagers() {
-        // If script.js hasn't loaded yet, retry after DOMContentLoaded
-        if (typeof StorageManager === 'undefined') {
+        // If script.js hasn't loaded yet, retry after DOMContentLoaded.
+        // NOTE: We check typeof StorageManager.load because StorageManager is a native Web API
+        // in modern browsers, so typeof StorageManager is 'function' even before script.js loads!
+        if (typeof window.StorageManager === 'undefined' || typeof window.StorageManager.load !== 'function') {
             console.log('[AUTH] Managers not loaded yet, deferring to DOMContentLoaded...');
             document.addEventListener('DOMContentLoaded', () => this._reinitManagers());
             return;

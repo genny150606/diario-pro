@@ -264,12 +264,14 @@ header:hover {
 @media (max-width: 1023px) {
     header {
         top: 1rem;
-        width: calc(100% - 2rem);
-        min-width: auto;
         left: 1rem;
+        right: 1rem;
+        width: auto;
+        min-width: auto;
+        transform: none;
         padding: 0 1rem;
         gap: 0.5rem;
-        border-radius: 2rem;
+        border-radius: 0.75rem;
         height: 4rem;
     }
 

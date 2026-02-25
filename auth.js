@@ -96,21 +96,32 @@ const AuthManager = {
 
             const isAppPage = window.location.pathname.includes('app');
 
+            // ── If user is logged in: load cloud data NOW (synchronously awaited) ──
+            if (this.user && typeof CloudStorage !== 'undefined') {
+                CloudStorage._clearLegacy();
+                await CloudStorage.load(this.user.id);
+                console.log('[AUTH] Cloud data loaded for user:', this.user.id);
+            }
+
             // ── AUTH GATE: Show login overlay if not authenticated ──
             if (isAppPage && !this.user) {
                 this.showAuthGate();
-                // Resolve ready even without user (empty data is fine)
-                this._readyResolve();
             }
 
-            // Listen for auth changes
+            // ── Resolve ready — data is now in localStorage cache ──
+            this._readyResolve();
+
+            // ── Listen for FUTURE auth changes (re-login, sign-out) ──
             supabaseClient.auth.onAuthStateChange(async (event, session) => {
                 console.log('Auth Event:', event);
                 this.user = session?.user || null;
                 this.updateUI();
 
-                if ((event === 'SIGNED_IN' || event === 'INITIAL_SESSION') && session) {
-                    if (event === 'SIGNED_IN') this.hideAuthGate();
+                // INITIAL_SESSION is already handled above — skip it
+                if (event === 'INITIAL_SESSION') return;
+
+                if (event === 'SIGNED_IN' && session) {
+                    this.hideAuthGate();
 
                     // SELF-HEALING: Ensure users_data row exists
                     const uid = session.user.id;
@@ -121,7 +132,6 @@ const AuthManager = {
                         .maybeSingle()
                         .then(({ data }) => {
                             if (!data) {
-                                console.log('Fixing missing users_data row for:', uid);
                                 return supabaseClient.from('users_data').insert([{ id: uid, data: {}, updated_at: new Date() }]);
                             }
                         })
@@ -131,12 +141,8 @@ const AuthManager = {
                     if (typeof CloudStorage !== 'undefined') {
                         CloudStorage._clearLegacy();
                         await CloudStorage.load(session.user.id);
-                        // Re-initialize all managers with fresh cloud data
                         this._reinitManagers();
                     }
-
-                    // Resolve the ready promise
-                    this._readyResolve();
                 }
 
                 if (event === 'SIGNED_OUT') {

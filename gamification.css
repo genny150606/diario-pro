@@ -427,3 +427,222 @@
     box-shadow: 0 0 30px var(--color-accent-60);
     animation: pulseGlow 2s infinite;
 }
+
+/* ============================================
+   DUEL ARENA — PREMIUM GLASSMORPHISM
+   ============================================ */
+
+/* ── Arena Main Content ── */
+.arena-main-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    flex: 1;
+    padding: 2.5rem 2rem;
+    max-width: 800px;
+    margin: 0 auto;
+    width: 100%;
+}
+
+/* ── Question Box — Glass Effect ── */
+.arena-question-box {
+    width: 100%;
+    background: rgba(255, 255, 255, 0.04);
+    backdrop-filter: blur(40px) saturate(180%);
+    -webkit-backdrop-filter: blur(40px) saturate(180%);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 1rem;
+    padding: 2.5rem 2rem;
+    margin-bottom: 2rem;
+    text-align: center;
+    box-shadow:
+        0 8px 32px rgba(0, 0, 0, 0.3),
+        inset 0 1px 0 rgba(255, 255, 255, 0.06);
+    position: relative;
+    overflow: hidden;
+}
+
+.arena-question-box::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg,
+            transparent,
+            rgba(255, 255, 255, 0.15),
+            transparent);
+}
+
+.arena-question-text {
+    font-family: 'Outfit', sans-serif;
+    font-size: clamp(1.1rem, 2.5vw, 1.5rem);
+    font-weight: 600;
+    color: #fff;
+    line-height: 1.5;
+    letter-spacing: -0.01em;
+}
+
+/* ── Options Grid ── */
+.arena-options-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.75rem;
+    width: 100%;
+}
+
+@media (max-width: 600px) {
+    .arena-options-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .arena-main-content {
+        padding: 1.5rem 1rem;
+    }
+
+    .arena-question-box {
+        padding: 1.5rem 1.25rem;
+    }
+}
+
+/* ── Option Button — Premium Glass ── */
+.arena-option-btn {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1.1rem 1.25rem;
+    background: rgba(255, 255, 255, 0.04);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    border-radius: 0.75rem;
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 0.95rem;
+    font-weight: 500;
+    text-align: left;
+    cursor: pointer;
+    transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    position: relative;
+    overflow: hidden;
+}
+
+.arena-option-btn::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg,
+            rgba(255, 255, 255, 0.03),
+            transparent);
+    opacity: 0;
+    transition: opacity 0.25s;
+}
+
+.arena-option-btn:hover:not(:disabled) {
+    transform: translateY(-3px);
+    border-color: rgba(255, 255, 255, 0.18);
+    background: rgba(255, 255, 255, 0.08);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+}
+
+.arena-option-btn:hover:not(:disabled)::before {
+    opacity: 1;
+}
+
+.arena-option-btn:active:not(:disabled) {
+    transform: translateY(0);
+}
+
+/* ── Option Key Badge (A, B, C, D) ── */
+.arena-option-btn .opt-key {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2rem;
+    height: 2rem;
+    background: rgba(91, 159, 243, 0.12);
+    color: var(--color-accent, #5B9FF3);
+    font-weight: 800;
+    font-size: 0.8rem;
+    font-family: 'Outfit', sans-serif;
+    border-radius: 0.4rem;
+    flex-shrink: 0;
+    letter-spacing: 0;
+    border: 1px solid rgba(91, 159, 243, 0.2);
+    transition: all 0.25s;
+}
+
+.arena-option-btn:hover:not(:disabled) .opt-key {
+    background: rgba(91, 159, 243, 0.2);
+    border-color: rgba(91, 159, 243, 0.35);
+}
+
+/* ── Correct Answer State ── */
+.arena-option-btn.correct {
+    background: rgba(48, 209, 88, 0.12) !important;
+    border-color: rgba(48, 209, 88, 0.4) !important;
+    box-shadow: 0 0 20px rgba(48, 209, 88, 0.15),
+        inset 0 0 20px rgba(48, 209, 88, 0.05);
+    color: #30D158;
+}
+
+.arena-option-btn.correct .opt-key {
+    background: rgba(48, 209, 88, 0.2);
+    color: #30D158;
+    border-color: rgba(48, 209, 88, 0.4);
+}
+
+/* ── Wrong Answer State ── */
+.arena-option-btn.wrong {
+    background: rgba(255, 59, 48, 0.12) !important;
+    border-color: rgba(255, 59, 48, 0.4) !important;
+    box-shadow: 0 0 20px rgba(255, 59, 48, 0.15),
+        inset 0 0 20px rgba(255, 59, 48, 0.05);
+    color: #FF3B30;
+}
+
+.arena-option-btn.wrong .opt-key {
+    background: rgba(255, 59, 48, 0.2);
+    color: #FF3B30;
+    border-color: rgba(255, 59, 48, 0.4);
+}
+
+/* ── Disabled state (after answering) ── */
+.arena-option-btn:disabled {
+    cursor: default;
+    opacity: 0.6;
+}
+
+.arena-option-btn:disabled:not(.correct):not(.wrong) {
+    opacity: 0.35;
+}
+
+/* ── Arena shake animation ── */
+@keyframes arenaShake {
+
+    0%,
+    100% {
+        transform: translateX(0);
+    }
+
+    20% {
+        transform: translateX(-8px);
+    }
+
+    40% {
+        transform: translateX(8px);
+    }
+
+    60% {
+        transform: translateX(-4px);
+    }
+
+    80% {
+        transform: translateX(4px);
+    }
+}
+
+.duel-arena-overlay.shake {
+    animation: arenaShake 0.4s ease;
+}

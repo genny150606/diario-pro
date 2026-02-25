@@ -90,9 +90,27 @@ Copri i punti chiave dell'argomento. Non aggiungere NULLA fuori dall'array JSON.
 app.post("/api/generate-duel-quiz", async (req, res) => {
     try {
         if (!genAI) throw new Error("GenAI not initialized");
-        const { topic } = req.body;
+        const { subject, context } = req.body;
         const ai = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
-        const result = await ai.generateContent(`Genera 10 domande a risposta multipla su "${topic}" in JSON: [{"question": "...", "options": ["...", "...", "..."], "answer": 0}]`);
+
+        let prompt = "";
+        if (context && context.trim().length > 0) {
+            prompt = `Analizza ESCLUSIVAMENTE il seguente testo e genera 10 domande a risposta multipla basate SOLO sul suo contenuto.
+Restituisci SOLO un array JSON valido, senza testo aggiuntivo, senza markdown, senza spiegazioni.
+Il formato ESATTO richiesto è: [{"question": "domanda?", "options": ["A", "B", "C", "D"], "answer": 0}]
+dove "answer" è l'indice (0-3) dell'opzione corretta.
+Testo: ${context.substring(0, 8000)}
+Non aggiungere NULLA fuori dall'array JSON.`;
+        } else {
+            const finalSubject = subject || "Cultura Generale";
+            prompt = `Genera 10 domande a risposta multipla di alto livello sull'argomento: "${finalSubject}".
+Restituisci SOLO un array JSON valido, senza testo aggiuntivo, senza markdown, senza spiegazioni.
+Il formato ESATTO richiesto è: [{"question": "domanda?", "options": ["A", "B", "C", "D"], "answer": 0}]
+dove "answer" è l'indice (0-3) dell'opzione corretta.
+Copri diversi aspetti dell'argomento. Non aggiungere NULLA fuori dall'array JSON.`;
+        }
+
+        const result = await ai.generateContent(prompt);
         res.json({ quiz: safelyParseJSON(await getAIText(result)) });
     } catch (e) { res.status(500).json({ error: e.message }); }
 });

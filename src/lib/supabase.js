@@ -16,13 +16,11 @@ export const supabase = createClient(SUPABASE_URL, SUPABASE_KEY, {
     global: {
         fetch: async (url, options) => {
             const urlStr = url.toString()
-
-            // Route REST and AUTH API calls through Vercel proxy to bypass Cloudflare 520
+            // Route REST API calls through Vercel proxy to bypass Cloudflare 520
             // ONLY IN PRODUCTION. Local dev doesn't need it and retrying causes massive slowdowns.
-            if (!import.meta.env.DEV && (urlStr.includes('/rest/v1/') || urlStr.includes('/auth/v1/'))) {
-                let path = ''
-                if (urlStr.includes('/rest/v1/')) path = `/rest/v1/${urlStr.split('/rest/v1/')[1]}`
-                if (urlStr.includes('/auth/v1/')) path = `/auth/v1/${urlStr.split('/auth/v1/')[1]}`
+            // DO NOT PROXY Auth calls, as they slow down the initial app load due to cold starts.
+            if (!import.meta.env.DEV && urlStr.includes('/rest/v1/')) {
+                let path = `/rest/v1/${urlStr.split('/rest/v1/')[1]}`
 
                 const rawHeaders = {}
                 if (options.headers) {

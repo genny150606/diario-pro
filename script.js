@@ -1086,6 +1086,14 @@ const AppManager = {
         appData.pomodoroSessions = PomodoroManager.data;
         appData.stats.totalHours = DiaryManager.getTotalHours() + PomodoroManager.getTotalHours();
         appData.stats.currentLevel = GamificationManager.getCurrentLevel();
+
+        // Dynamically append new-features.js data to prevent overwrite race conditions
+        if (typeof NotesManager !== 'undefined') appData.notes = NotesManager.data;
+        if (typeof FlashcardManager !== 'undefined') appData.flashcards = FlashcardManager.data;
+        if (typeof GoalsManager !== 'undefined') appData.goals = GoalsManager.data;
+        if (typeof ResourcesManager !== 'undefined') appData.resources = ResourcesManager.data;
+        if (typeof WellnessManager !== 'undefined') appData.wellness = WellnessManager.data;
+
         StorageManager.save(appData);
     },
 

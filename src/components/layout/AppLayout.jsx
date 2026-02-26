@@ -48,15 +48,19 @@ export default function AppLayout() {
     })
 
     const handleSignOut = async () => {
+        console.log('[LAYOUT] handleSignOut triggered')
         // Close menus immediately for better UX
         setMenuOpen(false)
         setSidebarOpen(false)
 
         try {
+            console.log('[LAYOUT] Calling signOut()...')
             await signOut()
+            console.log('[LAYOUT] signOut() complete')
         } catch (err) {
-            console.error('Sign out error:', err)
+            console.error('[LAYOUT] Sign out error:', err)
         } finally {
+            console.log('[LAYOUT] Navigating to /')
             // Always redirect to landing page
             navigate('/')
         }
@@ -93,7 +97,7 @@ export default function AppLayout() {
                     <Menu size={20} />
                 </button>
 
-                <Link to="/app" className="logo">
+                <Link to="/" className="logo">
                     <img src="/favicon.png" alt="Logo" className="logo-img" />
                     <span>StudyJournal</span>
                 </Link>

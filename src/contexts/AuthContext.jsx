@@ -91,15 +91,24 @@ export function AuthProvider({ children }) {
     }
 
     const signOut = async () => {
+        console.log('[AUTH] Starting signOut process...')
+
+        // Clear local state IMMEDIATELY for best UX
+        setUser(null)
+        const storageKey = 'sb-' + SUPABASE_URL.split('//')[1].split('.')[0] + '-auth-token'
+        localStorage.removeItem(storageKey)
+        console.log('[AUTH] Local state cleared')
+
         try {
-            await supabase.auth.signOut()
+            // Attempt to tell Supabase we're signing out, but don't let it hang the UI
+            // We use a Promise.race to timeout after 2 seconds
+            await Promise.race([
+                supabase.auth.signOut(),
+                new Promise((_, reject) => setTimeout(() => reject(new Error('Sign out network timeout')), 2000))
+            ])
+            console.log('[AUTH] Supabase signOut successful')
         } catch (error) {
-            console.error('[AUTH] Sign out error (network):', error)
-        } finally {
-            // Always clear local state regardless of server response
-            setUser(null)
-            // Force clear storage just in case
-            localStorage.removeItem('sb-' + SUPABASE_URL.split('//')[1].split('.')[0] + '-auth-token')
+            console.warn('[AUTH] Sign out network call failed or timed out:', error.message)
         }
     }
 

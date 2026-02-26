@@ -169,8 +169,6 @@ export default function Landing() {
         const sections = document.querySelectorAll('section, footer');
 
         const triggerScroll = (direction, e) => {
-            if (e && e.cancelable) e.preventDefault();
-
             let currentIdx = 0;
             const scrollPos = window.scrollY + (window.innerHeight / 3);
             sections.forEach((sec, idx) => {
@@ -184,6 +182,8 @@ export default function Landing() {
             if ((currentIdx === 0 && direction === 1) || (currentIdx === 1 && direction === -1)) {
                 return;
             }
+
+            if (e && e.cancelable) e.preventDefault();
 
             if (nextIdx !== currentIdx) {
                 isLock = true;

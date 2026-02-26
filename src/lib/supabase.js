@@ -86,8 +86,17 @@ const createSupabaseClient = () => {
                     }
                 }
 
-                // Universal fallback
-                return window.fetch(url, options)
+                // Universal fallback with strict timeout to prevent infinite hangs
+                const fallbackCtrl = new AbortController()
+                const fallbackTimeoutId = setTimeout(() => fallbackCtrl.abort(), 4000)
+                try {
+                    const fallbackRes = await window.fetch(url, { ...options, signal: fallbackCtrl.signal })
+                    clearTimeout(fallbackTimeoutId)
+                    return fallbackRes
+                } catch (fallbackErr) {
+                    clearTimeout(fallbackTimeoutId)
+                    throw fallbackErr
+                }
             }
         }
     })

@@ -91,8 +91,16 @@ export function AuthProvider({ children }) {
     }
 
     const signOut = async () => {
-        const { error } = await supabase.auth.signOut()
-        if (error) throw error
+        try {
+            await supabase.auth.signOut()
+        } catch (error) {
+            console.error('[AUTH] Sign out error (network):', error)
+        } finally {
+            // Always clear local state regardless of server response
+            setUser(null)
+            // Force clear storage just in case
+            localStorage.removeItem('sb-' + SUPABASE_URL.split('//')[1].split('.')[0] + '-auth-token')
+        }
     }
 
     const updatePassword = async (newPassword) => {

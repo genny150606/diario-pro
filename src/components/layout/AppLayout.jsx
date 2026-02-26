@@ -48,11 +48,17 @@ export default function AppLayout() {
     })
 
     const handleSignOut = async () => {
+        // Close menus immediately for better UX
+        setMenuOpen(false)
+        setSidebarOpen(false)
+
         try {
             await signOut()
-            navigate('/')
         } catch (err) {
             console.error('Sign out error:', err)
+        } finally {
+            // Always redirect to landing page
+            navigate('/')
         }
     }
 

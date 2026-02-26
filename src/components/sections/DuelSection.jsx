@@ -195,8 +195,9 @@ export default function DuelSection() {
             } catch (e) { }
 
             if (!response.ok) {
-                let errorMsg = responseData.error || 'Errore generazione quiz AI.'
-                if (errorMsg.includes('429')) errorMsg = 'Limite richieste superato (Quota API Gemini Esaurita). Riprova più tardi.'
+                let errorMsg = responseData.error || responseText || 'Errore generazione quiz AI.'
+                if (String(errorMsg).includes('429')) errorMsg = 'Limite richieste superato (Quota API Gemini Esaurita). Riprova più tardi.'
+                else errorMsg = `[Dettaglio Errore Server]: ${String(errorMsg)}`
                 throw new Error(errorMsg)
             }
 

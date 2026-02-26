@@ -164,10 +164,64 @@ export default function Landing() {
 
         document.querySelectorAll('section[data-nav-color]').forEach(el => navObserver.observe(el));
 
+        // --- ULTRA ASSISTED SCROLL (HIJACKER) ---
+        let isLock = false;
+        const sections = document.querySelectorAll('section, footer');
+
+        const triggerScroll = (direction, e) => {
+            if (e && e.cancelable) e.preventDefault();
+
+            let currentIdx = 0;
+            const scrollPos = window.scrollY + (window.innerHeight / 3);
+            sections.forEach((sec, idx) => {
+                if (scrollPos >= sec.offsetTop) currentIdx = idx;
+            });
+
+            const nextIdx = Math.max(0, Math.min(sections.length - 1, currentIdx + direction));
+
+            if (nextIdx !== currentIdx) {
+                isLock = true;
+                sections[nextIdx].scrollIntoView({ behavior: 'smooth' });
+                setTimeout(() => { isLock = false; }, 1000);
+            }
+        };
+
+        const handleWheel = (e) => {
+            if (isLock) { e.preventDefault(); return; }
+            if (Math.abs(e.deltaY) < 30) return;
+            triggerScroll(e.deltaY > 0 ? 1 : -1, e);
+        };
+
+        const handleKey = (e) => {
+            if (isLock) return;
+            if (e.key === 'ArrowDown') triggerScroll(1, e);
+            if (e.key === 'ArrowUp') triggerScroll(-1, e);
+        };
+
+        let touchStartY = 0;
+        const handleTouchStart = (e) => { touchStartY = e.touches[0].clientY; };
+        const handleTouchEnd = (e) => {
+            if (isLock) return;
+            const touchEndY = e.changedTouches[0].clientY;
+            const diff = touchStartY - touchEndY;
+            // High sensitivity for "ultra-assisted" feel
+            if (Math.abs(diff) > 40) triggerScroll(diff > 0 ? 1 : -1, e);
+        };
+
+        window.addEventListener('wheel', handleWheel, { passive: false });
+        window.addEventListener('keydown', handleKey);
+        window.addEventListener('touchstart', handleTouchStart, { passive: true });
+        window.addEventListener('touchend', handleTouchEnd, { passive: false });
+
         return () => {
             window.removeEventListener('scroll', handleScroll)
             document.removeEventListener('mousemove', handleMouseMove)
+            window.removeEventListener('wheel', handleWheel)
+            window.removeEventListener('keydown', handleKey)
+            window.removeEventListener('touchstart', handleTouchStart)
+            window.removeEventListener('touchend', handleTouchEnd)
             observer.disconnect()
+            navObserver.disconnect()
 
             // Cleanup injected styles
             const injectedStyle = document.getElementById('landing-dynamic-styles')

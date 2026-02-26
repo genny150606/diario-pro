@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { useAuth } from '../../hooks/useAuth'
 import { useData } from '../../hooks/useData'
 import { supabase } from '../../lib/supabase'
@@ -24,6 +24,14 @@ export default function DuelSection() {
     const [pdfText, setPdfText] = useState('')
     const [pdfName, setPdfName] = useState('')
 
+    // Multiplayer State
+    const [roomCode, setRoomCode] = useState('')
+    const [isHost, setIsHost] = useState(false)
+    const [currentRoom, setCurrentRoom] = useState(null)
+    const [players, setPlayers] = useState([])
+    const [joinCodeInput, setJoinCodeInput] = useState('')
+    const [playerName, setPlayerName] = useState('')
+
     const [questions, setQuestions] = useState([])
     const [currentIndex, setCurrentIndex] = useState(0)
     const [score, setScore] = useState(0)
@@ -33,30 +41,88 @@ export default function DuelSection() {
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState('')
     const timerRef = useRef(null)
+    const pollIntervalRef = useRef(null)
 
     const apiUrl = window.location.protocol === 'file:' ? 'https://diario-pro.vercel.app' : ''
 
-    // Generate questions via AI
-    const generateQuestions = async (topic) => {
-        const response = await fetch(`${apiUrl}/api/chat`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                message: `Genera esattamente 5 domande quiz a risposta multipla su "${topic}". 
-Formato JSON array (senza markdown): 
-[{"question":"...", "options":["A","B","C","D"], "correct":0}]
-dove "correct" è l'indice (0-3) della risposta corretta. Solo JSON, nient'altro.`,
-                history: [],
-                context: 'Quiz Generator'
-            })
-        })
-        if (!response.ok) throw new Error('Errore generazione domande')
-        const data = await response.json()
-        // Parse from response text
-        const text = data.response || data.text || ''
-        const jsonMatch = text.match(/\[[\s\S]*\]/)
-        if (!jsonMatch) throw new Error('Formato risposta invalido')
-        return JSON.parse(jsonMatch[0])
+    // Initialize player name from auth
+    useEffect(() => {
+        if (user) {
+            const name = user.user_metadata?.username || user.email?.split('@')[0] || 'Guerriero'
+            setPlayerName(name)
+        }
+    }, [user])
+
+    // Cleanup polling on unmount
+    useEffect(() => {
+        return () => {
+            if (pollIntervalRef.current) clearInterval(pollIntervalRef.current)
+            if (timerRef.current) clearInterval(timerRef.current)
+        }
+    }, [])
+
+    // Polling logic for room status
+    useEffect(() => {
+        if (state === DUEL_STATES.WAITING && currentRoom?.id) {
+            pollIntervalRef.current = setInterval(pollRoomStatus, 2000)
+        } else if (state === DUEL_STATES.PLAYING && currentRoom?.id) {
+            pollIntervalRef.current = setInterval(pollPlayersScore, 2000)
+        } else {
+            if (pollIntervalRef.current) {
+                clearInterval(pollIntervalRef.current)
+                pollIntervalRef.current = null
+            }
+        }
+
+        return () => {
+            if (pollIntervalRef.current) clearInterval(pollIntervalRef.current)
+        }
+    }, [state, currentRoom])
+
+    const pollRoomStatus = async () => {
+        if (!currentRoom?.id) return
+
+        try {
+            const { data: room, error: roomErr } = await supabase
+                .from('quiz_rooms')
+                .select('*')
+                .eq('id', currentRoom.id)
+                .single()
+
+            if (roomErr) throw roomErr
+
+            const { data: playersList, error: pErr } = await supabase
+                .from('quiz_players')
+                .select('*')
+                .eq('room_id', currentRoom.id)
+                .order('created_at', { ascending: true })
+
+            if (pErr) throw pErr
+
+            setPlayers(playersList || [])
+            setCurrentRoom(room)
+
+            // Auto-start countdown if room is active
+            if (room.status === 'active' && state === DUEL_STATES.WAITING) {
+                startCountdown()
+            }
+        } catch (err) {
+            console.error('[POLL_ERR]', err)
+        }
+    }
+
+    const pollPlayersScore = async () => {
+        if (!currentRoom?.id) return
+        try {
+            const { data: playersList } = await supabase
+                .from('quiz_players')
+                .select('username, score, current_question_index')
+                .eq('room_id', currentRoom.id)
+
+            if (playersList) setPlayers(playersList)
+        } catch (err) {
+            console.error('[SCORE_POLL_ERR]', err)
+        }
     }
 
     // --- PDF parsing ---
@@ -78,7 +144,6 @@ dove "correct" è l'indice (0-3) della risposta corretta. Solo JSON, nient'altro
         const file = e.target.files[0]
         if (!file) return
         setPdfName(file.name)
-
         try {
             if (file.type === 'application/pdf') {
                 await loadPdfJs()
@@ -86,7 +151,7 @@ dove "correct" è l'indice (0-3) della risposta corretta. Solo JSON, nient'altro
                 const pdf = await window.pdfjsLib.getDocument(arrayBuffer).promise
                 let fullText = ''
                 for (let i = 1; i <= pdf.numPages; i++) {
-                    if (fullText.length > 15000) break // limit text length
+                    if (fullText.length > 15000) break
                     const page = await pdf.getPage(i)
                     const textContent = await page.getTextContent()
                     fullText += textContent.items.map(item => item.str).join(' ') + '\n'
@@ -97,84 +162,114 @@ dove "correct" è l'indice (0-3) della risposta corretta. Solo JSON, nient'altro
                 setPdfText(text.substring(0, 15000))
             }
         } catch (err) {
-            console.error('File parsing error:', err)
-            setError('Errore nella lettura del file. Assicurati che sia un PDF o un file di testo valido.')
+            setError('Errore nella lettura del file.')
         }
     }
 
-    // Create a solo quiz
-    const handleCreateQuiz = async () => {
+    // CREATE MATCH
+    const handleCreateMatch = async () => {
         setLoading(true)
         setError('')
         try {
             let body = { subject: 'Cultura Generale', context: '', amount: 5 }
-
-            if (sourceType === 'subject') {
-                body.subject = subject
-            } else if (sourceType === 'notes') {
-                if (!selectedNoteId) throw new Error('Seleziona un appunto prima di iniziare.')
+            if (sourceType === 'subject') body.subject = subject
+            else if (sourceType === 'notes') {
                 const note = appData?.notes?.find(n => n.id.toString() === selectedNoteId.toString())
-                if (!note) throw new Error('Appunto non trovato. Ricarica la pagina.')
-                body.subject = `Note: ${note.title}`
-                body.context = note.content
+                if (!note) throw new Error('Seleziona un appunto.')
+                body.subject = `Note: ${note.title}`; body.context = note.content
             } else if (sourceType === 'pdf') {
-                if (!pdfText.trim()) throw new Error('Carica un file o incolla del testo.')
-                body.subject = `Document: ${pdfName || 'Manuale'}`
-                body.context = pdfText
+                if (!pdfText.trim()) throw new Error('Carica un file.')
+                body.subject = `Document: ${pdfName || 'Manuale'}`; body.context = pdfText
             }
 
-            console.log(`[QUIZ] Creating quiz via /api/generate-duel-quiz for ${sourceType}...`)
             const response = await fetch(`${apiUrl}/api/generate-duel-quiz`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(body)
             })
+            if (!response.ok) throw new Error('Errore generazione quiz AI.')
+            const { quiz } = await response.json()
+            if (!quiz || quiz.length === 0) throw new Error("L'AI non ha generato domande.")
 
-            if (!response.ok) {
-                const errData = await response.json().catch(() => ({}))
-                throw new Error(errData.error || 'Errore durante la generazione del quiz.')
-            }
+            const code = Math.random().toString(36).substring(2, 6).toUpperCase()
+            const { data: room, error: rErr } = await supabase
+                .from('quiz_rooms')
+                .insert([{ code, subject: body.subject, ai_data: quiz, status: 'waiting' }])
+                .select().single()
+            if (rErr) throw rErr
 
-            const data = await response.json()
-            const qs = data.quiz
+            // Add host to players
+            await supabase.from('quiz_players').insert([{ room_id: room.id, username: playerName, score: 0, is_ready: true }])
 
-            if (!Array.isArray(qs) || qs.length === 0) {
-                throw new Error('L\'AI non ha restituito domande valide. Riprova tra poco.')
-            }
-
-            // Normalizzazione frontend e validazione extra
-            const validQs = qs.map(q => ({
-                question: q.question,
-                options: q.options,
-                correct: typeof q.correct === 'number' ? q.correct : (typeof q.answer === 'number' ? q.answer : 0)
-            })).filter(q => q.question && Array.isArray(q.options) && q.options.length >= 2)
-
-            if (validQs.length === 0) throw new Error('Il formato delle domande generate non è compatibile.')
-
-            setQuestions(validQs)
-            setCurrentIndex(0)
-            setScore(0)
-            setStreak(0)
-            setState(DUEL_STATES.COUNTDOWN)
-
-            let count = 3
-            const countdownInterval = setInterval(() => {
-                count--
-                if (count <= 0) {
-                    clearInterval(countdownInterval)
-                    setState(DUEL_STATES.PLAYING)
-                    startTimer()
-                }
-            }, 1000)
+            setQuestions(quiz)
+            setRoomCode(code)
+            setCurrentRoom(room)
+            setIsHost(true)
+            setState(DUEL_STATES.WAITING)
+            setPlayers([{ username: playerName, is_ready: true, score: 0 }])
         } catch (err) {
-            console.error('[QUIZ_ERR]', err)
-            setError(`❌ ${err.message}`)
+            setError(err.message)
         } finally {
             setLoading(false)
         }
     }
 
-    // Timer per domanda
+    // JOIN MATCH
+    const handleJoinMatch = async () => {
+        if (!joinCodeInput) return setError('Inserisci un codice.')
+        setLoading(true)
+        setError('')
+        try {
+            const { data: room, error: rErr } = await supabase
+                .from('quiz_rooms')
+                .select('*')
+                .eq('code', joinCodeInput.toUpperCase().trim())
+                .maybeSingle()
+            if (rErr) throw rErr
+            if (!room) throw new Error('Codice non trovato.')
+            if (room.status !== 'waiting') throw new Error('Partita già iniziata o terminata.')
+
+            // Join as player
+            const { error: pErr } = await supabase
+                .from('quiz_players')
+                .insert([{ room_id: room.id, username: playerName, score: 0, is_ready: true }])
+            if (pErr) throw pErr
+
+            setQuestions(room.ai_data || [])
+            setRoomCode(room.code)
+            setCurrentRoom(room)
+            setIsHost(false)
+            setState(DUEL_STATES.WAITING)
+            pollRoomStatus() // Quick initial poll
+        } catch (err) {
+            setError(err.message)
+        } finally {
+            setLoading(false)
+        }
+    }
+
+    const handleLaunchDuel = async () => {
+        if (!isHost || players.length < 2) return
+        try {
+            await supabase.from('quiz_rooms').update({ status: 'active' }).eq('id', currentRoom.id)
+        } catch (err) {
+            setError('Errore nell\'avvio della sfida.')
+        }
+    }
+
+    const startCountdown = () => {
+        setState(DUEL_STATES.COUNTDOWN)
+        let count = 3
+        const interval = setInterval(() => {
+            count--
+            if (count <= 0) {
+                clearInterval(interval)
+                setState(DUEL_STATES.PLAYING)
+                startTimer()
+            }
+        }, 1000)
+    }
+
     const startTimer = () => {
         setTimeLeft(15)
         if (timerRef.current) clearInterval(timerRef.current)
@@ -190,17 +285,28 @@ dove "correct" è l'indice (0-3) della risposta corretta. Solo JSON, nient'altro
         }, 1000)
     }
 
-    const handleAnswer = (isCorrect, index) => {
+    const handleAnswer = async (isCorrect, index) => {
         clearInterval(timerRef.current)
         setSelectedAnswer(index)
 
+        let newScore = score
         if (isCorrect) {
             const bonus = Math.max(1, Math.floor(timeLeft / 3))
             const streakBonus = streak >= 3 ? 2 : 1
-            setScore(prev => prev + (100 + bonus * 10) * streakBonus)
+            newScore += (100 + bonus * 10) * streakBonus
+            setScore(newScore)
             setStreak(prev => prev + 1)
         } else {
             setStreak(0)
+        }
+
+        // Sync score to DB
+        if (currentRoom?.id) {
+            supabase.from('quiz_players')
+                .update({ score: newScore, current_question_index: currentIndex + 1 })
+                .eq('room_id', currentRoom.id)
+                .eq('username', playerName)
+                .then(() => { })
         }
 
         setTimeout(() => {
@@ -215,155 +321,166 @@ dove "correct" è l'indice (0-3) della risposta corretta. Solo JSON, nient'altro
     }
 
     const resetQuiz = () => {
-        clearInterval(timerRef.current)
+        if (pollIntervalRef.current) clearInterval(pollIntervalRef.current)
+        if (timerRef.current) clearInterval(timerRef.current)
         setState(DUEL_STATES.LOBBY)
-        setQuestions([])
-        setCurrentIndex(0)
-        setScore(0)
-        setStreak(0)
-        setError('')
+        setQuestions([]); setCurrentIndex(0); setScore(0); setStreak(0); setError('')
+        setRoomCode(''); setCurrentRoom(null); setPlayers([])
     }
 
     const currentQ = questions[currentIndex]
     const timerPercent = (timeLeft / 15) * 100
+    const opponent = players.find(p => p.username !== playerName)
 
     return (
-        <section className="section active">
-            {/* LOBBY */}
+        <section className="section active" style={{ maxWidth: '800px', margin: '0 auto' }}>
             {state === DUEL_STATES.LOBBY && (
                 <>
                     <div className="hero">
                         <h1><span className="gradient-text">Duello AI</span> ⚔️</h1>
-                        <p>Sfida te stesso con quiz generati dall'intelligenza artificiale</p>
+                        <p>Sfida un tuo amico in tempo reale con quiz generati dall'intelligenza artificiale</p>
                     </div>
 
-                    {error && <div className="card" style={{ borderLeft: '3px solid #FF453A', marginBottom: '1rem' }}><p style={{ color: '#FF453A' }}>{error}</p></div>}
+                    {error && <div className="card" style={{ borderLeft: '3px solid #FF453A', marginBottom: '1rem' }}><p style={{ color: '#FF453A', margin: 0 }}>{error}</p></div>}
 
-                    <div className="duel-card">
-                        <h3>🎯 Quiz Rapido</h3>
-                        <p style={{ color: 'var(--color-text-secondary)', marginBottom: '1.5rem' }}>
-                            Seleziona da cosa vuoi generare le domande:
-                        </p>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'minmax(300px, 1.2fr) minmax(200px, 0.8fr)', gap: '1.5rem' }}>
+                        <div className="duel-card">
+                            <h3>🎯 Crea una Sfida</h3>
+                            <p style={{ color: 'var(--color-text-secondary)', marginBottom: '1rem', fontSize: '0.9rem' }}>
+                                Scegli l'argomento e invita uno sfidante col codice.
+                            </p>
 
-                        <div className="tabs" style={{ marginBottom: '1.5rem' }}>
-                            <button className={`tab-btn ${sourceType === 'subject' ? 'active' : ''}`} onClick={() => setSourceType('subject')}>🌍 Materia</button>
-                            <button className={`tab-btn ${sourceType === 'notes' ? 'active' : ''}`} onClick={() => setSourceType('notes')}>📝 Note</button>
-                            <button className={`tab-btn ${sourceType === 'pdf' ? 'active' : ''}`} onClick={() => setSourceType('pdf')}>📄 PDF</button>
+                            <div className="tabs" style={{ marginBottom: '1.5rem' }}>
+                                <button className={`tab-btn ${sourceType === 'subject' ? 'active' : ''}`} onClick={() => setSourceType('subject')}>🌍 Materia</button>
+                                <button className={`tab-btn ${sourceType === 'notes' ? 'active' : ''}`} onClick={() => setSourceType('notes')}>📝 Note</button>
+                                <button className={`tab-btn ${sourceType === 'pdf' ? 'active' : ''}`} onClick={() => setSourceType('pdf')}>📄 PDF</button>
+                            </div>
+
+                            {sourceType === 'subject' && (
+                                <select value={subject} onChange={e => setSubject(e.target.value)} style={{ width: '100%', marginBottom: '1rem' }}>
+                                    {['Matematica', 'Italiano', 'Storia', 'Scienze', 'Inglese', 'Filosofia', 'Fisica', 'Cultura Generale'].map(s => <option key={s} value={s}>{s}</option>)}
+                                </select>
+                            )}
+
+                            {sourceType === 'notes' && (
+                                <select value={selectedNoteId} onChange={e => setSelectedNoteId(e.target.value)} style={{ width: '100%', marginBottom: '1rem' }}>
+                                    <option value="">-- Seleziona Appunti --</option>
+                                    {appData?.notes?.map(n => <option key={n.id} value={n.id}>{n.title}</option>)}
+                                </select>
+                            )}
+
+                            {sourceType === 'pdf' && (
+                                <div style={{ marginBottom: '1rem' }}>
+                                    <label className="btn-secondary" style={{ width: '100%', marginBottom: '0.5rem', textAlign: 'center' }}>
+                                        <input type="file" accept=".pdf,.txt" style={{ display: 'none' }} onChange={handleFileUpload} />
+                                        📎 {pdfName || 'Carica PDF/TXT'}
+                                    </label>
+                                    <textarea className="form-input" placeholder="O incolla testo qui..." style={{ height: '80px' }} value={pdfText} onChange={e => setPdfText(e.target.value)} />
+                                </div>
+                            )}
+
+                            <button className="btn-primary duel-start-btn" onClick={handleCreateMatch} disabled={loading}>
+                                {loading ? '⏳ Generazione...' : '🚀 CREA STANZA'}
+                            </button>
                         </div>
 
-                        {sourceType === 'subject' && (
-                            <div style={{ marginBottom: '1.5rem' }}>
-                                <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--color-text-secondary)', fontSize: '0.9rem' }}>Scegli Argomento Generale</label>
-                                <select value={subject} onChange={e => setSubject(e.target.value)} style={{ width: '100%' }}>
-                                    <option value="Matematica">Matematica</option>
-                                    <option value="Italiano">Italiano</option>
-                                    <option value="Storia">Storia</option>
-                                    <option value="Scienze">Scienze</option>
-                                    <option value="Inglese">Inglese</option>
-                                    <option value="Filosofia">Filosofia</option>
-                                    <option value="Geografia">Geografia</option>
-                                    <option value="Fisica">Fisica</option>
-                                    <option value="Cultura Generale">Cultura Generale</option>
-                                </select>
-                            </div>
-                        )}
-
-                        {sourceType === 'notes' && (
-                            <div style={{ marginBottom: '1.5rem' }}>
-                                <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--color-text-secondary)', fontSize: '0.9rem' }}>Seleziona un tuo Appunto</label>
-                                <select value={selectedNoteId} onChange={e => setSelectedNoteId(e.target.value)} style={{ width: '100%' }}>
-                                    <option value="">-- Seleziona Appunti --</option>
-                                    {appData?.notes && appData.notes.length > 0 ? (
-                                        appData.notes.map(n => <option key={n.id} value={n.id}>{n.title}</option>)
-                                    ) : (
-                                        <option value="" disabled>Nessuna nota trovata. Creane una prima!</option>
-                                    )}
-                                </select>
-                            </div>
-                        )}
-
-                        {sourceType === 'pdf' && (
-                            <div style={{ marginBottom: '1.5rem' }}>
-                                <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--color-text-secondary)', fontSize: '0.9rem' }}>Carica Documento o Incolla Testo</label>
-                                <div style={{ display: 'flex', gap: '8px', alignItems: 'center', marginBottom: '1rem' }}>
-                                    <label className="btn-secondary" style={{ cursor: 'pointer', flex: 1, textAlign: 'center' }}>
-                                        <input type="file" accept=".pdf,.txt" style={{ display: 'none' }} onChange={handleFileUpload} />
-                                        📎 Carica File (PDF/TXT)
-                                    </label>
-                                    <span style={{ fontSize: '0.85rem', color: 'var(--color-text-secondary)' }}>
-                                        {pdfName || 'Nessun file'}
-                                    </span>
-                                </div>
-                                <textarea
-                                    className="form-input"
-                                    placeholder="Incolla qui il testo su cui basare il quiz..."
-                                    style={{ height: '100px', resize: 'vertical' }}
-                                    value={pdfText}
-                                    onChange={e => setPdfText(e.target.value)}
-                                ></textarea>
-                            </div>
-                        )}
-
-                        <button
-                            className="btn-primary duel-start-btn"
-                            onClick={handleCreateQuiz}
-                            disabled={loading || (sourceType === 'notes' && !selectedNoteId) || (sourceType === 'pdf' && !pdfText.trim())}
-                        >
-                            {loading ? '⏳ Generazione Arena...' : '⚔️ Inizia Quiz'}
-                        </button>
-                    </div>
-
-                    <div className="duel-card" style={{ marginTop: '1rem' }}>
-                        <h3>📊 Le tue statistiche duello</h3>
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginTop: '1rem' }}>
-                            <div style={{ textAlign: 'center' }}>
-                                <div style={{ fontSize: '2rem', fontWeight: 800 }}>0</div>
-                                <div style={{ fontSize: '0.8rem', color: 'var(--color-text-tertiary)' }}>Partite</div>
-                            </div>
-                            <div style={{ textAlign: 'center' }}>
-                                <div style={{ fontSize: '2rem', fontWeight: 800, color: '#30D158' }}>0%</div>
-                                <div style={{ fontSize: '0.8rem', color: 'var(--color-text-tertiary)' }}>Precisione</div>
-                            </div>
+                        <div className="duel-card" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+                            <h3>🔑 Entra in Sfida</h3>
+                            <p style={{ fontSize: '0.9rem', color: 'var(--color-text-secondary)', marginBottom: '1rem' }}>Inserisci il codice ricevuto.</p>
+                            <input
+                                type="text"
+                                placeholder="Codice"
+                                maxLength={4}
+                                value={joinCodeInput}
+                                onChange={e => setJoinCodeInput(e.target.value.toUpperCase())}
+                                style={{ textAlign: 'center', fontSize: '1.5rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '4px', marginBottom: '1rem' }}
+                            />
+                            <button className="btn-secondary duel-start-btn" onClick={handleJoinMatch} disabled={loading}>
+                                {loading ? '⏳ Entrata...' : '⚔️ UNISCITI'}
+                            </button>
                         </div>
                     </div>
                 </>
             )}
 
-            {/* COUNTDOWN */}
-            {state === DUEL_STATES.COUNTDOWN && (
-                <div className="duel-countdown-screen">
-                    <div className="countdown-number">3</div>
-                    <p>Preparati!</p>
+            {state === DUEL_STATES.WAITING && (
+                <div className="duel-card" style={{ textAlign: 'center', padding: '3rem' }}>
+                    <div style={{ marginBottom: '2rem' }}>
+                        <h1 style={{ fontSize: '3rem', margin: '0.5rem 0', letterSpacing: '8px', color: 'var(--color-accent)' }}>{roomCode}</h1>
+                        <p style={{ color: 'var(--color-text-tertiary)' }}>Condividi questo codice con lo sfidante</p>
+                    </div>
+
+                    <div style={{ display: 'flex', gap: '2rem', justifyContent: 'center', marginBottom: '3rem' }}>
+                        <div className="player-lobby-card">
+                            <div className="avatar">👤</div>
+                            <div className="name">{playerName} (Tu)</div>
+                            <div className="status ready">Pronto!</div>
+                        </div>
+                        <div className="vs-circle">VS</div>
+                        <div className="player-lobby-card">
+                            {opponent ? (
+                                <>
+                                    <div className="avatar">👤</div>
+                                    <div className="name">{opponent.username}</div>
+                                    <div className="status ready">Pronto!</div>
+                                </>
+                            ) : (
+                                <>
+                                    <div className="avatar pulse">?</div>
+                                    <div className="name" style={{ opacity: 0.5 }}>In attesa...</div>
+                                    <div className="status waiting">---</div>
+                                </>
+                            )}
+                        </div>
+                    </div>
+
+                    {isHost ? (
+                        <button className="btn-primary" style={{ padding: '1rem 3rem', fontSize: '1.2rem' }} disabled={players.length < 2} onClick={handleLaunchDuel}>
+                            ⚡ INIZIA BATTAGLIA ⚡
+                        </button>
+                    ) : (
+                        <p style={{ color: 'var(--color-text-secondary)' }}>In attesa che l'Host avvii la sfida...</p>
+                    )}
+
+                    <button className="btn-minimal" onClick={resetQuiz} style={{ marginTop: '2rem', display: 'block', margin: '2rem auto' }}>Esci dalla stanza</button>
                 </div>
             )}
 
-            {/* PLAYING */}
+            {state === DUEL_STATES.COUNTDOWN && (
+                <div className="duel-countdown-screen">
+                    <div className="countdown-number">3</div>
+                    <p style={{ fontSize: '1.5rem', fontWeight: 600 }}>PREPARATI ALLO SCONTRO!</p>
+                </div>
+            )}
+
             {state === DUEL_STATES.PLAYING && currentQ && (
                 <div className="duel-game-screen">
-                    {/* Header */}
-                    <div className="duel-game-header">
-                        <div className="duel-progress">
-                            Domanda {currentIndex + 1}/{questions.length}
+                    <div className="multi-scoreboard">
+                        <div className="score-item me">
+                            <div className="name">{playerName}</div>
+                            <div className="bar"><div className="fill" style={{ width: `${(currentIndex / questions.length) * 100}%` }} /></div>
+                            <div className="pts">{score} pts</div>
                         </div>
-                        <div className="duel-score">{score} pt</div>
-                        {streak >= 2 && <div className="duel-streak">🔥 {streak}x</div>}
+                        <div className="score-item vs">VS</div>
+                        <div className="score-item opp">
+                            <div className="name">{opponent?.username || 'Sfidante'}</div>
+                            <div className="bar"><div className="fill" style={{ width: `${((opponent?.current_question_index || 0) / questions.length) * 100}%` }} /></div>
+                            <div className="pts">{opponent?.score || 0} pts</div>
+                        </div>
                     </div>
 
-                    {/* Timer bar */}
                     <div className="duel-timer-bar">
                         <div className="duel-timer-fill" style={{
                             width: `${timerPercent}%`,
                             background: timerPercent > 50 ? '#30D158' : timerPercent > 25 ? '#FF9F0A' : '#FF453A'
                         }} />
                     </div>
-                    <div style={{ textAlign: 'center', fontSize: '0.85rem', color: 'var(--color-text-tertiary)', marginBottom: '1rem' }}>{timeLeft}s</div>
 
-                    {/* Question */}
                     <div className="duel-question-card">
+                        <span style={{ fontSize: '0.8rem', color: 'var(--color-text-tertiary)', display: 'block', marginBottom: '0.5rem' }}>Domanda {currentIndex + 1} di {questions.length}</span>
                         <h3>{currentQ.question}</h3>
                     </div>
 
-                    {/* Options */}
                     <div className="duel-options">
                         {currentQ.options.map((opt, i) => {
                             let cls = 'duel-option'
@@ -372,12 +489,7 @@ dove "correct" è l'indice (0-3) della risposta corretta. Solo JSON, nient'altro
                                 else if (i === selectedAnswer) cls += ' wrong'
                             }
                             return (
-                                <button
-                                    key={i}
-                                    className={cls}
-                                    onClick={() => handleAnswer(i === currentQ.correct, i)}
-                                    disabled={selectedAnswer !== null}
-                                >
+                                <button key={i} className={cls} onClick={() => handleAnswer(i === currentQ.correct, i)} disabled={selectedAnswer !== null}>
                                     <span className="option-letter">{['A', 'B', 'C', 'D'][i]}</span>
                                     {opt}
                                 </button>
@@ -387,20 +499,27 @@ dove "correct" è l'indice (0-3) della risposta corretta. Solo JSON, nient'altro
                 </div>
             )}
 
-            {/* FINISHED */}
             {state === DUEL_STATES.FINISHED && (
                 <div className="duel-results-screen">
                     <div className="duel-trophy">🏆</div>
-                    <h2>Quiz Completato!</h2>
-                    <div className="duel-final-score">{score}</div>
-                    <p>punti totali</p>
-                    <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', marginTop: '2rem' }}>
-                        <button className="btn-primary" onClick={handleCreateQuiz} disabled={loading}>
-                            🔄 Rigioca
-                        </button>
-                        <button className="btn-secondary" onClick={resetQuiz}>
-                            ↩ Lobby
-                        </button>
+                    <h2>Sfida Conclusa!</h2>
+
+                    <div style={{ display: 'flex', gap: '2rem', justifyContent: 'center', margin: '2rem 0' }}>
+                        <div className={`result-card ${score >= (opponent?.score || 0) ? 'winner' : 'loser'}`}>
+                            <div style={{ fontSize: '0.8rem' }}>IL TUO SCORE</div>
+                            <div className="val">{score}</div>
+                            {score >= (opponent?.score || 0) && <div className="tag">👑 VINCITORE</div>}
+                        </div>
+                        <div className={`result-card ${(opponent?.score || 0) > score ? 'winner' : 'loser'}`}>
+                            <div style={{ fontSize: '0.8rem' }}>AVVERSARIO</div>
+                            <div className="val">{opponent?.score || 0}</div>
+                            {(opponent?.score || 0) > score && <div className="tag">👑 VINCITORE</div>}
+                        </div>
+                    </div>
+
+                    <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center' }}>
+                        <button className="btn-primary" onClick={resetQuiz}>Rigioca 🔄</button>
+                        <button className="btn-secondary" onClick={resetQuiz}>Lobby Principal ↩</button>
                     </div>
                 </div>
             )}

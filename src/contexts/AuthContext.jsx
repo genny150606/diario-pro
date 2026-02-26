@@ -1,4 +1,4 @@
-import { createContext, useState, useEffect } from 'react'
+import { createContext, useState, useEffect, useRef } from 'react'
 import { supabase, SUPABASE_URL } from '../lib/supabase'
 
 export const AuthContext = createContext(null)
@@ -7,7 +7,12 @@ export function AuthProvider({ children }) {
     const [user, setUser] = useState(null)
     const [loading, setLoading] = useState(true)
 
+    const getSessionCalled = useRef(false)
+
     useEffect(() => {
+        if (getSessionCalled.current) return
+        getSessionCalled.current = true
+
         // Get initial session with 5s timeout protection
         const sessionTimeout = setTimeout(() => {
             console.warn('[AUTH] Session fetch timed out (5s), proceeding without auth')

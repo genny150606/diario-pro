@@ -181,7 +181,7 @@ export default function Landing() {
 
             if (nextIdx !== currentIdx) {
                 isLock = true;
-                sections[nextIdx].scrollIntoView({ behavior: 'smooth' });
+                sections[nextIdx].scrollIntoView({ behavior: 'smooth', block: 'center' });
                 setTimeout(() => { isLock = false; }, 1000);
             }
         };

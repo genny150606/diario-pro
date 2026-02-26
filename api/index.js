@@ -48,6 +48,27 @@ async function getAIText(result) {
     catch (e) { return ""; }
 }
 
+async function generateWithFallback(prompt) {
+    const modelsToTry = ["gemini-2.0-flash", "gemini-1.5-flash", "gemini-1.5-flash-8b"];
+    let lastError = null;
+
+    for (const modelName of modelsToTry) {
+        try {
+            const ai = genAI.getGenerativeModel({ model: modelName });
+            const result = await ai.generateContent(prompt);
+            return await getAIText(result);
+        } catch (err) {
+            lastError = err;
+            console.warn(`[GEN_AI] Model ${modelName} failed:`, err.message);
+            if (!String(err.message).includes('429')) {
+                break; // Non-quota error, throw immediately
+            }
+            await new Promise(r => setTimeout(r, 600)); // Exponential-ish backoff
+        }
+    }
+    throw lastError;
+}
+
 function safelyParseJSON(text, defaultValue = []) {
     if (!text) return defaultValue;
     try {
@@ -81,8 +102,7 @@ Il formato ESATTO richiesto è: [{"front": "domanda", "back": "risposta"}, ...]
 Copri i punti chiave dell'argomento. Non aggiungere NULLA fuori dall'array JSON.`;
         }
 
-        const result = await ai.generateContent(prompt);
-        const aiText = await getAIText(result);
+        const aiText = await generateWithFallback(prompt);
         res.json({ flashcards: safelyParseJSON(aiText) });
     } catch (e) { res.status(500).json({ error: e.message }); }
 });
@@ -110,8 +130,7 @@ Formato: ${jsonFormat}
 Dove "correct" è l'indice (0-3) della risposta esatta.`;
         }
 
-        const result = await ai.generateContent(prompt);
-        const aiText = await getAIText(result);
+        const aiText = await generateWithFallback(prompt);
         const rawQuiz = safelyParseJSON(aiText);
 
         // Robust Normalization & Validation

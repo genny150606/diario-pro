@@ -25,29 +25,39 @@ export default function AuthModal({ onClose }) {
 
     const handleLogin = async (e) => {
         e.preventDefault()
+        setLoading(true)
         setError('')
         setSuccess('')
+        console.log('[AUTH] handleLogin: Starting login for', loginEmail)
 
         if (!loginEmail || !loginPassword) {
             setError('❌ Inserisci email e password.')
+            setLoading(false) // Reset loading if validation fails
             return
         }
 
-        setLoading(true)
+        const safetyTimeout = setTimeout(() => {
+            console.warn('[AUTH] handleLogin reached 15s safety timeout - resetting loading')
+            setLoading(false)
+        }, 15000)
+
         try {
             await signIn(loginEmail, loginPassword)
+            console.log('[AUTH] handleLogin: signIn successful')
             setSuccess('✅ Accesso effettuato! Reindirizzamento...')
             setTimeout(() => {
                 onClose()
                 navigate('/app')
             }, 1000)
         } catch (err) {
+            console.error('[AUTH] handleLogin: signIn error:', err)
             let msg = err.message
             if (msg.includes('Invalid login')) msg = '❌ Email o password non corretti.'
             else if (msg.includes('Email not confirmed')) msg = '❌ Conferma la tua email prima di accedere.'
             else msg = '❌ ' + msg
             setError(msg)
         } finally {
+            clearTimeout(safetyTimeout)
             setLoading(false)
         }
     }

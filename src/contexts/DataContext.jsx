@@ -128,6 +128,12 @@ export function DataProvider({ children }) {
             setLoading(true)
             console.log(`[DataContext] Loading data for user ${user.id}...`)
 
+            // Safety timeout to ensure loading screen is ALWAYS removed after 7s
+            const safetyTimeout = setTimeout(() => {
+                console.warn('[DataContext] loadData reached 7s safety timeout - forcing loading: false')
+                setLoading(false)
+            }, 7000)
+
             try {
                 // 1. Load Raw Cloud Data
                 const { data: row, error } = await supabase
@@ -239,6 +245,7 @@ export function DataProvider({ children }) {
                     setData(JSON.parse(JSON.stringify(DEFAULT_DATA)))
                 }
             } finally {
+                clearTimeout(safetyTimeout)
                 setLoading(false)
             }
         }

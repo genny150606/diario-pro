@@ -22,8 +22,11 @@ function ProtectedRoute({ children }) {
     const { user, loading } = useAuth()
 
     if (loading) {
+        console.log('[APP] ProtectedRoute: Auth is loading...')
         return <LoadingScreen />
     }
+
+    console.log('[APP] ProtectedRoute: Auth loaded, user:', user?.id || 'none')
 
     return user ? children : <Navigate to="/" replace />
 }

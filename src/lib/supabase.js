@@ -63,14 +63,19 @@ export const supabase = createClient(SUPABASE_URL, SUPABASE_KEY, {
                 }
 
                 try {
+                    const proxyController = new AbortController()
+                    const proxyTimeoutId = setTimeout(() => proxyController.abort(), 10000)
+
                     const proxyRes = await fetch(PROXY_URL, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(proxyBody)
+                        body: JSON.stringify(proxyBody),
+                        signal: proxyController.signal
                     })
+                    clearTimeout(proxyTimeoutId)
                     if (proxyRes.ok) return proxyRes
                 } catch (proxyErr) {
-                    console.error('[PROXY] Fallback also failed:', proxyErr)
+                    console.error('[PROXY] Fallback also failed or timed out:', proxyErr)
                 }
             }
 

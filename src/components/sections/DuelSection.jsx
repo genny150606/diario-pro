@@ -107,61 +107,56 @@ dove "correct" è l'indice (0-3) della risposta corretta. Solo JSON, nient'altro
         setLoading(true)
         setError('')
         try {
-            let genTopic = ''
-            let genContext = ''
+            let body = { subject: 'Cultura Generale', context: '', amount: 5 }
 
             if (sourceType === 'subject') {
-                genTopic = subject
-                genContext = ''
+                body.subject = subject
             } else if (sourceType === 'notes') {
-                const note = appData.notes.find(n => n.id === selectedNoteId)
-                if (!note) throw new Error('Seleziona un appunto prima di iniziare.')
-                genTopic = `Appunti: ${note.title}`
-                genContext = note.content
+                if (!selectedNoteId) throw new Error('Seleziona un appunto prima di iniziare.')
+                const note = appData?.notes?.find(n => n.id.toString() === selectedNoteId.toString())
+                if (!note) throw new Error('Appunto non trovato. Ricarica la pagina.')
+                body.subject = `Note: ${note.title}`
+                body.context = note.content
             } else if (sourceType === 'pdf') {
-                if (!pdfText.trim()) throw new Error('Carica prima un file PDF/Testo.')
-                genTopic = `Documento: ${pdfName}`
-                genContext = pdfText
+                if (!pdfText.trim()) throw new Error('Carica un file o incolla del testo.')
+                body.subject = `Document: ${pdfName || 'Manuale'}`
+                body.context = pdfText
             }
 
-            // Using the existing generateQuestions but modifying the prompt if context exists
-            const prompt = genContext
-                ? `Genera esattamente 5 domande quiz a risposta multipla basate sul seguente testo/appunto: "${genContext.substring(0, 3000)}".
-Argomento: ${genTopic}.
-Formato JSON array (senza markdown): 
-[{"question":"...", "options":["A","B","C","D"], "correct":0}]
-dove "correct" è l'indice (0-3) della risposta corretta. Solo JSON, nient'altro.`
-                : `Genera esattamente 5 domande quiz a risposta multipla su "${genTopic}". 
-Formato JSON array (senza markdown): 
-[{"question":"...", "options":["A","B","C","D"], "correct":0}]
-dove "correct" è l'indice (0-3) della risposta corretta. Solo JSON, nient'altro.`
-
-            const response = await fetch(`${apiUrl}/api/chat`, {
+            console.log(`[QUIZ] Creating quiz via /api/generate-duel-quiz for ${sourceType}...`)
+            const response = await fetch(`${apiUrl}/api/generate-duel-quiz`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    message: prompt,
-                    history: [],
-                    context: 'Quiz Generator'
-                })
+                body: JSON.stringify(body)
             })
 
-            if (!response.ok) throw new Error('Errore generazione domande')
+            if (!response.ok) {
+                const errData = await response.json().catch(() => ({}))
+                throw new Error(errData.error || 'Errore durante la generazione del quiz.')
+            }
+
             const data = await response.json()
-            const text = data.response || data.text || ''
-            const jsonMatch = text.match(/\[[\s\S]*\]/)
-            if (!jsonMatch) throw new Error('L\'AI non ha generato un formato valido. Riprova.')
+            const qs = data.quiz
 
-            const qs = JSON.parse(jsonMatch[0])
-            if (!qs || qs.length === 0) throw new Error('L\'AI non ha generato domande.')
+            if (!Array.isArray(qs) || qs.length === 0) {
+                throw new Error('L\'AI non ha restituito domande valide. Riprova tra poco.')
+            }
 
-            setQuestions(qs)
+            // Normalizzazione frontend e validazione extra
+            const validQs = qs.map(q => ({
+                question: q.question,
+                options: q.options,
+                correct: typeof q.correct === 'number' ? q.correct : (typeof q.answer === 'number' ? q.answer : 0)
+            })).filter(q => q.question && Array.isArray(q.options) && q.options.length >= 2)
+
+            if (validQs.length === 0) throw new Error('Il formato delle domande generate non è compatibile.')
+
+            setQuestions(validQs)
             setCurrentIndex(0)
             setScore(0)
             setStreak(0)
             setState(DUEL_STATES.COUNTDOWN)
 
-            // 3-2-1 countdown
             let count = 3
             const countdownInterval = setInterval(() => {
                 count--
@@ -172,6 +167,7 @@ dove "correct" è l'indice (0-3) della risposta corretta. Solo JSON, nient'altro
                 }
             }, 1000)
         } catch (err) {
+            console.error('[QUIZ_ERR]', err)
             setError(`❌ ${err.message}`)
         } finally {
             setLoading(false)
@@ -277,7 +273,7 @@ dove "correct" è l'indice (0-3) della risposta corretta. Solo JSON, nient'altro
                                 <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--color-text-secondary)', fontSize: '0.9rem' }}>Seleziona un tuo Appunto</label>
                                 <select value={selectedNoteId} onChange={e => setSelectedNoteId(e.target.value)} style={{ width: '100%' }}>
                                     <option value="">-- Seleziona Appunti --</option>
-                                    {appData.notes && appData.notes.length > 0 ? (
+                                    {appData?.notes && appData.notes.length > 0 ? (
                                         appData.notes.map(n => <option key={n.id} value={n.id}>{n.title}</option>)
                                     ) : (
                                         <option value="" disabled>Nessuna nota trovata. Creane una prima!</option>

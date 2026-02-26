@@ -90,29 +90,46 @@ Copri i punti chiave dell'argomento. Non aggiungere NULLA fuori dall'array JSON.
 app.post("/api/generate-duel-quiz", async (req, res) => {
     try {
         if (!genAI) throw new Error("GenAI not initialized");
-        const { subject, context } = req.body;
+        const { subject, context, amount = 5 } = req.body;
         const ai = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
 
         let prompt = "";
+        const jsonFormat = `[{"question": "domanda?", "options": ["A", "B", "C", "D"], "correct": 0}]`;
+
         if (context && context.trim().length > 0) {
-            prompt = `Analizza ESCLUSIVAMENTE il seguente testo e genera 10 domande a risposta multipla basate SOLO sul suo contenuto.
-Restituisci SOLO un array JSON valido, senza testo aggiuntivo, senza markdown, senza spiegazioni.
-Il formato ESATTO richiesto è: [{"question": "domanda?", "options": ["A", "B", "C", "D"], "answer": 0}]
-dove "answer" è l'indice (0-3) dell'opzione corretta.
-Testo: ${context.substring(0, 8000)}
-Non aggiungere NULLA fuori dall'array JSON.`;
+            prompt = `Analizza il seguente testo e genera esattamente ${amount} domande a risposta multipla basate sul suo contenuto.
+Restituisci SOLO un array JSON valido, senza markdown, senza testo aggiuntivo.
+Formato: ${jsonFormat}
+Dove "correct" è l'indice (0-3) della risposta esatta.
+Testo: ${context.substring(0, 8000)}`;
         } else {
             const finalSubject = subject || "Cultura Generale";
-            prompt = `Genera 10 domande a risposta multipla di alto livello sull'argomento: "${finalSubject}".
-Restituisci SOLO un array JSON valido, senza testo aggiuntivo, senza markdown, senza spiegazioni.
-Il formato ESATTO richiesto è: [{"question": "domanda?", "options": ["A", "B", "C", "D"], "answer": 0}]
-dove "answer" è l'indice (0-3) dell'opzione corretta.
-Copri diversi aspetti dell'argomento. Non aggiungere NULLA fuori dall'array JSON.`;
+            prompt = `Genera esattamente ${amount} domande a risposta multipla di alto livello su: "${finalSubject}".
+Restituisci SOLO un array JSON valido, senza markdown, senza testo aggiuntivo.
+Formato: ${jsonFormat}
+Dove "correct" è l'indice (0-3) della risposta esatta.`;
         }
 
         const result = await ai.generateContent(prompt);
-        res.json({ quiz: safelyParseJSON(await getAIText(result)) });
-    } catch (e) { res.status(500).json({ error: e.message }); }
+        const aiText = await getAIText(result);
+        const rawQuiz = safelyParseJSON(aiText);
+
+        // Robust Normalization & Validation
+        const sanitizedQuiz = Array.isArray(rawQuiz) ? rawQuiz.map(q => {
+            const correctIndex = typeof q.correct === 'number' ? q.correct : (typeof q.answer === 'number' ? q.answer : 0);
+            return {
+                question: q.question || "Domanda non generata correttamente?",
+                options: Array.isArray(q.options) && q.options.length >= 2 ? q.options : ["Opzione A", "Opzione B", "Opzione C", "Opzione D"],
+                correct: correctIndex,
+                answer: correctIndex // Doppia chiave per compatibilità
+            };
+        }).filter(q => q.question && q.options.length >= 2) : [];
+
+        res.json({ quiz: sanitizedQuiz });
+    } catch (e) {
+        console.error("[QUIZ_GEN] Error:", e);
+        res.status(500).json({ error: e.message, quiz: [] });
+    }
 });
 
 app.post("/api/chat", async (req, res) => {

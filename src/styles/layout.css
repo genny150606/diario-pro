@@ -82,6 +82,12 @@
     gap: 0.8rem;
 }
 
+.header-right {
+    display: flex;
+    align-items: center;
+    gap: 1.2rem;
+}
+
 /* Streak Badge — High End Visuals */
 .streak-badge {
     display: flex;
@@ -237,6 +243,19 @@
     border-radius: 1.5rem;
     transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
     white-space: nowrap;
+}
+
+.sidebar-item span {
+    display: none;
+    opacity: 0;
+    transform: translateX(-10px);
+    transition: all 0.3s ease;
+}
+
+.sidebar:hover .sidebar-item span {
+    display: block;
+    opacity: 1;
+    transform: translateX(0);
 }
 
 .sidebar-item:hover {

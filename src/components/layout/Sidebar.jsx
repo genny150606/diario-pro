@@ -30,7 +30,7 @@ export default function Sidebar({ sections, isOpen, setSidebarOpen, onExit }) {
                 )
             })}
 
-            <div style={{ marginTop: 'auto', paddingTop: '1rem', borderTop: '1px solid rgba(255,255,255,0.05)' }}>
+            <div className="sidebar-bottom-group" style={{ display: 'contents' }}>
                 {bottomSections.map(section => {
                     const IconComponent = section.Icon
                     return (

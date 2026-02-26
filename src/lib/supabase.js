@@ -45,6 +45,7 @@ export const supabase = createClient(SUPABASE_URL, SUPABASE_KEY, {
             const isAuth = urlStr.includes('/auth/v1/')
 
             if (isRest || isAuth) {
+                console.log(`[PROXY] Attempting fallback for ${urlStr.split('/').pop()}...`)
                 let path = isRest
                     ? `/rest/v1/${urlStr.split('/rest/v1/')[1]}`
                     : `/auth/v1/${urlStr.split('/auth/v1/')[1]}`

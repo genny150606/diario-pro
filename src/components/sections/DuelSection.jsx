@@ -31,6 +31,7 @@ export default function DuelSection() {
     const [players, setPlayers] = useState([])
     const [joinCodeInput, setJoinCodeInput] = useState('')
     const [playerName, setPlayerName] = useState('')
+    const [questionAmount, setQuestionAmount] = useState(5)
 
     const [questions, setQuestions] = useState([])
     const [currentIndex, setCurrentIndex] = useState(0)
@@ -101,11 +102,6 @@ export default function DuelSection() {
 
             setPlayers(playersList || [])
             setCurrentRoom(room)
-
-            // Auto-start countdown if room is active
-            if (room.status === 'active' && state === DUEL_STATES.WAITING) {
-                startCountdown()
-            }
         } catch (err) {
             console.error('[POLL_ERR]', err)
         }
@@ -171,7 +167,7 @@ export default function DuelSection() {
         setLoading(true)
         setError('')
         try {
-            let body = { subject: 'Cultura Generale', context: '', amount: 5 }
+            let body = { subject: 'Cultura Generale', context: '', amount: questionAmount }
             if (sourceType === 'subject') body.subject = subject
             else if (sourceType === 'notes') {
                 const note = appData?.notes?.find(n => n.id.toString() === selectedNoteId.toString())
@@ -284,6 +280,13 @@ export default function DuelSection() {
         }, 1000)
     }
 
+    // Auto-start countdown when room becomes active (fixes Guest sync)
+    useEffect(() => {
+        if (state === DUEL_STATES.WAITING && currentRoom?.status === 'active') {
+            startCountdown()
+        }
+    }, [state, currentRoom?.status])
+
     const startTimer = () => {
         setTimeLeft(15)
         if (timerRef.current) clearInterval(timerRef.current)
@@ -346,8 +349,19 @@ export default function DuelSection() {
     const timerPercent = (timeLeft / 15) * 100
     const opponent = players.find(p => p.username !== playerName)
 
+    const isFullscreen = [DUEL_STATES.COUNTDOWN, DUEL_STATES.PLAYING, DUEL_STATES.FINISHED].includes(state)
+
+    const sectionStyle = isFullscreen ? {
+        position: 'fixed',
+        top: 0, left: 0, right: 0, bottom: 0,
+        zIndex: 9999,
+        background: 'var(--color-bg)',
+        overflowY: 'auto',
+        padding: '2rem 1rem'
+    } : { maxWidth: '800px', margin: '0 auto' }
+
     return (
-        <section className="section active" style={{ maxWidth: '800px', margin: '0 auto' }}>
+        <section className={`section active ${isFullscreen ? 'duel-fullscreen' : ''}`} style={sectionStyle}>
             {state === DUEL_STATES.LOBBY && (
                 <>
                     <div className="hero">
@@ -392,6 +406,21 @@ export default function DuelSection() {
                                     <textarea className="form-input" placeholder="O incolla testo qui..." style={{ height: '80px' }} value={pdfText} onChange={e => setPdfText(e.target.value)} />
                                 </div>
                             )}
+
+                            <div style={{ marginBottom: '1.5rem', background: 'rgba(255,255,255,0.03)', padding: '1rem', borderRadius: '12px' }}>
+                                <label style={{ display: 'flex', justifyContent: 'space-between', color: 'var(--color-text-secondary)', marginBottom: '0.5rem' }}>
+                                    <span>Numero di Domande:</span>
+                                    <span style={{ fontWeight: 'bold', color: 'var(--color-accent)' }}>{questionAmount}</span>
+                                </label>
+                                <input
+                                    type="range"
+                                    min="3"
+                                    max="20"
+                                    value={questionAmount}
+                                    onChange={e => setQuestionAmount(parseInt(e.target.value))}
+                                    style={{ width: '100%', accentColor: 'var(--color-accent)' }}
+                                />
+                            </div>
 
                             <button className="btn-primary duel-start-btn" onClick={handleCreateMatch} disabled={loading}>
                                 {loading ? '⏳ Generazione...' : '🚀 CREA STANZA'}

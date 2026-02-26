@@ -95,7 +95,11 @@ const createSupabaseClient = () => {
                     return fallbackRes
                 } catch (fallbackErr) {
                     clearTimeout(fallbackTimeoutId)
-                    throw fallbackErr
+                    // Return a 408 to forcefully fail-fast and avoid Supabase-js exponential retries (60s+ loops)
+                    return new window.Response(
+                        JSON.stringify({ error: 'Timeout di Connessione', message: 'Problema di rete. Riprova.' }),
+                        { status: 408, statusText: 'Request Timeout', headers: { 'Content-Type': 'application/json' } }
+                    )
                 }
             }
         }

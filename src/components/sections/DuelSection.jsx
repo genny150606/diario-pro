@@ -1,4 +1,7 @@
 import { useState, useRef, useEffect } from 'react'
+import { useAuth } from '../../hooks/useAuth'
+import { useData } from '../../hooks/useData'
+import { supabase } from '../../lib/supabase'
 import { Swords, Target, Edit3, FileText, Paperclip, Clock, Key, User, Trophy, Play, RotateCcw, ChevronLeft, Sparkles, BookOpen, GraduationCap, Calculator, Globe, History, Atom, Brain, Zap, PlusCircle } from 'lucide-react'
 import './DuelSection.css'
 
@@ -15,7 +18,7 @@ export default function DuelSection() {
     const { data: appData } = useData()
     const [state, setState] = useState(DUEL_STATES.LOBBY)
 
-    // Quiz Generation Sources
+    // Quiz Generation 
     const [sourceType, setSourceType] = useState('subject') // 'subject', 'notes', 'pdf'
     const [subject, setSubject] = useState('Matematica')
     const [selectedNoteId, setSelectedNoteId] = useState('')
@@ -436,7 +439,7 @@ export default function DuelSection() {
                                         <div style={{ marginBottom: '1rem' }}>
                                             <label className="btn-secondary" style={{ width: '100%', marginBottom: '1rem', textAlign: 'center', cursor: 'pointer', borderRadius: '1rem' }}>
                                                 <input type="file" accept=".pdf,.txt" style={{ display: 'none' }} onChange={handleFileUpload} />
-                                                <Paperclip size={18} /> {pdfName || 'Carica PDF/TXT'}
+                                                <Paperclip size={18} /> {pdfName}
                                             </label>
                                             <textarea
                                                 className="form-input"

@@ -107,10 +107,76 @@
     color: #ffaa00;
 }
 
-.header-right {
-    display: flex;
-    align-items: center;
-    gap: 0.8rem;
+/* ── AURORA BACKGROUND ── */
+.aurora-bg {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    background: transparent;
+    overflow: hidden;
+    pointer-events: none;
+}
+
+.aurora-bg .orb {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(120px);
+    opacity: 0.25;
+    mix-blend-mode: screen;
+    animation: orbFloat 25s ease-in-out infinite alternate;
+}
+
+.orb-1 {
+    width: 60vw;
+    height: 60vw;
+    background: radial-gradient(circle, #6366f1, transparent);
+    top: -20%;
+    left: -10%;
+}
+
+.orb-2 {
+    width: 50vw;
+    height: 50vw;
+    background: radial-gradient(circle, #a855f7, transparent);
+    top: 20%;
+    right: -10%;
+    animation-delay: -5s;
+}
+
+.orb-3 {
+    width: 40vw;
+    height: 40vw;
+    background: radial-gradient(circle, #ec4899, transparent);
+    bottom: -10%;
+    left: 20%;
+    animation-delay: -10s;
+}
+
+.orb-4 {
+    width: 45vw;
+    height: 45vw;
+    background: radial-gradient(circle, #5b9ff3, transparent);
+    top: 50%;
+    left: -5%;
+    animation-delay: -15s;
+}
+
+@keyframes orbFloat {
+    0% {
+        transform: translate(0, 0) scale(1);
+    }
+
+    33% {
+        transform: translate(10vw, -10vh) scale(1.1);
+    }
+
+    66% {
+        transform: translate(-10vw, 10vh) scale(0.9);
+    }
+
+    100% {
+        transform: translate(5vw, 5vh) scale(1.05);
+    }
 }
 
 /* ── SPATIAL SIDEBAR (FLOATING) ── */
@@ -403,7 +469,8 @@
         flex-shrink: 0;
     }
 
-    .container {
+    .container,
+    .main-container {
         padding-left: 0 !important;
         padding-bottom: 120px;
     }

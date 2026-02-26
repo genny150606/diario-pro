@@ -17,16 +17,16 @@ export const supabase = createClient(SUPABASE_URL, SUPABASE_KEY, {
         fetch: async (url, options) => {
             const urlStr = url.toString()
 
-            // Skip proxy for Auth calls entirely
-            if (urlStr.includes('/auth/v1/')) {
-                return window.fetch(url, options)
-            }
-
-            // Direct-First Strategy for REST API
-            // We try to connect directly to Supabase first for maximum speed.
-            // We only use the proxy if we hit Cloudflare 520 or Gateway errors.
+            // Direct-First Strategy with 3s Timeout
             try {
-                const directRes = await window.fetch(url, options)
+                const controller = new AbortController()
+                const timeoutId = setTimeout(() => controller.abort(), 3000)
+
+                const directRes = await window.fetch(url, {
+                    ...options,
+                    signal: controller.signal
+                })
+                clearTimeout(timeoutId)
 
                 // If it's a success or a normal client error (4xx), return it immediately
                 if (directRes.status < 500 || directRes.status === 404) {
@@ -38,13 +38,18 @@ export const supabase = createClient(SUPABASE_URL, SUPABASE_KEY, {
                     return directRes
                 }
             } catch (err) {
-                // If it's a network error (CORS/Blocked), fall through to proxy
-                console.warn('[AUTH] Direct fetch failed, attempting proxy fallback...', err.message)
+                // If it's a network error (CORS/Blocked) or Timeout, fall through to proxy
+                console.warn(`[AUTH] Direct fetch failed for ${urlStr.split('/').pop()}, attempting proxy fallback...`, err.message)
             }
 
             // Proxy Fallback logic
-            if (!import.meta.env.DEV && urlStr.includes('/rest/v1/')) {
-                let path = `/rest/v1/${urlStr.split('/rest/v1/')[1]}`
+            const isRest = urlStr.includes('/rest/v1/')
+            const isAuth = urlStr.includes('/auth/v1/')
+
+            if (!import.meta.env.DEV && (isRest || isAuth)) {
+                let path = isRest
+                    ? `/rest/v1/${urlStr.split('/rest/v1/')[1]}`
+                    : `/auth/v1/${urlStr.split('/auth/v1/')[1]}`
                 const rawHeaders = {}
                 if (options.headers) {
                     new Headers(options.headers).forEach((v, k) => rawHeaders[k] = v)

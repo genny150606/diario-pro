@@ -1,9 +1,11 @@
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../../hooks/useAuth'
 import './AuthModal.css'
 
 export default function AuthModal({ onClose }) {
     const { signIn, signUp } = useAuth()
+    const navigate = useNavigate()
     const [tab, setTab] = useState('login')
     const [error, setError] = useState('')
     const [success, setSuccess] = useState('')
@@ -34,7 +36,11 @@ export default function AuthModal({ onClose }) {
         setLoading(true)
         try {
             await signIn(loginEmail, loginPassword)
-            setSuccess('✅ Accesso effettuato!')
+            setSuccess('✅ Accesso effettuato! Reindirizzamento...')
+            setTimeout(() => {
+                onClose()
+                navigate('/app')
+            }, 1000)
         } catch (err) {
             let msg = err.message
             if (msg.includes('Invalid login')) msg = '❌ Email o password non corretti.'

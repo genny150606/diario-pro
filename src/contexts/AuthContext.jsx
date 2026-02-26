@@ -8,11 +8,11 @@ export function AuthProvider({ children }) {
     const [loading, setLoading] = useState(true)
 
     useEffect(() => {
-        // Get initial session with generous timeout protection (allow proxy cold starts)
+        // Get initial session with 5s timeout protection
         const sessionTimeout = setTimeout(() => {
-            console.warn('[AUTH] Session fetch timed out (10s), proceeding without auth')
+            console.warn('[AUTH] Session fetch timed out (5s), proceeding without auth')
             setLoading(false)
-        }, 10000)
+        }, 5000)
 
         supabase.auth.getSession()
             .then(({ data: { session } }) => {

@@ -271,6 +271,12 @@
     max-width: calc(100vw - 4rem);
 }
 
+.preview-glass-card:hover {
+    transform: translateY(-8px) scale(1.02);
+    box-shadow: 0 4rem 8rem rgba(0, 0, 0, 0.9);
+    border-color: rgba(255, 255, 255, 0.2);
+}
+
 @media (max-width: 768px) {
     .preview-glass-card {
         box-shadow: 0 2rem 5rem rgba(0, 0, 0, 0.5);
@@ -298,6 +304,7 @@
     line-height: 1;
     background: linear-gradient(to bottom, #fff, rgba(255, 255, 255, 0.4));
     -webkit-background-clip: text;
+    background-clip: text;
     -webkit-text-fill-color: transparent;
 }
 
@@ -491,6 +498,58 @@
         opacity: 1;
         transform: translateY(0);
     }
+}
+
+/* ── PREMIUM CINEMATIC KEYFRAMES ── */
+@keyframes cinematicFadeUp {
+    0% {
+        opacity: 0;
+        transform: translateY(40px) scale(0.98);
+        filter: blur(10px);
+    }
+
+    100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+        filter: blur(0px);
+    }
+}
+
+@keyframes heroLogoGlow {
+
+    0%,
+    100% {
+        filter: drop-shadow(0 0 15px rgba(100, 150, 255, 0.4)) drop-shadow(0 0 40px rgba(175, 82, 222, 0.2));
+        transform: scale(1) translateY(0);
+    }
+
+    50% {
+        filter: drop-shadow(0 0 30px rgba(100, 150, 255, 0.8)) drop-shadow(0 0 80px rgba(175, 82, 222, 0.5));
+        transform: scale(1.05) translateY(-5px);
+    }
+}
+
+@keyframes smoothFloat {
+
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(-15px);
+    }
+}
+
+.animate-hero-logo {
+    animation: cinematicFadeUp 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards, heroLogoGlow 6s ease-in-out infinite alternate;
+    animation-delay: 0.1s;
+    opacity: 0;
+}
+
+.animate-hero-text {
+    animation: cinematicFadeUp 1s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    opacity: 0;
 }
 
 /* ── GDPR ── */

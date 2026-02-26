@@ -93,26 +93,34 @@ export default function Landing() {
         document.head.appendChild(style);
 
         // Setup Hero Intro Start State
-        const heroTag = document.querySelector('.hero-tag');
+        const heroLogo = document.querySelector('.hero-title-main img');
         const lines = document.querySelectorAll('.title-line');
         const desc = document.querySelector('.hero-description');
         const actions = document.querySelector('.hero-actions-radical');
         const preview = document.querySelector('.hero-floating-preview');
 
-        [heroTag, ...lines, desc, actions, preview].forEach(el => {
+        // Apply Premium CSS Animations via classes instead of manual JS transforms
+        if (heroLogo) heroLogo.classList.add('animate-hero-logo');
+
+        [...lines, desc, actions].forEach((el, index) => {
             if (!el) return;
-            el.style.opacity = '0';
-            el.style.transform = 'translateY(30px)';
-            el.style.transition = 'all 1.2s cubic-bezier(0.16, 1, 0.3, 1)';
+            el.classList.add('animate-hero-text');
+            el.style.animationDelay = `${0.3 + (index * 0.15)}s`;
         });
 
-        // Run Hero Sequence
-        setTimeout(() => { if (heroTag) { heroTag.style.opacity = '1'; heroTag.style.transform = 'translateY(0)'; } }, 400);
-        setTimeout(() => { if (lines[0]) { lines[0].style.opacity = '1'; lines[0].style.transform = 'translateY(0)'; } }, 600);
-        setTimeout(() => { if (lines[1]) { lines[1].style.opacity = '1'; lines[1].style.transform = 'translateY(0)'; } }, 750);
-        setTimeout(() => { if (desc) { desc.style.opacity = '1'; desc.style.transform = 'translateY(0)'; } }, 1050);
-        setTimeout(() => { if (actions) { actions.style.opacity = '1'; actions.style.transform = 'translateY(0)'; } }, 1250);
-        setTimeout(() => { if (preview) { preview.style.opacity = '1'; preview.style.transform = 'rotateX(15deg) translateY(0)'; } }, 1650);
+        if (preview) {
+            preview.style.opacity = '0';
+            preview.style.transform = 'rotateX(25deg) translateY(60px)';
+            preview.style.transition = 'all 1.6s cubic-bezier(0.16, 1, 0.3, 1)';
+            setTimeout(() => {
+                preview.style.opacity = '1';
+                preview.style.transform = 'rotateX(15deg) translateY(0)';
+                // Add continuous floating physics after entrance
+                setTimeout(() => {
+                    preview.style.animation = 'smoothFloat 8s ease-in-out infinite';
+                }, 1600);
+            }, 800);
+        }
 
         // Spatial Parallax
         const handleMouseMove = (e) => {
@@ -175,7 +183,7 @@ export default function Landing() {
                     <div className="hero-content">
                         <div className="hero-tag">Progettato per eccellere</div>
                         <h1 className="hero-title-main" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1rem' }}>
-                            <img src="/S.png" alt="StudyJournal Logo" style={{ width: '120px', height: '120px', marginBottom: '1rem', filter: 'drop-shadow(0 0 20px rgba(100, 150, 255, 0.6))' }} />
+                            <img src="/S.png" alt="StudyJournal Logo" style={{ width: '130px', height: '130px', marginBottom: '1.5rem', filter: 'drop-shadow(0 0 20px rgba(100, 150, 255, 0.6))' }} />
                             <div className="title-line"><span>Studia meno,</span></div>
                             <div className="title-line"><span className="accent-text">Impara tutto.</span></div>
                         </h1>

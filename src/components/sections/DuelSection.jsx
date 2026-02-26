@@ -373,7 +373,7 @@ export default function DuelSection() {
 
                     {error && <div className="card" style={{ borderLeft: '3px solid #FF453A', marginBottom: '1rem' }}><p style={{ color: '#FF453A', margin: 0 }}>{error}</p></div>}
 
-                    <div style={{ display: 'grid', gridTemplateColumns: 'minmax(300px, 1.4fr) minmax(200px, 0.6fr)', gap: '1.5rem' }}>
+                    <div className="duel-lobby-grid">
                         <div className="duel-card highlight-card">
                             <div className="duel-config-container">
                                 <div style={{ marginBottom: '1rem' }}>

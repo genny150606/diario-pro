@@ -518,6 +518,23 @@ input[type="range"].premium-slider::-webkit-slider-thumb:hover {
     transform: scale(1.2);
 }
 
+.duel-lobby-grid {
+    display: grid;
+    grid-template-columns: minmax(300px, 1.4fr) minmax(200px, 0.6fr);
+    gap: 1.5rem;
+}
+
+@media (max-width: 768px) {
+    .duel-lobby-grid {
+        grid-template-columns: 1fr;
+        gap: 2rem;
+    }
+
+    .selection-grid {
+        grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+    }
+}
+
 .btn-minimal {
     background: none;
     border: none;

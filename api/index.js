@@ -60,7 +60,18 @@ async function generateWithFallback(prompt) {
     for (const modelName of modelsToTry) {
         try {
             const ai = genAI.getGenerativeModel({ model: modelName });
-            const result = await ai.generateContent(prompt);
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 20000); // 20s Max AI Generation time per model
+
+            let result;
+            try {
+                result = await ai.generateContent({ contents: [{ role: 'user', parts: [{ text: prompt }] }], generationConfig: { maxOutputTokens: 2500 } }, { signal: controller.signal });
+                clearTimeout(timeoutId);
+            } catch (networkErr) {
+                clearTimeout(timeoutId);
+                throw networkErr;
+            }
+
             return await getAIText(result);
         } catch (err) {
             lastError = err;
@@ -71,7 +82,7 @@ async function generateWithFallback(prompt) {
             await new Promise(r => setTimeout(r, 600)); // Exponential-ish backoff
         }
     }
-    throw lastError;
+    throw new Error(`Tutti i modelli AI hanno fallito. Ultimo errore: ${lastError?.message || 'Sconosciuto'}`);
 }
 
 function safelyParseJSON(text, defaultValue = []) {

@@ -217,7 +217,8 @@ export default function DuelSection() {
             setState(DUEL_STATES.WAITING)
             setPlayers([{ username: playerName, is_ready: true, score: 0 }])
         } catch (err) {
-            setError(err.message)
+            console.error('[CREATE_MATCH_ERR]', err)
+            setError(err?.message || err?.error_description || String(err) || 'Errore Sconosciuto')
         } finally {
             setLoading(false)
         }
@@ -252,7 +253,7 @@ export default function DuelSection() {
             // React useEffect will start polling on next render
         } catch (err) {
             console.error('[JOIN_MATCH_ERR]', err)
-            setError(err.message || err.error_description || String(err))
+            setError(err?.message || err?.error_description || String(err) || 'Errore Sconosciuto')
         } finally {
             setLoading(false)
         }

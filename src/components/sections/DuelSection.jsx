@@ -188,17 +188,19 @@ export default function DuelSection() {
                 body: JSON.stringify(body)
             })
 
+            const responseText = await response.text()
+            let responseData = {}
+            try {
+                responseData = JSON.parse(responseText)
+            } catch (e) { }
+
             if (!response.ok) {
-                let errorMsg = 'Errore generazione quiz AI.'
-                try {
-                    const errData = await response.json()
-                    errorMsg = errData.error || errorMsg
-                    if (errorMsg.includes('429')) errorMsg = 'Limite richieste superato (Quota API Gemini Esaurita). Riprova più tardi.'
-                } catch (e) { }
+                let errorMsg = responseData.error || 'Errore generazione quiz AI.'
+                if (errorMsg.includes('429')) errorMsg = 'Limite richieste superato (Quota API Gemini Esaurita). Riprova più tardi.'
                 throw new Error(errorMsg)
             }
 
-            const { quiz } = await response.json()
+            const { quiz } = responseData
             if (!quiz || quiz.length === 0) throw new Error("L'AI non ha generato domande.")
 
             const code = Math.random().toString(36).substring(2, 6).toUpperCase()

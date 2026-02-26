@@ -73,9 +73,16 @@ const createSupabaseClient = () => {
                             signal: proxyController.signal
                         })
                         clearTimeout(proxyTimeoutId)
-                        if (proxyRes.ok) return proxyRes
+
+                        // If proxy successfully communicates with Supabase (even if returning a 4xx Supabase business error), return it.
+                        // Only fallthrough to direct connection if the PROXY ITSELF fails (5xx).
+                        if (proxyRes.status < 500) {
+                            return proxyRes
+                        } else {
+                            console.warn(`[PROXY] Returned 5xx error for ${urlStr.split('/').pop()}, falling back to direct connection...`)
+                        }
                     } catch (proxyErr) {
-                        console.error('[PROXY] Fallback also failed or timed out:', proxyErr)
+                        console.error('[PROXY] Fallback failed or timed out:', proxyErr)
                     }
                 }
 

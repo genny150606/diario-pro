@@ -367,6 +367,157 @@
     top: -10px;
 }
 
+/* Lobby Match Configurator */
+.duel-config-container {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+/* Segmented Control Tabs */
+.segmented-control {
+    display: flex;
+    background: rgba(255, 255, 255, 0.04);
+    padding: 4px;
+    border-radius: 1rem;
+    position: relative;
+    border: 1px solid var(--glass-border);
+}
+
+.segmented-btn {
+    flex: 1;
+    padding: 0.8rem;
+    border: none;
+    background: none;
+    color: var(--color-text-tertiary);
+    font-size: 0.9rem;
+    font-weight: 700;
+    cursor: pointer;
+    border-radius: 0.8rem;
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    z-index: 1;
+}
+
+.segmented-btn.active {
+    color: #fff;
+    background: rgba(255, 255, 255, 0.1);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+/* Visual Subject/Note Grid */
+.selection-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+    gap: 0.8rem;
+    max-height: 250px;
+    overflow-y: auto;
+    padding-right: 5px;
+}
+
+.selection-card {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--glass-border);
+    border-radius: 1rem;
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.6rem;
+    cursor: pointer;
+    transition: all 0.3s;
+    text-align: center;
+}
+
+.selection-card:hover {
+    background: rgba(255, 255, 255, 0.06);
+    border-color: var(--color-accent);
+    transform: translateY(-2px);
+}
+
+.selection-card.active {
+    background: rgba(91, 159, 243, 0.1);
+    border-color: var(--color-accent);
+    box-shadow: 0 0 15px rgba(91, 159, 243, 0.15);
+}
+
+.selection-card .icon-box {
+    width: 40px;
+    height: 40px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-accent);
+    transition: all 0.3s;
+}
+
+.selection-card.active .icon-box {
+    background: var(--color-accent);
+    color: #fff;
+}
+
+.selection-card .label {
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+/* Premium Slider */
+.premium-config-box {
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid var(--glass-border);
+    padding: 1.25rem;
+    border-radius: 1.5rem;
+    margin-top: 1.5rem;
+}
+
+.slider-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.slider-val-badge {
+    background: var(--accent-gradient);
+    color: white;
+    padding: 0.2rem 0.8rem;
+    border-radius: 2rem;
+    font-weight: 800;
+    font-size: 0.9rem;
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+}
+
+input[type="range"].premium-slider {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 100%;
+    height: 6px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 3px;
+    outline: none;
+}
+
+input[type="range"].premium-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 20px;
+    height: 20px;
+    background: #fff;
+    border: 3px solid var(--color-accent);
+    border-radius: 50%;
+    cursor: pointer;
+    box-shadow: 0 0 10px rgba(91, 159, 243, 0.5);
+    transition: transform 0.2s;
+}
+
+input[type="range"].premium-slider::-webkit-slider-thumb:hover {
+    transform: scale(1.2);
+}
+
 .btn-minimal {
     background: none;
     border: none;

@@ -1,8 +1,5 @@
 import { useState, useRef, useEffect } from 'react'
-import { useAuth } from '../../hooks/useAuth'
-import { useData } from '../../hooks/useData'
-import { supabase } from '../../lib/supabase'
-import { Swords, Target, Edit3, FileText, Paperclip, Clock, Key, User, Trophy, Play, RotateCcw, ChevronLeft, Sparkles } from 'lucide-react'
+import { Swords, Target, Edit3, FileText, Paperclip, Clock, Key, User, Trophy, Play, RotateCcw, ChevronLeft, Sparkles, BookOpen, GraduationCap, Calculator, Globe, History, Atom, Brain, Zap, PlusCircle } from 'lucide-react'
 import './DuelSection.css'
 
 const DUEL_STATES = {
@@ -373,75 +370,148 @@ export default function DuelSection() {
 
                     {error && <div className="card" style={{ borderLeft: '3px solid #FF453A', marginBottom: '1rem' }}><p style={{ color: '#FF453A', margin: 0 }}>{error}</p></div>}
 
-                    <div style={{ display: 'grid', gridTemplateColumns: 'minmax(300px, 1.2fr) minmax(200px, 0.8fr)', gap: '1.5rem' }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'minmax(300px, 1.4fr) minmax(200px, 0.6fr)', gap: '1.5rem' }}>
                         <div className="duel-card highlight-card">
-                            <h3><Target size={20} className="inline-icon" /> Crea una Sfida</h3>
-                            <p style={{ color: 'var(--color-text-secondary)', marginBottom: '1rem', fontSize: '0.9rem' }}>
-                                Scegli l'argomento e invita uno sfidante col codice.
-                            </p>
-
-                            <div className="tabs" style={{ marginBottom: '1.5rem' }}>
-                                <button className={`tab-btn ${sourceType === 'subject' ? 'active' : ''}`} onClick={() => setSourceType('subject')}>🌍 Materia</button>
-                                <button className={`tab-btn ${sourceType === 'notes' ? 'active' : ''}`} onClick={() => setSourceType('notes')}><Edit3 size={14} /> Note</button>
-                                <button className={`tab-btn ${sourceType === 'pdf' ? 'active' : ''}`} onClick={() => setSourceType('pdf')}><FileText size={14} /> PDF</button>
-                            </div>
-
-                            {sourceType === 'subject' && (
-                                <select value={subject} onChange={e => setSubject(e.target.value)} style={{ width: '100%', marginBottom: '1rem' }}>
-                                    {['Matematica', 'Italiano', 'Storia', 'Scienze', 'Inglese', 'Filosofia', 'Fisica', 'Cultura Generale'].map(s => <option key={s} value={s}>{s}</option>)}
-                                </select>
-                            )}
-
-                            {sourceType === 'notes' && (
-                                <select value={selectedNoteId} onChange={e => setSelectedNoteId(e.target.value)} style={{ width: '100%', marginBottom: '1rem' }}>
-                                    <option value="">-- Seleziona Appunti --</option>
-                                    {appData?.notes?.map(n => <option key={n.id} value={n.id}>{n.title}</option>)}
-                                </select>
-                            )}
-
-                            {sourceType === 'pdf' && (
+                            <div className="duel-config-container">
                                 <div style={{ marginBottom: '1rem' }}>
-                                    <label className="btn-secondary" style={{ width: '100%', marginBottom: '0.5rem', textAlign: 'center' }}>
-                                        <input type="file" accept=".pdf,.txt" style={{ display: 'none' }} onChange={handleFileUpload} />
-                                        <Paperclip size={16} /> {pdfName || 'Carica PDF/TXT'}
-                                    </label>
-                                    <textarea className="form-input" placeholder="O incolla testo qui..." style={{ height: '80px' }} value={pdfText} onChange={e => setPdfText(e.target.value)} />
+                                    <h3><Target size={22} className="inline-icon text-accent" /> Configura Battaglia</h3>
+                                    <p style={{ color: 'var(--color-text-secondary)', fontSize: '0.9rem' }}>
+                                        Scegli la tua arma e preparati alla sfida.
+                                    </p>
                                 </div>
-                            )}
 
-                            <div style={{ marginBottom: '1.5rem', background: 'rgba(255,255,255,0.03)', padding: '1rem', borderRadius: '12px' }}>
-                                <label style={{ display: 'flex', justifyContent: 'space-between', color: 'var(--color-text-secondary)', marginBottom: '0.5rem' }}>
-                                    <span>Numero di Domande:</span>
-                                    <span style={{ fontWeight: 'bold', color: 'var(--color-accent)' }}>{questionAmount}</span>
-                                </label>
-                                <input
-                                    type="range"
-                                    min="3"
-                                    max="20"
-                                    value={questionAmount}
-                                    onChange={e => setQuestionAmount(parseInt(e.target.value))}
-                                    style={{ width: '100%', accentColor: 'var(--color-accent)' }}
-                                />
+                                <div className="segmented-control">
+                                    <button className={`segmented-btn ${sourceType === 'subject' ? 'active' : ''}`} onClick={() => setSourceType('subject')}><Globe size={16} /> Materia</button>
+                                    <button className={`segmented-btn ${sourceType === 'notes' ? 'active' : ''}`} onClick={() => setSourceType('notes')}><Edit3 size={16} /> Note</button>
+                                    <button className={`segmented-btn ${sourceType === 'pdf' ? 'active' : ''}`} onClick={() => setSourceType('pdf')}><FileText size={16} /> PDF</button>
+                                </div>
+
+                                {sourceType === 'subject' && (
+                                    <div className="selection-grid reveal-entrance">
+                                        {[
+                                            { name: 'Matematica', icon: <Calculator size={20} /> },
+                                            { name: 'Italiano', icon: <BookOpen size={20} /> },
+                                            { name: 'Storia', icon: <History size={20} /> },
+                                            { name: 'Scienze', icon: <Atom size={20} /> },
+                                            { name: 'Inglese', icon: <Globe size={20} /> },
+                                            { name: 'Filosofia', icon: <Brain size={20} /> },
+                                            { name: 'Fisica', icon: <Zap size={20} /> },
+                                            { name: 'Generale', icon: <Sparkles size={20} /> },
+                                        ].map(s => (
+                                            <div
+                                                key={s.name}
+                                                className={`selection-card ${subject === s.name ? 'active' : ''}`}
+                                                onClick={() => setSubject(s.name)}
+                                            >
+                                                <div className="icon-box">{s.icon}</div>
+                                                <div className="label">{s.name}</div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+
+                                {sourceType === 'notes' && (
+                                    <div className="selection-grid reveal-entrance">
+                                        {appData?.notes?.length > 0 ? (
+                                            appData.notes.map(n => (
+                                                <div
+                                                    key={n.id}
+                                                    className={`selection-card ${selectedNoteId === n.id ? 'active' : ''}`}
+                                                    onClick={() => setSelectedNoteId(n.id)}
+                                                >
+                                                    <div className="icon-box"><FileText size={20} /></div>
+                                                    <div className="label">{n.title}</div>
+                                                </div>
+                                            ))
+                                        ) : (
+                                            <p style={{ gridColumn: '1/-1', textAlign: 'center', padding: '1rem', color: 'var(--color-text-tertiary)' }}>
+                                                Nessuna nota trovata.
+                                            </p>
+                                        )}
+                                    </div>
+                                )}
+
+                                {sourceType === 'pdf' && (
+                                    <div className="reveal-entrance">
+                                        <div style={{ marginBottom: '1rem' }}>
+                                            <label className="btn-secondary" style={{ width: '100%', marginBottom: '1rem', textAlign: 'center', cursor: 'pointer', borderRadius: '1rem' }}>
+                                                <input type="file" accept=".pdf,.txt" style={{ display: 'none' }} onChange={handleFileUpload} />
+                                                <Paperclip size={18} /> {pdfName || 'Carica PDF/TXT'}
+                                            </label>
+                                            <textarea
+                                                className="form-input"
+                                                placeholder="O incolla testo qui per generare i quiz..."
+                                                style={{ height: '120px', borderRadius: '1.25rem', background: 'rgba(255,255,255,0.04)' }}
+                                                value={pdfText}
+                                                onChange={e => setPdfText(e.target.value)}
+                                            />
+                                        </div>
+                                    </div>
+                                )}
+
+                                <div className="premium-config-box reveal-up">
+                                    <div className="slider-header">
+                                        <label style={{ color: 'var(--color-text-secondary)', fontWeight: 600 }}>Numero di domande</label>
+                                        <div className="slider-val-badge">{questionAmount}</div>
+                                    </div>
+                                    <input
+                                        type="range"
+                                        min="3"
+                                        max="20"
+                                        value={questionAmount}
+                                        onChange={e => setQuestionAmount(parseInt(e.target.value))}
+                                        className="premium-slider"
+                                    />
+                                </div>
+
+                                <button
+                                    className="btn-primary"
+                                    onClick={handleCreateMatch}
+                                    disabled={loading}
+                                    style={{
+                                        marginTop: '1rem',
+                                        padding: '1.2rem',
+                                        fontSize: '1.1rem',
+                                        borderRadius: '1.25rem',
+                                        boxShadow: '0 10px 30px rgba(99, 102, 241, 0.4)'
+                                    }}
+                                >
+                                    {loading ? (
+                                        <><Sparkles size={20} className="spin" /> GENERO ARENA...</>
+                                    ) : (
+                                        <><Swords size={20} /> CREA STANZA DI BATTAGLIA</>
+                                    )}
+                                </button>
                             </div>
-
-                            <button className="btn-primary duel-start-btn" onClick={handleCreateMatch} disabled={loading}>
-                                {loading ? '⏳ Generazione...' : '🚀 CREA STANZA'}
-                            </button>
                         </div>
 
-                        <div className="duel-card" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-                            <h3><Key size={20} className="inline-icon" /> Entra in Sfida</h3>
-                            <p style={{ fontSize: '0.9rem', color: 'var(--color-text-secondary)', marginBottom: '1rem' }}>Inserisci il codice ricevuto.</p>
+                        <div className="duel-card" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', textAlign: 'center' }}>
+                            <div className="icon-box-large" style={{ margin: '0 auto 1.5rem', width: '60px', height: '60px', borderRadius: '50%', background: 'rgba(255,255,255,0.05)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--color-accent)' }}>
+                                <Key size={30} />
+                            </div>
+                            <h3>Entra in Sfida</h3>
+                            <p style={{ fontSize: '0.9rem', color: 'var(--color-text-secondary)', marginBottom: '1.5rem' }}>Inserisci il codice ricevuto dal tuo avversario.</p>
                             <input
                                 type="text"
-                                placeholder="Codice"
+                                placeholder="----"
                                 maxLength={4}
                                 value={joinCodeInput}
                                 onChange={e => setJoinCodeInput(e.target.value.toUpperCase())}
-                                style={{ textAlign: 'center', fontSize: '1.5rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '4px', marginBottom: '1rem' }}
+                                style={{
+                                    textAlign: 'center',
+                                    fontSize: '2rem',
+                                    fontWeight: 900,
+                                    textTransform: 'uppercase',
+                                    letterSpacing: '8px',
+                                    marginBottom: '1.5rem',
+                                    background: 'rgba(255,255,255,0.05)',
+                                    border: '1px solid var(--glass-border)',
+                                    borderRadius: '1rem',
+                                    color: 'var(--color-accent)'
+                                }}
                             />
-                            <button className="btn-secondary duel-start-btn" onClick={handleJoinMatch} disabled={loading}>
-                                {loading ? <><Clock size={18} className="spin" /> Entrata...</> : <><Swords size={18} /> UNISCITI</>}
+                            <button className="btn-secondary" onClick={handleJoinMatch} disabled={loading} style={{ padding: '1rem', borderRadius: '1rem' }}>
+                                {loading ? <Clock size={18} className="spin" /> : <><Sparkles size={18} /> PARTECIPA</>}
                             </button>
                         </div>
                     </div>

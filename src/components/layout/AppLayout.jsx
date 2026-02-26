@@ -97,9 +97,9 @@ export default function AppLayout() {
                     <Menu size={20} />
                 </button>
 
-                <Link to="/" className="logo">
-                    <img src="/favicon.png" alt="Logo" className="logo-img" />
-                    <span>StudyJournal</span>
+                <Link pos="/" className="logo" style={{ display: 'flex', alignItems: 'center', gap: '10px', textDecoration: 'none' }}>
+                    <img src="/S.png" alt="StudyJournal Pro Logo" style={{ height: '36px', width: 'auto', filter: 'drop-shadow(0 0 8px rgba(100, 150, 255, 0.4))' }} />
+                    <span style={{ fontSize: '1.2rem', fontWeight: 800, background: 'linear-gradient(135deg, #fff 0%, #a5b4fc 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>StudyJournal</span>
                 </Link>
 
                 <div className="header-right-group">
@@ -145,8 +145,9 @@ export default function AppLayout() {
             <Sidebar
                 sections={SECTIONS}
                 isOpen={sidebarOpen}
-                setSidebarOpen={setSidebarOpen}
+                onClose={() => setSidebarOpen(false)}
                 onExit={handleSignOut}
+                logoSrc="/S.png"
             />
 
             {/* Click outside to close sidebar on mobile */}

@@ -144,7 +144,10 @@ export default function Landing() {
             {/* ═══════════ DYNAMIC ISLAND NAV ═══════════ */}
             <nav className="dynamic-island-nav" id="mainNav">
                 <div className="nav-content">
-                    <a href="#" className="nav-logo">SJ<span className="dot">.</span></a>
+                    <a href="#" className="nav-logo" style={{ display: 'flex', alignItems: 'center', gap: '8px', textDecoration: 'none' }}>
+                        <img src="/S.png" alt="StudyJournal Pro Logo" style={{ height: '32px', filter: 'drop-shadow(0 0 10px rgba(100, 150, 255, 0.5))' }} />
+                        <span style={{ fontSize: '1.2rem', fontWeight: 800, background: 'linear-gradient(135deg, #fff 0%, #a5b4fc 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>StudyJournal</span>
+                    </a>
                     <div className="nav-links">
                         <a href="#features">Tecnologia</a>
                         <a href="#philosophy">Filosofia</a>
@@ -171,7 +174,8 @@ export default function Landing() {
                 <section className="hero-section">
                     <div className="hero-content">
                         <div className="hero-tag">Progettato per eccellere</div>
-                        <h1 className="hero-title-main">
+                        <h1 className="hero-title-main" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1rem' }}>
+                            <img src="/S.png" alt="StudyJournal Logo" style={{ width: '120px', height: '120px', marginBottom: '1rem', filter: 'drop-shadow(0 0 20px rgba(100, 150, 255, 0.6))' }} />
                             <div className="title-line"><span>Studia meno,</span></div>
                             <div className="title-line"><span className="accent-text">Impara tutto.</span></div>
                         </h1>

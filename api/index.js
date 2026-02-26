@@ -49,7 +49,12 @@ async function getAIText(result) {
 }
 
 async function generateWithFallback(prompt) {
-    const modelsToTry = ["gemini-2.0-flash", "gemini-1.5-flash", "gemini-1.5-flash-8b"];
+    const modelsToTry = [
+        "gemini-2.0-flash",
+        "gemini-1.5-flash-8b-latest",
+        "gemini-1.5-flash-latest",
+        "gemini-1.5-flash-001"
+    ];
     let lastError = null;
 
     for (const modelName of modelsToTry) {

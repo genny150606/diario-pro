@@ -179,6 +179,12 @@ export default function Landing() {
 
             const nextIdx = Math.max(0, Math.min(sections.length - 1, currentIdx + direction));
 
+            // BYPASS ASSISTED SCROLL BETWEEN HERO (0) AND FIRST FEATURE (1)
+            // Allows user to see the "Dati Live" without being snapped away.
+            if ((currentIdx === 0 && direction === 1) || (currentIdx === 1 && direction === -1)) {
+                return;
+            }
+
             if (nextIdx !== currentIdx) {
                 isLock = true;
                 sections[nextIdx].scrollIntoView({ behavior: 'smooth', block: 'center' });

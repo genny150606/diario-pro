@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from 'react'
 import { useAuth } from '../../hooks/useAuth'
 import { useData } from '../../hooks/useData'
 import { supabase } from '../../lib/supabase'
+import { Swords, Target, Edit3, FileText, Paperclip, Clock, Key, User, Trophy, Play, RotateCcw, ChevronLeft, Sparkles } from 'lucide-react'
 import './DuelSection.css'
 
 const DUEL_STATES = {
@@ -362,27 +363,27 @@ export default function DuelSection() {
     } : { maxWidth: '800px', margin: '0 auto' }
 
     return (
-        <section className={`section active ${isFullscreen ? 'duel-fullscreen' : ''}`} style={sectionStyle}>
+        <section className={`section active ${isFullscreen ? 'duel-fullscreen' : ''} reveal-entrance`} style={sectionStyle}>
             {state === DUEL_STATES.LOBBY && (
                 <>
                     <div className="hero">
-                        <h1><span className="gradient-text">Duello AI</span> ⚔️</h1>
+                        <h1><span className="gradient-text">Duello AI</span> <Swords size={32} className="inline-icon hero-icon-floating" /></h1>
                         <p>Sfida un tuo amico in tempo reale con quiz generati dall'intelligenza artificiale</p>
                     </div>
 
                     {error && <div className="card" style={{ borderLeft: '3px solid #FF453A', marginBottom: '1rem' }}><p style={{ color: '#FF453A', margin: 0 }}>{error}</p></div>}
 
                     <div style={{ display: 'grid', gridTemplateColumns: 'minmax(300px, 1.2fr) minmax(200px, 0.8fr)', gap: '1.5rem' }}>
-                        <div className="duel-card">
-                            <h3>🎯 Crea una Sfida</h3>
+                        <div className="duel-card highlight-card">
+                            <h3><Target size={20} className="inline-icon" /> Crea una Sfida</h3>
                             <p style={{ color: 'var(--color-text-secondary)', marginBottom: '1rem', fontSize: '0.9rem' }}>
                                 Scegli l'argomento e invita uno sfidante col codice.
                             </p>
 
                             <div className="tabs" style={{ marginBottom: '1.5rem' }}>
                                 <button className={`tab-btn ${sourceType === 'subject' ? 'active' : ''}`} onClick={() => setSourceType('subject')}>🌍 Materia</button>
-                                <button className={`tab-btn ${sourceType === 'notes' ? 'active' : ''}`} onClick={() => setSourceType('notes')}>📝 Note</button>
-                                <button className={`tab-btn ${sourceType === 'pdf' ? 'active' : ''}`} onClick={() => setSourceType('pdf')}>📄 PDF</button>
+                                <button className={`tab-btn ${sourceType === 'notes' ? 'active' : ''}`} onClick={() => setSourceType('notes')}><Edit3 size={14} /> Note</button>
+                                <button className={`tab-btn ${sourceType === 'pdf' ? 'active' : ''}`} onClick={() => setSourceType('pdf')}><FileText size={14} /> PDF</button>
                             </div>
 
                             {sourceType === 'subject' && (
@@ -402,7 +403,7 @@ export default function DuelSection() {
                                 <div style={{ marginBottom: '1rem' }}>
                                     <label className="btn-secondary" style={{ width: '100%', marginBottom: '0.5rem', textAlign: 'center' }}>
                                         <input type="file" accept=".pdf,.txt" style={{ display: 'none' }} onChange={handleFileUpload} />
-                                        📎 {pdfName || 'Carica PDF/TXT'}
+                                        <Paperclip size={16} /> {pdfName || 'Carica PDF/TXT'}
                                     </label>
                                     <textarea className="form-input" placeholder="O incolla testo qui..." style={{ height: '80px' }} value={pdfText} onChange={e => setPdfText(e.target.value)} />
                                 </div>
@@ -429,7 +430,7 @@ export default function DuelSection() {
                         </div>
 
                         <div className="duel-card" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-                            <h3>🔑 Entra in Sfida</h3>
+                            <h3><Key size={20} className="inline-icon" /> Entra in Sfida</h3>
                             <p style={{ fontSize: '0.9rem', color: 'var(--color-text-secondary)', marginBottom: '1rem' }}>Inserisci il codice ricevuto.</p>
                             <input
                                 type="text"
@@ -440,7 +441,7 @@ export default function DuelSection() {
                                 style={{ textAlign: 'center', fontSize: '1.5rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '4px', marginBottom: '1rem' }}
                             />
                             <button className="btn-secondary duel-start-btn" onClick={handleJoinMatch} disabled={loading}>
-                                {loading ? '⏳ Entrata...' : '⚔️ UNISCITI'}
+                                {loading ? <><Clock size={18} className="spin" /> Entrata...</> : <><Swords size={18} /> UNISCITI</>}
                             </button>
                         </div>
                     </div>
@@ -456,7 +457,7 @@ export default function DuelSection() {
 
                     <div style={{ display: 'flex', gap: '2rem', justifyContent: 'center', marginBottom: '3rem' }}>
                         <div className="player-lobby-card">
-                            <div className="avatar">👤</div>
+                            <div className="avatar"><User size={32} /></div>
                             <div className="name">{playerName} (Tu)</div>
                             <div className="status ready">Pronto!</div>
                         </div>
@@ -464,7 +465,7 @@ export default function DuelSection() {
                         <div className="player-lobby-card">
                             {opponent ? (
                                 <>
-                                    <div className="avatar">👤</div>
+                                    <div className="avatar"><User size={32} /></div>
                                     <div className="name">{opponent.username}</div>
                                     <div className="status ready">Pronto!</div>
                                 </>
@@ -480,7 +481,7 @@ export default function DuelSection() {
 
                     {isHost ? (
                         <button className="btn-primary" style={{ padding: '1rem 3rem', fontSize: '1.2rem' }} disabled={players.length < 2} onClick={handleLaunchDuel}>
-                            ⚡ INIZIA BATTAGLIA ⚡
+                            <Sparkles size={20} /> INIZIA BATTAGLIA <Sparkles size={20} />
                         </button>
                     ) : (
                         <p style={{ color: 'var(--color-text-secondary)' }}>In attesa che l'Host avvii la sfida...</p>
@@ -544,26 +545,26 @@ export default function DuelSection() {
             )}
 
             {state === DUEL_STATES.FINISHED && (
-                <div className="duel-results-screen">
-                    <div className="duel-trophy">🏆</div>
+                <div className="duel-results-screen reveal-up">
+                    <div className="duel-trophy"><Trophy size={64} color="var(--color-accent)" /></div>
                     <h2>Sfida Conclusa!</h2>
 
                     <div style={{ display: 'flex', gap: '2rem', justifyContent: 'center', margin: '2rem 0' }}>
                         <div className={`result-card ${score >= (opponent?.score || 0) ? 'winner' : 'loser'}`}>
                             <div style={{ fontSize: '0.8rem' }}>IL TUO SCORE</div>
                             <div className="val">{score}</div>
-                            {score >= (opponent?.score || 0) && <div className="tag">👑 VINCITORE</div>}
+                            {score >= (opponent?.score || 0) && <div className="tag"><Trophy size={14} /> VINCITORE</div>}
                         </div>
                         <div className={`result-card ${(opponent?.score || 0) > score ? 'winner' : 'loser'}`}>
                             <div style={{ fontSize: '0.8rem' }}>AVVERSARIO</div>
                             <div className="val">{opponent?.score || 0}</div>
-                            {(opponent?.score || 0) > score && <div className="tag">👑 VINCITORE</div>}
+                            {(opponent?.score || 0) > score && <div className="tag"><Trophy size={14} /> VINCITORE</div>}
                         </div>
                     </div>
 
                     <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center' }}>
-                        <button className="btn-primary" onClick={resetQuiz}>Rigioca 🔄</button>
-                        <button className="btn-secondary" onClick={resetQuiz}>Lobby Principal ↩</button>
+                        <button className="btn-primary" onClick={resetQuiz}><RotateCcw size={18} /> Rigioca</button>
+                        <button className="btn-secondary" onClick={resetQuiz}><ChevronLeft size={18} /> Lobby Principal</button>
                     </div>
                 </div>
             )}

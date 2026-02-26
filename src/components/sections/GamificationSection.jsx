@@ -1,4 +1,5 @@
 import { useData } from '../../hooks/useData'
+import { Trophy, Edit3, Zap, GraduationCap, Flame, CheckCircle, Clock, Calendar, Sparkles } from 'lucide-react'
 
 const LEVEL_THRESHOLDS = [0, 100, 300, 600, 1000, 1500, 2500, 5000, 10000]
 const LEVEL_NAMES = ['Principiante', 'Studioso', 'Impegnato', 'Dedito', 'Maestro', 'Saggio', 'Erudito', 'Genio', 'Leggenda']
@@ -14,14 +15,14 @@ export default function GamificationSection() {
     const levelName = LEVEL_NAMES[level - 1] || 'Studente'
 
     const achievements = [
-        { id: 'firstNote', icon: '📝', title: 'Primo Passo', desc: 'Crea la tua prima nota', unlocked: data.notes.length > 0 },
-        { id: 'firstFlash', icon: '⚡', title: 'Memoria Veloce', desc: 'Crea 5 flashcard', unlocked: data.flashcards.length >= 5 },
-        { id: 'level5', icon: '🎓', title: 'Veterano', desc: 'Raggiungi il livello 5', unlocked: level >= 5 },
-        { id: 'streak3', icon: '🔥', title: 'Costante', desc: 'Studia per 3 giorni di fila', unlocked: false },
+        { id: 'firstNote', icon: <Edit3 />, title: 'Primo Passo', desc: 'Crea la tua prima nota', unlocked: data.notes.length > 0 },
+        { id: 'firstFlash', icon: <Zap />, title: 'Memoria Veloce', desc: 'Crea 5 flashcard', unlocked: data.flashcards.length >= 5 },
+        { id: 'level5', icon: <GraduationCap />, title: 'Veterano', desc: 'Raggiungi il livello 5', unlocked: level >= 5 },
+        { id: 'streak3', icon: <Flame />, title: 'Costante', desc: 'Studia per 3 giorni di fila', unlocked: false },
     ]
 
     return (
-        <section className="section active">
+        <section className="section active reveal-entrance">
             <div className="gamification-hero-mini">
                 <div className="hero-header-mini">
                     <div className="hero-level-circle-mini">
@@ -46,7 +47,7 @@ export default function GamificationSection() {
                     <div className="stat-game-label">XP Totali</div>
                 </div>
                 <div className="stat-card-game">
-                    <div className="stat-game-value">0 🔥</div>
+                    <div className="stat-game-value">0 <Flame size={20} className="inline-icon" /></div>
                     <div className="stat-game-label">Giorni di fila</div>
                 </div>
                 <div className="stat-card-game">
@@ -59,7 +60,7 @@ export default function GamificationSection() {
                 </div>
             </div>
 
-            <h3 style={{ marginBottom: 16 }}>🏆 Obiettivi & Badge</h3>
+            <h3 style={{ marginBottom: 16 }}><Trophy size={20} className="inline-icon" /> Obiettivi & Badge</h3>
             <div className="achievements-grid">
                 {achievements.map(ach => (
                     <div key={ach.id} className={`achievement-card ${ach.unlocked ? 'unlocked' : ''}`}>
@@ -70,15 +71,15 @@ export default function GamificationSection() {
                 ))}
             </div>
 
-            <div className="xp-guide-section">
-                <h3>💎 Come Guadagnare XP</h3>
+            <div className="xp-guide-section reveal-up">
+                <h3><Sparkles size={20} className="inline-icon" /> Come Guadagnare XP</h3>
                 <div className="xp-guide-list">
                     {[
-                        { icon: '📝', label: 'Nuova Nota', val: '+10 XP' },
-                        { icon: '⚡', label: 'Flashcard', val: '+5 XP' },
-                        { icon: '✅', label: 'Compito Fatto', val: '+20 XP' },
-                        { icon: '⏳', label: 'Pomodoro (25m)', val: '+25 XP' },
-                        { icon: '📅', label: 'Login Giornaliero', val: '+50 XP' },
+                        { icon: <Edit3 size={18} />, label: 'Nuova Nota', val: '+10 XP' },
+                        { icon: <Zap size={18} />, label: 'Flashcard', val: '+5 XP' },
+                        { icon: <CheckCircle size={18} />, label: 'Compito Fatto', val: '+20 XP' },
+                        { icon: <Clock size={18} />, label: 'Pomodoro (25m)', val: '+25 XP' },
+                        { icon: <Calendar size={18} />, label: 'Login Giornaliero', val: '+50 XP' },
                     ].map((item, i) => (
                         <div key={i} className="xp-guide-item">
                             <span className="xp-icon">{item.icon}</span>

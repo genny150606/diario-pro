@@ -35,9 +35,9 @@ export default function TasksSection() {
     }
 
     return (
-        <section className="section active">
+        <section className="section active reveal-entrance">
             <div className="hero">
-                <h1><span className="gradient-text">Compiti</span> 📝</h1>
+                <h1><span className="gradient-text">Compiti</span> <CheckSquare size={32} className="inline-icon hero-icon-floating" /></h1>
                 <p>Gestisci i tuoi compiti e scadenze</p>
             </div>
 
@@ -62,7 +62,7 @@ export default function TasksSection() {
 
             {sortedTasks.length === 0 ? (
                 <p style={{ textAlign: 'center', color: 'var(--color-text-tertiary)', padding: '2rem' }}>
-                    Nessun compito ancora. Aggiungine uno! 📋
+                    Nessun compito ancora. Aggiungine uno! <PlusCircle size={16} className="text-accent" />
                 </p>
             ) : (
                 <div className="tasks-list">

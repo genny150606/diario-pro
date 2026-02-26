@@ -111,9 +111,9 @@ export default function NotesSection() {
     )
 
     return (
-        <section className="section active">
+        <section className="section active reveal-entrance">
             <div className="hero">
-                <h1><span className="gradient-text">Note & Flashcard</span> 📚</h1>
+                <h1><span className="gradient-text">Note & Flashcard</span> <BookOpen size={32} className="inline-icon hero-icon-floating" /></h1>
                 <p>Organizza i tuoi appunti e crea flashcard per memorizzare</p>
             </div>
 
@@ -152,7 +152,7 @@ export default function NotesSection() {
 
                     {sortedNotes.length === 0 ? (
                         <p style={{ textAlign: 'center', color: 'var(--color-text-tertiary)', padding: '2rem' }}>
-                            Nessuna nota ancora. Crea la tua prima! ✨
+                            Nessuna nota ancora. Crea la tua prima! <Sparkles size={16} className="text-accent" />
                         </p>
                     ) : (
                         <div className="notes-list">
@@ -223,7 +223,7 @@ export default function NotesSection() {
 
                     {data.flashcards.length === 0 ? (
                         <p style={{ textAlign: 'center', color: 'var(--color-text-tertiary)', padding: '2rem' }}>
-                            Nessuna flashcard ancora. Genera con l'AI! ✨
+                            Nessuna flashcard ancora. Genera con l'AI! <Sparkles size={16} className="text-accent" />
                         </p>
                     ) : (
                         <div className="flashcards-grid">

@@ -3,16 +3,38 @@
    ============================================ */
 
 /* ── ENTRANCE CLASSES ── */
-.fade-in {
-    animation: fadeIn var(--duration-base) var(--ease-out);
+.reveal-entrance {
+    animation: revealEntrance 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
-.slide-in-bottom {
-    animation: fadeInUp var(--duration-slow) var(--ease-out);
+.reveal-up {
+    animation: revealUp 1s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
-.scale-in {
-    animation: scaleIn var(--duration-base) var(--ease-out);
+@keyframes revealEntrance {
+    from {
+        opacity: 0;
+        transform: scale(0.96) translateY(10px);
+        filter: blur(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+        filter: blur(0);
+    }
+}
+
+@keyframes revealUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 /* ── INTERACTIVE ── */
@@ -109,16 +131,28 @@
         transition-duration: 0.01ms !important;
     }
 }
+
 /* JARVIS MODE PULSE ANIMATION */
 @keyframes pulse-ring {
-    0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
-    70% { transform: scale(1); box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); }
-    100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+    0% {
+        transform: scale(0.95);
+        box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7);
+    }
+
+    70% {
+        transform: scale(1);
+        box-shadow: 0 0 0 10px rgba(239, 68, 68, 0);
+    }
+
+    100% {
+        transform: scale(0.95);
+        box-shadow: 0 0 0 0 rgba(239, 68, 68, 0);
+    }
 }
 
 .jarvis-active {
     animation: pulse-ring 2s infinite;
-    background-color: #ef4444 !important; /* Red when active */
+    background-color: #ef4444 !important;
+    /* Red when active */
     color: white !important;
 }
-

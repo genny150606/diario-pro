@@ -1,5 +1,5 @@
 import { useData } from '../../hooks/useData'
-import { FileText, Layers, CheckCircle, GraduationCap, BarChart3, Swords } from 'lucide-react'
+import { FileText, Layers, CheckCircle, GraduationCap, BarChart3, Swords, Sparkles, Target, Edit3 } from 'lucide-react'
 
 export default function DashboardSection() {
     const { data, getWeightedAverage, getCompletedTasksCount } = useData()
@@ -8,9 +8,9 @@ export default function DashboardSection() {
     const completedTasks = getCompletedTasksCount()
 
     return (
-        <section className="section active">
+        <section className="section active reveal-entrance">
             <div className="hero">
-                <h1><span className="gradient-text">Benvenuto!</span> 👋</h1>
+                <h1><span className="gradient-text">Benvenuto!</span> <Sparkles size={32} className="inline-icon hero-sparkle" /></h1>
                 <p>Visualizza il tuo progresso di studio in tempo reale</p>
             </div>
 
@@ -71,32 +71,32 @@ export default function DashboardSection() {
             </div>
 
             {/* Daily Challenges */}
-            <div className="daily-challenges-widget">
+            <div className="daily-challenges-widget reveal-up" style={{ animationDelay: '0.4s' }}>
                 <div className="challenge-header">
                     <div className="header-text">
-                        <h3>🎯 Sfide del Giorno</h3>
+                        <h3><Target size={20} className="inline-icon" /> Sfide del Giorno</h3>
                         <p className="challenge-subtitle">Guadagna XP extra completando le missioni</p>
                     </div>
                 </div>
                 <div className="challenge-list">
                     <div className={`challenge-item ${(data.notes || []).length >= 3 ? 'completed' : ''}`}>
-                        <div className="challenge-icon-box">📝</div>
+                        <div className="challenge-icon-box"><Edit3 size={18} /></div>
                         <div className="challenge-info">
                             <div className="challenge-name">Scrivi 3 nuove note</div>
                             <div className="challenge-reward">+50 XP</div>
                         </div>
-                        {(data.notes || []).length >= 3 && <div className="challenge-check-badge">✓</div>}
+                        {(data.notes || []).length >= 3 && <div className="challenge-check-badge"><CheckCircle size={14} /></div>}
                     </div>
                     <div className={`challenge-item ${(data.flashcards || []).length >= 5 ? 'completed' : ''}`}>
-                        <div className="challenge-icon-box">🎴</div>
+                        <div className="challenge-icon-box"><Layers size={18} /></div>
                         <div className="challenge-info">
                             <div className="challenge-name">Crea 5 flashcard</div>
                             <div className="challenge-reward">+100 XP</div>
                         </div>
-                        {(data.flashcards || []).length >= 5 && <div className="challenge-check-badge">✓</div>}
+                        {(data.flashcards || []).length >= 5 && <div className="challenge-check-badge"><CheckCircle size={14} /></div>}
                     </div>
                     <div className="challenge-item">
-                        <div className="challenge-icon-box">⚔️</div>
+                        <div className="challenge-icon-box"><Swords size={18} /></div>
                         <div className="challenge-info">
                             <div className="challenge-name">Partecipa a un Duello AI</div>
                             <div className="challenge-reward">+150 XP</div>

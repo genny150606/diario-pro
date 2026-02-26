@@ -253,9 +253,10 @@ export default function DuelSection() {
             setCurrentRoom(room)
             setIsHost(false)
             setState(DUEL_STATES.WAITING)
-            pollRoomStatus() // Quick initial poll
+            // React useEffect will start polling on next render
         } catch (err) {
-            setError(err.message)
+            console.error('[JOIN_MATCH_ERR]', err)
+            setError(err.message || err.error_description || String(err))
         } finally {
             setLoading(false)
         }

@@ -51,8 +51,6 @@ async function getAIText(result) {
 async function generateWithFallback(prompt) {
     const modelsToTry = [
         "gemini-2.0-flash",
-        "gemini-1.5-flash",
-        "gemini-1.5-flash-8b",
         "gemini-pro"
     ];
     let lastError = null;

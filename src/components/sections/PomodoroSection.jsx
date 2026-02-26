@@ -1,10 +1,11 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
+import { Play, Pause, RotateCcw, Settings, Coffee, Leaf, Book, Save } from 'lucide-react'
 import './PomodoroSection.css'
 
 const MODES = {
-    study: { label: 'Studio', emoji: '📚', color: '#5B9FF3' },
-    shortBreak: { label: 'Pausa Breve', emoji: '☕', color: '#30D158' },
-    longBreak: { label: 'Pausa Lunga', emoji: '🌿', color: '#FF9F0A' }
+    study: { label: 'Studio', Icon: Book, color: '#5B9FF3' },
+    shortBreak: { label: 'Pausa Breve', Icon: Coffee, color: '#30D158' },
+    longBreak: { label: 'Pausa Lunga', Icon: Leaf, color: '#FF9F0A' }
 }
 
 export default function PomodoroSection() {
@@ -107,52 +108,60 @@ export default function PomodoroSection() {
             </div>
 
             {/* Timer Display */}
-            <div className="pomodoro-card">
-                <div className="pomodoro-mode-badge" style={{ background: `${modeInfo.color}20`, color: modeInfo.color }}>
-                    {modeInfo.emoji} {modeInfo.label}
+            <div className="pomodoro-container-card">
+                <div className="pomodoro-mode-selector">
+                    {Object.entries(MODES).map(([mKey, mInfo]) => {
+                        const Icon = mInfo.Icon
+                        return (
+                            <button
+                                key={mKey}
+                                className={`mode-btn ${mode === mKey ? 'active' : ''}`}
+                                onClick={() => { setMode(mKey); setTimeLeft(mInfo.label === 'Studio' ? studyDuration * 60 : mInfo.label === 'Pausa Breve' ? shortBreakDuration * 60 : longBreakDuration * 60); setIsRunning(false); }}
+                                style={{ '--mode-color': mInfo.color }}
+                            >
+                                <Icon size={16} /> {mInfo.label}
+                            </button>
+                        )
+                    })}
                 </div>
 
-                <div className="pomodoro-timer-ring">
-                    <svg viewBox="0 0 200 200" className="timer-svg">
-                        <circle cx="100" cy="100" r="90" fill="none" stroke="rgba(255,255,255,0.05)" strokeWidth="6" />
-                        <circle
-                            cx="100" cy="100" r="90" fill="none"
-                            stroke={modeInfo.color}
-                            strokeWidth="6"
-                            strokeLinecap="round"
-                            strokeDasharray={`${2 * Math.PI * 90}`}
-                            strokeDashoffset={`${2 * Math.PI * 90 * (1 - progress / 100)}`}
-                            style={{ transition: 'stroke-dashoffset 0.5s ease', transform: 'rotate(-90deg)', transformOrigin: 'center' }}
-                        />
-                    </svg>
-                    <div className="timer-text">
-                        <span className="timer-digits">{formatTime(timeLeft)}</span>
-                        <span className="timer-label">{modeInfo.label}</span>
+                <div className="pomodoro-timer-display">
+                    <div className="timer-ring-wrapper">
+                        <svg viewBox="0 0 200 200" className="timer-svg">
+                            <circle cx="100" cy="100" r="92" className="ring-bg" />
+                            <circle
+                                cx="100" cy="100" r="92"
+                                className="ring-progress"
+                                stroke={modeInfo.color}
+                                strokeDasharray={`${2 * Math.PI * 92}`}
+                                strokeDashoffset={`${2 * Math.PI * 92 * (1 - progress / 100)}`}
+                            />
+                        </svg>
+                        <div className="timer-content">
+                            <div className="timer-digits">{formatTime(timeLeft)}</div>
+                            <div className="timer-mode-label">{modeInfo.label.toUpperCase()}</div>
+                        </div>
                     </div>
                 </div>
 
                 {/* Controls */}
-                <div className="pomodoro-controls">
-                    {!isRunning ? (
-                        <button className="pomo-btn pomo-start" onClick={handleStart} style={{ background: modeInfo.color }}>
-                            ▶ Avvia
-                        </button>
-                    ) : (
-                        <button className="pomo-btn pomo-pause" onClick={handlePause}>
-                            ⏸ Pausa
-                        </button>
-                    )}
-                    <button className="pomo-btn pomo-reset" onClick={handleReset}>
-                        ↺ Reset
+                <div className="pomodoro-actions">
+                    <button className={`pomo-action-btn ${isRunning ? 'pause' : 'start'}`} onClick={isRunning ? handlePause : handleStart} style={{ '--btn-color': modeInfo.color }}>
+                        {isRunning ? <><Pause size={24} /> PAUSA</> : <><Play size={24} /> AVVIA</>}
+                    </button>
+                    <button className="pomo-action-btn reset" onClick={handleReset}>
+                        <RotateCcw size={20} />
                     </button>
                 </div>
 
                 {/* Sessions counter */}
-                <div className="pomodoro-sessions">
-                    <span>{sessionsCompleted}</span> sessioni completate oggi
-                    <div className="session-dots">
+                <div className="pomodoro-status-footer">
+                    <div className="session-count">
+                        <span className="count-num">{sessionsCompleted}</span> sessioni completate
+                    </div>
+                    <div className="session-dots-progress">
                         {[...Array(4)].map((_, i) => (
-                            <span key={i} className={`session-dot ${i < (sessionsCompleted % 4) ? 'filled' : ''}`}
+                            <div key={i} className={`session-pip ${i < (sessionsCompleted % 4) ? 'done' : ''}`}
                                 style={{ background: i < (sessionsCompleted % 4) ? modeInfo.color : undefined }} />
                         ))}
                     </div>
@@ -160,29 +169,28 @@ export default function PomodoroSection() {
             </div>
 
             {/* Settings */}
-            <div className="card" style={{ marginTop: '1.5rem' }}>
-                <h3>⚙️ Impostazioni Timer</h3>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '1rem', marginBottom: '1rem' }}>
-                    <div>
-                        <label style={{ fontSize: '0.8rem', color: 'var(--color-text-secondary)', display: 'block', marginBottom: '0.3rem' }}>Studio (min)</label>
+            <div className="card pomo-settings-card">
+                <h3><Settings size={18} style={{ verticalAlign: 'middle', marginRight: '8px' }} /> Impostazioni Timer</h3>
+                <div className="pomo-settings-grid">
+                    <div className="setting-input-group">
+                        <label>Studio (min)</label>
                         <input type="number" min="1" max="120" value={studyDuration}
-                            onChange={e => setStudyDuration(parseInt(e.target.value) || 25)}
-                            style={{ marginBottom: 0 }} />
+                            onChange={e => setStudyDuration(parseInt(e.target.value) || 25)} />
                     </div>
-                    <div>
-                        <label style={{ fontSize: '0.8rem', color: 'var(--color-text-secondary)', display: 'block', marginBottom: '0.3rem' }}>Pausa breve</label>
+                    <div className="setting-input-group">
+                        <label>Pausa breve</label>
                         <input type="number" min="1" max="30" value={shortBreakDuration}
-                            onChange={e => setShortBreakDuration(parseInt(e.target.value) || 5)}
-                            style={{ marginBottom: 0 }} />
+                            onChange={e => setShortBreakDuration(parseInt(e.target.value) || 5)} />
                     </div>
-                    <div>
-                        <label style={{ fontSize: '0.8rem', color: 'var(--color-text-secondary)', display: 'block', marginBottom: '0.3rem' }}>Pausa lunga</label>
+                    <div className="setting-input-group">
+                        <label>Pausa lunga</label>
                         <input type="number" min="1" max="60" value={longBreakDuration}
-                            onChange={e => setLongBreakDuration(parseInt(e.target.value) || 15)}
-                            style={{ marginBottom: 0 }} />
+                            onChange={e => setLongBreakDuration(parseInt(e.target.value) || 15)} />
                     </div>
                 </div>
-                <button className="btn-secondary" onClick={handleSaveSettings} style={{ width: '100%' }}>💾 Salva Impostazioni</button>
+                <button className="btn-secondary pomo-save-btn" onClick={handleSaveSettings}>
+                    <Save size={16} /> Salva Impostazioni
+                </button>
             </div>
         </section>
     )

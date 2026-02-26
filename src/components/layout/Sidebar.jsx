@@ -1,24 +1,32 @@
+import { NavLink } from 'react-router-dom'
 import { LogOut } from 'lucide-react'
 
-export default function Sidebar({ sections, activeSection, isOpen, onSectionChange, onSignOut }) {
+export default function Sidebar({ sections, isOpen, setSidebarOpen, onExit }) {
     const mainSections = sections.filter(s => !s.bottom)
     const bottomSections = sections.filter(s => s.bottom)
+
+    const handleLinkClick = () => {
+        if (window.innerWidth < 768) {
+            setSidebarOpen(false)
+        }
+    }
 
     return (
         <nav className={`sidebar ${isOpen ? 'open' : ''}`}>
             {mainSections.map(section => {
                 const IconComponent = section.Icon
                 return (
-                    <a
+                    <NavLink
                         key={section.id}
-                        href="#"
-                        className={`sidebar-item ${activeSection === section.id ? 'active' : ''}`}
-                        onClick={(e) => { e.preventDefault(); onSectionChange(section.id) }}
-                        title={section.label}
+                        to={section.path}
+                        end={section.path === '/app'}
+                        className={({ isActive }) => `sidebar-item ${isActive ? 'active' : ''}`}
+                        onClick={handleLinkClick}
                     >
-                        {IconComponent && <IconComponent size={20} />}
+                        {IconComponent && <IconComponent size={22} strokeWidth={2.5} />}
                         <span>{section.label}</span>
-                    </a>
+                        <div className="sidebar-active-dot" />
+                    </NavLink>
                 )
             })}
 
@@ -26,22 +34,27 @@ export default function Sidebar({ sections, activeSection, isOpen, onSectionChan
                 {bottomSections.map(section => {
                     const IconComponent = section.Icon
                     return (
-                        <a
+                        <NavLink
                             key={section.id}
-                            href="#"
-                            className={`sidebar-item ${activeSection === section.id ? 'active' : ''}`}
-                            onClick={(e) => { e.preventDefault(); onSectionChange(section.id) }}
+                            to={section.path}
+                            className={({ isActive }) => `sidebar-item ${isActive ? 'active' : ''}`}
+                            onClick={handleLinkClick}
                             title={section.label}
                         >
                             {IconComponent && <IconComponent size={20} />}
                             <span>{section.label}</span>
-                        </a>
+                        </NavLink>
                     )
                 })}
-                <a href="#" className="sidebar-item" onClick={(e) => { e.preventDefault(); onSignOut() }} title="Esci">
+                <button
+                    className="sidebar-item"
+                    onClick={() => { handleLinkClick(); onExit() }}
+                    title="Esci"
+                    style={{ background: 'none', border: 'none', width: '100%', cursor: 'pointer', textAlign: 'left' }}
+                >
                     <LogOut size={20} />
                     <span>Esci</span>
-                </a>
+                </button>
             </div>
         </nav>
     )

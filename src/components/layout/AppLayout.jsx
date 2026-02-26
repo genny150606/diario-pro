@@ -1,5 +1,5 @@
-import { useState, useCallback } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useState } from 'react'
+import { useNavigate, Link, Outlet } from 'react-router-dom'
 import { useAuth } from '../../hooks/useAuth'
 import Sidebar from './Sidebar'
 import ChatbotWidget from '../chatbot/ChatbotWidget'
@@ -24,19 +24,19 @@ import {
 } from 'lucide-react'
 
 const SECTIONS = [
-    { id: 'dashboard', label: 'Dashboard', Icon: Home },
-    { id: 'notes', label: 'Note', Icon: BookOpen },
-    { id: 'tasks', label: 'Compiti', Icon: CheckSquare },
-    { id: 'grades', label: 'Voti', Icon: Star },
-    { id: 'pomodoro', label: 'Pomodoro', Icon: Timer },
-    { id: 'stats', label: 'Statistiche', Icon: BarChart2 },
-    { id: 'duel', label: 'Duello AI', Icon: Swords },
-    { id: 'social', label: 'Social', Icon: Users },
-    { id: 'gamification', label: 'Livello', Icon: Trophy },
-    { id: 'settings', label: 'Impostazioni', Icon: Settings, bottom: true },
+    { id: 'dashboard', label: 'Dashboard', Icon: Home, path: '/app' },
+    { id: 'notes', label: 'Note', Icon: BookOpen, path: '/app/notes' },
+    { id: 'tasks', label: 'Compiti', Icon: CheckSquare, path: '/app/tasks' },
+    { id: 'grades', label: 'Voti', Icon: Star, path: '/app/grades' },
+    { id: 'pomodoro', label: 'Pomodoro', Icon: Timer, path: '/app/pomodoro' },
+    { id: 'stats', label: 'Statistiche', Icon: BarChart2, path: '/app/stats' },
+    { id: 'duel', label: 'Duello AI', Icon: Swords, path: '/app/duel' },
+    { id: 'social', label: 'Social', Icon: Users, path: '/app/social' },
+    { id: 'gamification', label: 'Livello', Icon: Trophy, path: '/app/gamification' },
+    { id: 'settings', label: 'Impostazioni', Icon: Settings, path: '/app/settings', bottom: true },
 ]
 
-export default function AppLayout({ children, activeSection, onSectionChange }) {
+export default function AppLayout() {
     const { user, signOut } = useAuth()
     const navigate = useNavigate()
     const [sidebarOpen, setSidebarOpen] = useState(false)
@@ -47,11 +47,6 @@ export default function AppLayout({ children, activeSection, onSectionChange }) 
         return stored
     })
 
-    const handleSectionChange = useCallback((sectionId) => {
-        onSectionChange(sectionId)
-        setSidebarOpen(false)
-    }, [onSectionChange])
-
     const handleSignOut = async () => {
         try {
             await signOut()
@@ -60,6 +55,7 @@ export default function AppLayout({ children, activeSection, onSectionChange }) 
             console.error('Sign out error:', err)
         }
     }
+
 
     const toggleTheme = () => {
         const newTheme = theme === 'dark' ? 'light' : 'dark'
@@ -91,44 +87,46 @@ export default function AppLayout({ children, activeSection, onSectionChange }) 
                     <Menu size={20} />
                 </button>
 
-                <a href="#" className="logo" onClick={(e) => { e.preventDefault(); handleSectionChange('dashboard') }}>
+                <Link to="/app" className="logo">
                     <img src="/favicon.png" alt="Logo" className="logo-img" />
                     <span>StudyJournal</span>
-                </a>
+                </Link>
 
-                <div className="header-right-actions">
-                    <div className="streak-badge active" title="Serie di studio">
-                        <Star size={14} className="streak-icon" />
-                        <span className="streak-count">1</span>
+                <div className="header-right-group">
+                    <div className="header-right-actions">
+                        <div className="streak-badge active" title="Serie di studio">
+                            <Star size={14} className="streak-icon" />
+                            <span className="streak-count">1</span>
+                        </div>
                     </div>
-                </div>
 
-                <div className="header-right">
-                    <button className="theme-toggle" onClick={toggleTheme} title="Cambia Tema">
-                        {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
-                    </button>
-
-                    <div className="user-profile-wrapper">
-                        <button
-                            className="account-btn"
-                            onClick={(e) => { e.stopPropagation(); setMenuOpen(!menuOpen) }}
-                        >
-                            <User size={16} className="account-icon-mobile" />
-                            <span className="account-email-text">{displayEmail}</span>
-                            <ChevronDown size={14} className="chevron-icon" style={{ transform: menuOpen ? 'rotate(180deg)' : 'rotate(0)', transition: 'transform 0.2s' }} />
+                    <div className="header-right">
+                        <button className="theme-toggle" onClick={toggleTheme} title="Cambia Tema">
+                            {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
                         </button>
 
-                        {menuOpen && (
-                            <div className="account-dropdown show">
-                                <a href="#" className="dropdown-item" onClick={(e) => { e.preventDefault(); handleSectionChange('settings'); setMenuOpen(false) }}>
-                                    <Settings size={14} /> Impostazioni
-                                </a>
-                                <div style={{ height: 1, background: 'rgba(255,255,255,0.05)', margin: '0.5rem 0' }}></div>
-                                <a href="#" className="dropdown-item" onClick={(e) => { e.preventDefault(); handleSignOut() }} style={{ color: '#FF453A' }}>
-                                    <LogOut size={14} /> Esci
-                                </a>
-                            </div>
-                        )}
+                        <div className="user-profile-wrapper">
+                            <button
+                                className="account-btn"
+                                onClick={(e) => { e.stopPropagation(); setMenuOpen(!menuOpen) }}
+                            >
+                                <User size={16} className="account-icon-mobile" />
+                                <span className="account-email-text">{displayEmail}</span>
+                                <ChevronDown size={14} className="chevron-icon" style={{ transform: menuOpen ? 'rotate(180deg)' : 'rotate(0)', transition: 'transform 0.2s' }} />
+                            </button>
+
+                            {menuOpen && (
+                                <div className="account-dropdown show">
+                                    <Link to="/app/settings" className="dropdown-item" onClick={() => setMenuOpen(false)}>
+                                        <Settings size={14} /> Impostazioni
+                                    </Link>
+                                    <div style={{ height: 1, background: 'rgba(255,255,255,0.05)', margin: '0.5rem 0' }}></div>
+                                    <button className="dropdown-item" onClick={handleSignOut} style={{ color: '#FF453A', border: 'none', background: 'none', width: '100%', cursor: 'pointer' }}>
+                                        <LogOut size={14} /> Esci
+                                    </button>
+                                </div>
+                            )}
+                        </div>
                     </div>
                 </div>
             </header>
@@ -136,10 +134,9 @@ export default function AppLayout({ children, activeSection, onSectionChange }) 
             {/* Sidebar */}
             <Sidebar
                 sections={SECTIONS}
-                activeSection={activeSection}
                 isOpen={sidebarOpen}
-                onSectionChange={handleSectionChange}
-                onSignOut={handleSignOut}
+                setSidebarOpen={setSidebarOpen}
+                onExit={handleSignOut}
             />
 
             {/* Click outside to close sidebar on mobile */}
@@ -161,7 +158,7 @@ export default function AppLayout({ children, activeSection, onSectionChange }) 
             {/* Main content */}
             <div className="container">
                 <div className="content">
-                    {children}
+                    <Outlet />
                 </div>
             </div>
 

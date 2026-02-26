@@ -16,12 +16,35 @@ export const supabase = createClient(SUPABASE_URL, SUPABASE_KEY, {
     global: {
         fetch: async (url, options) => {
             const urlStr = url.toString()
-            // Route REST API calls through Vercel proxy to bypass Cloudflare 520
-            // ONLY IN PRODUCTION. Local dev doesn't need it and retrying causes massive slowdowns.
-            // DO NOT PROXY Auth calls, as they slow down the initial app load due to cold starts.
+
+            // Skip proxy for Auth calls entirely
+            if (urlStr.includes('/auth/v1/')) {
+                return window.fetch(url, options)
+            }
+
+            // Direct-First Strategy for REST API
+            // We try to connect directly to Supabase first for maximum speed.
+            // We only use the proxy if we hit Cloudflare 520 or Gateway errors.
+            try {
+                const directRes = await window.fetch(url, options)
+
+                // If it's a success or a normal client error (4xx), return it immediately
+                if (directRes.status < 500 || directRes.status === 404) {
+                    return directRes
+                }
+
+                // If it's a 520 (Cloudflare) or Gateway error, fall through to proxy
+                if (![520, 502, 503, 504].includes(directRes.status)) {
+                    return directRes
+                }
+            } catch (err) {
+                // If it's a network error (CORS/Blocked), fall through to proxy
+                console.warn('[AUTH] Direct fetch failed, attempting proxy fallback...', err.message)
+            }
+
+            // Proxy Fallback logic
             if (!import.meta.env.DEV && urlStr.includes('/rest/v1/')) {
                 let path = `/rest/v1/${urlStr.split('/rest/v1/')[1]}`
-
                 const rawHeaders = {}
                 if (options.headers) {
                     new Headers(options.headers).forEach((v, k) => rawHeaders[k] = v)
@@ -34,65 +57,19 @@ export const supabase = createClient(SUPABASE_URL, SUPABASE_KEY, {
                     body: options.body
                 }
 
-                // Retry logic with exponential backoff and timeout
-                let lastRes
-                for (let attempt = 0; attempt < 3; attempt++) {
-                    try {
-                        const controller = new AbortController()
-                        // 12s timeout to allow Vercel serverless cold starts
-                        const timeoutId = setTimeout(() => controller.abort(), 12000)
-
-                        lastRes = await fetch(PROXY_URL, {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                                'X-Client-Info': 'studyjournal-pro-react',
-                                'X-Client-Retry-Count': attempt.toString()
-                            },
-                            body: JSON.stringify(proxyBody),
-                            signal: controller.signal
-                        })
-
-                        clearTimeout(timeoutId)
-
-                        if (lastRes.ok) {
-                            return lastRes // Proxy succeeded and returned 2xx
-                        }
-
-                        // If proxy endpoint is missing
-                        if (lastRes.status === 404 && lastRes.headers.get('content-type')?.includes('text/html')) {
-                            break
-                        }
-
-                        // Valid 4xx from Supabase
-                        if (lastRes.status >= 400 && lastRes.status < 500 && !lastRes.headers.get('content-type')?.includes('text/html')) {
-                            return lastRes
-                        }
-
-                    } catch (err) {
-                        console.warn(`[PROXY RETRY] Attempt ${attempt + 1} failed:`, err.message)
-                    }
-
-                    if (attempt < 2) {
-                        const delay = 500 * Math.pow(2, attempt) + (Math.random() * 200)
-                        await new Promise(r => setTimeout(r, delay))
-                    }
+                try {
+                    const proxyRes = await fetch(PROXY_URL, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(proxyBody)
+                    })
+                    if (proxyRes.ok) return proxyRes
+                } catch (proxyErr) {
+                    console.error('[PROXY] Fallback also failed:', proxyErr)
                 }
-
-                // Fallback to direct Supabase connection if proxy completely failed or timed out
-                if (!lastRes || !lastRes.ok) {
-                    console.warn(`⚠️ Proxy completely failed (or returned ${lastRes?.status}), falling back to direct Supabase...`)
-                    try {
-                        return await window.fetch(url, options)
-                    } catch (fallbackErr) {
-                        console.error('❌ Direct fallback also failed:', fallbackErr)
-                        throw fallbackErr
-                    }
-                }
-
-                return lastRes
             }
 
+            // Universal fallback
             return window.fetch(url, options)
         }
     }

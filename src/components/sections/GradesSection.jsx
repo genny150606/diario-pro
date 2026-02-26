@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useData } from '../../hooks/useData'
+import { GraduationCap, Plus, Trash2, Calendar, Layout, Info, Award } from 'lucide-react'
 
 export default function GradesSection() {
     const { data, addGrade, deleteGrade, getWeightedAverage } = useData()
@@ -52,43 +53,58 @@ export default function GradesSection() {
                 <p>Traccia i tuoi progressi scolastici</p>
             </div>
 
-            {/* Average card */}
+            {/* Average summary */}
             {data.grades.length > 0 && (
-                <div style={{ display: 'flex', gap: 12, marginBottom: 24 }}>
-                    <div className="card" style={{ flex: 1, textAlign: 'center', padding: 16 }}>
-                        <div style={{ fontSize: 13, color: 'var(--color-text-secondary)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Media Ponderata</div>
-                        <div style={{ fontSize: 32, fontWeight: 800, color: gradeColor(parseFloat(average)), marginTop: 8 }}>{average}</div>
+                <div className="grades-summary-grid">
+                    <div className="card summary-item-card">
+                        <div className="summary-label">Media Ponderata</div>
+                        <div className="summary-value" style={{ color: gradeColor(parseFloat(average)) }}>
+                            {average}
+                        </div>
                     </div>
-                    <div className="card" style={{ flex: 1, textAlign: 'center', padding: 16 }}>
-                        <div style={{ fontSize: 13, color: 'var(--color-text-secondary)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Voti Totali</div>
-                        <div style={{ fontSize: 32, fontWeight: 800, color: 'var(--color-text)', marginTop: 8 }}>{data.grades.length}</div>
+                    <div className="card summary-item-card">
+                        <div className="summary-label">Voti Totali</div>
+                        <div className="summary-value">
+                            {data.grades.length}
+                        </div>
+                    </div>
+                    <div className="card summary-item-card">
+                        <div className="summary-label">Performance</div>
+                        <div className="summary-value" style={{ fontSize: '1.5rem', color: 'var(--color-accent)' }}>
+                            {parseFloat(average) >= 8 ? 'Eccellente' : parseFloat(average) >= 6 ? 'Buona' : 'Da revisionare'}
+                        </div>
                     </div>
                 </div>
             )}
 
-            <div className="card">
-                <h3>Aggiungi nuovo voto</h3>
-                <input type="text" placeholder="Materia..." value={subject} onChange={e => setSubject(e.target.value)} />
-                <input type="number" placeholder="Voto..." min="1" max="10" step="0.5" style={{ marginBottom: 12 }} value={value} onChange={e => setValue(e.target.value)} />
-                <input type="date" style={{ marginBottom: 12 }} value={date} onChange={e => setDate(e.target.value)} />
-                <textarea placeholder="Note..." style={{ minHeight: 80 }} value={notes} onChange={e => setNotes(e.target.value)} />
-                <button className="btn-primary" onClick={handleAddGrade} disabled={!subject.trim() || !value}>Salva Voto</button>
+            <div className="card grade-input-card">
+                <h3><Plus size={18} style={{ verticalAlign: 'middle', marginRight: '8px' }} /> Nuovo Voto</h3>
+                <div className="form-group">
+                    <div className="form-row" style={{ display: 'flex', gap: '1rem', marginBottom: '1rem' }}>
+                        <input type="text" style={{ flex: 2 }} placeholder="Materia..." value={subject} onChange={e => setSubject(e.target.value)} />
+                        <input type="number" style={{ flex: 1 }} placeholder="Voto..." min="1" max="10" step="0.5" value={value} onChange={e => setValue(e.target.value)} />
+                    </div>
+                    <div className="form-row" style={{ display: 'flex', gap: '1rem', marginBottom: '1rem' }}>
+                        <input type="date" style={{ flex: 1 }} value={date} onChange={e => setDate(e.target.value)} />
+                        <input type="text" style={{ flex: 2 }} placeholder="Note (es. Scritto, Orale...)" value={notes} onChange={e => setNotes(e.target.value)} />
+                    </div>
+                    <button className="btn-primary" style={{ width: '100%' }} onClick={handleAddGrade} disabled={!subject.trim() || !value}>
+                        Salva Voto
+                    </button>
+                </div>
             </div>
 
             {/* Subject averages */}
             {subjects.length > 0 && (
-                <div className="card" style={{ marginBottom: '1rem' }}>
-                    <h4 style={{ marginBottom: '0.8rem' }}>📊 Medie per Materia</h4>
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: '0.8rem' }}>
+                <div className="card subject-averages-card">
+                    <h4><Award size={18} style={{ verticalAlign: 'middle', marginRight: '8px' }} /> Medie per Materia</h4>
+                    <div className="subject-grid">
                         {subjects.map(sub => (
-                            <div key={sub} style={{
-                                background: 'rgba(255,255,255,0.03)',
-                                padding: '0.6rem 0.8rem',
-                                borderRadius: '0.5rem',
-                                textAlign: 'center'
-                            }}>
-                                <div style={{ fontSize: '0.8rem', color: 'var(--color-text-tertiary)', marginBottom: '0.2rem' }}>{sub}</div>
-                                <div style={{ fontSize: '1.3rem', fontWeight: 700, color: gradeColor(parseFloat(averageBySubject(sub))) }}>{averageBySubject(sub)}</div>
+                            <div key={sub} className="subject-item-box">
+                                <div className="subject-name">{sub}</div>
+                                <div className="subject-avg" style={{ color: gradeColor(parseFloat(averageBySubject(sub))) }}>
+                                    {averageBySubject(sub)}
+                                </div>
                             </div>
                         ))}
                     </div>
@@ -103,22 +119,22 @@ export default function GradesSection() {
             ) : (
                 <div className="grades-list">
                     {sortedGrades.map(grade => (
-                        <div key={grade.id} className="card" style={{ marginBottom: '0.8rem', borderLeft: `3px solid ${gradeColor(grade.value)}` }}>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                <div>
-                                    <p style={{ fontWeight: 600, margin: '0 0 0.2rem' }}>{grade.subject}</p>
-                                    <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-                                        <span style={{ fontSize: '0.75rem', color: 'var(--color-text-tertiary)' }}>📅 {grade.date}</span>
+                        <div key={grade.id} className="card grade-item-card" style={{ borderLeftColor: gradeColor(grade.value) }}>
+                            <div className="grade-item-content">
+                                <div className="grade-main-info">
+                                    <p className="grade-subject-title">{grade.subject}</p>
+                                    <div className="grade-meta">
+                                        <span className="grade-date"><Calendar size={12} /> {grade.date}</span>
+                                        {grade.notes && <span className="grade-note-tag"><Info size={12} /> {grade.notes}</span>}
                                     </div>
-                                    {grade.notes && <p style={{ fontSize: '0.85rem', color: 'var(--color-text-secondary)', marginTop: '0.3rem' }}>{grade.notes}</p>}
                                 </div>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                                    <span style={{
-                                        fontSize: '1.5rem', fontWeight: 800, color: gradeColor(grade.value),
-                                        background: `${gradeColor(grade.value)}15`, padding: '0.3rem 0.8rem',
-                                        borderRadius: '0.5rem'
-                                    }}>{grade.value}</span>
-                                    <button className="btn-secondary" onClick={() => handleDeleteGrade(grade.id)} style={{ padding: '0.3rem 0.6rem', fontSize: '0.8rem', minHeight: 'unset' }}>🗑️</button>
+                                <div className="grade-value-box">
+                                    <div className="grade-pill" style={{ background: `${gradeColor(grade.value)}20`, color: gradeColor(grade.value) }}>
+                                        {grade.value}
+                                    </div>
+                                    <button className="btn-icon-delete" onClick={() => handleDeleteGrade(grade.id)}>
+                                        <Trash2 size={16} />
+                                    </button>
                                 </div>
                             </div>
                         </div>

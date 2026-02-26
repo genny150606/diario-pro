@@ -29,6 +29,83 @@ const DEFAULT_DATA = {
     }
 }
 
+// ✅ HELPER: Parsing sicuro che gestisce oggetti o stringhe
+function safeJsonParse(input) {
+    if (!input) return null;
+    if (typeof input === 'object') return input;
+    try {
+        return JSON.parse(input);
+    } catch (e) {
+        console.error("[safeJsonParse] ERR: JSON malformato", e);
+        return null;
+    }
+}
+
+// ✅ SEZIONE deepMergeSafe - ARCHITETTURA DIFENSIVA
+function deepMergeSafe(defaultObj, incomingObj) {
+    if (!incomingObj || typeof incomingObj !== 'object' || Array.isArray(incomingObj)) {
+        return JSON.parse(JSON.stringify(defaultObj));
+    }
+
+    const result = JSON.parse(JSON.stringify(defaultObj));
+
+    Object.keys(defaultObj).forEach(key => {
+        const defaultValue = defaultObj[key];
+        const incomingValue = incomingObj[key];
+
+        if (incomingValue === undefined) return;
+
+        if (Array.isArray(defaultValue)) {
+            // Se è array → sostituisci completamente con array valido
+            if (Array.isArray(incomingValue)) {
+                result[key] = JSON.parse(JSON.stringify(incomingValue));
+            }
+        } else if (defaultValue !== null && typeof defaultValue === 'object') {
+            // Se è oggetto → ricorsione
+            result[key] = deepMergeSafe(defaultValue, incomingValue);
+        } else {
+            // Se è primitivo → usa valore input solo se tipo corretto
+            if (typeof incomingValue === typeof defaultValue) {
+                result[key] = incomingValue;
+            }
+        }
+    });
+
+    return result;
+}
+
+// ✅ SEZIONE sanitizeData - VALIDAZIONE DEFINITIVA
+function sanitizeData(inputData) {
+    if (!inputData || typeof inputData !== 'object') {
+        return JSON.parse(JSON.stringify(DEFAULT_DATA));
+    }
+
+    try {
+        const merged = deepMergeSafe(DEFAULT_DATA, inputData);
+
+        // Mapping dati legacy (Es: entries -> diaryEntries)
+        if (inputData.entries && Array.isArray(inputData.entries) && (!merged.diaryEntries || merged.diaryEntries.length === 0)) {
+            merged.diaryEntries = JSON.parse(JSON.stringify(inputData.entries));
+        }
+
+        // Validazione post-merge per oggetti critici
+        if (!merged.counters || typeof merged.counters !== 'object') {
+            merged.counters = JSON.parse(JSON.stringify(DEFAULT_DATA.counters));
+        }
+        if (!merged.stats || typeof merged.stats !== 'object') {
+            merged.stats = JSON.parse(JSON.stringify(DEFAULT_DATA.stats));
+        }
+
+        return {
+            ...merged,
+            lastModified: inputData.lastModified || Date.now()
+        };
+    } catch (err) {
+        console.error("[sanitizeData] ERR: Errore durante sanitizzazione:", err);
+        return JSON.parse(JSON.stringify(DEFAULT_DATA));
+    }
+}
+
 export function DataProvider({ children }) {
     const { user } = useAuth()
     const [data, setData] = useState(DEFAULT_DATA)
@@ -38,7 +115,7 @@ export function DataProvider({ children }) {
     // Cache key for localStorage
     const cacheKey = user ? `sj_data_${user.id}` : null
 
-    // ── LOAD data from Supabase (source of truth) or localStorage cache ──
+    // ✅ SEZIONE HYDRATION EFFECT - LOGICAMENTE PROTETTA
     useEffect(() => {
         if (!user) {
             console.log('[DataContext] No user, setting DEFAULT_DATA')
@@ -50,7 +127,9 @@ export function DataProvider({ children }) {
         async function loadData() {
             setLoading(true)
             console.log(`[DataContext] Loading data for user ${user.id}...`)
+
             try {
+                // 1. Load Raw Cloud Data
                 const { data: row, error } = await supabase
                     .from('users_data')
                     .select('data')
@@ -61,29 +140,34 @@ export function DataProvider({ children }) {
                     console.warn('[DataContext] CloudStorage load error:', error)
                 }
 
-                // ── MIGRATION LOGIC: Rescue old HTML app data ──
-                const oldHtmlDataStr = localStorage.getItem('studyjournal_data')
+                // 2. Load and Parse Local Data
                 const cachedStr = localStorage.getItem(cacheKey)
-                let localData = cachedStr ? sanitizeData(JSON.parse(cachedStr)) : null
+                let localData = null
 
+                if (cachedStr) {
+                    const parsed = safeJsonParse(cachedStr);
+                    if (parsed) {
+                        console.log('[DataContext] Raw Local Data:', parsed)
+                        localData = sanitizeData(parsed)
+                        console.log('[DataContext] Sanitized Local Data:', localData)
+                    }
+                }
+
+                // ── MIGRATION LOGIC (NON TOCCARE) ──
+                const oldHtmlDataStr = localStorage.getItem('studyjournal_data')
                 if (oldHtmlDataStr) {
                     try {
                         const oldData = sanitizeData(JSON.parse(oldHtmlDataStr))
-                        // Prioritize old html total items to see if we should rescue
                         const totalOldItems = oldData.notes.length + oldData.flashcards.length
                         const totalLocalItems = localData ? localData.notes.length + localData.flashcards.length : 0
                         const totalCloudItems = (row?.data?.notes || []).length + (row?.data?.flashcards || []).length
 
                         if (totalOldItems > totalLocalItems && totalOldItems > totalCloudItems && totalOldItems > 0) {
                             console.log('[DataContext] MIGRATION: Found much richer old HTML data, forcefully adopting it over everything.')
-
-                            // Adopt immediately
                             localData = oldData
                             localStorage.setItem(cacheKey, JSON.stringify(oldData))
                             setData(oldData)
                             setLoading(false)
-
-                            // Force cloud sync immediately
                             supabase.from('users_data').upsert({
                                 id: user.id,
                                 data: oldData,
@@ -92,8 +176,6 @@ export function DataProvider({ children }) {
                                 console.log('[DataContext] MIGRATION: Successfully backed up old HTML data to Cloud.')
                                 localStorage.removeItem('studyjournal_data')
                             })
-
-                            // Exit early, migration handled everything
                             return
                         } else if (totalOldItems === 0) {
                             localStorage.removeItem('studyjournal_data')
@@ -103,57 +185,58 @@ export function DataProvider({ children }) {
                     }
                 }
 
-                if (row?.data && Object.keys(row.data).length > 0) {
-                    console.log('[DataContext] Loaded data from Supabase:', row.data)
+                // 3. Process Cloud Data & Final Merge
+                const cloudRaw = safeJsonParse(row?.data);
+                if (cloudRaw && Object.keys(cloudRaw).length > 0) {
+                    console.log('[DataContext] Raw Cloud Data:', cloudRaw)
 
-                    let finalData = sanitizeData(row.data)
+                    let finalData;
+                    try {
+                        finalData = sanitizeData(cloudRaw)
+                        console.log('[DataContext] Sanitized Cloud Data:', finalData)
+                    } catch (err) {
+                        console.error("HYDRATION FAILED (Cloud Data)", err)
+                        finalData = localData || JSON.parse(JSON.stringify(DEFAULT_DATA))
+                    }
 
                     if (localData) {
-                        // Compare local vs cloud using lastModified timestamp
                         const cloudModified = finalData.lastModified || 0
                         const localModified = localData.lastModified || 0
-
-                        const cloudNotes = finalData.notes.length
-                        const localNotes = localData.notes.length
-                        const cloudFlashcards = finalData.flashcards.length
-                        const localFlashcards = localData.flashcards.length
-
-                        console.log(`[DataContext] Merge Check - Cloud [Modified: ${cloudModified}, Notes: ${cloudNotes}] vs Local [Modified: ${localModified}, Notes: ${localNotes}]`)
-
-                        // Determine if local is newer (via timestamp) or if missing timestamps, guess by assuming local is newer if lengths are >=
                         const isLocalNewer = localModified > cloudModified ||
-                            (localModified === 0 && cloudModified === 0 && localNotes >= cloudNotes && localFlashcards >= cloudFlashcards)
+                            (localModified === 0 && cloudModified === 0 && localData.notes.length >= finalData.notes.length && localData.flashcards.length >= finalData.flashcards.length)
 
                         if (isLocalNewer) {
-                            console.log('[DataContext] Local storage is NEWER! Preferring local storage to prevent data loss.')
+                            console.log('[DataContext] Local storage is NEWER! Preferring local storage.')
                             finalData = localData
-
-                            // Re-sync the rich local data back up to the cloud!
                             supabase.from('users_data').upsert({
                                 id: user.id,
                                 data: finalData,
                                 updated_at: new Date().toISOString()
-                            }, { onConflict: 'id' }).then(() => console.log('[DataContext] Cloud forcefully synced with rich local data.'))
+                            }, { onConflict: 'id' }).then(() => console.log('[DataContext] Cloud forcefully synced with local cache.'))
                         }
                     }
 
                     localStorage.setItem(cacheKey, JSON.stringify(finalData))
                     setData(finalData)
                 } else {
-                    console.log('[DataContext] No data in Supabase (or empty object), trying localStorage...')
+                    console.log('[DataContext] No data in Supabase, using local or default.')
                     if (localData) {
-                        console.log('[DataContext] Loaded data from localStorage:', localData)
                         setData(localData)
                     } else {
-                        console.log('[DataContext] No data anywhere, using DEFAULT_DATA')
-                        setData(DEFAULT_DATA)
+                        setData(JSON.parse(JSON.stringify(DEFAULT_DATA)))
                     }
                 }
             } catch (err) {
-                console.error('[DataContext] CloudStorage load exception:', err)
+                console.error("HYDRATION FAILED (Global)", err)
                 const cached = localStorage.getItem(cacheKey)
                 if (cached) {
-                    setData(sanitizeData(JSON.parse(cached)))
+                    try {
+                        setData(sanitizeData(JSON.parse(cached)))
+                    } catch (e) {
+                        setData(JSON.parse(JSON.stringify(DEFAULT_DATA)))
+                    }
+                } else {
+                    setData(JSON.parse(JSON.stringify(DEFAULT_DATA)))
                 }
             } finally {
                 setLoading(false)
@@ -163,7 +246,7 @@ export function DataProvider({ children }) {
         loadData()
     }, [user, cacheKey])
 
-    // ── SAVE data (debounced: write-through cache + async Supabase) ──
+    // ✅ SEZIONE saveData - PERFORMANCE OTTIMIZZATA
     const saveData = useCallback((newData) => {
         if (!user) {
             console.log('[DataContext] saveData called but no user')
@@ -172,9 +255,8 @@ export function DataProvider({ children }) {
 
         console.log('[DataContext] saveData called with:', newData)
 
-        // Prevent state mutation bugs! Deep clone before modifying nested counters
         const updated = JSON.parse(JSON.stringify(newData))
-        updated.lastModified = Date.now() // Ensure timestamp exists for merge logic
+        updated.lastModified = Date.now()
 
         if (!updated.counters) updated.counters = {}
 
@@ -217,12 +299,10 @@ export function DataProvider({ children }) {
                     if (error) console.error('[DataContext] CloudStorage save error:', error)
                     else console.log('[DataContext] CloudStorage save success')
                 })
-        }, 500) // Debounce 500ms to batch rapid changes
-    }, [user, cacheKey, data])
+        }, 500)
+    }, [user, cacheKey])
 
     // ── CRUD helpers ──
-
-    // NOTES
     const addNote = useCallback((note) => {
         const newNote = {
             id: Date.now(),
@@ -242,7 +322,6 @@ export function DataProvider({ children }) {
         saveData(updated)
     }, [data, saveData])
 
-    // TASKS
     const addTask = useCallback((task) => {
         const newTask = {
             id: Date.now(),
@@ -273,7 +352,6 @@ export function DataProvider({ children }) {
         saveData(updated)
     }, [data, saveData])
 
-    // GRADES
     const addGrade = useCallback((grade) => {
         const newGrade = {
             id: Date.now(),
@@ -293,19 +371,16 @@ export function DataProvider({ children }) {
         saveData(updated)
     }, [data, saveData])
 
-    // FLASHCARDS & GENERIC UPDATES
     const updateFlashcards = useCallback((newFlashcards) => {
         const updated = { ...data, flashcards: newFlashcards }
         saveData(updated)
     }, [data, saveData])
 
-    // A generic setter for components that used to call raw setData directly
     const updateData = useCallback((newDataPartial) => {
         const updated = { ...data, ...newDataPartial }
         saveData(updated)
     }, [data, saveData])
 
-    // COMPUTED
     const getWeightedAverage = useCallback(() => {
         const grades = data.grades || []
         if (grades.length === 0) return 0
@@ -324,19 +399,14 @@ export function DataProvider({ children }) {
         loading,
         saveData,
         updateData,
-        // Notes
         addNote,
         deleteNote,
-        // Flashcards
         updateFlashcards,
-        // Tasks
         addTask,
         deleteTask,
         toggleTask,
-        // Grades
         addGrade,
         deleteGrade,
-        // Computed
         getWeightedAverage,
         getCompletedTasksCount
     }
@@ -347,3 +417,4 @@ export function DataProvider({ children }) {
         </DataContext.Provider>
     )
 }
+

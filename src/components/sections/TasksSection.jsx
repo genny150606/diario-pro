@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useData } from '../../hooks/useData'
+import { PlusCircle, Trash2, Calendar, CheckSquare, Square } from 'lucide-react'
 
 export default function TasksSection() {
     const { data, addTask, deleteTask, toggleTask } = useData()
@@ -40,17 +41,23 @@ export default function TasksSection() {
                 <p>Gestisci i tuoi compiti e scadenze</p>
             </div>
 
-            <div className="card">
-                <h3>Nuovo compito</h3>
-                <input type="text" placeholder="Descrizione compito..." value={description} onChange={e => setDescription(e.target.value)} />
-                <input type="date" style={{ marginBottom: 12 }} value={dueDate} onChange={e => setDueDate(e.target.value)} />
-                <select style={{ marginBottom: 12 }} value={subject} onChange={e => setSubject(e.target.value)}>
-                    <option value="Generale">Generale</option>
-                    <option value="Matematica">Matematica</option>
-                    <option value="Italiano">Italiano</option>
-                    <option value="Inglese">Inglese</option>
-                </select>
-                <button className="btn-primary" onClick={handleAddTask} disabled={!description.trim()}>Aggiungi Compito</button>
+            <div className="card task-input-card">
+                <h3><PlusCircle size={18} style={{ verticalAlign: 'middle', marginRight: '8px' }} /> Nuovo compito</h3>
+                <div className="form-group">
+                    <input type="text" placeholder="Descrizione compito..." value={description} onChange={e => setDescription(e.target.value)} />
+                    <div className="form-row" style={{ display: 'flex', gap: '1rem', marginTop: '1rem' }}>
+                        <input type="date" style={{ flex: 1 }} value={dueDate} onChange={e => setDueDate(e.target.value)} />
+                        <select style={{ flex: 1 }} value={subject} onChange={e => setSubject(e.target.value)}>
+                            <option value="Generale">Generale</option>
+                            <option value="Matematica">Matematica</option>
+                            <option value="Italiano">Italiano</option>
+                            <option value="Inglese">Inglese</option>
+                        </select>
+                    </div>
+                    <button className="btn-primary" style={{ width: '100%', marginTop: '1.25rem' }} onClick={handleAddTask} disabled={!description.trim()}>
+                        Aggiungi Compito
+                    </button>
+                </div>
             </div>
 
             {sortedTasks.length === 0 ? (
@@ -60,38 +67,25 @@ export default function TasksSection() {
             ) : (
                 <div className="tasks-list">
                     {sortedTasks.map(task => (
-                        <div key={task.id} className="card" style={{
-                            marginBottom: '0.8rem',
-                            opacity: task.completed ? 0.6 : 1,
-                            borderLeft: isOverdue(task) ? '3px solid #FF453A' : task.completed ? '3px solid #30D158' : '3px solid var(--color-accent)',
-                            transition: 'all 0.3s'
-                        }}>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
-                                <input
-                                    type="checkbox"
-                                    checked={task.completed}
-                                    onChange={() => toggleTask(task.id)}
-                                    style={{ width: 20, height: 20, cursor: 'pointer', accentColor: 'var(--color-accent)' }}
-                                />
-                                <div style={{ flex: 1 }}>
-                                    <p style={{
-                                        fontWeight: 600,
-                                        textDecoration: task.completed ? 'line-through' : 'none',
-                                        margin: '0 0 0.2rem'
-                                    }}>{task.description}</p>
-                                    <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-                                        <span style={{ fontSize: '0.75rem', background: 'rgba(255,255,255,0.06)', padding: '0.15rem 0.5rem', borderRadius: '1rem', color: 'var(--color-text-tertiary)' }}>{task.subject}</span>
+                        <div key={task.id} className={`task-item-card ${task.completed ? 'completed' : ''} ${isOverdue(task) ? 'overdue' : ''}`}>
+                            <div className="task-content">
+                                <div className="task-checkbox" onClick={() => toggleTask(task.id)}>
+                                    {task.completed ? <CheckSquare size={22} color="var(--color-success)" /> : <Square size={22} />}
+                                </div>
+                                <div className="task-details">
+                                    <p className="task-desc">{task.description}</p>
+                                    <div className="task-meta">
+                                        <span className="task-tag">{task.subject}</span>
                                         {task.dueDate && (
-                                            <span style={{
-                                                fontSize: '0.75rem',
-                                                color: isOverdue(task) ? '#FF453A' : 'var(--color-text-tertiary)'
-                                            }}>
-                                                📅 {task.dueDate}
+                                            <span className={`task-date ${isOverdue(task) ? 'date-overdue' : ''}`}>
+                                                <Calendar size={12} /> {task.dueDate}
                                             </span>
                                         )}
                                     </div>
                                 </div>
-                                <button className="btn-secondary" onClick={() => handleDeleteTask(task.id)} style={{ padding: '0.3rem 0.6rem', fontSize: '0.8rem', minHeight: 'unset' }}>🗑️</button>
+                                <button className="btn-icon-delete" onClick={() => handleDeleteTask(task.id)}>
+                                    <Trash2 size={16} />
+                                </button>
                             </div>
                         </div>
                     ))}

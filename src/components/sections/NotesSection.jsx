@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useData } from '../../hooks/useData'
+import { Plus, Sparkles, BookOpen, Trash2, Calendar, FileText, HelpCircle, CheckCircle, ChevronDown, Info } from 'lucide-react'
 
 export default function NotesSection() {
     const { data, addNote, deleteNote, saveData } = useData()
@@ -127,20 +128,26 @@ export default function NotesSection() {
 
             {activeTab === 'notes' && (
                 <div className="tab-content active">
-                    <div className="card">
-                        <h3>Aggiungi nuova nota</h3>
-                        <input type="text" placeholder="Titolo nota..." value={title} onChange={e => setTitle(e.target.value)} />
-                        <select style={{ marginBottom: 12 }} value={subject} onChange={e => setSubject(e.target.value)}>
-                            <option value="Generale">Generale</option>
-                            <option value="Matematica">Matematica</option>
-                            <option value="Italiano">Italiano</option>
-                            <option value="Inglese">Inglese</option>
-                            <option value="Scienze">Scienze</option>
-                            <option value="Storia">Storia</option>
-                        </select>
-                        <textarea placeholder="Scrivi i tuoi appunti..." style={{ minHeight: 120, marginBottom: 12 }} value={content} onChange={e => setContent(e.target.value)} />
-                        <input type="date" style={{ marginBottom: 16 }} value={date} onChange={e => setDate(e.target.value)} />
-                        <button className="btn-primary" onClick={handleAddNote} disabled={!title.trim()}>📝 Salva Nota</button>
+                    <div className="card note-input-card">
+                        <h3><Plus size={18} style={{ verticalAlign: 'middle', marginRight: '8px' }} /> Nuova Nota</h3>
+                        <div className="form-group">
+                            <input type="text" placeholder="Titolo nota..." value={title} onChange={e => setTitle(e.target.value)} />
+                            <div className="form-row" style={{ display: 'flex', gap: '1rem', marginTop: '1rem' }}>
+                                <select style={{ flex: 1 }} value={subject} onChange={e => setSubject(e.target.value)}>
+                                    <option value="Generale">Generale</option>
+                                    <option value="Matematica">Matematica</option>
+                                    <option value="Italiano">Italiano</option>
+                                    <option value="Inglese">Inglese</option>
+                                    <option value="Scienze">Scienze</option>
+                                    <option value="Storia">Storia</option>
+                                </select>
+                                <input type="date" style={{ flex: 1 }} value={date} onChange={e => setDate(e.target.value)} />
+                            </div>
+                            <textarea placeholder="Scrivi i tuoi appunti..." style={{ minHeight: 150, marginTop: '1rem' }} value={content} onChange={e => setContent(e.target.value)} />
+                            <button className="btn-primary" style={{ width: '100%', marginTop: '1.25rem' }} onClick={handleAddNote} disabled={!title.trim()}>
+                                <FileText size={18} /> Salva Nota
+                            </button>
+                        </div>
                     </div>
 
                     {sortedNotes.length === 0 ? (
@@ -150,18 +157,20 @@ export default function NotesSection() {
                     ) : (
                         <div className="notes-list">
                             {sortedNotes.map(note => (
-                                <div key={note.id} className="card" style={{ marginBottom: '1rem' }}>
-                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                                        <div>
-                                            <h4 style={{ margin: '0 0 0.3rem' }}>{note.title}</h4>
-                                            <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '0.5rem' }}>
-                                                <span style={{ fontSize: '0.75rem', background: 'var(--color-accent)', color: '#fff', padding: '0.15rem 0.5rem', borderRadius: '1rem' }}>{note.subject}</span>
-                                                <span style={{ fontSize: '0.75rem', color: 'var(--color-text-tertiary)' }}>{note.date}</span>
+                                <div key={note.id} className="card note-item-card">
+                                    <div className="note-item-header">
+                                        <div className="note-title-info">
+                                            <h4>{note.title}</h4>
+                                            <div className="note-meta">
+                                                <span className="note-tag">{note.subject}</span>
+                                                <span className="note-date"><Calendar size={12} /> {note.date}</span>
                                             </div>
                                         </div>
-                                        <button className="btn-secondary" onClick={() => handleDeleteNote(note.id)} style={{ padding: '0.3rem 0.6rem', fontSize: '0.8rem', minHeight: 'unset' }}>🗑️</button>
+                                        <button className="btn-icon-delete" onClick={() => handleDeleteNote(note.id)}>
+                                            <Trash2 size={16} />
+                                        </button>
                                     </div>
-                                    {note.content && <p style={{ color: 'var(--color-text-secondary)', fontSize: '0.9rem', whiteSpace: 'pre-wrap', maxHeight: '200px', overflow: 'hidden' }}>{note.content}</p>}
+                                    {note.content && <p className="note-content-preview">{note.content}</p>}
                                 </div>
                             ))}
                         </div>
@@ -171,36 +180,43 @@ export default function NotesSection() {
 
             {activeTab === 'flashcards' && (
                 <div className="tab-content active">
-                    <div className="card">
-                        <h3>⚡ Genera Flashcard con AI</h3>
-                        <p style={{ color: 'var(--color-text-secondary)', marginBottom: 16, fontSize: '0.9rem' }}>
-                            Seleziona una nota e genera flashcard automaticamente con Gemini
+                    <div className="card ai-gen-card">
+                        <h3><Sparkles size={18} color="var(--color-accent)" style={{ verticalAlign: 'middle', marginRight: '8px' }} /> AI Flashcard Generator</h3>
+                        <p className="ai-gen-desc">
+                            Seleziona una nota e lascia che Gemini crei per te flashcard intelligenti.
                         </p>
                         {data.notes.length > 0 ? (
-                            <>
-                                <select style={{ marginBottom: 12 }} value={selectedNoteId || ''} onChange={e => setSelectedNoteId(e.target.value)}>
-                                    <option value="">-- Seleziona una nota --</option>
-                                    {data.notes.map(n => (
-                                        <option key={n.id} value={n.id}>{n.title} ({n.subject})</option>
-                                    ))}
-                                </select>
+                            <div className="form-group">
+                                <div className="custom-select-wrapper">
+                                    <select value={selectedNoteId || ''} onChange={e => setSelectedNoteId(e.target.value)}>
+                                        <option value="">-- Seleziona una nota --</option>
+                                        {data.notes.map(n => (
+                                            <option key={n.id} value={n.id}>{n.title} ({n.subject})</option>
+                                        ))}
+                                    </select>
+                                    <ChevronDown className="select-icon" size={16} />
+                                </div>
                                 <button
-                                    className="btn-primary"
-                                    style={{ width: '100%', marginBottom: 8 }}
+                                    className="btn-primary btn-ai"
+                                    style={{ width: '100%', marginTop: '1rem' }}
                                     onClick={handleGenerateFlashcards}
                                     disabled={generating || !selectedNoteId}
                                 >
-                                    {generating ? '⏳ Generando...' : '🤖 Genera 5 Flashcard'}
+                                    {generating ? (
+                                        <span className="btn-loading"><span className="pulse-dot"></span> Generando...</span>
+                                    ) : (
+                                        <><Sparkles size={18} /> Genera 5 Flashcard</>
+                                    )}
                                 </button>
-                            </>
+                            </div>
                         ) : (
-                            <p style={{ color: 'var(--color-text-tertiary)', fontSize: '0.85rem' }}>
-                                ⚠️ Aggiungi prima una nota nella sezione Note per generare flashcard
-                            </p>
+                            <div className="empty-warning">
+                                <Info size={18} /> Aggiungi prima una nota per generare flashcard
+                            </div>
                         )}
                         {data.flashcards.length > 0 && (
-                            <button className="btn-secondary" style={{ width: '100%' }} onClick={handleDeleteAllFlashcards}>
-                                🗑️ Elimina tutte le Flashcard ({data.flashcards.length})
+                            <button className="btn-danger-outline" style={{ width: '100%', marginTop: '1rem' }} onClick={handleDeleteAllFlashcards}>
+                                <Trash2 size={16} /> Elimina tutte ({data.flashcards.length})
                             </button>
                         )}
                     </div>
@@ -210,32 +226,33 @@ export default function NotesSection() {
                             Nessuna flashcard ancora. Genera con l'AI! ✨
                         </p>
                     ) : (
-                        <div style={{ padding: '1rem 0' }}>
+                        <div className="flashcards-grid">
                             {data.flashcards.map((fc) => (
                                 <div
                                     key={fc.id}
-                                    className="card"
-                                    style={{ marginBottom: '0.8rem', cursor: 'pointer', position: 'relative' }}
+                                    className={`card flashcard-item-card ${flippedCards.has(fc.id) ? 'is-flipped' : ''}`}
                                     onClick={() => toggleFlip(fc.id)}
                                 >
-                                    <div style={{ fontWeight: 600, color: 'var(--color-accent)', marginBottom: '0.5rem' }}>
-                                        ❓ {fc.front}
-                                    </div>
-                                    {flippedCards.has(fc.id) ? (
-                                        <div style={{ color: '#30D158', fontSize: '0.95rem', padding: '0.5rem 0' }}>
-                                            ✅ {fc.back}
+                                    <div className="flashcard-card-content">
+                                        <div className="fc-front">
+                                            <div className="fc-q-label"><HelpCircle size={14} /> DOMANDA</div>
+                                            <div className="fc-text">{fc.front}</div>
+                                            <div className="fc-hint">Clicca per girare</div>
                                         </div>
-                                    ) : (
-                                        <small style={{ color: 'var(--color-text-tertiary)' }}>Clicca per vedere la risposta</small>
-                                    )}
-                                    {fc.subject && (
-                                        <span style={{ fontSize: '0.7rem', background: 'rgba(255,255,255,0.05)', padding: '0.15rem 0.5rem', borderRadius: '1rem', color: 'var(--color-text-tertiary)', position: 'absolute', top: '0.8rem', right: '3rem' }}>{fc.subject}</span>
-                                    )}
-                                    <button
-                                        className="btn-secondary"
-                                        onClick={(e) => { e.stopPropagation(); handleDeleteFlashcard(fc.id) }}
-                                        style={{ position: 'absolute', top: '0.6rem', right: '0.6rem', padding: '0.2rem 0.4rem', fontSize: '0.75rem', minHeight: 'unset' }}
-                                    >🗑️</button>
+                                        <div className="fc-back">
+                                            <div className="fc-a-label"><CheckCircle size={14} /> RISPOSTA</div>
+                                            <div className="fc-text">{fc.back}</div>
+                                        </div>
+                                    </div>
+                                    <div className="fc-footer">
+                                        <span className="fc-subject">{fc.subject}</span>
+                                        <button
+                                            className="btn-icon-delete sm"
+                                            onClick={(e) => { e.stopPropagation(); handleDeleteFlashcard(fc.id) }}
+                                        >
+                                            <Trash2 size={14} />
+                                        </button>
+                                    </div>
                                 </div>
                             ))}
                         </div>

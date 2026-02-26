@@ -3,9 +3,7 @@ import { createClient } from '@supabase/supabase-js'
 export const SUPABASE_URL = 'https://rzdpntvojpibbndhsrlz.supabase.co'
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ6ZHBudHZvanBpYmJuZGhzcmx6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEzNzg1MjEsImV4cCI6MjA4Njk1NDUyMX0.QwnT9Okp8CkN_LxGIeBKWrroo3letL8OhSvaqdQVW7M'
 
-const PROXY_URL = import.meta.env.DEV
-    ? '/api/supabase-proxy'
-    : '/api/supabase-proxy'
+const PROXY_URL = '/api/supabase-proxy'
 
 export const supabase = createClient(SUPABASE_URL, SUPABASE_KEY, {
     auth: {
@@ -46,7 +44,7 @@ export const supabase = createClient(SUPABASE_URL, SUPABASE_KEY, {
             const isRest = urlStr.includes('/rest/v1/')
             const isAuth = urlStr.includes('/auth/v1/')
 
-            if (!import.meta.env.DEV && (isRest || isAuth)) {
+            if (isRest || isAuth) {
                 let path = isRest
                     ? `/rest/v1/${urlStr.split('/rest/v1/')[1]}`
                     : `/auth/v1/${urlStr.split('/auth/v1/')[1]}`

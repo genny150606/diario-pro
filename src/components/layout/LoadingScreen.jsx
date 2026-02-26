@@ -1,6 +1,17 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 
 export default function LoadingScreen() {
+    const [showSkip, setShowSkip] = useState(false);
+
+    useEffect(() => {
+        const timer = setTimeout(() => setShowSkip(true), 6000);
+        return () => clearTimeout(timer);
+    }, []);
+
+    const handleSkip = () => {
+        window.location.href = '/';
+    };
+
     return (
         <div className="loading-screen">
             <div className="loading-content">
@@ -31,6 +42,25 @@ export default function LoadingScreen() {
                         <p className="status-text">Sincronizzazione in corso...</p>
                     </div>
                 </div>
+                {showSkip && (
+                    <button
+                        onClick={handleSkip}
+                        className="skip-loading-btn"
+                        style={{
+                            marginTop: '2rem',
+                            background: 'rgba(255,255,255,0.05)',
+                            border: '1px solid rgba(255,255,255,0.1)',
+                            color: 'rgba(255,255,255,0.5)',
+                            padding: '0.6rem 1.2rem',
+                            borderRadius: '12px',
+                            cursor: 'pointer',
+                            fontSize: '0.85rem',
+                            transition: 'all 0.3s'
+                        }}
+                    >
+                        Problemi di connessione? Torna alla Home
+                    </button>
+                )}
             </div>
         </div>
     );

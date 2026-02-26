@@ -4,11 +4,17 @@
    ============================================ */
 
 /* ── BASE ── */
+html,
+body {
+    scroll-snap-type: y mandatory;
+    scroll-behavior: smooth;
+    overflow-x: hidden;
+}
+
 .landing-page {
     overflow-x: hidden;
     background: var(--bg-dynamic-color, #050505);
     color: #fff;
-    scroll-behavior: smooth;
     font-family: 'Inter', sans-serif;
     transition: background 1.5s cubic-bezier(0.16, 1, 0.3, 1);
 }
@@ -166,6 +172,8 @@
     padding: 8rem 2rem;
     position: relative;
     z-index: 10;
+    scroll-snap-align: start;
+    scroll-snap-stop: always;
 }
 
 .hero-content {
@@ -352,13 +360,15 @@
 
 /* ── EDITORIAL REVEALS ── */
 .reveal-section {
-    min-height: 90vh;
+    min-height: 100vh;
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 15vw 5vw;
+    padding: 10vh 5vw;
     position: relative;
     z-index: 10;
+    scroll-snap-align: start;
+    scroll-snap-stop: always;
 }
 
 .feature-large-text {

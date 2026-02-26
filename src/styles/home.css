@@ -10,10 +10,23 @@ body {
     overflow-x: hidden;
     width: 100%;
     position: relative;
+
+    /* Hide scrollbar for Chrome, Safari and Opera */
+    &::-webkit-scrollbar {
+        display: none;
+    }
+
+    /* Hide scrollbar for IE, Edge and Firefox */
+    -ms-overflow-style: none;
+    /* IE and Edge */
+    scrollbar-width: none;
+    /* Firefox */
 }
 
 .landing-page {
     overflow-x: hidden;
+    max-width: 100%;
+    position: relative;
     background: var(--bg-dynamic-color, #050505);
     color: #fff;
     font-family: 'Inter', sans-serif;

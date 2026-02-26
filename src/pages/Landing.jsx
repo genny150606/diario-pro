@@ -147,12 +147,16 @@ export default function Landing() {
         const navObserver = new IntersectionObserver((entries) => {
             entries.forEach(entry => {
                 if (entry.isIntersecting) {
-                    const color = entry.target.dataset.navColor;
-                    if (color) {
-                        document.documentElement.style.setProperty('--nav-dynamic-bg', color);
+                    const navColor = entry.target.dataset.navColor;
+                    const bgColor = entry.target.dataset.bgColor;
+                    if (navColor) {
+                        document.documentElement.style.setProperty('--nav-dynamic-bg', navColor);
                         if (nav && window.scrollY > 50) {
-                            nav.style.background = color;
+                            nav.style.background = navColor;
                         }
+                    }
+                    if (bgColor) {
+                        document.documentElement.style.setProperty('--bg-dynamic-color', bgColor);
                     }
                 }
             });
@@ -208,7 +212,7 @@ export default function Landing() {
 
             {/* ═══════════ RADICAL HERO ═══════════ */}
             <main className="radical-container">
-                <section className="hero-section" data-nav-color="rgba(10, 10, 12, 0.9)">
+                <section className="hero-section" data-nav-color="rgba(10, 10, 12, 0.9)" data-bg-color="#050505">
                     <div className="hero-content">
                         <div className="hero-tag">Progettato per eccellere</div>
                         <h1 className="hero-title-main" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1rem' }}>
@@ -261,7 +265,7 @@ export default function Landing() {
                 </section>
 
                 {/* ═══════════ FEATURE REVEAL SECTIONS ═══════════ */}
-                <section id="features" className="reveal-section" data-nav-color="rgba(25, 15, 45, 0.85)">
+                <section id="features" className="reveal-section" data-nav-color="rgba(25, 15, 45, 0.85)" data-bg-color="#0a0515">
                     <div className="reveal-content-box">
                         <div className="feature-large-text">
                             <h2 className="section-title-minimal">
@@ -276,7 +280,7 @@ export default function Landing() {
                     </div>
                 </section>
 
-                <section id="philosophy" className="reveal-section" data-nav-color="rgba(10, 35, 25, 0.85)">
+                <section id="philosophy" className="reveal-section" data-nav-color="rgba(10, 35, 25, 0.85)" data-bg-color="#05100a">
                     <div className="reveal-content-box">
                         <div className="feature-large-text">
                             <h2 className="section-title-minimal">
@@ -291,7 +295,7 @@ export default function Landing() {
                     </div>
                 </section>
 
-                <section className="reveal-section" data-nav-color="rgba(15, 25, 45, 0.85)">
+                <section className="reveal-section" data-nav-color="rgba(15, 25, 45, 0.85)" data-bg-color="#050a15">
                     <div className="reveal-content-box">
                         <div className="feature-large-text">
                             <h2 className="section-title-minimal">
@@ -305,7 +309,7 @@ export default function Landing() {
                 </section>
 
                 {/* FINAL CTA */}
-                <section className="reveal-section" data-nav-color="rgba(40, 15, 25, 0.85)">
+                <section className="reveal-section" data-nav-color="rgba(40, 15, 25, 0.85)" data-bg-color="#15050a">
                     <div className="feature-large-text" style={{ textAlign: 'center' }}>
                         <h2 className="section-title-minimal">Prendi il controllo</h2>
                         <button

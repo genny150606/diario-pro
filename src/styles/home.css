@@ -98,6 +98,7 @@
     background: var(--color-bg);
     overflow: hidden;
     pointer-events: none;
+    transform: translateY(calc(var(--scroll-y, 0) * 0.4px));
 }
 
 .aurora-bg .orb {
@@ -164,6 +165,11 @@
     padding: 8rem 2rem;
     position: relative;
     z-index: 10;
+}
+
+.hero-content {
+    transform: translateY(calc(var(--scroll-y, 0) * 0.6px));
+    opacity: calc(1 - (var(--scroll-y, 0) / 500));
 }
 
 .hero-tag {
@@ -250,12 +256,13 @@
     color: #fff;
 }
 
-/* ── PREVIEW COMPONENT ── */
+/* ── PREVIEW COMPONENT (MAGNETIC PARALLAX + GLARE) ── */
 .hero-floating-preview {
     margin-top: 8rem;
     perspective: 2500px;
     width: 100%;
     max-width: 800px;
+    transform: translateY(calc(var(--scroll-y, 0) * 0.15px));
 }
 
 .preview-glass-card {
@@ -267,8 +274,28 @@
     padding: 3rem 5rem;
     transform-style: preserve-3d;
     box-shadow: 0 5rem 10rem rgba(0, 0, 0, 0.7);
-    transition: transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+    transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.4s ease;
     max-width: calc(100vw - 4rem);
+    position: relative;
+    overflow: hidden;
+    will-change: transform;
+}
+
+.preview-glass-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: radial-gradient(800px circle at calc(var(--mouse-x, 0) * 100%) calc(var(--mouse-y, 0) * 100%),
+            rgba(255, 255, 255, 0.15),
+            transparent 40%);
+    z-index: 1;
+    transition: opacity 0.5s;
+    opacity: 0;
+}
+
+.preview-glass-card:hover::before {
+    opacity: 1;
 }
 
 .preview-glass-card:hover {

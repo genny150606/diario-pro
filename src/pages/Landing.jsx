@@ -53,10 +53,13 @@ export default function Landing() {
         // Dynamic Island
         const nav = document.getElementById('mainNav');
         const handleScroll = () => {
+            // Bind Scroll to Global CSS Var for Parallax Engine
+            document.documentElement.style.setProperty('--scroll-y', window.scrollY);
+
             if (!nav) return
             if (window.scrollY > 50) {
                 nav.style.transform = 'translateX(-50%) translateY(-10px) scale(0.95)';
-                nav.style.background = 'rgba(10, 10, 12, 0.9)';
+                nav.style.background = 'var(--nav-dynamic-bg, rgba(10, 10, 12, 0.9))';
             } else {
                 nav.style.transform = 'translateX(-50%) translateY(0) scale(1)';
                 nav.style.background = 'rgba(20, 20, 22, 0.7)';
@@ -76,8 +79,9 @@ export default function Landing() {
 
         document.querySelectorAll('.reveal-section, .feature-large-text').forEach(el => {
             el.style.opacity = '0';
-            el.style.transform = 'translateY(40px)';
-            el.style.transition = 'all 1.4s cubic-bezier(0.16, 1, 0.3, 1)';
+            el.style.transform = 'translateY(150px) scale(0.85)';
+            el.style.filter = 'blur(15px)';
+            el.style.transition = 'all 1.8s cubic-bezier(0.16, 1, 0.3, 1)';
             observer.observe(el);
         });
 
@@ -87,7 +91,8 @@ export default function Landing() {
         style.innerHTML = `
             .is-visible {
                 opacity: 1 !important;
-                transform: translateY(0) !important;
+                transform: translateY(0) scale(1) !important;
+                filter: blur(0px) !important;
             }
         `;
         document.head.appendChild(style);
@@ -122,14 +127,38 @@ export default function Landing() {
             }, 800);
         }
 
-        // Spatial Parallax
+        // Spatial Parallax & Dynamic Glare
         const handleMouseMove = (e) => {
+            // Bind Normalized Mouse Coords [0..1] for Premium CSS Shaders/Glare
+            const normX = e.clientX / window.innerWidth;
+            const normY = e.clientY / window.innerHeight;
+            document.documentElement.style.setProperty('--mouse-x', normX);
+            document.documentElement.style.setProperty('--mouse-y', normY);
+
             if (!preview) return;
-            const x = (window.innerWidth / 2 - e.pageX) / 40;
-            const y = (window.innerHeight / 2 - e.pageY) / 40;
-            preview.style.transform = `rotateX(${15 + y}deg) rotateY(${-x}deg) translateY(${-y}px)`;
+            const x = (window.innerWidth / 2 - e.pageX) / 25;
+            const y = (window.innerHeight / 2 - e.pageY) / 25;
+            // Add a scaling bump alongside the rotation for extreme physics
+            preview.style.transform = `rotateX(${15 + y}deg) rotateY(${-x}deg) translateY(${-y}px) scale(1.03)`;
         }
         document.addEventListener('mousemove', handleMouseMove);
+
+        // Dynamic Nav Color Observer
+        const navObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const color = entry.target.dataset.navColor;
+                    if (color) {
+                        document.documentElement.style.setProperty('--nav-dynamic-bg', color);
+                        if (nav && window.scrollY > 50) {
+                            nav.style.background = color;
+                        }
+                    }
+                }
+            });
+        }, { threshold: 0.35 });
+
+        document.querySelectorAll('section[data-nav-color]').forEach(el => navObserver.observe(el));
 
         return () => {
             window.removeEventListener('scroll', handleScroll)
@@ -179,7 +208,7 @@ export default function Landing() {
 
             {/* ═══════════ RADICAL HERO ═══════════ */}
             <main className="radical-container">
-                <section className="hero-section">
+                <section className="hero-section" data-nav-color="rgba(10, 10, 12, 0.9)">
                     <div className="hero-content">
                         <div className="hero-tag">Progettato per eccellere</div>
                         <h1 className="hero-title-main" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1rem' }}>
@@ -232,7 +261,7 @@ export default function Landing() {
                 </section>
 
                 {/* ═══════════ FEATURE REVEAL SECTIONS ═══════════ */}
-                <section id="features" className="reveal-section">
+                <section id="features" className="reveal-section" data-nav-color="rgba(25, 15, 45, 0.85)">
                     <div className="reveal-content-box">
                         <div className="feature-large-text">
                             <h2 className="section-title-minimal">
@@ -247,7 +276,7 @@ export default function Landing() {
                     </div>
                 </section>
 
-                <section id="philosophy" className="reveal-section">
+                <section id="philosophy" className="reveal-section" data-nav-color="rgba(10, 35, 25, 0.85)">
                     <div className="reveal-content-box">
                         <div className="feature-large-text">
                             <h2 className="section-title-minimal">
@@ -262,7 +291,7 @@ export default function Landing() {
                     </div>
                 </section>
 
-                <section className="reveal-section">
+                <section className="reveal-section" data-nav-color="rgba(15, 25, 45, 0.85)">
                     <div className="reveal-content-box">
                         <div className="feature-large-text">
                             <h2 className="section-title-minimal">
@@ -276,7 +305,7 @@ export default function Landing() {
                 </section>
 
                 {/* FINAL CTA */}
-                <section className="reveal-section">
+                <section className="reveal-section" data-nav-color="rgba(40, 15, 25, 0.85)">
                     <div className="feature-large-text" style={{ textAlign: 'center' }}>
                         <h2 className="section-title-minimal">Prendi il controllo</h2>
                         <button

@@ -1,10 +1,12 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, lazy, Suspense } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
 import { supabase } from '../lib/supabase'
 import AuthModal from '../components/auth/AuthModal'
-import { Sparkles, BrainCircuit, Swords, Calendar, Activity } from 'lucide-react'
+import { Sparkles, BrainCircuit, Swords, Calendar, Activity, Home } from 'lucide-react'
 import '../styles/home.css'
+
+// const DynamicHero3D = lazy(() => import('../components/ui/DynamicHero3D'))
 
 export default function Landing() {
     const { user } = useAuth()
@@ -165,68 +167,11 @@ export default function Landing() {
 
         document.querySelectorAll('section[data-nav-color]').forEach(el => navObserver.observe(el));
 
-        // --- ULTRA ASSISTED SCROLL (HIJACKER) ---
-        let isLock = false;
-        const sections = document.querySelectorAll('section, footer');
-
-        const triggerScroll = (direction, e) => {
-            let currentIdx = 0;
-            const scrollPos = window.scrollY + (window.innerHeight / 3);
-            sections.forEach((sec, idx) => {
-                if (scrollPos >= sec.offsetTop) currentIdx = idx;
-            });
-
-            const nextIdx = Math.max(0, Math.min(sections.length - 1, currentIdx + direction));
-
-            // BYPASS ASSISTED SCROLL BETWEEN HERO (0) AND FIRST FEATURE (1)
-            // Allows user to see the "Dati Live" without being snapped away.
-            if ((currentIdx === 0 && direction === 1) || (currentIdx === 1 && direction === -1)) {
-                return;
-            }
-
-            if (e && e.cancelable) e.preventDefault();
-
-            if (nextIdx !== currentIdx) {
-                isLock = true;
-                sections[nextIdx].scrollIntoView({ behavior: 'smooth', block: 'center' });
-                setTimeout(() => { isLock = false; }, 1000);
-            }
-        };
-
-        const handleWheel = (e) => {
-            if (isLock) { e.preventDefault(); return; }
-            if (Math.abs(e.deltaY) < 30) return;
-            triggerScroll(e.deltaY > 0 ? 1 : -1, e);
-        };
-
-        const handleKey = (e) => {
-            if (isLock) return;
-            if (e.key === 'ArrowDown') triggerScroll(1, e);
-            if (e.key === 'ArrowUp') triggerScroll(-1, e);
-        };
-
-        let touchStartY = 0;
-        const handleTouchStart = (e) => { touchStartY = e.touches[0].clientY; };
-        const handleTouchEnd = (e) => {
-            if (isLock) return;
-            const touchEndY = e.changedTouches[0].clientY;
-            const diff = touchStartY - touchEndY;
-            // High sensitivity for "ultra-assisted" feel
-            if (Math.abs(diff) > 40) triggerScroll(diff > 0 ? 1 : -1, e);
-        };
-
-        window.addEventListener('wheel', handleWheel, { passive: false });
-        window.addEventListener('keydown', handleKey);
-        window.addEventListener('touchstart', handleTouchStart, { passive: true });
-        window.addEventListener('touchend', handleTouchEnd, { passive: false });
+        document.querySelectorAll('section[data-nav-color]').forEach(el => navObserver.observe(el));
 
         return () => {
             window.removeEventListener('scroll', handleScroll)
             document.removeEventListener('mousemove', handleMouseMove)
-            window.removeEventListener('wheel', handleWheel)
-            window.removeEventListener('keydown', handleKey)
-            window.removeEventListener('touchstart', handleTouchStart)
-            window.removeEventListener('touchend', handleTouchEnd)
             observer.disconnect()
             navObserver.disconnect()
 
@@ -251,6 +196,7 @@ export default function Landing() {
                         <span style={{ fontSize: '1.2rem', fontWeight: 800, background: 'linear-gradient(135deg, #fff 0%, #a5b4fc 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>StudyJournal</span>
                     </a>
                     <div className="nav-links">
+                        <Link to="/" className="nav-home-icon" title="Logo Home"><Home size={20} /></Link>
                         <a href="#features">Tecnologia</a>
                         <a href="#philosophy">Filosofia</a>
                     </div>
@@ -273,58 +219,46 @@ export default function Landing() {
 
             {/* ═══════════ RADICAL HERO ═══════════ */}
             <main className="radical-container">
-                <section className="hero-section" data-nav-color="rgba(10, 10, 12, 0.9)" data-bg-color="#050505">
-                    <div className="hero-content">
-                        <div className="hero-tag">Progettato per eccellere</div>
-                        <h1 className="hero-title-main" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1rem' }}>
-                            <img src="/S.png" alt="StudyJournal Logo" style={{ width: '130px', height: '130px', marginBottom: '1.5rem', filter: 'drop-shadow(0 0 20px rgba(100, 150, 255, 0.6))' }} />
-                            <div className="title-line"><span>Studia meno,</span></div>
-                            <div className="title-line"><span className="accent-text">Impara tutto.</span></div>
-                        </h1>
-                        <p className="hero-description">
-                            Dimentica gli appunti disordinati e le nottate in bianco. Lascia che l'AI trasformi le tue lezioni
-                            in flashcard, quiz e piani di studio perfetti.
-                            Tu metti l'obiettivo, noi tracciamo la strada.
-                        </p>
-                        <div className="hero-actions-radical">
-                            <button
-                                className="cta-primary-glass"
-                                onClick={() => user ? navigate('/app') : setShowAuth(true)}
-                                style={{ border: 'none', cursor: 'pointer' }}
-                            >
-                                {user ? "Apri Dashboard" : "Inizia Gratis"}
-                            </button>
-                            <a href="#features" className="cta-secondary-minimal">Scopri di più</a>
-                        </div>
-                    </div>
-
-                    <div className="hero-floating-preview">
-                        <div className="floating-badge badge-1"><BrainCircuit size={18} /> AI Flashcards</div>
-                        <div className="floating-badge badge-2"><Swords size={18} /> Duel Arena</div>
-                        <div className="floating-badge badge-3"><Sparkles size={18} /> Knowledge Hub</div>
-                        <div className="preview-glass-card">
-                            <div className="mesh-gradient-bg"></div>
-                            <div className="card-inner">
-                                <div className="stat-group">
-                                    <span className="stat-val">{stats.notes}</span>
-                                    <span className="stat-lab">Note</span>
-                                </div>
-                                <div className="stat-divider"></div>
-                                <div className="stat-group">
-                                    <span className="stat-val">{stats.flashcards}</span>
-                                    <span className="stat-lab">Flashcard</span>
-                                </div>
-                                <div className="stat-divider"></div>
-                                <div className="stat-group">
-                                    <span className="stat-val">{stats.duels}</span>
-                                    <span className="stat-lab">Duelli</span>
-                                </div>
-                                <div className="stat-divider"></div>
-                                <div className="stat-group">
-                                    <span className="stat-val">{stats.users}</span>
-                                    <span className="stat-lab">Menti</span>
-                                </div>
+                <section className="hero-section hero-scroll-track" data-nav-color="rgba(10, 10, 12, 0.9)" data-bg-color="#050505">
+                    <div className="hero-sticky-container">
+                        <div className="hero-content" style={{ opacity: `calc(1 - (var(--scroll-y, 0) / 800))` }}>
+                            <div className="hero-tag">Progettato per eccellere</div>
+                            <h1 className="hero-title-main" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1rem' }}>
+                                <img src="/S.png" alt="StudyJournal Logo" style={{ width: '130px', height: '130px', marginBottom: '1.5rem', filter: 'drop-shadow(0 0 20px rgba(100, 150, 255, 0.6))' }} />
+                                <div className="title-line"><span>Studia meno,</span></div>
+                                <div className="title-line"><span className="accent-text">Impara tutto.</span></div>
+                            </h1>
+                            <p className="hero-description">
+                                Dimentica gli appunti disordinati e le nottate in bianco. Lascia che l'AI trasformi le tue lezioni
+                                in flashcard, quiz e piani di studio perfetti.
+                                Tu metti l'obiettivo, noi tracciamo la strada.
+                            </p>
+                            <div className="hero-actions-radical">
+                                <button
+                                    className="cta-primary-glass"
+                                    onClick={() => user ? navigate('/app') : setShowAuth(true)}
+                                    style={{ border: 'none', cursor: 'pointer' }}
+                                >
+                                    {user ? "Apri Dashboard" : "Inizia Gratis"}
+                                </button>
+                                <a href="#features" className="cta-secondary-minimal">Scopri di più</a>
                             </div>
+                        </div>
+
+                        <div className="hero-floating-preview">
+                            <Suspense fallback={<div className="preview-loading-skeleton" />}>
+                                <div className="spline-hero-container">
+                                    <spline-viewer
+                                        url="https://prod.spline.design/rPFH4AfknG-ptPHN/scene.splinecode"
+                                        loading-alpha="0"
+                                        hint-background-color="transparent"
+                                        alpha="true"
+                                    ></spline-viewer>
+                                </div>
+                            </Suspense>
+                            <div className="floating-badge badge-1"><BrainCircuit size={18} /> AI Flashcards</div>
+                            <div className="floating-badge badge-2"><Swords size={18} /> Duel Arena</div>
+                            <div className="floating-badge badge-3"><Sparkles size={18} /> Knowledge Hub</div>
                         </div>
                     </div>
                 </section>

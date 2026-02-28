@@ -32,6 +32,50 @@ export default function ChatbotWidget() {
         }
     }, [isOpen])
 
+    // Nuclear Spline Watermark Removal
+    useEffect(() => {
+        const removeWatermark = () => {
+            const viewers = document.querySelectorAll('spline-viewer');
+            viewers.forEach(viewer => {
+                if (viewer && viewer.shadowRoot) {
+                    // NUCLEAR OPTION: Hide EVERYTHING in shadowRoot that isn't the canvas
+                    const allElements = viewer.shadowRoot.querySelectorAll('*');
+                    allElements.forEach(el => {
+                        // If it's not the canvas, and it's not a root container we need, hide it
+                        if (el.tagName !== 'CANVAS' && el.tagName !== 'SLOT' && el.tagName !== 'STYLE') {
+                            // We check if it's part of the UI/Logo by its typical positioning or name
+                            const isLogo = el.id?.toLowerCase().includes('logo') ||
+                                el.id?.toLowerCase().includes('badge') ||
+                                el.className?.toString().toLowerCase().includes('spline') ||
+                                el.tagName === 'A';
+
+                            // Even if it doesn't match the name, if it's positioned like a logo, kill it
+                            const style = window.getComputedStyle(el);
+                            const isPositionedLikeLogo = (style.position === 'absolute' && (style.bottom !== 'auto' || style.top !== 'auto'));
+
+                            if (isLogo || isPositionedLikeLogo) {
+                                el.style.display = 'none';
+                                el.style.setProperty('display', 'none', 'important');
+                                el.style.opacity = '0';
+                                el.style.setProperty('opacity', '0', 'important');
+                                el.style.pointerEvents = 'none';
+                                el.style.visibility = 'hidden';
+                            }
+                        }
+                    });
+                }
+            });
+        };
+
+        const interval = setInterval(removeWatermark, 100);
+        const timeout = setTimeout(() => clearInterval(interval), 20000); // Polling for 20s
+
+        return () => {
+            clearInterval(interval);
+            clearTimeout(timeout);
+        };
+    }, []);
+
     const formatMarkdown = (text) => {
         return text
             .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
@@ -131,21 +175,37 @@ export default function ChatbotWidget() {
 
     return (
         <>
-            {/* FAB Button */}
-            <button
-                className={`chatbot-fab ${isOpen ? 'active' : ''}`}
+            {/* Spline 3D Toggle Button */}
+            <div
+                className={`chatbot-spline-container ${isOpen ? 'active' : ''}`}
                 onClick={() => setIsOpen(!isOpen)}
-                aria-label="AI Chatbot"
+                title="AI Assistant"
             >
-                {isOpen ? <X size={24} strokeWidth={2.5} /> : <Sparkles size={24} strokeWidth={2.5} />}
-            </button>
+                <spline-viewer
+                    url="https://prod.spline.design/AbmTcgRhAHUrxbQK/scene.splinecode"
+                    loading-alpha="0"
+                    hint-background-color="transparent"
+                    alpha="true"
+                ></spline-viewer>
+
+                {isOpen && (
+                    <div className="chatbot-close-overlay">
+                        <X size={20} />
+                    </div>
+                )}
+            </div>
 
             {/* Chat Window */}
             {isOpen && (
                 <div className="chatbot-window">
                     <div className="chatbot-header">
                         <div className="chatbot-avatar">
-                            <Bot size={20} strokeWidth={2.5} color="#fff" />
+                            <spline-viewer
+                                url="https://prod.spline.design/7CwI66tHlWIL45AN/scene.splinecode"
+                                loading-alpha="0"
+                                hint-background-color="transparent"
+                                alpha="true"
+                            ></spline-viewer>
                         </div>
                         <div>
                             <h4>StudyJournal AI</h4>

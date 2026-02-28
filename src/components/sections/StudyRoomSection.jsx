@@ -406,7 +406,7 @@ export default function StudyRoomSection() {
         setError(null)
         try {
             // Assicuriamoci che sui dispositivi Mobile/Capacitor l'URL sia assoluto
-            const apiUrl = import.meta.env.VITE_API_URL || (import.meta.env.DEV ? '' : 'https://studyjournal-pro.vercel.app')
+            const apiUrl = import.meta.env.VITE_API_URL || (import.meta.env.DEV ? '' : 'https://diario-pro.vercel.app')
             const participantName = user.email?.split('@')[0] || user.id.substring(0, 8)
             const response = await fetch(`${apiUrl}/api/livekit-token`, {
                 method: 'POST',

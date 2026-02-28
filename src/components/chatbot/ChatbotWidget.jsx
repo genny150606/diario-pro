@@ -12,7 +12,7 @@ export default function ChatbotWidget() {
     const messagesEndRef = useRef(null)
     const inputRef = useRef(null)
 
-    const apiUrl = import.meta.env.VITE_API_URL || (import.meta.env.DEV ? '' : 'https://studyjournal-pro.vercel.app')
+    const apiUrl = import.meta.env.VITE_API_URL || (import.meta.env.DEV ? '' : 'https://diario-pro.vercel.app')
 
     // Auto-scroll to bottom
     useEffect(() => {

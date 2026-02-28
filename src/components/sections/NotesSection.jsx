@@ -28,7 +28,7 @@ export default function NotesSection() {
     const [studyFcs, setStudyFcs] = useState([])
     const [swipeState, setSwipeState] = useState(null) // null, 'swipe-out-left', 'swipe-out-right', 'swipe-out-up'
 
-    const apiUrl = import.meta.env.VITE_API_URL || (import.meta.env.DEV ? '' : 'https://studyjournal-pro.vercel.app')
+    const apiUrl = import.meta.env.VITE_API_URL || (import.meta.env.DEV ? '' : 'https://diario-pro.vercel.app')
 
     // NOTE ACTIONS
     const handleAddOrUpdateNote = () => {

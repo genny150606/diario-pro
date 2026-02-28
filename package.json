@@ -5,7 +5,7 @@
     "type": "module",
     "scripts": {
         "dev": "vite",
-        "backend": "node api/index.js",
+        "backend": "node api/index.cjs",
         "build": "vite build",
         "preview": "vite preview",
         "mobile:build": "vite build && npx cap sync",

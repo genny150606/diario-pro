@@ -42,6 +42,9 @@ app.use(cors({
     credentials: false
 }));
 
+// Gestione Esplicita Preflight (OPTIONS) richiesta dai browser Mobile rigorosi come Safari
+app.options('*', cors());
+
 const KEYS = {
     chat: process.env.GEMINI_API_KEY_CHAT?.trim(),
     duel: process.env.GEMINI_API_KEY_DUEL?.trim(),

@@ -1,35 +1,141 @@
-import { useMemo } from 'react'
+import { useMemo, useState, useEffect } from 'react'
 import { useData } from '../../hooks/useData'
-import { FileText, Layers, CheckCircle, GraduationCap, BarChart3, Swords, Sparkles, Target, Edit3, Clock, AlertCircle } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
+import {
+    FileText, Layers, CheckCircle, GraduationCap, BarChart3, Swords, Sparkles,
+    Target, Edit3, Clock, Zap, TrendingUp, CalendarDays, BookOpen,
+    Timer, Trophy, Headphones, ArrowRight, Flame, Star, Brain
+} from 'lucide-react'
+import '../../styles/dashboard-pro.css'
 
 const QUOTES = [
     "Il successo è la somma di piccoli sforzi ripetuti giorno dopo giorno.",
     "Non hai bisogno di vedere l'intera scalinata, inizia dal primo gradino.",
     "La motivazione ti fa iniziare. L'abitudine ti fa continuare.",
     "L'unico posto in cui il successo viene prima del sudore è nel dizionario.",
-    "Studia non per superare l'esame, ma per superare te stesso."
+    "Studia non per superare l'esame, ma per superare te stesso.",
+    "La disciplina è il ponte tra i tuoi obiettivi e la loro realizzazione.",
+    "Ogni esperto è stato un principiante. Ogni professionista è stato un dilettante.",
+    "Il momento migliore per iniziare era ieri. Il secondo miglior momento è adesso."
 ]
 
 const LEVEL_THRESHOLDS = [0, 100, 300, 600, 1000, 1500, 2500, 5000, 10000]
+const LEVEL_TITLES = ['Novizio', 'Studente', 'Apprendista', 'Esperto', 'Maestro', 'Erudito', 'Saggio', 'Leggenda', 'Divinità']
+
+function getGreeting() {
+    const h = new Date().getHours()
+    if (h < 6) return { text: 'Buona notte', emoji: '🌙' }
+    if (h < 12) return { text: 'Buongiorno', emoji: '☀️' }
+    if (h < 18) return { text: 'Buon pomeriggio', emoji: '🌤️' }
+    return { text: 'Buonasera', emoji: '🌙' }
+}
+
+// Mini activity heatmap for last 30 days
+function ActivityHeatmap({ tasks, notes, flashcards }) {
+    const days = useMemo(() => {
+        const result = []
+        const now = new Date()
+        for (let i = 29; i >= 0; i--) {
+            const d = new Date(now)
+            d.setDate(d.getDate() - i)
+            const dateStr = d.toISOString().split('T')[0]
+
+            // Count activity: tasks completed, notes created, flashcards created on this day
+            let count = 0
+                ; (tasks || []).forEach(t => {
+                    if (t.completed && t.completedAt?.startsWith(dateStr)) count++
+                })
+                ; (notes || []).forEach(n => {
+                    if (n.createdAt?.startsWith(dateStr)) count++
+                })
+                ; (flashcards || []).forEach(f => {
+                    if (f.createdAt?.startsWith(dateStr)) count++
+                })
+
+            result.push({
+                date: d,
+                count,
+                label: d.toLocaleDateString('it-IT', { weekday: 'short', day: 'numeric' })
+            })
+        }
+        return result
+    }, [tasks, notes, flashcards])
+
+    const maxCount = Math.max(1, ...days.map(d => d.count))
+
+    return (
+        <div className="heatmap-container">
+            <div className="heatmap-grid">
+                {days.map((day, i) => {
+                    const intensity = day.count === 0 ? 0 : Math.min(4, Math.ceil((day.count / maxCount) * 4))
+                    return (
+                        <div
+                            key={i}
+                            className={`heatmap-cell level-${intensity}`}
+                            title={`${day.label}: ${day.count} attività`}
+                        />
+                    )
+                })}
+            </div>
+            <div className="heatmap-legend">
+                <span>Meno</span>
+                <div className="heatmap-cell level-0 mini" />
+                <div className="heatmap-cell level-1 mini" />
+                <div className="heatmap-cell level-2 mini" />
+                <div className="heatmap-cell level-3 mini" />
+                <div className="heatmap-cell level-4 mini" />
+                <span>Più</span>
+            </div>
+        </div>
+    )
+}
+
+// Quick Actions
+function QuickActions() {
+    const navigate = useNavigate()
+    const actions = [
+        { icon: Edit3, label: 'Nuova Nota', path: '/app/notes', color: '#4FACFE', bg: 'rgba(79, 172, 254, 0.1)' },
+        { icon: Layers, label: 'Flashcard', path: '/app/notes', color: '#A78BFA', bg: 'rgba(167, 139, 250, 0.1)' },
+        { icon: Timer, label: 'Pomodoro', path: '/app/pomodoro', color: '#FF6B6B', bg: 'rgba(255, 107, 107, 0.1)' },
+        { icon: Swords, label: 'Duello AI', path: '/app/duel', color: '#F59E0B', bg: 'rgba(245, 158, 11, 0.1)' },
+        { icon: Headphones, label: 'Stanza Studio', path: '/app/study-rooms', color: '#8B5CF6', bg: 'rgba(139, 92, 246, 0.1)' },
+        { icon: GraduationCap, label: 'Classroom', path: '/app/classroom', color: '#F97316', bg: 'rgba(249, 115, 22, 0.1)' },
+    ]
+
+    return (
+        <div className="quick-actions-grid">
+            {actions.map((a, i) => (
+                <button key={i} className="quick-action-btn hover-lift" onClick={() => navigate(a.path)}
+                    style={{ '--action-color': a.color, '--action-bg': a.bg }}>
+                    <div className="quick-action-icon"><a.icon size={20} /></div>
+                    <span>{a.label}</span>
+                </button>
+            ))}
+        </div>
+    )
+}
 
 export default function DashboardSection() {
     const { data, getWeightedAverage, getCompletedTasksCount } = useData()
+    const navigate = useNavigate()
 
     const average = getWeightedAverage()
     const completedTasks = getCompletedTasksCount()
     const quote = useMemo(() => QUOTES[Math.floor(Math.random() * QUOTES.length)], [])
+    const greeting = useMemo(() => getGreeting(), [])
 
     const xp = data.stats?.xp || 0
     const level = data.stats?.level || 1
     const nextLevelXP = LEVEL_THRESHOLDS[level] || 100000
     const prevLevelXP = LEVEL_THRESHOLDS[level - 1] || 0
     const progress = Math.min(100, Math.max(0, ((xp - prevLevelXP) / (nextLevelXP - prevLevelXP)) * 100))
+    const levelTitle = LEVEL_TITLES[level - 1] || 'Leggenda'
 
     const upcomingTasks = useMemo(() => {
         return (data.tasks || [])
             .filter(t => !t.completed && t.dueDate)
             .sort((a, b) => new Date(a.dueDate) - new Date(b.dueDate))
-            .slice(0, 3)
+            .slice(0, 4)
     }, [data.tasks])
 
     const recentGrades = useMemo(() => {
@@ -38,184 +144,231 @@ export default function DashboardSection() {
             .slice(0, 5)
     }, [data.grades])
 
-    const radius = 36
+    const totalNotes = (data.notes || []).length
+    const totalFlashcards = (data.flashcards || []).length
+    const totalTasks = (data.tasks || []).length
+    const totalGrades = (data.grades || []).length
+    const streak = data.stats?.currentStreak || 0
+    const totalPomodoros = data.stats?.pomodoros || 0
+
+    const radius = 42
     const circumference = 2 * Math.PI * radius
     const strokeDashoffset = circumference - (progress / 100) * circumference
 
+    // Daily challenge progress
+    const challenges = [
+        { icon: Edit3, name: 'Scrivi 3 note', goal: 3, current: totalNotes, reward: 50, color: '#4FACFE' },
+        { icon: Layers, name: 'Crea 5 flashcard', goal: 5, current: totalFlashcards, reward: 100, color: '#A78BFA' },
+        { icon: Swords, name: 'Combatti un Duello', goal: 1, current: data.stats?.duelsPlayed || 0, reward: 150, color: '#FF6B6B' },
+    ]
+
     return (
-        <section className="section active reveal-entrance" style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-            <div className="hero" style={{ marginBottom: 0 }}>
-                <h1><span className="gradient-text">Benvenuto!</span> <Sparkles size={32} className="inline-icon hero-sparkle" /></h1>
-                <p style={{ fontStyle: 'italic', color: 'var(--color-text-secondary)', marginTop: '0.5rem', opacity: 0.9 }}>
-                    &ldquo;{quote}&rdquo;
-                </p>
+        <section className="dashboard-pro">
+            {/* Hero Section */}
+            <div className="dash-hero">
+                <div className="dash-hero-text">
+                    <h1>
+                        <span className="dash-greeting-emoji">{greeting.emoji}</span>
+                        <span className="dash-greeting-text">{greeting.text}!</span>
+                    </h1>
+                    <p className="dash-quote">&ldquo;{quote}&rdquo;</p>
+                </div>
+                <div className="dash-hero-stats">
+                    <div className="dash-mini-stat">
+                        <Flame size={16} className="dash-mini-icon fire" />
+                        <span className="dash-mini-value">{streak}</span>
+                        <span className="dash-mini-label">streak</span>
+                    </div>
+                    <div className="dash-mini-stat">
+                        <Star size={16} className="dash-mini-icon star" />
+                        <span className="dash-mini-value">{xp}</span>
+                        <span className="dash-mini-label">XP</span>
+                    </div>
+                </div>
             </div>
 
-            {/* Top Widgets Row: XP Ring + Next Deadlines */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1.5rem' }}>
-                {/* XP Progress Ring */}
-                <div className="card glass-card hover-glow" style={{ display: 'flex', alignItems: 'center', gap: '1.5rem', padding: '1.5rem' }}>
-                    <div style={{ position: 'relative', width: '90px', height: '90px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                        <svg width="90" height="90" style={{ transform: 'rotate(-90deg)' }}>
-                            <circle cx="45" cy="45" r="36" fill="transparent" stroke="rgba(255,255,255,0.05)" strokeWidth="6" />
-                            <circle cx="45" cy="45" r="36" fill="transparent" stroke="url(#xpGradient)" strokeWidth="6"
+            {/* Top Row: XP + Quick Actions */}
+            <div className="dash-top-row stagger-item stagger-1">
+                {/* XP Card */}
+                <div className="dash-card dash-xp-card">
+                    <div className="xp-ring-wrapper">
+                        <svg width="100" height="100" viewBox="0 0 100 100">
+                            <circle cx="50" cy="50" r={radius} fill="transparent"
+                                className="xp-ring-bg" strokeWidth="6" />
+                            <circle cx="50" cy="50" r={radius} fill="transparent"
+                                stroke="url(#xpGrad)" strokeWidth="6"
                                 strokeDasharray={circumference} strokeDashoffset={strokeDashoffset}
-                                style={{ transition: 'stroke-dashoffset 1.5s cubic-bezier(0.16, 1, 0.3, 1)', strokeLinecap: 'round' }} />
+                                className="xp-ring-progress" />
                             <defs>
-                                <linearGradient id="xpGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <linearGradient id="xpGrad" x1="0%" y1="0%" x2="100%" y2="100%">
                                     <stop offset="0%" stopColor="#38F9D7" />
                                     <stop offset="100%" stopColor="#4FACFE" />
                                 </linearGradient>
                             </defs>
                         </svg>
-                        <div style={{ position: 'absolute', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
-                            <span style={{ fontSize: '1.5rem', fontWeight: 800, lineHeight: 1 }}>{level}</span>
-                            <span style={{ fontSize: '0.65rem', color: 'var(--color-text-secondary)', textTransform: 'uppercase', letterSpacing: '1px' }}>LVL</span>
+                        <div className="xp-ring-center">
+                            <span className="xp-level-num">{level}</span>
+                            <span className="xp-level-label">LVL</span>
                         </div>
                     </div>
-                    <div>
-                        <h3 style={{ fontSize: '1.1rem', marginBottom: '0.25rem' }}>Livello {level}</h3>
-                        <p style={{ fontSize: '0.85rem', color: 'var(--color-text-secondary)', marginBottom: '0.5rem' }}>
-                            {xp} / {nextLevelXP} XP
-                        </p>
-                        <div style={{ fontSize: '0.75rem', color: '#38F9D7', background: 'rgba(56, 249, 215, 0.1)', padding: '0.2rem 0.6rem', borderRadius: '12px', display: 'inline-block' }}>
-                            {nextLevelXP - xp} XP al prossimo
+                    <div className="xp-info">
+                        <div className="xp-title-row">
+                            <h3>{levelTitle}</h3>
+                            <span className="xp-badge"><Trophy size={12} /> Lv.{level}</span>
+                        </div>
+                        <div className="xp-bar-wrapper">
+                            <div className="xp-bar-fill" style={{ width: `${progress}%` }} />
+                        </div>
+                        <div className="xp-detail">
+                            <span>{xp} / {nextLevelXP} XP</span>
+                            <span className="xp-remaining">{nextLevelXP - xp} XP rimasti</span>
                         </div>
                     </div>
                 </div>
 
-                {/* Upcoming Deadlines */}
-                <div className="card glass-card hover-glow" style={{ padding: '1.5rem' }}>
-                    <h3 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '1.1rem', marginBottom: '1rem' }}>
-                        <Clock size={18} className="text-accent" /> Prossime Scadenze
-                    </h3>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-                        {upcomingTasks.length === 0 ? (
-                            <p style={{ color: 'var(--color-text-secondary)', fontSize: '0.9rem', fontStyle: 'italic' }}>
-                                Nessuna scadenza a breve!
-                            </p>
-                        ) : upcomingTasks.map(t => (
-                            <div key={t.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'rgba(255,255,255,0.02)', padding: '0.5rem 0.8rem', borderRadius: '8px', borderLeft: '3px solid #FF6B6B' }}>
-                                <span style={{ fontSize: '0.9rem', textOverflow: 'ellipsis', whiteSpace: 'nowrap', overflow: 'hidden', maxWidth: '65%' }}>{t.description}</span>
-                                <span style={{ fontSize: '0.75rem', color: '#FF6B6B', background: 'rgba(255, 107, 107, 0.1)', padding: '0.2rem 0.5rem', borderRadius: '6px' }}>
-                                    {new Date(t.dueDate).toLocaleDateString()}
-                                </span>
-                            </div>
-                        ))}
-                    </div>
+                {/* Quick Actions */}
+                <div className="dash-card dash-quick-card">
+                    <h3><Zap size={18} /> Azioni Rapide</h3>
+                    <QuickActions />
                 </div>
             </div>
 
             {/* Stats Grid */}
-            <div className="stats-grid">
-                <div className="stat-card hover-glow animated-border">
-                    <div className="stat-header">
-                        <FileText size={20} className="stat-icon-svg" />
-                        <div className="stat-label">Note</div>
+            <div className="dash-stats-row stagger-item stagger-2">
+                <div className="dash-stat-item">
+                    <div className="dash-stat-icon" style={{ '--stat-color': '#4FACFE' }}><FileText size={20} /></div>
+                    <div className="dash-stat-content">
+                        <span className="dash-stat-value">{totalNotes}</span>
+                        <span className="dash-stat-label">Note</span>
                     </div>
-                    <div className="stat-value">{(data.notes || []).length}</div>
-                    <div className="stat-change">appunti salvati</div>
+                </div>
+                <div className="dash-stat-item">
+                    <div className="dash-stat-icon" style={{ '--stat-color': '#A78BFA' }}><Layers size={20} /></div>
+                    <div className="dash-stat-content">
+                        <span className="dash-stat-value">{totalFlashcards}</span>
+                        <span className="dash-stat-label">Flashcard</span>
+                    </div>
+                </div>
+                <div className="dash-stat-item">
+                    <div className="dash-stat-icon" style={{ '--stat-color': '#38F9D7' }}><CheckCircle size={20} /></div>
+                    <div className="dash-stat-content">
+                        <span className="dash-stat-value">{completedTasks}</span>
+                        <span className="dash-stat-label">Completati</span>
+                    </div>
+                </div>
+                <div className="dash-stat-item">
+                    <div className="dash-stat-icon" style={{ '--stat-color': '#F59E0B' }}><GraduationCap size={20} /></div>
+                    <div className="dash-stat-content">
+                        <span className="dash-stat-value">{average || '—'}</span>
+                        <span className="dash-stat-label">Media</span>
+                    </div>
+                </div>
+                <div className="dash-stat-item">
+                    <div className="dash-stat-icon" style={{ '--stat-color': '#FF6B6B' }}><Timer size={20} /></div>
+                    <div className="dash-stat-content">
+                        <span className="dash-stat-value">{totalPomodoros}</span>
+                        <span className="dash-stat-label">Pomodori</span>
+                    </div>
+                </div>
+            </div>
+
+            {/* Middle Row: Heatmap + Deadlines */}
+            <div className="dash-mid-row stagger-item stagger-3">
+                {/* Activity Heatmap */}
+                <div className="dash-card dash-heatmap-card">
+                    <h3><CalendarDays size={18} /> Attività Ultimi 30 Giorni</h3>
+                    <ActivityHeatmap tasks={data.tasks} notes={data.notes} flashcards={data.flashcards} />
                 </div>
 
-                <div className="stat-card hover-glow animated-border">
-                    <div className="stat-header">
-                        <Layers size={20} className="stat-icon-svg" />
-                        <div className="stat-label">Flashcard</div>
+                {/* Upcoming Deadlines */}
+                <div className="dash-card dash-deadlines-card">
+                    <div className="dash-card-header">
+                        <h3><Clock size={18} /> Prossime Scadenze</h3>
+                        <button className="dash-see-all" onClick={() => navigate('/app/tasks')}>
+                            Vedi tutto <ArrowRight size={14} />
+                        </button>
                     </div>
-                    <div className="stat-value">{(data.flashcards || []).length}</div>
-                    <div className="stat-change">flashcard create</div>
+                    <div className="deadlines-list">
+                        {upcomingTasks.length === 0 ? (
+                            <div className="dash-empty-state">
+                                <CheckCircle size={28} />
+                                <span>Nessuna scadenza a breve! 🎉</span>
+                            </div>
+                        ) : upcomingTasks.map(t => {
+                            const daysLeft = Math.ceil((new Date(t.dueDate) - new Date()) / 86400000)
+                            const urgency = daysLeft <= 1 ? 'urgent' : daysLeft <= 3 ? 'soon' : 'normal'
+                            return (
+                                <div key={t.id} className={`deadline-item ${urgency}`}>
+                                    <div className="deadline-dot" />
+                                    <div className="deadline-info">
+                                        <span className="deadline-name">{t.description}</span>
+                                        <span className="deadline-date">
+                                            {daysLeft <= 0 ? 'Scaduto!' : daysLeft === 1 ? 'Domani' : `Fra ${daysLeft} giorni`}
+                                        </span>
+                                    </div>
+                                </div>
+                            )
+                        })}
+                    </div>
                 </div>
+            </div>
 
-                <div className="stat-card hover-glow animated-border">
-                    <div className="stat-header">
-                        <CheckCircle size={20} className="stat-icon-svg text-accent" />
-                        <div className="stat-label">Compiti</div>
-                    </div>
-                    <div className="stat-value">{completedTasks}</div>
-                    <div className="stat-change text-accent">completati</div>
-                </div>
-
-                <div className="stat-card hover-glow animated-border">
-                    <div className="stat-header">
-                        <GraduationCap size={20} className="stat-icon-svg" />
-                        <div className="stat-label">Media</div>
-                    </div>
-                    <div className="stat-value">{average || '-'}</div>
-                    <div className="stat-change">media ponderata</div>
-                </div>
-
-                <div className="stat-card hover-glow animated-border" style={{ gridColumn: 'span 2', display: 'flex', flexDirection: 'column' }}>
-                    <div className="stat-header" style={{ marginBottom: '1rem' }}>
-                        <BarChart3 size={20} className="stat-icon-svg" />
-                        <div className="stat-label">Trend Ultimi Voti</div>
-                    </div>
+            {/* Bottom Row: Grades Trend + Challenges */}
+            <div className="dash-bottom-row stagger-item stagger-4">
+                {/* Grades Chart */}
+                <div className="dash-card dash-grades-card">
+                    <h3><BarChart3 size={18} /> Trend Voti</h3>
                     {recentGrades.length === 0 ? (
-                        <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--color-text-secondary)', fontSize: '0.85rem' }}>Nessun voto inserito</div>
+                        <div className="dash-empty-state">
+                            <TrendingUp size={28} />
+                            <span>Nessun voto inserito</span>
+                        </div>
                     ) : (
-                        <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', flex: 1, gap: '8px', padding: '0 1rem' }}>
-                            {recentGrades.reverse().map((g, i) => {
-                                const numVal = parseFloat(g.value) || 0;
-                                const percentage = Math.min(100, (numVal / 10) * 100);
+                        <div className="grades-chart">
+                            {[...recentGrades].reverse().map((g, i) => {
+                                const val = parseFloat(g.value) || 0
+                                const pct = Math.min(100, (val / 10) * 100)
                                 return (
-                                    <div key={i} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px', flex: 1 }}>
-                                        <span style={{ fontSize: '0.75rem', fontWeight: 600 }}>{numVal}</span>
-                                        <div style={{
-                                            width: '100%', maxWidth: '20px', height: '60px',
-                                            background: 'rgba(255,255,255,0.05)', borderRadius: '4px',
-                                            position: 'relative', overflow: 'hidden'
-                                        }}>
-                                            <div style={{
-                                                position: 'absolute', bottom: 0, left: 0, right: 0,
-                                                height: `${percentage}%`,
-                                                background: numVal >= 6 ? 'linear-gradient(to top, #38F9D7, #4FACFE)' : '#FF6B6B',
-                                                borderRadius: '4px', transition: 'height 1s cubic-bezier(0.16, 1, 0.3, 1)'
-                                            }}></div>
+                                    <div key={i} className="grade-bar-wrapper">
+                                        <span className="grade-bar-value">{val}</span>
+                                        <div className="grade-bar-track">
+                                            <div className={`grade-bar-fill ${val >= 6 ? 'pass' : 'fail'}`}
+                                                style={{ height: `${pct}%` }} />
                                         </div>
+                                        <span className="grade-bar-label">{g.subject?.substring(0, 3) || '—'}</span>
                                     </div>
                                 )
                             })}
                         </div>
                     )}
                 </div>
-            </div>
 
-            {/* Daily Challenges */}
-            <div className="daily-challenges-widget reveal-up glass-card" style={{ animationDelay: '0.2s', padding: '1.5rem', background: 'rgba(15, 15, 25, 0.5)' }}>
-                <div className="challenge-header" style={{ marginBottom: '1rem' }}>
-                    <div className="header-text">
-                        <h3 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}><Target size={20} className="text-secondary" /> Sfide del Giorno</h3>
-                        <p className="challenge-subtitle" style={{ color: 'var(--color-text-secondary)' }}>Guadagna XP extra completando le missioni</p>
-                    </div>
-                </div>
-                <div className="challenge-list" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '1rem' }}>
-                    <div className={`challenge-item ${(data.notes || []).length >= 3 ? 'completed' : ''}`} style={{ background: 'rgba(255,255,255,0.02)', padding: '1rem', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.05)' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                            <div className="challenge-icon-box" style={{ background: 'rgba(79, 172, 254, 0.1)', color: '#4FACFE', padding: '0.5rem', borderRadius: '8px' }}><Edit3 size={18} /></div>
-                            <div className="challenge-info" style={{ flex: 1 }}>
-                                <div className="challenge-name" style={{ fontSize: '0.95rem', fontWeight: 600 }}>Scrivi 3 note</div>
-                                <div className="challenge-reward" style={{ fontSize: '0.8rem', color: '#38F9D7' }}>+50 XP</div>
-                            </div>
-                            {(data.notes || []).length >= 3 && <div className="challenge-check-badge" style={{ color: '#38F9D7' }}><CheckCircle size={18} /></div>}
-                        </div>
-                    </div>
-                    <div className={`challenge-item ${(data.flashcards || []).length >= 5 ? 'completed' : ''}`} style={{ background: 'rgba(255,255,255,0.02)', padding: '1rem', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.05)' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                            <div className="challenge-icon-box" style={{ background: 'rgba(167, 139, 250, 0.1)', color: '#A78BFA', padding: '0.5rem', borderRadius: '8px' }}><Layers size={18} /></div>
-                            <div className="challenge-info" style={{ flex: 1 }}>
-                                <div className="challenge-name" style={{ fontSize: '0.95rem', fontWeight: 600 }}>Crea 5 flashcard</div>
-                                <div className="challenge-reward" style={{ fontSize: '0.8rem', color: '#38F9D7' }}>+100 XP</div>
-                            </div>
-                            {(data.flashcards || []).length >= 5 && <div className="challenge-check-badge" style={{ color: '#38F9D7' }}><CheckCircle size={18} /></div>}
-                        </div>
-                    </div>
-                    <div className="challenge-item" style={{ background: 'rgba(255,255,255,0.02)', padding: '1rem', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.05)' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                            <div className="challenge-icon-box" style={{ background: 'rgba(255, 107, 107, 0.1)', color: '#FF6B6B', padding: '0.5rem', borderRadius: '8px' }}><Swords size={18} /></div>
-                            <div className="challenge-info" style={{ flex: 1 }}>
-                                <div className="challenge-name" style={{ fontSize: '0.95rem', fontWeight: 600 }}>Combatti un Duello</div>
-                                <div className="challenge-reward" style={{ fontSize: '0.8rem', color: '#38F9D7' }}>+150 XP</div>
-                            </div>
-                        </div>
+                {/* Daily Challenges */}
+                <div className="dash-card dash-challenges-card">
+                    <h3><Target size={18} /> Sfide del Giorno</h3>
+                    <div className="challenges-list">
+                        {challenges.map((c, i) => {
+                            const done = c.current >= c.goal
+                            const pct = Math.min(100, (c.current / c.goal) * 100)
+                            return (
+                                <div key={i} className={`challenge-row ${done ? 'done' : ''}`}>
+                                    <div className="challenge-icon" style={{ background: `${c.color}15`, color: c.color }}>
+                                        <c.icon size={18} />
+                                    </div>
+                                    <div className="challenge-body">
+                                        <div className="challenge-top">
+                                            <span className="challenge-name">{c.name}</span>
+                                            <span className="challenge-reward">+{c.reward} XP</span>
+                                        </div>
+                                        <div className="challenge-bar">
+                                            <div className="challenge-bar-fill" style={{ width: `${pct}%`, background: c.color }} />
+                                        </div>
+                                        <span className="challenge-progress">{Math.min(c.current, c.goal)}/{c.goal}</span>
+                                    </div>
+                                    {done && <CheckCircle size={18} className="challenge-check" />}
+                                </div>
+                            )
+                        })}
                     </div>
                 </div>
             </div>

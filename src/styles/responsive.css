@@ -82,7 +82,7 @@
     }
 
     .content {
-        padding: 1rem !important;
+        padding: 8.5rem 1rem 4rem !important;
         width: 100%;
         max-width: 100%;
     }
@@ -110,7 +110,7 @@
 
     /* Lift chatbot FAB above the mobile bottom nav */
     #geminiChat {
-        bottom: 8.5rem;
+        bottom: 7rem !important;
         right: 1rem;
         z-index: 10003;
     }
@@ -124,7 +124,7 @@
 /* ── TABLET (48em–63.9375em / 768px–1023px) ── */
 @media (min-width: 48em) and (max-width: 63.9375em) {
     .content {
-        padding: var(--space-8) var(--space-6);
+        padding: 8.5rem var(--space-6, 1.5rem) 4rem;
     }
 
     .stats-grid {
@@ -146,7 +146,7 @@
     }
 
     .content {
-        padding: var(--space-12) var(--space-10);
+        padding: 8.5rem var(--space-10, 2.5rem) 4rem;
     }
 
     .stats-grid {

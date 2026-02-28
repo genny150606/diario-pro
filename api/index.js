@@ -7,6 +7,7 @@ const cors = require("cors");
 const { GoogleGenerativeAI } = require("@google/generative-ai");
 const multer = require("multer");
 const pdfParse = require("pdf-parse");
+const { AccessToken } = require("livekit-server-sdk");
 // This pdf-parse version requires buffer passed as {data} in the constructor
 const pdf = async (buffer) => {
     try {
@@ -50,8 +51,8 @@ console.log(`  - Duel: ${KEYS.duel ? 'OK' : 'MANCANTE'}`);
 console.log(`  - Flashcards: ${KEYS.flashcards ? 'OK' : 'MANCANTE'}`);
 console.log(`  - PDF: ${KEYS.pdf ? 'OK' : 'MANCANTE'}`);
 
-const SUPABASE_URL = "https://rzdpntvojpibbndhsrlz.supabase.co";
-const SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ6ZHBudHZvanBpYmJuZGhzcmx6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEzNzg1MjEsImV4cCI6MjA4Njk1NDUyMX0.QwnT9Okp8CkN_LxGIeBKWrroo3letL8OhSvaqdQVW7M';
+const SUPABASE_URL = process.env.SUPABASE_URL || "https://rzdpntvojpibbndhsrlz.supabase.co";
+const SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ6ZHBudHZvanBpYmJuZGhzcmx6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEzNzg1MjEsImV4cCI6MjA4Njk1NDUyMX0.QwnT9Okp8CkN_LxGIeBKWrroo3letL8OhSvaqdQVW7M';
 
 // Inizializza le istanze AI solo per le chiavi presenti
 const aiInstances = {};
@@ -84,7 +85,7 @@ app.get("/api/health", async (req, res) => {
     try {
         const start = Date.now();
         const testReq = await fetch(`${SUPABASE_URL}/rest/v1/users_data?select=id&limit=1`, {
-            headers: { 'apikey': SERVICE_KEY, 'Authorization': `Bearer ${SERVICE_KEY}` }
+            headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` }
         });
         supabaseStatus = `${testReq.status} (${Date.now() - start}ms)`;
     } catch (e) {
@@ -95,7 +96,7 @@ app.get("/api/health", async (req, res) => {
         status: "alive",
         version: "v14-multi-key",
         ai_instances: Object.keys(aiInstances),
-        env: { has_any_gemini: Object.keys(aiInstances).length > 0, has_supabase_key: !!process.env.SUPABASE_SERVICE_ROLE_KEY },
+        env: { has_any_gemini: Object.keys(aiInstances).length > 0, has_supabase_key: !!process.env.SUPABASE_ANON_KEY },
         connectivity: { supabase: supabaseStatus }
     });
 });
@@ -471,8 +472,8 @@ app.post("/api/supabase-proxy", async (req, res) => {
 
             // Costruiamo gli header dinamicamente
             const headers = {
-                'apikey': SERVICE_KEY,
-                'Authorization': userAuth || `Bearer ${SERVICE_KEY}`,
+                'apikey': SUPABASE_ANON_KEY,
+                'Authorization': userAuth || `Bearer ${SUPABASE_ANON_KEY}`,
                 'User-Agent': USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)],
                 'X-Client-Info': 'studyjournal-pro-proxy-v13'
             };
@@ -544,6 +545,47 @@ app.post("/api/supabase-proxy", async (req, res) => {
             message: lastErr?.message,
             version: "v14-omega-max"
         });
+    }
+});
+
+// ============================================
+// LIVEKIT TOKEN ENDPOINT
+// ============================================
+
+app.post("/api/livekit-token", async (req, res) => {
+    try {
+        const { roomName, participantName } = req.body;
+
+        if (!roomName || !participantName) {
+            return res.status(400).json({ error: "roomName e participantName sono obbligatori" });
+        }
+
+        const apiKey = process.env.LIVEKIT_API_KEY;
+        const apiSecret = process.env.LIVEKIT_API_SECRET;
+
+        if (!apiKey || !apiSecret) {
+            console.error("[LIVEKIT] Chiavi API mancanti. Configura LIVEKIT_API_KEY e LIVEKIT_API_SECRET nel file .env");
+            return res.status(500).json({ error: "Configurazione LiveKit mancante sul server" });
+        }
+
+        const token = new AccessToken(apiKey, apiSecret, {
+            identity: participantName,
+            ttl: '6h',
+        });
+
+        token.addGrant({
+            room: roomName,
+            roomJoin: true,
+            canPublish: true,
+            canSubscribe: true,
+        });
+
+        const jwt = await token.toJwt();
+        console.log(`[LIVEKIT] Token generato per ${participantName} nella stanza ${roomName}`);
+        res.json({ token: jwt });
+    } catch (e) {
+        console.error("[LIVEKIT] Errore generazione token:", e.message);
+        res.status(500).json({ error: e.message });
     }
 });
 

@@ -1,4 +1,5 @@
 import { useState, useMemo } from 'react'
+import { createPortal } from 'react-dom'
 import { useData } from '../../hooks/useData'
 import { Plus, Sparkles, BookOpen, Trash2, Calendar, FileText, HelpCircle, CheckCircle, ChevronDown, Info, Search, Edit3, X, Zap, RefreshCw, ChevronLeft, ChevronRight } from 'lucide-react'
 
@@ -212,7 +213,7 @@ export default function NotesSection() {
 
     if (studyMode && studyFcs.length > 0) {
         const fc = studyFcs[currentFcIndex]
-        return (
+        return createPortal(
             <div className="study-mode-overlay reveal-entrance">
                 <div className="study-container" style={{ perspective: '2000px', display: 'flex', flexDirection: 'column', alignItems: 'center', maxWidth: '500px', margin: '0 auto' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', marginBottom: '2rem' }}>
@@ -259,7 +260,8 @@ export default function NotesSection() {
                         </div>
                     )}
                 </div>
-            </div>
+            </div>,
+            document.body
         )
     }
 

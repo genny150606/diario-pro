@@ -1898,7 +1898,7 @@
     position: fixed;
     inset: 0;
     background: var(--color-bg);
-    z-index: 10002;
+    z-index: 99999;
     background-image: radial-gradient(circle at 50% 50%, rgba(91, 159, 243, 0.1) 0%, transparent 70%);
     display: flex;
     align-items: center;

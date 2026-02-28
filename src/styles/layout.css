@@ -402,7 +402,7 @@
 .content {
     max-width: 1200px;
     margin: 0 auto;
-    padding: 8rem 2rem 4rem;
+    padding: 8.5rem 2rem 4rem;
     width: 100%;
 }
 
@@ -583,6 +583,12 @@
         box-shadow: 0 1rem 3rem rgba(0, 0, 0, 0.5);
     }
 
+    .sidebar-group,
+    .sidebar-bottom-group {
+        flex-direction: row;
+        width: auto;
+    }
+
     .sidebar.open {
         bottom: 0;
         left: 0;
@@ -600,6 +606,11 @@
         backdrop-filter: blur(60px) saturate(200%);
         -webkit-backdrop-filter: blur(60px) saturate(200%);
         border: none;
+    }
+
+    .sidebar.open .sidebar-group,
+    .sidebar.open .sidebar-bottom-group {
+        flex-direction: column;
     }
 
     /* ONLY hide labels on mobile collapsed state */
@@ -695,7 +706,35 @@
     }
 
     .content {
-        padding-top: 6rem;
+        padding-top: 7.5rem;
+    }
+
+    /* Mobile collapsed: show only priority items (first 5) */
+    .sidebar:not(.open) .sidebar-item[data-mobile-priority="false"] {
+        display: none !important;
+    }
+
+    /* Hide bottom group and profile in collapsed state */
+    .sidebar:not(.open) .sidebar-bottom-group {
+        display: none !important;
+    }
+
+    /* Show everything when expanded */
+    .sidebar.open .sidebar-item[data-mobile-priority="false"] {
+        display: flex !important;
+    }
+
+    .sidebar.open .sidebar-bottom-group {
+        display: flex !important;
+    }
+
+    /* Chatbot FAB: lift above mobile bottom bar */
+    .chatbot-fab,
+    .chatbot-widget-fab,
+    [class*="chatbot"] button[class*="fab"],
+    .gemini-fab {
+        bottom: 7rem !important;
+        z-index: 10003;
     }
 }
 
@@ -875,4 +914,141 @@ footer {
     50% {
         opacity: 1;
     }
+}
+
+/* ============================================
+   Light Theme Overrides for Layout
+   ============================================ */
+
+:root .menu-toggle {
+    color: var(--color-text);
+}
+
+:root .theme-toggle {
+    color: var(--color-text);
+}
+
+:root .streak-badge {
+    background: rgba(0, 0, 0, 0.04);
+    border-color: rgba(0, 0, 0, 0.1);
+    color: var(--color-text-secondary);
+}
+
+:root .streak-badge.active {
+    background: rgba(255, 170, 0, 0.08);
+    border-color: rgba(255, 170, 0, 0.25);
+    color: #b45309;
+}
+
+:root .account-btn {
+    background: rgba(0, 0, 0, 0.04);
+    border-color: rgba(0, 0, 0, 0.1);
+    color: var(--color-text);
+}
+
+:root .account-btn:hover {
+    background: rgba(0, 0, 0, 0.08);
+}
+
+:root .account-dropdown {
+    background: rgba(255, 255, 255, 0.95);
+    border-color: rgba(0, 0, 0, 0.1);
+    box-shadow: 0 2rem 4rem rgba(0, 0, 0, 0.15);
+}
+
+:root .dropdown-item {
+    color: var(--color-text-secondary);
+}
+
+:root .dropdown-item:hover {
+    background: rgba(0, 0, 0, 0.04);
+    color: var(--color-text);
+}
+
+:root .sidebar {
+    box-shadow: 0 40px 100px rgba(0, 0, 0, 0.08), inset 0 0 40px rgba(0, 0, 0, 0.01);
+}
+
+:root .sidebar:hover {
+    border-color: rgba(0, 0, 0, 0.12);
+}
+
+:root .sidebar-item.active {
+    color: var(--color-accent);
+    text-shadow: none;
+}
+
+:root .sidebar-profile-widget {
+    background: rgba(0, 0, 0, 0.03);
+    border-color: rgba(0, 0, 0, 0.06);
+}
+
+:root .profile-name {
+    color: var(--color-text);
+}
+
+:root .profile-badge {
+    color: var(--color-text-tertiary);
+}
+
+:root .profile-logout-btn {
+    color: var(--color-text-tertiary);
+}
+
+:root .loading-brand {
+    color: var(--color-text);
+}
+
+/* Dark theme explicit restore */
+[data-theme="dark"] .menu-toggle,
+[data-theme="dark"] .theme-toggle {
+    color: #fff;
+}
+
+[data-theme="dark"] .streak-badge {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(255, 255, 255, 0.1);
+    color: #fff;
+}
+
+[data-theme="dark"] .account-btn {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(255, 255, 255, 0.1);
+    color: #fff;
+}
+
+[data-theme="dark"] .account-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+[data-theme="dark"] .account-dropdown {
+    background: rgba(10, 10, 12, 0.9);
+    border-color: rgba(255, 255, 255, 0.1);
+    box-shadow: 0 2rem 4rem rgba(0, 0, 0, 0.6);
+}
+
+[data-theme="dark"] .dropdown-item {
+    color: rgba(255, 255, 255, 0.5);
+}
+
+[data-theme="dark"] .dropdown-item:hover {
+    background: rgba(255, 255, 255, 0.05);
+    color: #fff;
+}
+
+[data-theme="dark"] .sidebar-item.active {
+    color: #fff;
+    text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+}
+
+[data-theme="dark"] .profile-name {
+    color: #fff;
+}
+
+[data-theme="dark"] .profile-badge {
+    color: rgba(255, 255, 255, 0.5);
+}
+
+[data-theme="dark"] .profile-logout-btn {
+    color: rgba(255, 255, 255, 0.4);
 }

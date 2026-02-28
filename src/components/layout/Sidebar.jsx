@@ -43,6 +43,7 @@ export default function Sidebar({ sections, isOpen, setSidebarOpen, onExit }) {
                             className={({ isActive }) => `sidebar-item ${isActive ? 'active' : ''}`}
                             onClick={handleLinkClick}
                             style={{ '--item-index': idx }}
+                            data-mobile-priority={idx < 5 ? 'true' : 'false'}
                         >
                             {IconComponent && <IconComponent size={22} strokeWidth={2.5} />}
                             <span className="sidebar-label">{section.label}</span>

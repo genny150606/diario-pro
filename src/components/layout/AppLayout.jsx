@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useNavigate, Link, Outlet } from 'react-router-dom'
+import { useNavigate, Link, Outlet, useLocation } from 'react-router-dom'
 import { useAuth } from '../../hooks/useAuth'
 import { useData } from '../../hooks/useData'
 import Sidebar from './Sidebar'
@@ -21,7 +21,7 @@ import '../../styles/gamification.css'
 import {
     Home, BookOpen, CheckSquare, Star, Timer,
     BarChart2, Swords, Users, Trophy, Settings,
-    Menu, Sun, Moon, ChevronDown, LogOut, User, CalendarDays, Database
+    Menu, Sun, Moon, ChevronDown, LogOut, User, CalendarDays, Database, Headphones, GraduationCap
 } from 'lucide-react'
 
 const SECTIONS = [
@@ -36,6 +36,8 @@ const SECTIONS = [
     { id: 'gamification', label: 'Livello', Icon: Trophy, path: '/app/gamification' },
     { id: 'calendar', label: 'Calendario', Icon: CalendarDays, path: '/app/calendar' },
     { id: 'knowledge', label: 'Knowledge Hub', Icon: Database, path: '/app/knowledge' },
+    { id: 'study-rooms', label: 'Stanze Studio', Icon: Headphones, path: '/app/study-rooms' },
+    { id: 'classroom', label: 'Classroom', Icon: GraduationCap, path: '/app/classroom' },
     { id: 'settings', label: 'Impostazioni', Icon: Settings, path: '/app/settings', bottom: true },
 ]
 
@@ -43,6 +45,7 @@ export default function AppLayout() {
     const { user, signOut } = useAuth()
     const { data } = useData()
     const navigate = useNavigate()
+    const location = useLocation()
     const [sidebarOpen, setSidebarOpen] = useState(false)
     const [menuOpen, setMenuOpen] = useState(false)
     const [theme, setTheme] = useState(() => {
@@ -104,7 +107,7 @@ export default function AppLayout() {
 
                 <Link pos="/" className="logo" style={{ display: 'flex', alignItems: 'center', gap: '10px', textDecoration: 'none' }}>
                     <img src="/S.png" alt="StudyJournal Pro Logo" style={{ height: '36px', width: 'auto', filter: 'drop-shadow(0 0 8px rgba(100, 150, 255, 0.4))' }} />
-                    <span style={{ fontSize: '1.2rem', fontWeight: 800, background: 'linear-gradient(135deg, #fff 0%, #a5b4fc 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>StudyJournal</span>
+                    <span style={{ fontSize: '1.2rem', fontWeight: 800, color: 'var(--color-text)' }}>StudyJournal</span>
                 </Link>
 
                 <div className="header-right-group">
@@ -113,8 +116,8 @@ export default function AppLayout() {
                             title="Giorni consecutivi di studio"
                             style={{
                                 boxShadow: data?.stats?.currentStreak > 0 ? '0 0 15px rgba(56, 249, 215, 0.3)' : 'none',
-                                background: data?.stats?.currentStreak > 0 ? 'rgba(56, 249, 215, 0.1)' : 'rgba(255,255,255,0.05)',
-                                border: data?.stats?.currentStreak > 0 ? '1px solid rgba(56, 249, 215, 0.3)' : '1px solid rgba(255,255,255,0.1)'
+                                background: data?.stats?.currentStreak > 0 ? 'rgba(56, 249, 215, 0.1)' : 'var(--color-bg-secondary)',
+                                border: data?.stats?.currentStreak > 0 ? '1px solid rgba(56, 249, 215, 0.3)' : '1px solid var(--color-border)'
                             }}>
                             <Star size={14} className="streak-icon" style={{ color: data?.stats?.currentStreak > 0 ? '#38F9D7' : 'inherit' }} />
                             <span className="streak-count" style={{ color: data?.stats?.currentStreak > 0 ? '#38F9D7' : 'inherit' }}>{data?.stats?.currentStreak || 0}</span>
@@ -141,7 +144,7 @@ export default function AppLayout() {
                                     <Link to="/app/settings" className="dropdown-item" onClick={() => setMenuOpen(false)}>
                                         <Settings size={14} /> Impostazioni
                                     </Link>
-                                    <div style={{ height: 1, background: 'rgba(255,255,255,0.05)', margin: '0.5rem 0' }}></div>
+                                    <div style={{ height: 1, background: 'var(--color-border)', margin: '0.5rem 0' }}></div>
                                     <button className="dropdown-item" onClick={handleSignOut} style={{ color: '#FF453A', border: 'none', background: 'none', width: '100%', cursor: 'pointer' }}>
                                         <LogOut size={14} /> Esci
                                     </button>
@@ -179,7 +182,7 @@ export default function AppLayout() {
 
             {/* Main content */}
             <div className="container">
-                <div className="content">
+                <div className="content page-transition" key={location.pathname}>
                     <Outlet />
                 </div>
             </div>

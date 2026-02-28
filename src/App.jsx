@@ -19,6 +19,8 @@ const GamificationSection = lazy(() => import('./components/sections/Gamificatio
 const CalendarSection = lazy(() => import('./components/sections/CalendarSection'))
 const KnowledgeHubSection = lazy(() => import('./components/sections/KnowledgeHubSection'))
 const SettingsSection = lazy(() => import('./components/sections/SettingsSection'))
+const StudyRoomSection = lazy(() => import('./components/sections/StudyRoomSection'))
+const ClassroomSection = lazy(() => import('./components/sections/ClassroomSection'))
 
 function ProtectedRoute({ children }) {
     const { user, loading } = useAuth()
@@ -59,6 +61,8 @@ export default function App() {
                     <Route path="gamification" element={<GamificationSection />} />
                     <Route path="calendar" element={<CalendarSection />} />
                     <Route path="knowledge" element={<KnowledgeHubSection />} />
+                    <Route path="study-rooms" element={<StudyRoomSection />} />
+                    <Route path="classroom" element={<ClassroomSection />} />
                     <Route path="settings" element={<SettingsSection />} />
                 </Route>
 

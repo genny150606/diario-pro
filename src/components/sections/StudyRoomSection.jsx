@@ -224,10 +224,15 @@ function ActiveRoomView({ room, token, onLeave, userId }) {
     return (
         <div className="study-room-active">
             <div className="room-top-bar">
-                <h2>
-                    <Headphones size={20} />
-                    {room.name}
-                </h2>
+                <div>
+                    <h2>
+                        <Headphones size={20} />
+                        {room.name}
+                    </h2>
+                    <div style={{ color: 'var(--color-accent)', fontWeight: 800, letterSpacing: '2px', fontSize: '0.9rem', marginTop: '0.5rem' }}>
+                        CODICE STANZA: {room.id.substring(0, 6).toUpperCase()}
+                    </div>
+                </div>
                 <button className="btn-leave-room" onClick={onLeave}>
                     <LogOut size={14} /> Esci dalla Stanza
                 </button>
@@ -307,8 +312,24 @@ export default function StudyRoomSection() {
     const [activeRoom, setActiveRoom] = useState(null)
     const [livekitToken, setLivekitToken] = useState(null)
     const [showCreateModal, setShowCreateModal] = useState(false)
+    const [joinCode, setJoinCode] = useState('')
     const [error, setError] = useState(null)
     const [loading, setLoading] = useState(true)
+
+    // Derived short code
+    const getShortCode = (id) => id?.substring(0, 6).toUpperCase()
+
+    const handleJoinByCode = () => {
+        if (!joinCode.trim()) return
+        const targetRoom = rooms.find(r => getShortCode(r.id) === joinCode.trim().toUpperCase() || r.id === joinCode.trim())
+        if (targetRoom) {
+            joinRoom(targetRoom)
+            setJoinCode('')
+        } else {
+            setError('Codice stanza non valido o stanza inesistente.')
+            setTimeout(() => setError(null), 3000)
+        }
+    }
 
     // Fetch rooms
     const fetchRooms = useCallback(async () => {
@@ -456,6 +477,21 @@ export default function StudyRoomSection() {
                 </button>
             </div>
 
+            <div className="join-by-code-container" style={{ margin: '1rem 0 2rem 0', display: 'flex', gap: '1rem', alignItems: 'center', background: 'rgba(255,255,255,0.03)', padding: '1rem', borderRadius: '1rem', border: '1px solid var(--glass-border)' }}>
+                <input
+                    type="text"
+                    placeholder="Incolla codice stanza (es. 12E4A9)"
+                    value={joinCode}
+                    onChange={(e) => setJoinCode(e.target.value)}
+                    onKeyDown={(e) => e.key === 'Enter' && handleJoinByCode()}
+                    style={{ flex: 1, padding: '0.8rem 1rem', background: 'rgba(0,0,0,0.2)', border: '1px solid var(--glass-border)', color: 'white', borderRadius: '0.5rem', textTransform: 'uppercase', letterSpacing: '2px' }}
+                    maxLength={36}
+                />
+                <button className="btn-secondary" onClick={handleJoinByCode} disabled={!joinCode.trim()} style={{ padding: '0.8rem 1.5rem', borderRadius: '0.5rem', whiteSpace: 'nowrap' }}>
+                    Entra con Codice
+                </button>
+            </div>
+
             {error && (
                 <div className="room-error">{error}</div>
             )}
@@ -483,7 +519,10 @@ export default function StudyRoomSection() {
                                     {room.pomodoro_status === 'idle' && 'In attesa'}
                                 </span>
                             </div>
-                            <div className="room-card-info">
+                            <div className="room-card-info" style={{ marginTop: '0.5rem', color: 'var(--color-accent)', fontWeight: 600, fontSize: '0.85rem', letterSpacing: '1px' }}>
+                                #{getShortCode(room.id)}
+                            </div>
+                            <div className="room-card-info" style={{ marginTop: '0.5rem' }}>
                                 <span><Users size={13} /> {participantCounts[room.id] || 0} / {room.max_participants}</span>
                                 <span><Clock size={13} /> {new Date(room.created_at).toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' })}</span>
                             </div>

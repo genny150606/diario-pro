@@ -3,7 +3,8 @@ import { createClient } from '@supabase/supabase-js'
 export const SUPABASE_URL = 'https://rzdpntvojpibbndhsrlz.supabase.co'
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ6ZHBudHZvanBpYmJuZGhzcmx6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEzNzg1MjEsImV4cCI6MjA4Njk1NDUyMX0.QwnT9Okp8CkN_LxGIeBKWrroo3letL8OhSvaqdQVW7M'
 
-const PROXY_URL = '/api/supabase-proxy'
+// Workaround anti Vite 502 (Bad Gateway) IPv4
+const PROXY_URL = import.meta.env?.DEV ? 'http://localhost:3001/api/supabase-proxy' : '/api/supabase-proxy'
 
 const createSupabaseClient = () => {
     return createClient(SUPABASE_URL, SUPABASE_KEY, {
@@ -55,11 +56,16 @@ const createSupabaseClient = () => {
                         new Headers(options.headers).forEach((v, k) => rawHeaders[k] = v)
                     }
 
+                    let parsedBody = options.body
+                    if (typeof options.body === 'string') {
+                        try { parsedBody = JSON.parse(options.body) } catch (e) { }
+                    }
+
                     const proxyBody = {
                         path: path,
                         method: options.method,
                         headers: rawHeaders,
-                        body: options.body
+                        body: parsedBody
                     }
 
                     try {

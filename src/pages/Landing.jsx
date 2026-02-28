@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
 import { supabase } from '../lib/supabase'
 import AuthModal from '../components/auth/AuthModal'
+import { Sparkles, BrainCircuit, Swords, Calendar, Activity } from 'lucide-react'
 import '../styles/home.css'
 
 export default function Landing() {
@@ -298,7 +299,11 @@ export default function Landing() {
                     </div>
 
                     <div className="hero-floating-preview">
+                        <div className="floating-badge badge-1"><BrainCircuit size={18} /> AI Flashcards</div>
+                        <div className="floating-badge badge-2"><Swords size={18} /> Duel Arena</div>
+                        <div className="floating-badge badge-3"><Sparkles size={18} /> Knowledge Hub</div>
                         <div className="preview-glass-card">
+                            <div className="mesh-gradient-bg"></div>
                             <div className="card-inner">
                                 <div className="stat-group">
                                     <span className="stat-val">{stats.notes}</span>
@@ -324,45 +329,57 @@ export default function Landing() {
                     </div>
                 </section>
 
-                {/* ═══════════ FEATURE REVEAL SECTIONS ═══════════ */}
-                <section id="features" className="reveal-section" data-nav-color="rgba(25, 15, 45, 0.85)" data-bg-color="#0a0515">
-                    <div className="reveal-content-box">
-                        <div className="feature-large-text">
-                            <h2 className="section-title-minimal">
-                                L'AI che <br /><span className="muted">Studia con te.</span>
-                            </h2>
-                            <p className="section-desc-minimal">
-                                Da semplici appunti a una memoria di ferro in un clic.
-                                Genera flashcard istantanee, chiedi spiegazioni al tuo tutor virtuale e preparati per l'esame
-                                senza perdere un secondo in organizzazione.
+                {/* ═══════════ BENTO GRID FEATURES ═══════════ */}
+                <section id="features" className="bento-section reveal-section" data-nav-color="rgba(10, 10, 15, 0.85)" data-bg-color="#08080c">
+                    <div className="bento-header feature-large-text">
+                        <h2 className="section-title-minimal">
+                            L'AI che <br /><span className="muted">Studia con te.</span>
+                        </h2>
+                        <p className="section-desc-minimal" style={{ fontSize: '1.2rem', marginTop: '1rem', maxWidth: '600px', margin: '1rem auto 0' }}>
+                            Un ecosistema progettato per abbattere i tempi di studio e massimizzare la ritenzione a lungo termine.
+                        </p>
+                    </div>
+
+                    <div className="bento-grid">
+                        <div className="bento-card bento-large">
+                            <div className="bento-icon-wrapper"><BrainCircuit size={28} /></div>
+                            <h3 className="bento-title">Smart Flashcards & Spaced Repetition</h3>
+                            <p className="bento-desc">
+                                L'IA trasforma istantaneamente i tuoi appunti in flashcard ottimizzate per la memoria a lungo termine.
+                                Algoritmi SRS (Spaced Repetition System) ti interrogano esattamente nel momento in cui stai per dimenticare.
                             </p>
                         </div>
-                    </div>
-                </section>
 
-                <section id="philosophy" className="reveal-section" data-nav-color="rgba(10, 35, 25, 0.85)" data-bg-color="#05100a">
-                    <div className="reveal-content-box">
-                        <div className="feature-large-text">
-                            <h2 className="section-title-minimal">
-                                Zero distrazioni.<br /><span className="muted">Solo deep work.</span>
-                            </h2>
-                            <p className="section-desc-minimal">
-                                Un'interfaccia pulita, modalità scura nativa e un ambiente
-                                progettato per eliminare il rumore di fondo.
-                                Entra nel flow state e lascia il mondo fuori.
+                        <div className="bento-card bento-tall">
+                            <div className="bento-icon-wrapper"><Swords size={28} /></div>
+                            <h3 className="bento-title">AI Quiz Duel</h3>
+                            <p className="bento-desc">
+                                Sfida i tuoi amici o l'IA in battaglie in tempo reale. Genera arene personalizzate sui tuoi stessi appunti.
+                                Imparare non è mai stato così competitivo ed elettrizzante.
                             </p>
                         </div>
-                    </div>
-                </section>
 
-                <section className="reveal-section" data-nav-color="rgba(15, 25, 45, 0.85)" data-bg-color="#050a15">
-                    <div className="reveal-content-box">
-                        <div className="feature-large-text">
-                            <h2 className="section-title-minimal">
-                                Il tuo sapere <br /><span className="muted">Sempre in tasca.</span>
-                            </h2>
-                            <p className="section-desc-minimal">
-                                I tuoi pensieri, ovunque tu sia. In tempo reale, senza barriere.
+                        <div className="bento-card bento-small">
+                            <div className="bento-icon-wrapper"><Sparkles size={28} /></div>
+                            <h3 className="bento-title">AI Knowledge Hub</h3>
+                            <p className="bento-desc">
+                                Carica i tuoi PDF e lascia che l'IA li studi per te. Riassunti istantanei, flashcard e chat con il documento, tutto in 10 secondi.
+                            </p>
+                        </div>
+
+                        <div className="bento-card bento-small">
+                            <div className="bento-icon-wrapper"><Calendar size={28} /></div>
+                            <h3 className="bento-title">Deep Work Calendar</h3>
+                            <p className="bento-desc">
+                                Un calendario intelligente che rispetta il tuo flow state. Nessuna distrazione esterna, solo focus assoluto sui tuoi obiettivi e sessioni.
+                            </p>
+                        </div>
+
+                        <div className="bento-card bento-small">
+                            <div className="bento-icon-wrapper"><Activity size={28} /></div>
+                            <h3 className="bento-title">Daily Analytics</h3>
+                            <p className="bento-desc">
+                                Monitora il tuo andamento in tempo reale con dashboard eleganti: livelli XP, statistiche sui voti e visualizzazione avanzata dello streak.
                             </p>
                         </div>
                     </div>

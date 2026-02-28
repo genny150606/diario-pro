@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useNavigate, Link, Outlet } from 'react-router-dom'
 import { useAuth } from '../../hooks/useAuth'
+import { useData } from '../../hooks/useData'
 import Sidebar from './Sidebar'
 import ChatbotWidget from '../chatbot/ChatbotWidget'
 import './AppLayout.css'
@@ -20,7 +21,7 @@ import '../../styles/gamification.css'
 import {
     Home, BookOpen, CheckSquare, Star, Timer,
     BarChart2, Swords, Users, Trophy, Settings,
-    Menu, Sun, Moon, ChevronDown, LogOut, User
+    Menu, Sun, Moon, ChevronDown, LogOut, User, CalendarDays, Database
 } from 'lucide-react'
 
 const SECTIONS = [
@@ -33,11 +34,14 @@ const SECTIONS = [
     { id: 'duel', label: 'Duello AI', Icon: Swords, path: '/app/duel' },
     { id: 'social', label: 'Social', Icon: Users, path: '/app/social' },
     { id: 'gamification', label: 'Livello', Icon: Trophy, path: '/app/gamification' },
+    { id: 'calendar', label: 'Calendario', Icon: CalendarDays, path: '/app/calendar' },
+    { id: 'knowledge', label: 'Knowledge Hub', Icon: Database, path: '/app/knowledge' },
     { id: 'settings', label: 'Impostazioni', Icon: Settings, path: '/app/settings', bottom: true },
 ]
 
 export default function AppLayout() {
     const { user, signOut } = useAuth()
+    const { data } = useData()
     const navigate = useNavigate()
     const [sidebarOpen, setSidebarOpen] = useState(false)
     const [menuOpen, setMenuOpen] = useState(false)
@@ -105,9 +109,15 @@ export default function AppLayout() {
 
                 <div className="header-right-group">
                     <div className="header-right-actions">
-                        <div className="streak-badge active" title="Serie di studio">
-                            <Star size={14} className="streak-icon" />
-                            <span className="streak-count">1</span>
+                        <div className={`streak-badge ${data?.stats?.currentStreak > 0 ? 'active' : ''}`}
+                            title="Giorni consecutivi di studio"
+                            style={{
+                                boxShadow: data?.stats?.currentStreak > 0 ? '0 0 15px rgba(56, 249, 215, 0.3)' : 'none',
+                                background: data?.stats?.currentStreak > 0 ? 'rgba(56, 249, 215, 0.1)' : 'rgba(255,255,255,0.05)',
+                                border: data?.stats?.currentStreak > 0 ? '1px solid rgba(56, 249, 215, 0.3)' : '1px solid rgba(255,255,255,0.1)'
+                            }}>
+                            <Star size={14} className="streak-icon" style={{ color: data?.stats?.currentStreak > 0 ? '#38F9D7' : 'inherit' }} />
+                            <span className="streak-count" style={{ color: data?.stats?.currentStreak > 0 ? '#38F9D7' : 'inherit' }}>{data?.stats?.currentStreak || 0}</span>
                         </div>
                     </div>
 

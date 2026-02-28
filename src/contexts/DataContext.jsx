@@ -14,6 +14,7 @@ const DEFAULT_DATA = {
     presences: [],
     uniExams: [],
     uniGrades: [],
+    profilePhoto: null,
     counters: {
         totalNotesCreated: 0,
         totalFlashcardsCreated: 0,
@@ -55,6 +56,9 @@ function deepMergeSafe(defaultObj, incomingObj) {
             }
         } else if (defaultValue !== null && typeof defaultValue === 'object') {
             result[key] = deepMergeSafe(defaultValue, incomingValue);
+        } else if (defaultValue === null) {
+            // Nullable field (e.g. profilePhoto) — accept any incoming value
+            result[key] = incomingValue;
         } else {
             if (typeof incomingValue === typeof defaultValue) {
                 result[key] = incomingValue;
@@ -187,6 +191,54 @@ export function DataProvider({ children }) {
                         }
                     }
 
+                    // --- DAILY STREAK LOGIC ---
+                    if (!finalData.stats) finalData.stats = {}
+                    const todayStr = new Date().toISOString().split('T')[0]
+                    const lastLoginStr = finalData.stats.lastLoginDate
+
+                    if (lastLoginStr !== todayStr) {
+                        if (lastLoginStr) {
+                            const today = new Date(todayStr)
+                            const lastLogin = new Date(lastLoginStr)
+                            const diffTime = Math.abs(today - lastLogin)
+                            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
+
+                            if (diffDays === 1) {
+                                // Logged in yesterday
+                                finalData.stats.currentStreak = (finalData.stats.currentStreak || 0) + 1
+                            } else if (diffDays > 1) {
+                                // Streak broken
+                                finalData.stats.currentStreak = 1
+                            }
+                        } else {
+                            // First time login
+                            finalData.stats.currentStreak = 1
+                        }
+
+                        // Give 50 XP for daily login (optional, based on gamification plan)
+                        if (lastLoginStr !== todayStr) {
+                            finalData.stats.xp = (finalData.stats.xp || 0) + 50
+
+                            // Check level up based on thresholds (simple version)
+                            const thresholds = [0, 100, 300, 600, 1000, 1500, 2500, 5000, 10000]
+                            let newLvl = 1
+                            for (let i = thresholds.length - 1; i >= 0; i--) {
+                                if (finalData.stats.xp >= thresholds[i]) { newLvl = i + 1; break; }
+                            }
+                            finalData.stats.level = newLvl
+                        }
+
+                        finalData.stats.lastLoginDate = todayStr
+                        finalData.lastModified = Date.now()
+                        // Save the streak back immediately
+                        supabase.from('users_data').upsert({
+                            id: user.id,
+                            data: finalData,
+                            updated_at: new Date().toISOString()
+                        })
+                    }
+                    // --------------------------
+
                     localStorage.setItem(cacheKey, JSON.stringify(finalData))
                     setData(finalData)
                 } else if (!localData) {
@@ -249,6 +301,13 @@ export function DataProvider({ children }) {
         saveData({ ...data, notes: data.notes.filter(n => n.id !== id) })
     }, [data, saveData])
 
+    const updateNote = useCallback((id, updatedNote) => {
+        saveData({
+            ...data,
+            notes: data.notes.map(n => n.id === id ? { ...n, ...updatedNote, updatedAt: new Date().toISOString() } : n)
+        })
+    }, [data, saveData])
+
     const addTask = useCallback((task) => {
         const newTask = { id: Date.now(), completed: false, ...task, createdAt: new Date().toISOString() }
         saveData({ ...data, tasks: [...data.tasks, newTask] })
@@ -260,7 +319,38 @@ export function DataProvider({ children }) {
     }, [data, saveData])
 
     const toggleTask = useCallback((id) => {
-        saveData({ ...data, tasks: data.tasks.map(t => t.id === id ? { ...t, completed: !t.completed } : t) })
+        saveData({
+            ...data,
+            // If we uncheck, we reset xp claimed so they could potentially claim again if they check it back
+            tasks: data.tasks.map(t => t.id === id ? { ...t, completed: !t.completed, xpClaimed: (!t.completed ? t.xpClaimed : false) } : t)
+        })
+    }, [data, saveData])
+
+    const claimTaskXp = useCallback((id) => {
+        const taskToClaim = data.tasks.find(t => t.id === id)
+        if (!taskToClaim || !taskToClaim.completed || taskToClaim.xpClaimed) return
+
+        const newXp = (data.stats?.xp || 0) + 20
+
+        // Calculate new level
+        const LEVEL_THRESHOLDS = [0, 100, 300, 600, 1000, 1500, 2500, 5000, 10000]
+        let newLevel = 1
+        for (let i = LEVEL_THRESHOLDS.length - 1; i >= 0; i--) {
+            if (newXp >= LEVEL_THRESHOLDS[i]) {
+                newLevel = i + 1
+                break
+            }
+        }
+
+        saveData({
+            ...data,
+            tasks: data.tasks.map(t => t.id === id ? { ...t, xpClaimed: true } : t),
+            stats: {
+                ...(data.stats || {}),
+                xp: newXp,
+                level: newLevel
+            }
+        })
     }, [data, saveData])
 
     const addGrade = useCallback((grade) => {
@@ -285,6 +375,6 @@ export function DataProvider({ children }) {
 
     const getCompletedTasksCount = useCallback(() => (data.tasks || []).filter(t => t.completed).length, [data.tasks])
 
-    const value = { data, loading, saveData, updateData, addNote, deleteNote, updateFlashcards, addTask, deleteTask, toggleTask, addGrade, deleteGrade, getWeightedAverage, getCompletedTasksCount }
+    const value = { data, loading, saveData, updateData, addNote, updateNote, deleteNote, updateFlashcards, addTask, deleteTask, toggleTask, claimTaskXp, addGrade, deleteGrade, getWeightedAverage, getCompletedTasksCount }
     return <DataContext.Provider value={value}>{children}</DataContext.Provider>
 }

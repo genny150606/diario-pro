@@ -18,12 +18,12 @@ export default function GamificationSection() {
         { id: 'firstNote', icon: <Edit3 />, title: 'Primo Passo', desc: 'Crea la tua prima nota', unlocked: data.notes.length > 0 },
         { id: 'firstFlash', icon: <Zap />, title: 'Memoria Veloce', desc: 'Crea 5 flashcard', unlocked: data.flashcards.length >= 5 },
         { id: 'level5', icon: <GraduationCap />, title: 'Veterano', desc: 'Raggiungi il livello 5', unlocked: level >= 5 },
-        { id: 'streak3', icon: <Flame />, title: 'Costante', desc: 'Studia per 3 giorni di fila', unlocked: false },
+        { id: 'streak3', icon: <Flame />, title: 'Costante', desc: 'Studia per 3 giorni di fila', unlocked: (data.stats?.currentStreak || 0) >= 3 },
     ]
 
     return (
         <section className="section active reveal-entrance">
-            <div className="gamification-hero-mini">
+            <div className="card glass-card hover-glow animated-border gamification-hero-mini" style={{ padding: '2rem' }}>
                 <div className="hero-header-mini">
                     <div className="hero-level-circle-mini">
                         <span className="hero-level-number-mini">{level}</span>
@@ -42,19 +42,19 @@ export default function GamificationSection() {
             </div>
 
             <div className="stats-grid-gamification">
-                <div className="stat-card-game">
+                <div className="stat-card-game glass-card hover-glow">
                     <div className="stat-game-value">{xp}</div>
                     <div className="stat-game-label">XP Totali</div>
                 </div>
-                <div className="stat-card-game">
-                    <div className="stat-game-value">0 <Flame size={20} className="inline-icon" /></div>
+                <div className="stat-card-game glass-card hover-glow">
+                    <div className="stat-game-value">{data.stats?.currentStreak || 0} <Flame size={20} className="inline-icon" /></div>
                     <div className="stat-game-label">Giorni di fila</div>
                 </div>
-                <div className="stat-card-game">
+                <div className="stat-card-game glass-card hover-glow">
                     <div className="stat-game-value">{data.notes.length}</div>
                     <div className="stat-game-label">Note Create</div>
                 </div>
-                <div className="stat-card-game">
+                <div className="stat-card-game glass-card hover-glow">
                     <div className="stat-game-value">{data.flashcards.length}</div>
                     <div className="stat-game-label">Flashcard</div>
                 </div>
@@ -63,7 +63,7 @@ export default function GamificationSection() {
             <h3 style={{ marginBottom: 16 }}><Trophy size={20} className="inline-icon" /> Obiettivi & Badge</h3>
             <div className="achievements-grid">
                 {achievements.map(ach => (
-                    <div key={ach.id} className={`achievement-card ${ach.unlocked ? 'unlocked' : ''}`}>
+                    <div key={ach.id} className={`card glass-card hover-glow achievement-card ${ach.unlocked ? 'unlocked' : ''}`}>
                         <span className="achievement-icon">{ach.icon}</span>
                         <div className="achievement-title">{ach.title}</div>
                         <div className="achievement-desc">{ach.desc}</div>

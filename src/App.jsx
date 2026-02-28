@@ -16,6 +16,8 @@ const StatsSection = lazy(() => import('./components/sections/StatsSection'))
 const DuelSection = lazy(() => import('./components/sections/DuelSection'))
 const SocialSection = lazy(() => import('./components/sections/SocialSection'))
 const GamificationSection = lazy(() => import('./components/sections/GamificationSection'))
+const CalendarSection = lazy(() => import('./components/sections/CalendarSection'))
+const KnowledgeHubSection = lazy(() => import('./components/sections/KnowledgeHubSection'))
 const SettingsSection = lazy(() => import('./components/sections/SettingsSection'))
 
 function ProtectedRoute({ children }) {
@@ -55,6 +57,8 @@ export default function App() {
                     <Route path="duel" element={<DuelSection />} />
                     <Route path="social" element={<SocialSection />} />
                     <Route path="gamification" element={<GamificationSection />} />
+                    <Route path="calendar" element={<CalendarSection />} />
+                    <Route path="knowledge" element={<KnowledgeHubSection />} />
                     <Route path="settings" element={<SettingsSection />} />
                 </Route>
 

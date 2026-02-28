@@ -13,6 +13,7 @@ import './styles/animations.css'
 import './styles/animations-ui.css'
 import './styles/responsive.css'
 import './styles/gamification.css'
+import './styles/social.css'
 ReactDOM.createRoot(document.getElementById('root')).render(
     <React.StrictMode>
         <BrowserRouter>

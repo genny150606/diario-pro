@@ -47,7 +47,7 @@ export default function GradesSection() {
     }
 
     return (
-        <section className="section active">
+        <section className="section active reveal-entrance">
             <div className="hero">
                 <h1><span className="gradient-text">Voti</span> ⭐</h1>
                 <p>Traccia i tuoi progressi scolastici</p>
@@ -56,19 +56,19 @@ export default function GradesSection() {
             {/* Average summary */}
             {data.grades.length > 0 && (
                 <div className="grades-summary-grid">
-                    <div className="card summary-item-card">
+                    <div className="card glass-card hover-glow animated-border summary-item-card">
                         <div className="summary-label">Media Ponderata</div>
                         <div className="summary-value" style={{ color: gradeColor(parseFloat(average)) }}>
                             {average}
                         </div>
                     </div>
-                    <div className="card summary-item-card">
+                    <div className="card glass-card hover-glow animated-border summary-item-card">
                         <div className="summary-label">Voti Totali</div>
                         <div className="summary-value">
                             {data.grades.length}
                         </div>
                     </div>
-                    <div className="card summary-item-card">
+                    <div className="card glass-card hover-glow animated-border summary-item-card">
                         <div className="summary-label">Performance</div>
                         <div className="summary-value" style={{ fontSize: '1.5rem', color: 'var(--color-accent)' }}>
                             {parseFloat(average) >= 8 ? 'Eccellente' : parseFloat(average) >= 6 ? 'Buona' : 'Da revisionare'}
@@ -77,7 +77,7 @@ export default function GradesSection() {
                 </div>
             )}
 
-            <div className="card grade-input-card">
+            <div className="card glass-card hover-glow grade-input-card">
                 <h3><Plus size={18} style={{ verticalAlign: 'middle', marginRight: '8px' }} /> Nuovo Voto</h3>
                 <div className="form-group">
                     <div className="form-row" style={{ display: 'flex', gap: '1rem', marginBottom: '1rem' }}>
@@ -96,7 +96,7 @@ export default function GradesSection() {
 
             {/* Subject averages */}
             {subjects.length > 0 && (
-                <div className="card subject-averages-card">
+                <div className="card glass-card hover-glow subject-averages-card">
                     <h4><Award size={18} style={{ verticalAlign: 'middle', marginRight: '8px' }} /> Medie per Materia</h4>
                     <div className="subject-grid">
                         {subjects.map(sub => (
@@ -119,7 +119,7 @@ export default function GradesSection() {
             ) : (
                 <div className="grades-list">
                     {sortedGrades.map(grade => (
-                        <div key={grade.id} className="card grade-item-card" style={{ borderLeftColor: gradeColor(grade.value) }}>
+                        <div key={grade.id} className="card glass-card hover-glow grade-item-card" style={{ borderLeftColor: gradeColor(grade.value) }}>
                             <div className="grade-item-content">
                                 <div className="grade-main-info">
                                     <p className="grade-subject-title">{grade.subject}</p>

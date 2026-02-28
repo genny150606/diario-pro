@@ -1,0 +1,6 @@
+{
+    "appId": "com.studyjournal.pro",
+    "appName": "StudyJournal Pro",
+    "webDir": "dist",
+    "bundledWebRuntime": false
+}

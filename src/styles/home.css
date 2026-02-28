@@ -188,9 +188,6 @@ body {
     padding: 12rem 2rem 8rem;
     position: relative;
     z-index: 10;
-    scroll-snap-align: center;
-    scroll-snap-stop: always;
-    scroll-margin-top: 120px;
 }
 
 .hero-content {
@@ -384,9 +381,6 @@ body {
     padding: 15vh 5vw 5vh;
     position: relative;
     z-index: 10;
-    scroll-snap-align: center;
-    scroll-snap-stop: always;
-    scroll-margin-top: 120px;
 }
 
 .feature-large-text {
@@ -606,6 +600,202 @@ body {
 .animate-hero-text {
     animation: cinematicFadeUp 1s cubic-bezier(0.16, 1, 0.3, 1) forwards;
     opacity: 0;
+}
+
+/* ── BENTO GRID FEATURES ── */
+.bento-section {
+    min-height: 100vh;
+    padding: 10rem 5vw;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+    z-index: 10;
+}
+
+.bento-header {
+    text-align: center;
+    max-width: 800px;
+    margin-bottom: 6rem;
+}
+
+.bento-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: repeat(2, minmax(320px, auto));
+    gap: 1.5rem;
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.bento-card {
+    background: rgba(25, 25, 30, 0.4);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 2rem;
+    padding: 2.5rem;
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+    isolation: isolate;
+}
+
+.bento-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(800px circle at var(--mouse-x, 0) var(--mouse-y, 0), rgba(255, 255, 255, 0.06), transparent 40%);
+    opacity: 0;
+    transition: opacity 0.3s;
+    z-index: -1;
+    pointer-events: none;
+}
+
+.bento-card:hover::before {
+    opacity: 1;
+}
+
+.bento-card:hover {
+    transform: translateY(-5px) scale(1.02);
+    border-color: rgba(255, 255, 255, 0.2);
+    box-shadow: 0 2rem 4rem rgba(0, 0, 0, 0.5);
+}
+
+.bento-icon-wrapper {
+    width: 60px;
+    height: 60px;
+    border-radius: 1.2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.05);
+    margin-bottom: 1.5rem;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: #fff;
+    transition: transform 0.4s ease;
+}
+
+.bento-card:hover .bento-icon-wrapper {
+    transform: scale(1.1) rotate(-5deg);
+    background: var(--accent-gradient);
+    border-color: transparent;
+    box-shadow: 0 0 20px rgba(100, 150, 255, 0.4);
+}
+
+.bento-title {
+    font-family: 'Outfit', sans-serif;
+    font-size: 1.8rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+    letter-spacing: -0.02em;
+}
+
+.bento-desc {
+    color: rgba(255, 255, 255, 0.5);
+    line-height: 1.6;
+    font-size: 1.05rem;
+}
+
+/* Specific Grid Placements */
+.bento-large {
+    grid-column: span 2;
+    background: linear-gradient(135deg, rgba(25, 25, 30, 0.8) 0%, rgba(15, 15, 20, 0.8) 100%);
+}
+
+.bento-tall {
+    grid-row: span 2;
+    background: linear-gradient(180deg, rgba(30, 20, 40, 0.6) 0%, rgba(10, 10, 15, 0.8) 100%);
+}
+
+.bento-small {
+    grid-column: span 1;
+}
+
+/* ── FLOATING UI ELEMENTS (HERO) ── */
+.floating-badge {
+    position: absolute;
+    background: rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(15px);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    padding: 0.8rem 1.2rem;
+    border-radius: 2rem;
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    font-weight: 600;
+    font-size: 0.9rem;
+    box-shadow: 0 1rem 2rem rgba(0, 0, 0, 0.3);
+    pointer-events: none;
+    z-index: 20;
+    animation: smoothFloat 6s ease-in-out infinite alternate;
+}
+
+.badge-1 {
+    top: -10%;
+    left: -5%;
+    animation-delay: 0s;
+    color: #a5b4fc;
+}
+
+.badge-2 {
+    bottom: 10%;
+    right: -15%;
+    animation-delay: -2s;
+    color: #fcb4a5;
+}
+
+.badge-3 {
+    bottom: -15%;
+    left: 10%;
+    animation-delay: -4s;
+    color: #a5fcc1;
+}
+
+.mesh-gradient-bg {
+    position: absolute;
+    inset: 0;
+    background:
+        radial-gradient(circle at 15% 50%, rgba(100, 150, 255, 0.15), transparent 40%),
+        radial-gradient(circle at 85% 30%, rgba(175, 82, 222, 0.15), transparent 40%);
+    filter: blur(40px);
+    pointer-events: none;
+    z-index: -1;
+}
+
+/* Responsive Bento */
+@media (max-width: 992px) {
+    .bento-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .bento-tall {
+        grid-row: span 1;
+        grid-column: span 2;
+    }
+
+    .bento-large {
+        grid-column: span 2;
+    }
+}
+
+@media (max-width: 768px) {
+    .bento-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .bento-large,
+    .bento-tall,
+    .bento-small {
+        grid-column: span 1;
+    }
+
+    .floating-badge {
+        display: none;
+    }
 }
 
 /* ── GDPR ── */

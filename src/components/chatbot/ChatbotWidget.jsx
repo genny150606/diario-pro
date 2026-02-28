@@ -12,7 +12,7 @@ export default function ChatbotWidget() {
     const messagesEndRef = useRef(null)
     const inputRef = useRef(null)
 
-    const apiUrl = window.location.protocol === 'file:' ? 'https://diario-pro.vercel.app' : ''
+    const apiUrl = ''
 
     // Auto-scroll to bottom
     useEffect(() => {

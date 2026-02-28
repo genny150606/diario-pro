@@ -3,7 +3,7 @@ import { useData } from '../../hooks/useData'
 import { PlusCircle, Trash2, Calendar, CheckSquare, Square } from 'lucide-react'
 
 export default function TasksSection() {
-    const { data, addTask, deleteTask, toggleTask } = useData()
+    const { data, addTask, deleteTask, toggleTask, claimTaskXp } = useData()
     const [description, setDescription] = useState('')
     const [dueDate, setDueDate] = useState('')
     const [subject, setSubject] = useState('Generale')
@@ -41,7 +41,7 @@ export default function TasksSection() {
                 <p>Gestisci i tuoi compiti e scadenze</p>
             </div>
 
-            <div className="card task-input-card">
+            <div className="card glass-card hover-glow animated-border task-input-card">
                 <h3><PlusCircle size={18} style={{ verticalAlign: 'middle', marginRight: '8px' }} /> Nuovo compito</h3>
                 <div className="form-group">
                     <input type="text" placeholder="Descrizione compito..." value={description} onChange={e => setDescription(e.target.value)} />
@@ -67,7 +67,7 @@ export default function TasksSection() {
             ) : (
                 <div className="tasks-list">
                     {sortedTasks.map(task => (
-                        <div key={task.id} className={`task-item-card ${task.completed ? 'completed' : ''} ${isOverdue(task) ? 'overdue' : ''}`}>
+                        <div key={task.id} className={`card glass-card hover-glow task-item-card ${task.completed ? 'completed' : ''} ${isOverdue(task) ? 'overdue' : ''}`}>
                             <div className="task-content">
                                 <div className="task-checkbox" onClick={() => toggleTask(task.id)}>
                                     {task.completed ? <CheckSquare size={22} color="var(--color-success)" /> : <Square size={22} />}
@@ -83,6 +83,20 @@ export default function TasksSection() {
                                         )}
                                     </div>
                                 </div>
+                                {task.completed && !task.xpClaimed && (
+                                    <button
+                                        className="btn-primary"
+                                        onClick={(e) => { e.stopPropagation(); claimTaskXp(task.id); }}
+                                        style={{ padding: '0.4rem 0.8rem', fontSize: '0.85rem', borderRadius: '15px', marginLeft: 'auto', marginRight: '10px', boxShadow: '0 4px 10px rgba(56, 249, 215, 0.3)' }}
+                                    >
+                                        ✨ Riscatta +20
+                                    </button>
+                                )}
+                                {task.completed && task.xpClaimed && (
+                                    <span style={{ color: 'var(--color-primary)', fontSize: '0.85rem', fontWeight: 'bold', marginLeft: 'auto', marginRight: '10px' }}>
+                                        +20 XP
+                                    </span>
+                                )}
                                 <button className="btn-icon-delete" onClick={() => handleDeleteTask(task.id)}>
                                     <Trash2 size={16} />
                                 </button>

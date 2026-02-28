@@ -17,16 +17,22 @@
 @keyframes fadeInUp {
     from {
         opacity: 0;
-        transform: translateY(12px);
+        transform: translateY(20px);
+        filter: blur(10px);
     }
 
     to {
         opacity: 1;
         transform: translateY(0);
+        filter: blur(0);
     }
 }
 
-@keyframes scaleIn {
+.reveal-entrance {
+    animation: fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes scalePopIn {
     from {
         opacity: 0;
         transform: scale(0.96);
@@ -153,14 +159,44 @@
     animation-delay: 230ms;
 }
 
-/* ── HOVER — SUBTLE ── */
+/* ── HOVER — SUBTLE & GLOW ── */
 .stat-card {
     transition: all var(--duration-base) var(--ease-out);
 }
 
 .stat-card:hover {
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-md);
+    transform: translateY(-4px);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+}
+
+.hover-glow {
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.hover-glow:hover {
+    transform: translateY(-4px) scale(1.02);
+    box-shadow: 0 15px 35px rgba(56, 249, 215, 0.15), 0 5px 15px rgba(167, 139, 250, 0.1);
+    border-color: rgba(255, 255, 255, 0.2);
+}
+
+/* ── ANIMATED BORDER ── */
+.animated-border {
+    position: relative;
+    background: var(--glass-bg);
+    background-clip: padding-box;
+    border: 1px solid transparent;
+}
+
+.animated-border::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    margin: -1px;
+    border-radius: inherit;
+    z-index: -1;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.02), rgba(255, 255, 255, 0.1));
+    background-size: 200% 200%;
+    animation: gradientShift 4s ease infinite;
 }
 
 /* ── PERFORMANCE ── */

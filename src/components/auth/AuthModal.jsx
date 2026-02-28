@@ -47,7 +47,7 @@ export default function AuthModal({ onClose }) {
             setSuccess('✅ Accesso effettuato! Reindirizzamento...')
             setTimeout(() => {
                 onClose()
-                navigate('/app')
+                window.location.href = '/app'
             }, 1000)
         } catch (err) {
             console.error('[AUTH] handleLogin: signIn error:', err)
@@ -85,6 +85,9 @@ export default function AuthModal({ onClose }) {
                 username: signupUsername
             })
             setSuccess('✅ Account creato! Controlla l\'email per confermare.')
+            setTimeout(() => {
+                onClose()
+            }, 3000)
         } catch (err) {
             let msg = err.message
             if (msg.includes('already registered')) msg = '❌ Questa email è già registrata.'

@@ -1,0 +1,113 @@
+/* Social Section Specific Styles */
+
+.social-section .tab-btn {
+    font-size: 0.95rem;
+}
+
+.social-section .tab-btn:hover {
+    background: rgba(255, 255, 255, 0.1) !important;
+}
+
+.social-section .tab-btn.active:hover {
+    background: var(--color-primary) !important;
+    filter: brightness(1.1);
+}
+
+.create-post-card textarea:focus {
+    outline: none;
+    border-color: var(--color-primary) !important;
+    background: rgba(255, 255, 255, 0.05) !important;
+}
+
+.post-card {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.post-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    border-color: rgba(255, 255, 255, 0.1);
+}
+
+.friend-item:hover {
+    background: rgba(255, 255, 255, 0.03) !important;
+}
+
+.user-result-card:hover {
+    background: rgba(255, 255, 255, 0.05) !important;
+    transform: translateX(4px);
+    border-color: rgba(56, 249, 215, 0.3) !important;
+}
+
+.reaction-btn:hover {
+    background: rgba(255, 255, 255, 0.08) !important;
+    transform: scale(1.05);
+}
+
+.reaction-btn:active {
+    transform: scale(0.95);
+}
+
+@keyframes pulse {
+    0% {
+        opacity: 0.5;
+    }
+
+    50% {
+        opacity: 0.8;
+    }
+
+    100% {
+        opacity: 0.5;
+    }
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-5px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes bounce {
+
+    0%,
+    20%,
+    50%,
+    80%,
+    100% {
+        transform: translateY(0);
+    }
+
+    40% {
+        transform: translateY(-5px);
+    }
+
+    60% {
+        transform: translateY(-3px);
+    }
+}
+
+/* Make lists mobile friendly */
+@media (max-width: 900px) {
+    .explore-container {
+        grid-template-columns: 1fr !important;
+    }
+}
+
+@media (max-width: 768px) {
+    .social-section .tab-btn {
+        padding: 0.5rem 1rem !important;
+        font-size: 0.85rem !important;
+    }
+
+    .create-post-card textarea {
+        min-height: 60px !important;
+    }
+}

@@ -33,25 +33,33 @@ export function AuthProvider({ children }) {
 
         // Listen for auth changes
         const { data: { subscription } } = supabase.auth.onAuthStateChange(
-            async (event, session) => {
+            (event, session) => {
                 setUser(session?.user ?? null)
+                setLoading(false) // Make sure we unlock loading here as well
 
                 if (event === 'SIGNED_IN' && session) {
                     // Ensure users_data row exists
                     const uid = session.user.id
-                    const { data } = await supabase
-                        .from('users_data')
-                        .select('id')
-                        .eq('id', uid)
-                        .maybeSingle()
+                        // run async context
+                        ; (async () => {
+                            try {
+                                const { data } = await supabase
+                                    .from('users_data')
+                                    .select('id')
+                                    .eq('id', uid)
+                                    .maybeSingle()
 
-                    if (!data) {
-                        await supabase.from('users_data').insert([{
-                            id: uid,
-                            data: {},
-                            updated_at: new Date().toISOString()
-                        }])
-                    }
+                                if (!data) {
+                                    await supabase.from('users_data').upsert([{
+                                        id: uid,
+                                        data: {},
+                                        updated_at: new Date().toISOString()
+                                    }])
+                                }
+                            } catch (e) {
+                                console.error('[AUTH] error checking/creating user data on auth split:', e)
+                            }
+                        })();
                 }
             }
         )

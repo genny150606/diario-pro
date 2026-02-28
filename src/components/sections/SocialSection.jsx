@@ -1,120 +1,78 @@
 import { useState } from 'react'
-import { useAuth } from '../../hooks/useAuth'
-import { supabase } from '../../lib/supabase'
+import Feed from '../social/Feed'
+import ExploreTab from '../social/ExploreTab'
+import FriendsTab from '../social/FriendsTab'
 
 export default function SocialSection() {
-    const { user } = useAuth()
-    const [searchQuery, setSearchQuery] = useState('')
-    const [searchResults, setSearchResults] = useState([])
-    const [searching, setSearching] = useState(false)
-    const [friends, setFriends] = useState([])
-    const [message, setMessage] = useState('')
+    const [activeTab, setActiveTab] = activeTabState()
 
-    const handleSearch = async () => {
-        if (!searchQuery.trim() || searchQuery.length < 3) return
-        setSearching(true)
-        setMessage('')
-
-        try {
-            const { data, error } = await supabase
-                .from('users_data')
-                .select('id, data')
-                .neq('id', user?.id)
-
-            if (error) throw error
-
-            const filtered = (data || [])
-                .filter(u => {
-                    const username = u.data?.username || u.data?.email || ''
-                    return username.toLowerCase().includes(searchQuery.toLowerCase())
-                })
-                .slice(0, 10)
-                .map(u => ({
-                    id: u.id,
-                    username: u.data?.username || u.data?.email?.split('@')[0] || 'Utente'
-                }))
-
-            setSearchResults(filtered)
-            if (filtered.length === 0) setMessage('Nessun utente trovato')
-        } catch (err) {
-            setMessage(`❌ Errore ricerca: ${err.message}`)
-        } finally {
-            setSearching(false)
-        }
-    }
-
-    const handleAddFriend = (userId, username) => {
-        setFriends(prev => [...prev, { id: userId, username }])
-        setMessage(`✅ Richiesta inviata a ${username}!`)
-        setSearchResults(prev => prev.filter(u => u.id !== userId))
+    function activeTabState() {
+        return useState('feed')
     }
 
     return (
-        <section className="section active">
-            <div className="hero">
-                <h1><span className="gradient-text">Social</span> 👥</h1>
-                <p>Connettiti con i tuoi compagni di studio</p>
-            </div>
+        <section className="section active social-section">
+            <div className="hero" style={{ paddingBottom: '1rem', borderBottom: '1px solid rgba(255,255,255,0.05)', marginBottom: '1.5rem' }}>
+                <h1 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', justifyContent: 'center' }}>
+                    <span className="gradient-text" style={{ fontSize: '2.5rem' }}>Social</span>
+                    <span style={{ fontSize: '2rem' }}>🌐</span>
+                </h1>
+                <p style={{ marginTop: '0.5rem', color: 'var(--color-text-secondary)', fontSize: '1.1rem' }}>
+                    La tua rete di studio: condividi, esplora, connettiti.
+                </p>
 
-            {/* Search */}
-            <div className="card">
-                <h3>🔍 Cerca Studenti</h3>
-                <div style={{ display: 'flex', gap: '0.5rem' }}>
-                    <input
-                        type="text"
-                        placeholder="Cerca per username..."
-                        value={searchQuery}
-                        onChange={e => setSearchQuery(e.target.value)}
-                        onKeyDown={e => e.key === 'Enter' && handleSearch()}
-                        style={{ flex: 1, marginBottom: 0 }}
-                    />
-                    <button className="btn-primary" onClick={handleSearch} disabled={searching} style={{ minWidth: 80 }}>
-                        {searching ? '⏳' : '🔍 Cerca'}
+                {/* Custom Tabs Navigation */}
+                <div style={{
+                    display: 'flex', justifyContent: 'center', gap: '1rem', marginTop: '2rem',
+                    background: 'rgba(255,255,255,0.03)', padding: '0.5rem', borderRadius: '30px',
+                    width: 'fit-content', margin: '2rem auto 0 auto', border: '1px solid rgba(255,255,255,0.05)'
+                }}>
+                    <button
+                        className={`tab-btn ${activeTab === 'feed' ? 'active' : ''}`}
+                        onClick={() => setActiveTab('feed')}
+                        style={{
+                            background: activeTab === 'feed' ? 'var(--color-primary)' : 'transparent',
+                            color: activeTab === 'feed' ? 'white' : 'var(--color-text-secondary)',
+                            border: 'none', padding: '0.6rem 1.5rem', borderRadius: '25px',
+                            fontWeight: 600, cursor: 'pointer', transition: 'all 0.3s',
+                            display: 'flex', alignItems: 'center', gap: '0.5rem'
+                        }}
+                    >
+                        📰 Bacheca
+                    </button>
+                    <button
+                        className={`tab-btn ${activeTab === 'explore' ? 'active' : ''}`}
+                        onClick={() => setActiveTab('explore')}
+                        style={{
+                            background: activeTab === 'explore' ? 'var(--color-primary)' : 'transparent',
+                            color: activeTab === 'explore' ? 'white' : 'var(--color-text-secondary)',
+                            border: 'none', padding: '0.6rem 1.5rem', borderRadius: '25px',
+                            fontWeight: 600, cursor: 'pointer', transition: 'all 0.3s',
+                            display: 'flex', alignItems: 'center', gap: '0.5rem'
+                        }}
+                    >
+                        🔍 Esplora
+                    </button>
+                    <button
+                        className={`tab-btn ${activeTab === 'friends' ? 'active' : ''}`}
+                        onClick={() => setActiveTab('friends')}
+                        style={{
+                            background: activeTab === 'friends' ? 'var(--color-primary)' : 'transparent',
+                            color: activeTab === 'friends' ? 'white' : 'var(--color-text-secondary)',
+                            border: 'none', padding: '0.6rem 1.5rem', borderRadius: '25px',
+                            fontWeight: 600, cursor: 'pointer', transition: 'all 0.3s',
+                            display: 'flex', alignItems: 'center', gap: '0.5rem'
+                        }}
+                    >
+                        👥 Amici
                     </button>
                 </div>
-
-                {message && <p style={{ marginTop: '0.8rem', fontSize: '0.9rem', color: 'var(--color-text-secondary)' }}>{message}</p>}
-
-                {searchResults.length > 0 && (
-                    <div style={{ marginTop: '1rem' }}>
-                        {searchResults.map(u => (
-                            <div key={u.id} style={{
-                                display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-                                padding: '0.6rem 0', borderBottom: '1px solid rgba(255,255,255,0.05)'
-                            }}>
-                                <div>
-                                    <span style={{ fontWeight: 600 }}>👤 {u.username}</span>
-                                </div>
-                                <button className="btn-secondary" onClick={() => handleAddFriend(u.id, u.username)}
-                                    style={{ padding: '0.3rem 0.8rem', fontSize: '0.8rem', minHeight: 'unset' }}>
-                                    ➕ Aggiungi
-                                </button>
-                            </div>
-                        ))}
-                    </div>
-                )}
             </div>
 
-            {/* Friends */}
-            <div className="card" style={{ marginTop: '1rem' }}>
-                <h3>👫 I tuoi Amici ({friends.length})</h3>
-                {friends.length === 0 ? (
-                    <p style={{ color: 'var(--color-text-tertiary)', fontSize: '0.9rem' }}>
-                        Nessun amico ancora. Cerca e aggiungi compagni di studio!
-                    </p>
-                ) : (
-                    friends.map(f => (
-                        <div key={f.id} style={{
-                            display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-                            padding: '0.6rem 0', borderBottom: '1px solid rgba(255,255,255,0.05)'
-                        }}>
-                            <span style={{ fontWeight: 600 }}>👤 {f.username}</span>
-                            <button className="btn-primary" style={{ padding: '0.3rem 0.8rem', fontSize: '0.8rem', minHeight: 'unset' }}>
-                                ⚔️ Sfida
-                            </button>
-                        </div>
-                    ))
-                )}
+            <div className="tab-content" style={{ animation: 'fadeIn 0.4s ease-out' }}>
+                {activeTab === 'feed' && <Feed />}
+                {activeTab === 'explore' && <ExploreTab />}
+                {activeTab === 'friends' && <FriendsTab />}
             </div>
         </section>
     )

@@ -2,7 +2,8 @@ import { useState, useRef, useEffect } from 'react'
 import { useAuth } from '../../hooks/useAuth'
 import { useData } from '../../hooks/useData'
 import { supabase } from '../../lib/supabase'
-import { Swords, Target, Edit3, FileText, Paperclip, Clock, Key, User, Trophy, Play, RotateCcw, ChevronLeft, Sparkles, BookOpen, GraduationCap, Calculator, Globe, History, Atom, Brain, Zap, PlusCircle } from 'lucide-react'
+import { Swords, Target, Edit3, FileText, Paperclip, Clock, Key, User, Trophy, Play, RotateCcw, ChevronLeft, Sparkles, BookOpen, GraduationCap, Calculator, Globe, History, Atom, Brain, Zap, PlusCircle, X } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
 import './DuelSection.css'
 
 const DUEL_STATES = {
@@ -16,6 +17,7 @@ const DUEL_STATES = {
 export default function DuelSection() {
     const { user } = useAuth()
     const { data: appData } = useData()
+    const navigate = useNavigate()
     const [state, setState] = useState(DUEL_STATES.LOBBY)
 
     // Quiz Generation 
@@ -40,12 +42,13 @@ export default function DuelSection() {
     const [timeLeft, setTimeLeft] = useState(15)
     const [selectedAnswer, setSelectedAnswer] = useState(null)
     const [streak, setStreak] = useState(0)
+    const [countdownNumber, setCountdownNumber] = useState(3)
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState('')
     const timerRef = useRef(null)
     const pollIntervalRef = useRef(null)
 
-    const apiUrl = window.location.protocol === 'file:' ? 'https://diario-pro.vercel.app' : ''
+    const apiUrl = ''
 
     // Initialize player name from auth
     useEffect(() => {
@@ -271,9 +274,11 @@ export default function DuelSection() {
 
     const startCountdown = () => {
         setState(DUEL_STATES.COUNTDOWN)
+        setCountdownNumber(3)
         let count = 3
         const interval = setInterval(() => {
             count--
+            setCountdownNumber(count)
             if (count <= 0) {
                 clearInterval(interval)
                 setState(DUEL_STATES.PLAYING)
@@ -281,6 +286,8 @@ export default function DuelSection() {
             }
         }, 1000)
     }
+
+    const [strikeClass, setStrikeClass] = useState('')
 
     // Auto-start countdown when room becomes active (fixes Guest sync)
     useEffect(() => {
@@ -307,6 +314,10 @@ export default function DuelSection() {
     const handleAnswer = async (isCorrect, index) => {
         clearInterval(timerRef.current)
         setSelectedAnswer(index)
+
+        // Visual Arcade Strike Feedback
+        setStrikeClass(isCorrect ? 'strike-correct' : 'strike-wrong')
+        setTimeout(() => setStrikeClass(''), 400) // Rimuovi l'animazione dopo 400ms
 
         let newScore = score
         if (isCorrect) {
@@ -343,23 +354,26 @@ export default function DuelSection() {
         if (pollIntervalRef.current) clearInterval(pollIntervalRef.current)
         if (timerRef.current) clearInterval(timerRef.current)
         setState(DUEL_STATES.LOBBY)
-        setQuestions([]); setCurrentIndex(0); setScore(0); setStreak(0); setError('')
+        setQuestions([]); setCurrentIndex(0); setScore(0); setStreak(0); setError(''); setStrikeClass('')
         setRoomCode(''); setCurrentRoom(null); setPlayers([])
     }
 
     const currentQ = questions[currentIndex]
     const timerPercent = (timeLeft / 15) * 100
-    const opponent = players.find(p => p.username !== playerName)
-
-    const isFullscreen = [DUEL_STATES.COUNTDOWN, DUEL_STATES.PLAYING, DUEL_STATES.FINISHED].includes(state)
+    const opponent = players?.find(p => p.username !== playerName)
+    const isFullscreen = [DUEL_STATES.WAITING, DUEL_STATES.COUNTDOWN, DUEL_STATES.PLAYING, DUEL_STATES.FINISHED].includes(state)
 
     const sectionStyle = isFullscreen ? {
         position: 'fixed',
         top: 0, left: 0, right: 0, bottom: 0,
-        zIndex: 9999,
-        background: 'var(--color-bg)',
+        zIndex: 100000, /* Sopra ogni altro Header o Sidebar */
+        background: 'linear-gradient(135deg, #050505 0%, #0a0a0f 100%)',
         overflowY: 'auto',
-        padding: '2rem 1rem'
+        overflowX: 'hidden',
+        minHeight: '100vh',
+        padding: '2rem 1rem',
+        display: 'flex',
+        flexDirection: 'column'
     } : { maxWidth: '800px', margin: '0 auto' }
 
     return (
@@ -468,22 +482,12 @@ export default function DuelSection() {
                                 </div>
 
                                 <button
-                                    className="btn-primary"
+                                    className="btn-primary flex-center gap-sm"
                                     onClick={handleCreateMatch}
                                     disabled={loading}
-                                    style={{
-                                        marginTop: '1rem',
-                                        padding: '1.2rem',
-                                        fontSize: '1.1rem',
-                                        borderRadius: '1.25rem',
-                                        boxShadow: '0 10px 30px rgba(99, 102, 241, 0.4)'
-                                    }}
+                                    style={{ marginTop: '1rem', padding: '1.2rem', fontSize: '1.1rem', borderRadius: '1.25rem', boxShadow: '0 10px 30px rgba(99, 102, 241, 0.4)' }}
                                 >
-                                    {loading ? (
-                                        <><Sparkles size={20} className="spin" /> GENERO ARENA...</>
-                                    ) : (
-                                        <><Swords size={20} /> CREA STANZA DI BATTAGLIA</>
-                                    )}
+                                    {loading ? <><Sparkles size={20} className="spin" /> GENERO ARENA...</> : <><Swords size={20} /> CREA STANZA DI BATTAGLIA</>}
                                 </button>
                             </div>
                         </div>
@@ -500,18 +504,7 @@ export default function DuelSection() {
                                 maxLength={4}
                                 value={joinCodeInput}
                                 onChange={e => setJoinCodeInput(e.target.value.toUpperCase())}
-                                style={{
-                                    textAlign: 'center',
-                                    fontSize: '2rem',
-                                    fontWeight: 900,
-                                    textTransform: 'uppercase',
-                                    letterSpacing: '8px',
-                                    marginBottom: '1.5rem',
-                                    background: 'rgba(255,255,255,0.05)',
-                                    border: '1px solid var(--glass-border)',
-                                    borderRadius: '1rem',
-                                    color: 'var(--color-accent)'
-                                }}
+                                style={{ textAlign: 'center', fontSize: '2rem', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '8px', marginBottom: '1.5rem', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--glass-border)', borderRadius: '1rem', color: 'var(--color-accent)' }}
                             />
                             <button className="btn-secondary" onClick={handleJoinMatch} disabled={loading} style={{ padding: '1rem', borderRadius: '1rem' }}>
                                 {loading ? <Clock size={18} className="spin" /> : <><Sparkles size={18} /> PARTECIPA</>}
@@ -522,9 +515,9 @@ export default function DuelSection() {
             )}
 
             {state === DUEL_STATES.WAITING && (
-                <div className="duel-card" style={{ textAlign: 'center', padding: '3rem' }}>
+                <div className="duel-card" style={{ textAlign: 'center', padding: '3rem', maxWidth: '800px', width: '100%', margin: 'auto' }}>
                     <div style={{ marginBottom: '2rem' }}>
-                        <h1 style={{ fontSize: '3rem', margin: '0.5rem 0', letterSpacing: '8px', color: 'var(--color-accent)' }}>{roomCode}</h1>
+                        <h1 style={{ fontSize: '4rem', margin: '0.5rem 0', letterSpacing: '12px', color: 'var(--color-accent)', textShadow: '0 0 20px rgba(91,159,243,0.5)' }}>{roomCode}</h1>
                         <p style={{ color: 'var(--color-text-tertiary)' }}>Condividi questo codice con lo sfidante</p>
                     </div>
 
@@ -553,11 +546,11 @@ export default function DuelSection() {
                     </div>
 
                     {isHost ? (
-                        <button className="btn-primary" style={{ padding: '1rem 3rem', fontSize: '1.2rem' }} disabled={players.length < 2} onClick={handleLaunchDuel}>
+                        <button className="btn-primary" style={{ padding: '1rem 3rem', fontSize: '1.2rem', boxShadow: '0 0 30px rgba(91, 159, 243, 0.4)' }} disabled={players.length < 2} onClick={handleLaunchDuel}>
                             <Sparkles size={20} /> INIZIA BATTAGLIA <Sparkles size={20} />
                         </button>
                     ) : (
-                        <p style={{ color: 'var(--color-text-secondary)' }}>In attesa che l'Host avvii la sfida...</p>
+                        <p style={{ color: 'var(--color-text-secondary)', marginTop: '1rem' }}>In attesa che l'Host avvii la sfida...</p>
                     )}
 
                     <button className="btn-minimal" onClick={resetQuiz} style={{ marginTop: '2rem', display: 'block', margin: '2rem auto' }}>Esci dalla stanza</button>
@@ -565,14 +558,16 @@ export default function DuelSection() {
             )}
 
             {state === DUEL_STATES.COUNTDOWN && (
-                <div className="duel-countdown-screen">
-                    <div className="countdown-number">3</div>
-                    <p style={{ fontSize: '1.5rem', fontWeight: 600 }}>PREPARATI ALLO SCONTRO!</p>
+                <div className="duel-countdown-screen" style={{ margin: 'auto' }}>
+                    <div className="countdown-number" style={{ textShadow: '0 0 40px var(--color-accent)' }}>{countdownNumber > 0 ? countdownNumber : 'GO!'}</div>
+                    <p style={{ fontSize: '2rem', fontWeight: 800, marginTop: '2rem', letterSpacing: '4px' }}>PREPARATI ALLO SCONTRO!</p>
                 </div>
             )}
 
             {state === DUEL_STATES.PLAYING && currentQ && (
-                <div className="duel-game-screen">
+                <div className={`duel-game-screen max-w-4xl w-full mx-auto ${strikeClass}`} style={{ margin: 'auto', flex: 1, display: 'flex', flexDirection: 'column', width: '100%', maxWidth: '800px' }}>
+
+                    {/* ARCADE HUD: Power Bars */}
                     <div className="multi-scoreboard">
                         <div className="score-item me">
                             <div className="name">{playerName}</div>
@@ -587,15 +582,17 @@ export default function DuelSection() {
                         </div>
                     </div>
 
-                    <div className="duel-timer-bar">
-                        <div className="duel-timer-fill" style={{
-                            width: `${timerPercent}%`,
-                            background: timerPercent > 50 ? '#30D158' : timerPercent > 25 ? '#FF9F0A' : '#FF453A'
-                        }} />
+                    <div className="duel-timer-container">
+                        <div className="duel-timer-bar" style={{ maxWidth: '400px', height: '12px' }}>
+                            <div className="duel-timer-fill" style={{
+                                width: `${timerPercent}%`,
+                                background: timerPercent > 50 ? '#30D158' : timerPercent > 25 ? '#FF9F0A' : '#FF453A'
+                            }} />
+                        </div>
                     </div>
 
                     <div className="duel-question-card">
-                        <span style={{ fontSize: '0.8rem', color: 'var(--color-text-tertiary)', display: 'block', marginBottom: '0.5rem' }}>Domanda {currentIndex + 1} di {questions.length}</span>
+                        <span style={{ fontSize: '0.9rem', fontWeight: '800', letterSpacing: '2px', color: 'var(--color-accent)', display: 'block', marginBottom: '1rem', textTransform: 'uppercase' }}>Round {currentIndex + 1} / {questions.length}</span>
                         <h3>{currentQ.question}</h3>
                     </div>
 
@@ -618,7 +615,7 @@ export default function DuelSection() {
             )}
 
             {state === DUEL_STATES.FINISHED && (
-                <div className="duel-results-screen reveal-up">
+                <div className="duel-results-screen reveal-up" style={{ margin: 'auto', maxWidth: '800px', width: '100%', textAlign: 'center' }}>
                     <div className="duel-trophy"><Trophy size={64} color="var(--color-accent)" /></div>
                     <h2>Sfida Conclusa!</h2>
 

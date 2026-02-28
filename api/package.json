@@ -1,6 +1,7 @@
 {
     "name": "studyjournal-pro",
     "version": "1.0.0",
+    "type": "module",
     "description": "StudyJournal Pro - AI Powered Study Assistant",
     "dependencies": {
         "@google/generative-ai": "^0.21.0",

@@ -1,13 +1,22 @@
-const express = require("express");
-const path = require("path");
-// Cerca il file .env sia nella root che nella cartella api/
-require('dotenv').config();
-require('dotenv').config({ path: path.join(__dirname, '.env') });
-const cors = require("cors");
-const { GoogleGenerativeAI } = require("@google/generative-ai");
-const multer = require("multer");
+import express from "express";
+import path from "path";
+import { fileURLToPath } from "url";
+import dotenv from "dotenv";
+import cors from "cors";
+import { GoogleGenerativeAI } from "@google/generative-ai";
+import multer from "multer";
+import { createRequire } from "module";
+const require = createRequire(import.meta.url);
 const pdfParse = require("pdf-parse");
-const { AccessToken } = require("livekit-server-sdk");
+
+import { AccessToken } from "livekit-server-sdk";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// Cerca il file .env sia nella root che nella cartella api/
+dotenv.config();
+dotenv.config({ path: path.join(__dirname, '.env') });
 // This pdf-parse version requires buffer passed as {data} in the constructor
 const pdf = async (buffer) => {
     try {
@@ -589,9 +598,9 @@ app.post("/api/livekit-token", async (req, res) => {
     }
 });
 
-module.exports = app;
+export default app;
 
-if (require.main === module) {
+if (process.argv[1] === fileURLToPath(import.meta.url)) {
     const PORT = process.env.PORT || 3001;
     app.use((err, req, res, next) => {
         console.error(`\n[GLOBAL ERROR] su ${req.method} ${req.path}:`, err.message);

@@ -85,7 +85,7 @@ function sanitizeData(inputData) {
         }
         return {
             ...merged,
-            lastModified: inputData.lastModified || Date.now()
+            lastModified: inputData.lastModified || 0 // Fix: Default a 0, non a Date.now(), altrimenti sovrascrive i salvataggi locali
         };
     } catch (err) {
         console.error("[sanitizeData] ERR: Errore durante sanitizzazione:", err);
@@ -187,6 +187,8 @@ export function DataProvider({ children }) {
                                 id: user.id,
                                 data: localData,
                                 updated_at: new Date().toISOString()
+                            }).then(({ error }) => {
+                                if (error) console.error('[DataContext] Error merging cloud data:', error.message)
                             })
                         }
                     }
@@ -235,6 +237,8 @@ export function DataProvider({ children }) {
                             id: user.id,
                             data: finalData,
                             updated_at: new Date().toISOString()
+                        }).then(({ error }) => {
+                            if (error) console.error('[DataContext] Error saving streak:', error.message)
                         })
                     }
                     // --------------------------
@@ -282,12 +286,14 @@ export function DataProvider({ children }) {
         setData(updated)
 
         if (saveTimeout.current) clearTimeout(saveTimeout.current)
-        saveTimeout.current = setTimeout(() => {
-            supabase.from('users_data').upsert({
+        saveTimeout.current = setTimeout(async () => {
+            const { error } = await supabase.from('users_data').upsert({
                 id: user.id,
                 data: updated,
                 updated_at: new Date().toISOString()
             })
+            if (error) console.error('[DataContext] Background save failed:', error.message)
+            else console.log('[DataContext] Data safely synced to Supabase')
         }, 1000)
     }, [user, cacheKey])
 

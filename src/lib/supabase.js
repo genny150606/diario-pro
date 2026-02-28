@@ -3,8 +3,9 @@ import { createClient } from '@supabase/supabase-js'
 export const SUPABASE_URL = 'https://rzdpntvojpibbndhsrlz.supabase.co'
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ6ZHBudHZvanBpYmJuZGhzcmx6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEzNzg1MjEsImV4cCI6MjA4Njk1NDUyMX0.QwnT9Okp8CkN_LxGIeBKWrroo3letL8OhSvaqdQVW7M'
 
-// Workaround anti Vite 502 (Bad Gateway) IPv4
-const PROXY_URL = import.meta.env?.DEV ? 'http://localhost:3001/api/supabase-proxy' : '/api/supabase-proxy'
+// URL del Backend assoluta per supportare Mobile LAN / Capacitor
+const apiUrl = import.meta.env.VITE_API_URL || (import.meta.env.DEV ? '' : 'https://studyjournal-pro.vercel.app')
+const PROXY_URL = `${apiUrl}/api/supabase-proxy`
 
 const createSupabaseClient = () => {
     return createClient(SUPABASE_URL, SUPABASE_KEY, {
@@ -20,7 +21,7 @@ const createSupabaseClient = () => {
                 // Direct-First Strategy with 3s Timeout
                 try {
                     const controller = new AbortController()
-                    const timeoutId = setTimeout(() => controller.abort(), 3000)
+                    const timeoutId = setTimeout(() => controller.abort(), 8000) // Aumentato a 8s per connessioni mobile lente
 
                     const directRes = await window.fetch(url, {
                         ...options,
@@ -94,7 +95,7 @@ const createSupabaseClient = () => {
 
                 // Universal fallback with strict timeout to prevent infinite hangs
                 const fallbackCtrl = new AbortController()
-                const fallbackTimeoutId = setTimeout(() => fallbackCtrl.abort(), 4000)
+                const fallbackTimeoutId = setTimeout(() => fallbackCtrl.abort(), 12000)
                 try {
                     const fallbackRes = await window.fetch(url, { ...options, signal: fallbackCtrl.signal })
                     clearTimeout(fallbackTimeoutId)

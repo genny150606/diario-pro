@@ -48,7 +48,7 @@ export default function DuelSection() {
     const timerRef = useRef(null)
     const pollIntervalRef = useRef(null)
 
-    const apiUrl = ''
+    const apiUrl = import.meta.env.VITE_API_URL || (import.meta.env.DEV ? '' : 'https://studyjournal-pro.vercel.app')
 
     // Initialize player name from auth
     useEffect(() => {

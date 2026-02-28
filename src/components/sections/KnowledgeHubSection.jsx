@@ -16,7 +16,7 @@ export default function KnowledgeHubSection() {
     const [sendingChat, setSendingChat] = useState(false)
     const chatEndRef = useRef(null)
 
-    const apiUrl = ''
+    const apiUrl = import.meta.env.VITE_API_URL || (import.meta.env.DEV ? '' : 'https://studyjournal-pro.vercel.app')
 
     const scrollToBottom = () => {
         chatEndRef.current?.scrollIntoView({ behavior: "smooth" })

@@ -384,9 +384,10 @@ export default function StudyRoomSection() {
     const joinRoom = async (room) => {
         setError(null)
         try {
-            // Get LiveKit token from backend
+            // Assicuriamoci che sui dispositivi Mobile/Capacitor l'URL sia assoluto
+            const apiUrl = import.meta.env.VITE_API_URL || (import.meta.env.DEV ? '' : 'https://studyjournal-pro.vercel.app')
             const participantName = user.email?.split('@')[0] || user.id.substring(0, 8)
-            const response = await fetch('/api/livekit-token', {
+            const response = await fetch(`${apiUrl}/api/livekit-token`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({

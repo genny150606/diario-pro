@@ -476,7 +476,7 @@ export default function Landing() {
                             Domande <span className="muted" style={{ background: 'linear-gradient(135deg, #6495FF, #FFD700)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>frequenti</span>
                         </h2>
                     </div>
-                    <div style={{ display: 'grid', gap: '0.8rem' }}>
+                    <div style={{ display: 'grid', gap: '0.8rem', position: 'relative', zIndex: 10 }}>
                         {FAQS.map((faq, i) => (
                             <div key={i} style={{
                                 background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)',

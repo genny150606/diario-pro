@@ -983,3 +983,149 @@
     color: var(--color-text-secondary, #98989D);
     margin-bottom: 1.5rem;
 }
+
+/* ═══════════ NEW ACHIEVEMENT GRID ═══════════ */
+.achievements-grid-new {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 1.2rem;
+}
+
+.ach-card {
+    background: var(--ach-bg, rgba(255, 255, 255, 0.03));
+    border: 1.5px solid var(--ach-border, rgba(255, 255, 255, 0.08));
+    border-radius: 1rem;
+    padding: 1.5rem;
+    text-align: center;
+    position: relative;
+    transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+    opacity: 0.55;
+    animation: achFadeIn 0.4s ease forwards;
+}
+
+.ach-card.ach-unlocked {
+    opacity: 1;
+}
+
+.ach-card:hover {
+    transform: translateY(-5px);
+    border-color: var(--ach-color);
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.25), 0 0 20px color-mix(in srgb, var(--ach-color) 10%, transparent);
+}
+
+@keyframes achFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 0.55;
+        transform: translateY(0);
+    }
+}
+
+.ach-card.ach-unlocked {
+    animation: achFadeInFull 0.4s ease forwards;
+}
+
+@keyframes achFadeInFull {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.ach-rarity-badge {
+    position: absolute;
+    top: 8px;
+    right: 10px;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 3px 8px;
+    border-radius: 4px;
+    background: var(--ach-border);
+    color: var(--ach-color);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.ach-icon {
+    font-size: 2.5rem;
+    margin-bottom: 0.8rem;
+    transition: filter 0.3s;
+}
+
+.ach-name {
+    font-weight: 700;
+    font-size: 0.95rem;
+    margin-bottom: 4px;
+    color: #fff;
+}
+
+.ach-desc {
+    font-size: 0.78rem;
+    color: rgba(255, 255, 255, 0.45);
+    margin-bottom: 0.8rem;
+}
+
+.ach-progress-wrap {
+    margin-bottom: 0.5rem;
+}
+
+.ach-progress-bar {
+    height: 5px;
+    background: rgba(255, 255, 255, 0.08);
+    border-radius: 3px;
+    overflow: hidden;
+    margin-bottom: 4px;
+}
+
+.ach-progress-fill {
+    height: 100%;
+    border-radius: 3px;
+    transition: width 0.5s ease;
+}
+
+.ach-progress-text {
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.ach-unlocked-badge {
+    font-weight: 700;
+    font-size: 13px;
+    margin-bottom: 0.5rem;
+}
+
+.ach-points {
+    margin-top: 0.8rem;
+    padding-top: 0.8rem;
+    border-top: 1px solid var(--ach-border);
+    font-size: 12px;
+    font-weight: 700;
+}
+
+@media (max-width: 600px) {
+    .achievements-grid-new {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 0.8rem;
+    }
+
+    .ach-card {
+        padding: 1rem;
+    }
+
+    .ach-icon {
+        font-size: 2rem;
+    }
+
+    .ach-name {
+        font-size: 0.85rem;
+    }
+}

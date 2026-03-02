@@ -2,8 +2,10 @@ import { useState } from 'react'
 import { useNavigate, Link, Outlet, useLocation } from 'react-router-dom'
 import { useAuth } from '../../hooks/useAuth'
 import { useData } from '../../hooks/useData'
+import { useDailyBonus } from '../../hooks/useDailyBonus'
 import Sidebar from './Sidebar'
 import ChatbotWidget from '../chatbot/ChatbotWidget'
+import NotificationCenter from '../NotificationCenter'
 import './AppLayout.css'
 
 // Import all app styles
@@ -54,21 +56,17 @@ export default function AppLayout() {
         return stored
     })
 
+    // Initialize daily login bonus
+    useDailyBonus()
+
     const handleSignOut = async () => {
-        console.log('[LAYOUT] handleSignOut triggered')
-        // Close menus immediately for better UX
         setMenuOpen(false)
         setSidebarOpen(false)
-
         try {
-            console.log('[LAYOUT] Calling signOut()...')
             await signOut()
-            console.log('[LAYOUT] signOut() complete')
         } catch (err) {
-            console.error('[LAYOUT] Sign out error:', err)
+            // silently handle
         } finally {
-            console.log('[LAYOUT] Navigating to /')
-            // Always redirect to landing page
             navigate('/')
         }
     }
@@ -195,6 +193,9 @@ export default function AppLayout() {
 
             {/* AI Chatbot */}
             <ChatbotWidget />
+
+            {/* In-app Notifications */}
+            <NotificationCenter />
         </div>
     )
 }

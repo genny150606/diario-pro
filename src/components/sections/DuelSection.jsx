@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from 'react'
 import { useAuth } from '../../hooks/useAuth'
 import { useData } from '../../hooks/useData'
 import { supabase } from '../../lib/supabase'
-import { Swords, Target, Edit3, FileText, Paperclip, Clock, Key, User, Trophy, Play, RotateCcw, ChevronLeft, Sparkles, BookOpen, GraduationCap, Calculator, Globe, History, Atom, Brain, Zap, PlusCircle, X } from 'lucide-react'
+import { Swords, Target, Edit3, FileText, Paperclip, Clock, Key, User, Trophy, Play, RotateCcw, ChevronLeft, Sparkles, BookOpen, GraduationCap, Calculator, Globe, History, Atom, Brain, Zap, PlusCircle, X, Bot } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import './DuelSection.css'
 
@@ -565,51 +565,116 @@ export default function DuelSection() {
             )}
 
             {state === DUEL_STATES.PLAYING && currentQ && (
-                <div className={`duel-game-screen max-w-4xl w-full mx-auto ${strikeClass}`} style={{ margin: 'auto', flex: 1, display: 'flex', flexDirection: 'column', width: '100%', maxWidth: '800px' }}>
-
-                    {/* ARCADE HUD: Power Bars */}
-                    <div className="multi-scoreboard">
-                        <div className="score-item me">
-                            <div className="name">{playerName}</div>
-                            <div className="bar"><div className="fill" style={{ width: `${(currentIndex / questions.length) * 100}%` }} /></div>
-                            <div className="pts">{score} pts</div>
+                <div className={`duel-arena-wrapper ${strikeClass}`}>
+                    {/* Top Header */}
+                    <header className="arena-header">
+                        <div className="arena-logo">
+                            <img src="/favicon.png" alt="Logo" className="arena-logo-img" />
+                            <span className="arena-logo-text">StudyJournal <span className="pro-badge">Pro</span></span>
+                            <span className="arena-divider">|</span>
+                            <span className="arena-title">Duel Arena</span>
                         </div>
-                        <div className="score-item vs">VS</div>
-                        <div className="score-item opp">
-                            <div className="name">{opponent?.username || 'Sfidante'}</div>
-                            <div className="bar"><div className="fill" style={{ width: `${((opponent?.current_question_index || 0) / questions.length) * 100}%` }} /></div>
-                            <div className="pts">{opponent?.score || 0} pts</div>
+                        <div className="arena-timer">
+                            <div className="live-dot pulse"></div>
+                            <span>Live countdown:</span>
+                            <span className="timer-value">
+                                {String(Math.floor(timeLeft / 60)).padStart(2, '0')}:{String(timeLeft % 60).padStart(2, '0')}
+                            </span>
                         </div>
-                    </div>
+                    </header>
 
-                    <div className="duel-timer-container">
-                        <div className="duel-timer-bar" style={{ maxWidth: '400px', height: '12px' }}>
-                            <div className="duel-timer-fill" style={{
-                                width: `${timerPercent}%`,
-                                background: timerPercent > 50 ? '#30D158' : timerPercent > 25 ? '#FF9F0A' : '#FF453A'
-                            }} />
+                    {/* Main Arena Layout */}
+                    <div className="arena-main-layout">
+
+                        {/* LEFT: Player Panel */}
+                        <div className="player-panel panel-blue">
+                            <div className="player-avatar-wrapper">
+                                <div className="avatar-glow"></div>
+                                <div className="avatar-circle"><User size={48} /></div>
+                            </div>
+                            <h2 className="player-name">Tu (User)</h2>
+                            <div className="player-level">Lvl {appData?.stats?.level || 1}</div>
+
+                            <div className="player-score-block">
+                                <span className="score-value">{score}</span>
+                                <span className="score-label">Punti</span>
+                            </div>
+
+                            <div className="player-progress-wrapper">
+                                <div className="player-progress-bar">
+                                    <div className="progress-fill" style={{ width: `${((currentIndex) / questions.length) * 100}%` }}></div>
+                                </div>
+                                <span className="progress-text">{currentIndex}/{questions.length} Domande</span>
+                            </div>
                         </div>
-                    </div>
 
-                    <div className="duel-question-card">
-                        <span style={{ fontSize: '0.9rem', fontWeight: '800', letterSpacing: '2px', color: 'var(--color-accent)', display: 'block', marginBottom: '1rem', textTransform: 'uppercase' }}>Round {currentIndex + 1} / {questions.length}</span>
-                        <h3>{currentQ.question}</h3>
-                    </div>
+                        {/* CENTER: Question Area */}
+                        <div className="arena-center">
+                            <div className="question-card glass-neon">
+                                <h2>{currentQ.question}</h2>
+                            </div>
 
-                    <div className="duel-options">
-                        {currentQ.options.map((opt, i) => {
-                            let cls = 'duel-option'
-                            if (selectedAnswer !== null) {
-                                if (i === currentQ.correct) cls += ' correct'
-                                else if (i === selectedAnswer) cls += ' wrong'
-                            }
-                            return (
-                                <button key={i} className={cls} onClick={() => handleAnswer(i === currentQ.correct, i)} disabled={selectedAnswer !== null}>
-                                    <span className="option-letter">{['A', 'B', 'C', 'D'][i]}</span>
-                                    {opt}
-                                </button>
-                            )
-                        })}
+                            <div className="options-grid">
+                                {currentQ.options.map((opt, i) => {
+                                    let cls = 'option-btn'
+                                    if (selectedAnswer !== null) {
+                                        if (i === currentQ.correct) cls += ' correct'
+                                        else if (i === selectedAnswer) cls += ' wrong'
+                                    }
+                                    return (
+                                        <button key={i} className={cls} onClick={() => handleAnswer(i === currentQ.correct, i)} disabled={selectedAnswer !== null}>
+                                            <span className="opt-letter">{['A)', 'B)', 'C)', 'D)'][i]}</span>
+                                            <span className="opt-text">{opt}</span>
+                                        </button>
+                                    )
+                                })}
+                            </div>
+                        </div>
+
+                        {/* RIGHT: Opponent Panel */}
+                        <div className="player-panel panel-red">
+                            <div className="player-avatar-wrapper">
+                                <div className="avatar-glow"></div>
+                                <div className="avatar-circle"><Bot size={48} /></div>
+                            </div>
+                            <h2 className="player-name">{opponent?.username || 'Avversario'}</h2>
+                            <div className="player-level">Lvl 5</div>
+
+                            <div className="player-score-block">
+                                <span className="score-value">{opponent?.score || 0}</span>
+                                <span className="score-label">Punti</span>
+                            </div>
+
+                            <div className="player-progress-wrapper">
+                                <div className="player-progress-bar">
+                                    <div className="progress-fill" style={{ width: `${((opponent?.current_question_index || 0) / questions.length) * 100}%` }}></div>
+                                </div>
+                                <span className="progress-text">{opponent?.current_question_index || 0}/{questions.length} Domande</span>
+                            </div>
+                        </div>
+
+                        {/* FAR RIGHT: Live Crowd Sidebar */}
+                        <aside className="live-crowd-sidebar">
+                            <h3 className="sidebar-title">Live Crowd & Classifica</h3>
+                            <div className="crowd-feed">
+                                <div className="feed-item"><span className="emoji">🔥</span> Andrea P. ha risposto correttamente!</div>
+                                <div className="feed-item"><span className="emoji">🎉</span> Marco G. è salito in classifica!</div>
+                                <div className="feed-item"><span className="emoji">👏</span> Tifate per Andrea!</div>
+                                <div className="feed-item"><span className="emoji">🤓</span> Giulia R. ha una streak di 5!</div>
+                            </div>
+
+                            <div className="leaderboard">
+                                <h4 className="leaderboard-title">Leaderboard</h4>
+                                <ol className="leaderboard-list">
+                                    <li>Giulia R. - 15800 Punti</li>
+                                    <li>Matteo B. - 14200 Punti</li>
+                                    <li>Andrea P. - 13900 Punti</li>
+                                    <li>Tu - {score} Punti</li>
+                                    <li>Avversario - {opponent?.score || 0} Punti</li>
+                                </ol>
+                            </div>
+                        </aside>
+
                     </div>
                 </div>
             )}

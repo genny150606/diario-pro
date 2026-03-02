@@ -49,9 +49,17 @@ const createSupabaseClient = () => {
 
                 if (isRest || isAuth) {
                     console.log(`[PROXY] Attempting fallback for ${urlStr.split('/').pop()}...`)
-                    let path = isRest
-                        ? `/rest/v1/${urlStr.split('/rest/v1/')[1]}`
-                        : `/auth/v1/${urlStr.split('/auth/v1/')[1]}`
+                    // Safely extract the path + query string needed by the Proxy by splitting exactly at the Supabase URL boundary or by finding /rest/v1 | /auth/v1
+                    let path = '';
+                    try {
+                        const parsedUrl = new URL(urlStr);
+                        path = parsedUrl.pathname + parsedUrl.search;
+                    } catch (e) {
+                        path = isRest
+                            ? `/rest/v1/${urlStr.split('/rest/v1/')[1]}`
+                            : `/auth/v1/${urlStr.split('/auth/v1/')[1]}`
+                    }
+
                     const rawHeaders = {}
                     if (options.headers) {
                         new Headers(options.headers).forEach((v, k) => rawHeaders[k] = v)

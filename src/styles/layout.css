@@ -398,22 +398,16 @@
     background: rgba(239, 68, 68, 0.1);
 }
 
-/* ── MAIN CONTAINER & PUSH EFFECT ── */
+/* ── MAIN CONTAINER ── */
 .container,
 .main-container {
     display: block;
     width: 100%;
     margin: 0;
-    padding-left: calc(var(--sidebar-width) + 3rem);
+    padding: 0;
     min-height: 100vh;
     background: transparent;
     transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
-}
-
-/* Sidebar Push Interaction */
-.app-layout:has(.sidebar:hover) .container,
-.app-layout:has(.sidebar:hover) .main-container {
-    padding-left: calc(var(--sidebar-width-expanded) + 3rem);
 }
 
 .content {

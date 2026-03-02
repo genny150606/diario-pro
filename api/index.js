@@ -537,12 +537,12 @@ app.post("/api/supabase-proxy", async (req, res) => {
             if (fetchRes.status === 204 || fetchRes.status === 304) return res.end();
 
             const contentType = fetchRes.headers.get('content-type') || '';
-            if (contentType.includes('application/json') || contentType.includes('text/')) {
+            if (contentType.includes('json') || contentType.includes('text/')) {
                 const text = await fetchRes.text();
                 return res.send(text);
             } else {
                 const arrayBuffer = await fetchRes.arrayBuffer();
-                return res.send(Buffer.from(arrayBuffer));
+                return res.end(Buffer.from(arrayBuffer));
             }
         } catch (err) {
             lastErr = err;

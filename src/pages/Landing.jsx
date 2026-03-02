@@ -245,7 +245,7 @@ export default function Landing() {
                     </a>
                     <div className="nav-links">
                         <Link to="/" className="nav-home-icon" title="Home"><Home size={20} /></Link>
-                        <a href="#features">Features</a>
+                        <a href="#features">Funzionalità</a>
                         <a href="#reviews">Recensioni</a>
                         <a href="#pricing">Prezzi</a>
                     </div>
@@ -578,7 +578,7 @@ export default function Landing() {
                 <footer className="landing-footer">
                     <div className="footer-logo">SJ<span className="dot">.</span></div>
                     <div className="footer-links">
-                        <a href="#features">Features</a>
+                        <a href="#features">Funzionalità</a>
                         <a href="#pricing">Prezzi</a>
                         <a href="#faq">FAQ</a>
                         <button onClick={ctaAction} style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.3)', fontSize: '0.9rem', cursor: 'pointer', padding: 0 }}>

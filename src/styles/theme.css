@@ -428,56 +428,63 @@
 
 /* ── DARK MODE (OLED CYBER PREMIUM) ── */
 [data-theme="dark"] {
-    --color-bg: #050508;
-    --color-bg-secondary: #0D0F16;
-    --color-bg-tertiary: #161A26;
-    --color-bg-elevated: #11141E;
+    /* Deep Cosmic Backgrounds */
+    --color-bg: #030308;
+    --color-bg-secondary: #0A0A14;
+    --color-bg-tertiary: #121220;
+    --color-bg-elevated: #1A1A2E;
 
+    /* Crisp Text */
     --color-text: #FFFFFF;
-    --color-text-secondary: #A1A8B8;
-    --color-text-tertiary: #6E7587;
+    --color-text-secondary: #94A3B8;
+    --color-text-tertiary: #64748B;
 
-    --color-border: rgba(255, 255, 255, 0.08);
-    --color-border-strong: rgba(255, 255, 255, 0.15);
+    /* Subtle Borders */
+    --color-border: rgba(255, 255, 255, 0.06);
+    --color-border-strong: rgba(255, 255, 255, 0.12);
 
-    --color-accent: #3B82F6;
-    --color-accent-hover: #60A5FA;
-    --color-accent-bg: rgba(59, 130, 246, 0.15);
-    --color-accent-bg-strong: rgba(59, 130, 246, 0.3);
-    --color-accent-glow: 0 0 24px rgba(59, 130, 246, 0.5);
+    /* Neon Accents */
+    --color-accent: #6495FF;
+    --color-accent-hover: #8264FF;
+    --color-accent-bg: rgba(100, 149, 255, 0.15);
+    --color-accent-bg-strong: rgba(100, 149, 255, 0.3);
+    --color-accent-glow: 0 0 24px rgba(100, 149, 255, 0.5);
 
-    --color-success: #22C55E;
-    --color-warning: #F59E0B;
-    --color-error: #EF4444;
-    --color-error-bg: rgba(239, 68, 68, 0.15);
+    --color-success: #4ade80;
+    /* Neon Emerald */
+    --color-warning: #fbbf24;
+    --color-error: #f43f5e;
+    --color-error-bg: rgba(244, 63, 94, 0.15);
 
-    --glass-bg: rgba(13, 15, 22, 0.4);
-    --glass-border: rgba(255, 255, 255, 0.12);
-    --glass-bg-deep: rgba(13, 15, 22, 0.7);
-    --glass-shadow: 0 16px 50px 0 rgba(0, 0, 0, 0.6);
+    /* Glassmorphism Constants */
+    --glass-bg: rgba(20, 20, 35, 0.4);
+    --glass-border: rgba(255, 255, 255, 0.08);
+    --glass-bg-deep: rgba(15, 15, 25, 0.7);
+    --glass-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.7), inset 0 1px 1px rgba(255, 255, 255, 0.05);
 
-    --shadow-xs: 0 0 1px rgba(0, 0, 0, 0.5), 0 2px 4px rgba(0, 0, 0, 0.35);
-    --shadow-sm: 0 0 1px rgba(0, 0, 0, 0.5), 0 4px 8px rgba(0, 0, 0, 0.45);
-    --shadow-md: 0 0 2px rgba(59, 130, 246, 0.2), 0 8px 30px rgba(0, 0, 0, 0.6);
-    --shadow-lg: 0 0 4px rgba(59, 130, 246, 0.3), 0 16px 50px rgba(0, 0, 0, 0.8);
-    --shadow-xl: 0 0 6px rgba(59, 130, 246, 0.4), 0 24px 80px rgba(0, 0, 0, 0.9);
-    --shadow-float: 0 20px 80px 10px rgba(37, 99, 235, 0.3), 0 0 0 1px rgba(255, 255, 255, 0.1);
+    /* Epic Shadows */
+    --shadow-xs: 0 0 1px rgba(0, 0, 0, 0.8), 0 2px 4px rgba(0, 0, 0, 0.4);
+    --shadow-sm: 0 0 1px rgba(0, 0, 0, 0.8), 0 4px 8px rgba(0, 0, 0, 0.5);
+    --shadow-md: 0 10px 30px rgba(0, 0, 0, 0.8), inset 0 1px 1px rgba(255, 255, 255, 0.05);
+    --shadow-lg: 0 20px 50px rgba(0, 0, 0, 0.9), inset 0 1px 1px rgba(255, 255, 255, 0.05);
+    --shadow-xl: 0 30px 80px rgba(0, 0, 0, 1), inset 0 1px 1px rgba(255, 255, 255, 0.08);
+    --shadow-float: 0 20px 80px 10px rgba(130, 100, 255, 0.2), 0 0 0 1px rgba(255, 255, 255, 0.1);
 
     /* ── ALIASES OVERRIDE ── */
     --primary: #F8FAFC;
     --primary-light: #94A3B8;
-    --accent: #3B82F6;
-    --accent-light: #60A5FA;
-    --bg-primary: #050508;
-    --bg-secondary: #0D0F16;
-    --bg-tertiary: #161A26;
-    --text-primary: #F8FAFC;
+    --accent: #6495FF;
+    --accent-light: #8264FF;
+    --bg-primary: #030308;
+    --bg-secondary: #0A0A14;
+    --bg-tertiary: #121220;
+    --text-primary: #FFFFFF;
     --text-secondary: #94A3B8;
-    --text-light: #475569;
-    --border: rgba(255, 255, 255, 0.15);
-    --success: #22C55E;
-    --warning: #F59E0B;
-    --error: #EF4444;
+    --text-light: #64748B;
+    --border: rgba(255, 255, 255, 0.08);
+    --success: #4ade80;
+    --warning: #fbbf24;
+    --error: #f43f5e;
 }
 
 /* ── RESET ── */

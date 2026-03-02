@@ -1,107 +1,362 @@
 /* ============================================
-   APP LAYOUT — React-specific styles
-   (Layout-critical styles consolidated in layout.css)
+   APP LAYOUT — EPIC GLASSMORPHISM & TOP PILL NAV
    ============================================ */
 
 .app-layout {
-    min-height: 100svh;
     min-height: 100vh;
     position: relative;
-    overflow: hidden;
+    overflow-x: hidden;
+    background: var(--color-bg);
+    /* Enforced Dark Mode #030308 */
 }
 
-/* Sidebar SVG icon sizing */
-.sidebar-item svg {
-    width: 20px;
-    height: 20px;
-    flex-shrink: 0;
-}
-
-.app-header {
-    height: 70px;
-    background: rgba(10, 10, 12, 0.7);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0 1.5rem;
+/* ── COSMIC BACKGROUND ── */
+.cosmic-bg {
     position: fixed;
-    top: 0;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    overflow: hidden;
+    background: #030308;
+}
+
+.cosmic-orb {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(120px);
+    opacity: 0.4;
+    mix-blend-mode: screen;
+}
+
+.orb-c1 {
+    width: 600px;
+    height: 600px;
+    background: radial-gradient(circle, #6495FF, transparent 60%);
+    top: -20%;
+    right: -10%;
+    animation: drift 25s infinite alternate ease-in-out;
+}
+
+.orb-c2 {
+    width: 500px;
+    height: 500px;
+    background: radial-gradient(circle, #D946EF, transparent 60%);
+    bottom: -10%;
+    left: -10%;
+    animation: drift 20s infinite alternate-reverse ease-in-out;
+}
+
+.orb-c3 {
+    width: 400px;
+    height: 400px;
+    background: radial-gradient(circle, #4ADE80, transparent 60%);
+    top: 40%;
+    left: 40%;
+    opacity: 0.15;
+    animation: pulseOrb 15s infinite alternate;
+}
+
+@keyframes drift {
+    100% {
+        transform: translate(-50px, 50px) scale(1.1);
+    }
+}
+
+@keyframes pulseOrb {
+    100% {
+        transform: scale(1.2);
+        opacity: 0.25;
+    }
+}
+
+/* ── TOP NAVIGATION PILL ── */
+.pill-nav-wrapper {
+    position: fixed;
+    top: 1.5rem;
     left: 0;
     right: 0;
     z-index: 1000;
+    display: flex;
+    justify-content: center;
+    padding: 0 1.5rem;
 }
 
-.header-left-group {
+.pill-nav {
     display: flex;
     align-items: center;
-    gap: 1rem;
+    justify-content: space-between;
+    width: 100%;
+    max-width: 1200px;
+    height: 64px;
+    background: rgba(20, 20, 35, 0.4);
+    backdrop-filter: blur(24px) saturate(200%);
+    -webkit-backdrop-filter: blur(24px) saturate(200%);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 2rem;
+    padding: 0 1.5rem;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5), inset 0 1px 1px rgba(255, 255, 255, 0.1);
 }
 
-.home-link-svg:hover {
-    opacity: 1 !important;
-    transform: scale(1.1);
+.pill-logo {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    text-decoration: none;
+    z-index: 20;
 }
 
-.logo-text {
-    display: block;
+.pill-logo img {
+    height: 28px;
+    width: auto;
+    border-radius: 6px;
+    box-shadow: 0 0 10px rgba(100, 149, 255, 0.5);
 }
 
-@media (max-width: 768px) {
-    .logo-text {
+.pill-logo-text {
+    color: #fff;
+    font-family: 'Outfit', sans-serif;
+    font-size: 1.15rem;
+    font-weight: 500;
+    letter-spacing: -0.01em;
+}
+
+.pill-logo-text strong {
+    font-weight: 800;
+    background: linear-gradient(135deg, #6495FF, #D946EF);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+/* Center Links */
+.pill-links {
+    display: flex;
+    align-items: center;
+    gap: 0.2rem;
+}
+
+@media (max-width: 1024px) {
+    .pill-links {
         display: none;
-    }
-}
-
-/* Sidebar overlay for mobile */
-.sidebar-overlay {
-    position: fixed;
-    inset: 0;
-    background: rgba(0, 0, 0, 0.5);
-    z-index: 998;
-    animation: fadeIn 0.2s;
-}
-
-@keyframes fadeIn {
-    from {
-        opacity: 0;
-    }
-
-    to {
-        opacity: 1;
-    }
-}
-
-/* ── MOBILE ── */
-@media (max-width: 47.9375em) {
-    .content {
-        min-width: 0;
-        max-width: 100%;
-        overflow-x: hidden;
-    }
-
-    .stats-grid {
-        grid-template-columns: 1fr 1fr;
-        gap: 0.8rem;
-    }
-
-    .stat-card {
+        flex-direction: column;
+        position: absolute;
+        top: 80px;
+        left: 1.5rem;
+        right: 1.5rem;
+        background: rgba(20, 20, 35, 0.95);
+        backdrop-filter: blur(20px);
         padding: 1rem;
+        border-radius: 1.5rem;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        z-index: 1000;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.8);
     }
 
-    .chatbot-fab {
-        bottom: calc(1rem + var(--bottom-nav-height, 56px));
-        right: 1rem;
-        width: 48px;
-        height: 48px;
+    .pill-links.mobile-open {
+        display: flex;
+    }
+}
+
+.pill-link {
+    color: rgba(255, 255, 255, 0.6);
+    text-decoration: none;
+    font-size: 0.85rem;
+    font-weight: 500;
+    padding: 0.5rem 0.8rem;
+    border-radius: 1.5rem;
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    white-space: nowrap;
+}
+
+@media (max-width: 1024px) {
+    .pill-link {
+        width: 100%;
+        text-align: center;
+        padding: 0.8rem;
+        font-size: 1rem;
+    }
+}
+
+.pill-link:hover {
+    color: #fff;
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.pill-link.active {
+    color: #fff;
+    background: rgba(255, 255, 255, 0.1);
+    box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.1);
+}
+
+/* Actions */
+.pill-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    z-index: 20;
+}
+
+.pill-account-btn {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.pill-account-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(100, 149, 255, 0.5);
+    box-shadow: 0 0 15px rgba(100, 149, 255, 0.3);
+}
+
+.mobile-toggle-btn {
+    display: none;
+    background: none;
+    border: none;
+    color: #fff;
+    cursor: pointer;
+    padding: 0.5rem;
+}
+
+@media (max-width: 1024px) {
+    .mobile-toggle-btn {
+        display: block;
+    }
+}
+
+/* User Dropdown */
+.user-profile-wrapper {
+    position: relative;
+}
+
+.pill-dropdown {
+    position: absolute;
+    top: calc(100% + 1rem);
+    right: 0;
+    width: 240px;
+    background: rgba(20, 20, 30, 0.85);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 1rem;
+    padding: 0.5rem;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.9);
+    z-index: 1001;
+}
+
+.dropdown-header {
+    padding: 0.75rem 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.dropdown-email {
+    color: #fff;
+    font-weight: 600;
+    font-size: 0.9rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.dropdown-level {
+    color: #4ADE80;
+    font-size: 0.8rem;
+    font-weight: 700;
+}
+
+.dropdown-divider {
+    height: 1px;
+    background: rgba(255, 255, 255, 0.08);
+    margin: 0.25rem 0;
+}
+
+.dropdown-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    width: 100%;
+    padding: 0.6rem 1rem;
+    color: rgba(255, 255, 255, 0.7);
+    text-decoration: none;
+    background: none;
+    border: none;
+    border-radius: 0.5rem;
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-align: left;
+}
+
+.dropdown-item:hover {
+    background: rgba(255, 255, 255, 0.05);
+    color: #fff;
+}
+
+.text-danger {
+    color: #F43F5E !important;
+}
+
+.text-danger:hover {
+    background: rgba(244, 63, 94, 0.1) !important;
+}
+
+/* ── MAIN CONTENT AREA ── */
+.main-content-area {
+    position: relative;
+    z-index: 10;
+    padding-top: 100px;
+    /* Space for pill nav */
+    padding-bottom: 2rem;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+}
+
+.content {
+    width: 100%;
+    max-width: 1200px;
+    padding: 0 1.5rem;
+}
+
+/* ── MOBILE RESPONSIVENESS ── */
+@media (max-width: 900px) {
+    .pill-links {
+        display: none;
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        background: rgba(20, 20, 30, 0.95);
+        backdrop-filter: blur(20px);
+        flex-direction: column;
+        padding: 1rem;
+        border-radius: 1rem;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        margin-top: 0.5rem;
+        gap: 0.25rem;
     }
 
-    .chatbot-window {
-        width: calc(100vw - 1.5rem);
-        right: 0.75rem;
-        bottom: calc(4rem + var(--bottom-nav-height, 56px));
-        max-height: 65vh;
+    .pill-links.mobile-open {
+        display: flex;
+        animation: fadeIn 0.2s ease;
+    }
+
+    .pill-link {
+        width: 100%;
+        padding: 0.75rem 1rem;
+    }
+
+    .mobile-toggle-btn {
+        display: block;
     }
 }

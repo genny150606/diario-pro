@@ -1,9 +1,8 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate, Link, Outlet, useLocation } from 'react-router-dom'
 import { useAuth } from '../../hooks/useAuth'
 import { useData } from '../../hooks/useData'
 import { useDailyBonus } from '../../hooks/useDailyBonus'
-import Sidebar from './Sidebar'
 import ChatbotWidget from '../chatbot/ChatbotWidget'
 import NotificationCenter from '../NotificationCenter'
 import './AppLayout.css'
@@ -20,27 +19,17 @@ import '../../styles/responsive.css'
 import '../../styles/gamification.css'
 
 // Lucide SVG Icons
-import {
-    Home, BookOpen, CheckSquare, Star, Timer,
-    BarChart2, Swords, Users, Trophy, Settings,
-    Menu, Sun, Moon, ChevronDown, LogOut, User, CalendarDays, Database, Headphones, GraduationCap
-} from 'lucide-react'
+import { LogOut, User, Settings, Menu, X } from 'lucide-react'
 
-const SECTIONS = [
-    { id: 'dashboard', label: 'Dashboard', Icon: Home, path: '/app' },
-    { id: 'notes', label: 'Note', Icon: BookOpen, path: '/app/notes' },
-    { id: 'tasks', label: 'Compiti', Icon: CheckSquare, path: '/app/tasks' },
-    { id: 'grades', label: 'Voti', Icon: Star, path: '/app/grades' },
-    { id: 'pomodoro', label: 'Pomodoro', Icon: Timer, path: '/app/pomodoro' },
-    { id: 'stats', label: 'Statistiche', Icon: BarChart2, path: '/app/stats' },
-    { id: 'duel', label: 'Duello AI', Icon: Swords, path: '/app/duel' },
-    { id: 'social', label: 'Social', Icon: Users, path: '/app/social' },
-    { id: 'gamification', label: 'Livello', Icon: Trophy, path: '/app/gamification' },
-    { id: 'calendar', label: 'Calendario', Icon: CalendarDays, path: '/app/calendar' },
-    { id: 'knowledge', label: 'Knowledge Hub', Icon: Database, path: '/app/knowledge' },
-    { id: 'study-rooms', label: 'Stanze Studio', Icon: Headphones, path: '/app/study-rooms' },
-    { id: 'classroom', label: 'Classroom', Icon: GraduationCap, path: '/app/classroom' },
-    { id: 'settings', label: 'Impostazioni', Icon: Settings, path: '/app/settings', bottom: true },
+const PILL_LINKS = [
+    { id: 'dashboard', label: 'Dashboard', path: '/app' },
+    { id: 'grades', label: 'Voti', path: '/app/grades' },
+    { id: 'tasks', label: 'Task', path: '/app/tasks' },
+    { id: 'notes', label: 'Note', path: '/app/notes' },
+    { id: 'knowledge', label: 'AI', path: '/app/knowledge' },
+    { id: 'classroom', label: 'Class', path: '/app/classroom' },
+    { id: 'pomodoro', label: 'Focus', path: '/app/pomodoro' },
+    { id: 'duel', label: 'Arena', path: '/app/duel' },
 ]
 
 export default function AppLayout() {
@@ -48,20 +37,19 @@ export default function AppLayout() {
     const { data } = useData()
     const navigate = useNavigate()
     const location = useLocation()
-    const [sidebarOpen, setSidebarOpen] = useState(false)
     const [menuOpen, setMenuOpen] = useState(false)
-    const [theme, setTheme] = useState(() => {
-        const stored = localStorage.getItem('theme') || 'dark'
-        document.documentElement.setAttribute('data-theme', stored)
-        return stored
-    })
+    const [mobileNavOpen, setMobileNavOpen] = useState(false)
+    // Always force dark mode for the premium glassmorphism theme
+    useEffect(() => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        localStorage.setItem('theme', 'dark')
+    }, [])
 
     // Initialize daily login bonus
     useDailyBonus()
 
     const handleSignOut = async () => {
         setMenuOpen(false)
-        setSidebarOpen(false)
         try {
             await signOut()
         } catch (err) {
@@ -71,85 +59,70 @@ export default function AppLayout() {
         }
     }
 
-
-    const toggleTheme = () => {
-        const newTheme = theme === 'dark' ? 'light' : 'dark'
-        setTheme(newTheme)
-        document.documentElement.setAttribute('data-theme', newTheme)
-        localStorage.setItem('theme', newTheme)
+    const isActive = (path) => {
+        if (path === '/app') return location.pathname === '/app'
+        return location.pathname.startsWith(path)
     }
 
-    const displayEmail = user?.email
-        ? (user.email.length > 20 ? user.email.substring(0, 17) + '...' : user.email)
-        : ''
-
     return (
-        <div className="app-layout" data-theme={theme}>
-            {/* Aurora background */}
-            <div className="aurora-bg" aria-hidden="true">
-                <div className="orb orb-1"></div>
-                <div className="orb orb-2"></div>
-                <div className="orb orb-3"></div>
-                <div className="orb orb-4"></div>
+        <div className="app-layout" data-theme="dark">
+            {/* Deep Cosmic Background & Orbs */}
+            <div className="cosmic-bg">
+                <div className="cosmic-orb orb-c1"></div>
+                <div className="cosmic-orb orb-c2"></div>
+                <div className="cosmic-orb orb-c3"></div>
             </div>
 
-            {/* Header */}
-            <header className="app-header">
-                <div className="header-left-group">
-                    <button
-                        className="menu-toggle"
-                        onClick={() => setSidebarOpen(!sidebarOpen)}
-                        aria-label="Toggle menu"
-                    >
-                        <Menu size={20} />
-                    </button>
-
-                    <Link to="/" className="home-link-svg" title="Torna alla Home" style={{ display: 'flex', alignItems: 'center', color: 'var(--color-text)', opacity: 0.7, transition: 'opacity 0.2s' }}>
-                        <Home size={20} />
+            {/* Top Navigation Pill (Dynamic Island) */}
+            <header className="pill-nav-wrapper">
+                <div className="pill-nav">
+                    {/* Left: Logo */}
+                    <Link to="/app" className="pill-logo">
+                        <img src="/favicon.png" alt="StudyJournal Pro Logo" />
+                        <span className="pill-logo-text">StudyJournal <strong>Pro</strong></span>
                     </Link>
-                </div>
 
-                <Link to="/" className="logo" style={{ display: 'flex', alignItems: 'center', gap: '10px', textDecoration: 'none' }}>
-                    <img src="/S.png" alt="StudyJournal Pro Logo" style={{ height: '36px', width: 'auto', filter: 'drop-shadow(0 0 8px rgba(100, 150, 255, 0.4))' }} />
-                    <span className="logo-text" style={{ fontSize: '1.2rem', fontWeight: 800, color: 'var(--color-text)' }}>StudyJournal</span>
-                </Link>
+                    {/* Center: Links (Hidden on small mobile) */}
+                    <nav className={`pill-links ${mobileNavOpen ? 'mobile-open' : ''}`}>
+                        {PILL_LINKS.map(link => (
+                            <Link
+                                key={link.id}
+                                to={link.path}
+                                className={`pill-link ${isActive(link.path) ? 'active' : ''}`}
+                                onClick={() => setMobileNavOpen(false)}
+                            >
+                                {link.label}
+                            </Link>
+                        ))}
+                    </nav>
 
-                <div className="header-right-group">
-                    <div className="header-right-actions">
-                        <div className={`streak-badge ${data?.stats?.currentStreak > 0 ? 'active' : ''}`}
-                            title="Giorni consecutivi di studio"
-                            style={{
-                                boxShadow: data?.stats?.currentStreak > 0 ? '0 0 15px rgba(56, 249, 215, 0.3)' : 'none',
-                                background: data?.stats?.currentStreak > 0 ? 'rgba(56, 249, 215, 0.1)' : 'var(--color-bg-secondary)',
-                                border: data?.stats?.currentStreak > 0 ? '1px solid rgba(56, 249, 215, 0.3)' : '1px solid var(--color-border)'
-                            }}>
-                            <Star size={14} className="streak-icon" style={{ color: data?.stats?.currentStreak > 0 ? '#38F9D7' : 'inherit' }} />
-                            <span className="streak-count" style={{ color: data?.stats?.currentStreak > 0 ? '#38F9D7' : 'inherit' }}>{data?.stats?.currentStreak || 0}</span>
-                        </div>
-                    </div>
-
-                    <div className="header-right">
-                        <button className="theme-toggle" onClick={toggleTheme} title="Cambia Tema">
-                            {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
+                    {/* Right: Actions */}
+                    <div className="pill-actions">
+                        {/* Mobile Hamburger toggle */}
+                        <button className="mobile-toggle-btn" onClick={() => setMobileNavOpen(!mobileNavOpen)}>
+                            {mobileNavOpen ? <X size={20} /> : <Menu size={20} />}
                         </button>
 
                         <div className="user-profile-wrapper">
                             <button
-                                className="account-btn"
+                                className="pill-account-btn"
                                 onClick={(e) => { e.stopPropagation(); setMenuOpen(!menuOpen) }}
                             >
-                                <User size={16} className="account-icon-mobile" />
-                                <span className="account-email-text">{displayEmail}</span>
-                                <ChevronDown size={14} className="chevron-icon" style={{ transform: menuOpen ? 'rotate(180deg)' : 'rotate(0)', transition: 'transform 0.2s' }} />
+                                <User size={18} />
                             </button>
 
                             {menuOpen && (
-                                <div className="account-dropdown show">
+                                <div className="pill-dropdown show fade-in">
+                                    <div className="dropdown-header">
+                                        <span className="dropdown-email">{user?.email}</span>
+                                        <span className="dropdown-level">Lvl. {data?.stats?.level || 1} • {data?.stats?.currentStreak || 0}🔥</span>
+                                    </div>
+                                    <div className="dropdown-divider"></div>
                                     <Link to="/app/settings" className="dropdown-item" onClick={() => setMenuOpen(false)}>
                                         <Settings size={14} /> Impostazioni
                                     </Link>
-                                    <div style={{ height: 1, background: 'var(--color-border)', margin: '0.5rem 0' }}></div>
-                                    <button className="dropdown-item" onClick={handleSignOut} style={{ color: '#FF453A', border: 'none', background: 'none', width: '100%', cursor: 'pointer' }}>
+                                    <div className="dropdown-divider"></div>
+                                    <button className="dropdown-item text-danger" onClick={handleSignOut}>
                                         <LogOut size={14} /> Esci
                                     </button>
                                 </div>
@@ -159,37 +132,17 @@ export default function AppLayout() {
                 </div>
             </header>
 
-            {/* Sidebar */}
-            <Sidebar
-                sections={SECTIONS}
-                isOpen={sidebarOpen}
-                onClose={() => setSidebarOpen(false)}
-                onExit={handleSignOut}
-                logoSrc="/S.png"
-            />
-
-            {/* Click outside to close sidebar on mobile */}
-            {sidebarOpen && (
-                <div
-                    className="sidebar-overlay"
-                    onClick={() => setSidebarOpen(false)}
-                />
-            )}
-
-            {/* Click outside to close menu */}
+            {/* Click outside to close dropdowns */}
             {menuOpen && (
-                <div
-                    style={{ position: 'fixed', inset: 0, zIndex: 99 }}
-                    onClick={() => setMenuOpen(false)}
-                />
+                <div style={{ position: 'fixed', inset: 0, zIndex: 900 }} onClick={() => setMenuOpen(false)} />
             )}
 
             {/* Main content */}
-            <div className="container">
+            <main className="main-content-area">
                 <div className="content page-transition" key={location.pathname}>
                     <Outlet />
                 </div>
-            </div>
+            </main>
 
             {/* AI Chatbot */}
             <ChatbotWidget />

@@ -1059,3 +1059,38 @@ body {
         font-size: 1.6rem;
     }
 }
+
+/* ═══ LANDING RESPONSIVE — New Sections ═══ */
+@media (max-width: 768px) {
+
+    /* Features 2-col → 1-col */
+    #features .bento-header~div {
+        grid-template-columns: 1fr !important;
+        gap: 1.5rem !important;
+        padding: 0 1rem !important;
+    }
+
+    #features .bento-header~div>div:first-child {
+        grid-template-columns: repeat(3, 1fr) !important;
+    }
+
+    /* Pricing stack */
+    #pricing>div:last-child {
+        grid-template-columns: 1fr !important;
+    }
+
+    /* Testimonials */
+    #testimonials>div:nth-child(2) {
+        grid-template-columns: 1fr !important;
+    }
+
+    #testimonials>div:last-child {
+        grid-template-columns: 1fr 1fr !important;
+    }
+
+    /* Hero value props */
+    .hero-actions-radical {
+        flex-direction: column;
+        align-items: center;
+    }
+}

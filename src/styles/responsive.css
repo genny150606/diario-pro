@@ -34,10 +34,18 @@ body {
 img,
 svg,
 video,
-canvas,
-iframe {
+canvas {
     max-width: 100%;
     height: auto;
+}
+
+/* Don't constrain Spline 3D viewer or its internals */
+.chatbot-spline-container,
+.chatbot-spline-container *,
+spline-viewer,
+spline-viewer * {
+    max-width: none;
+    min-width: unset;
 }
 
 input,

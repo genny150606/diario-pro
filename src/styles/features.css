@@ -2677,3 +2677,86 @@
 .avatar-remove-btn:hover {
     transform: scale(1.15);
 }
+
+/* ── RESPONSIVE OVERRIDES ── */
+@media (max-width: 47.9375em) {
+
+    .task-item-card,
+    .note-item-card,
+    .grade-item-card {
+        padding: 1rem;
+        border-radius: 1rem;
+    }
+
+    .grade-item-content,
+    .note-item-header {
+        flex-wrap: wrap;
+        gap: 0.6rem;
+    }
+
+    .study-mode-overlay {
+        padding: 1rem;
+    }
+
+    .study-card {
+        height: 320px;
+    }
+
+    .study-card-front,
+    .study-card-back {
+        padding: 2rem 1.5rem;
+        border-radius: 1.5rem;
+    }
+
+    .study-card-front h2,
+    .study-card-back h2 {
+        font-size: 1.3rem;
+    }
+
+    .study-actions {
+        flex-direction: column;
+        gap: 0.6rem;
+    }
+
+    .btn-srs {
+        padding: 1rem;
+        font-size: 0.9rem;
+    }
+
+    .storage-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .app-info-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .backup-actions {
+        flex-direction: column;
+    }
+
+    .settings-profile-card {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .settings-profile-stats {
+        justify-content: center;
+    }
+
+    .flashcards-top-actions {
+        flex-wrap: wrap;
+        gap: 0.75rem;
+    }
+}
+
+@media (max-width: 22.4375em) {
+    .study-card {
+        height: 260px;
+    }
+
+    .study-card-front h2,
+    .study-card-back h2 {
+        font-size: 1.1rem;
+    }
+}

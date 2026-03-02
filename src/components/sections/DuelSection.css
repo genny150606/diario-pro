@@ -760,3 +760,33 @@ input[type="range"].premium-slider::-webkit-slider-thumb:hover {
         max-width: 300px;
     }
 }
+
+/* ── TINY PHONES (< 360px) ── */
+@media (max-width: 22.4375em) {
+    .countdown-number {
+        font-size: 4rem;
+    }
+
+    .duel-question-card {
+        padding: 1rem;
+        font-size: 0.9rem;
+    }
+
+    .duel-question-card h3 {
+        font-size: 1.1rem;
+    }
+
+    .duel-card {
+        padding: 1rem;
+        border-radius: 1rem;
+    }
+
+    .score-item .pts {
+        font-size: 1.5rem;
+    }
+
+    .score-item .name {
+        font-size: 0.85rem;
+        letter-spacing: 1px;
+    }
+}

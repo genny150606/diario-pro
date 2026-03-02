@@ -6,6 +6,23 @@
 :root {
     --sidebar-width: 80px;
     --sidebar-width-expanded: 250px;
+    --bottom-nav-height: 0px;
+
+    /* BREAKPOINT SYSTEM — CANONICAL
+       xs:   < 360px  (22.5em)  — tiny phones
+       sm:   360–480px          — small phones
+       md:   480–768px          — medium phones
+       lg:   768–1024px         — tablet portrait
+       xl:   1024–1280px        — tablet landscape
+       2xl:  1280–1440px        — laptops
+       3xl:  1440px+            — large desktops
+    */
+}
+
+@media (max-width: 47.9375em) {
+    :root {
+        --bottom-nav-height: 56px;
+    }
 }
 
 /* ── HEADER — DYNAMIC ISLAND ( pill style ) ── */
@@ -402,8 +419,10 @@
 .content {
     max-width: 1200px;
     margin: 0 auto;
-    padding: 8.5rem 2rem 4rem;
+    padding: 8.5rem 2rem calc(2rem + var(--bottom-nav-height));
     width: 100%;
+    min-width: 0;
+    overflow-x: hidden;
 }
 
 /* ── UI ELEMENTS ── */

@@ -216,8 +216,56 @@
     gap: 0.5rem;
 }
 
-@media (max-width: 600px) {
+/* ── RESPONSIVE ── */
+@media (max-width: 47.9375em) {
+    .pomodoro-container-card {
+        padding: 1.5rem;
+        border-radius: 1.5rem;
+        gap: 1.5rem;
+    }
+
+    .pomodoro-timer-display {
+        width: 220px;
+        height: 220px;
+    }
+
+    .timer-digits {
+        font-size: clamp(3rem, 15vw, 4.5rem);
+    }
+
+    .pomodoro-actions {
+        gap: 0.8rem;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
+    .pomo-action-btn.start,
+    .pomo-action-btn.pause {
+        padding: 0.8rem 2rem;
+    }
+
+    .pomo-action-btn.reset {
+        width: 50px;
+        height: 50px;
+    }
+
     .pomo-settings-grid {
         grid-template-columns: 1fr;
+    }
+
+    .pomodoro-mode-selector {
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+}
+
+@media (max-width: 22.4375em) {
+    .pomodoro-timer-display {
+        width: 180px;
+        height: 180px;
+    }
+
+    .timer-digits {
+        font-size: 2.8rem;
     }
 }

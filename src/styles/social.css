@@ -221,7 +221,7 @@
     color: #000;
 }
 
-@media (max-width: 768px) {
+@media (max-width: 47.9375em) {
     .activity-card {
         flex-direction: column;
         align-items: flex-start;
@@ -230,5 +230,24 @@
     .activity-actions {
         width: 100%;
         justify-content: flex-end;
+    }
+
+    .friends-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1rem;
+    }
+
+    .friend-card {
+        padding: 1rem;
+    }
+}
+
+@media (max-width: 22.4375em) {
+    .activity-card {
+        padding: 1rem;
+    }
+
+    .friends-grid {
+        grid-template-columns: 1fr;
     }
 }

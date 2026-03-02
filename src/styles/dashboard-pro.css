@@ -668,14 +668,14 @@
     }
 }
 
-@media (max-width: 600px) {
+@media (max-width: 47.9375em) {
     .dash-hero {
         flex-direction: column;
         align-items: flex-start;
     }
 
     .dash-hero-text h1 {
-        font-size: 1.5rem;
+        font-size: clamp(1.3rem, 4vw, 2rem);
     }
 
     .dash-stats-row {
@@ -697,5 +697,24 @@
 
     .heatmap-grid {
         grid-template-columns: repeat(6, 1fr);
+    }
+
+    .dash-hero-stats {
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+}
+
+@media (max-width: 22.4375em) {
+    .dash-hero-text h1 {
+        font-size: 1.2rem;
+    }
+
+    .dash-mini-stat {
+        padding: 0.3rem 0.7rem;
+    }
+
+    .dash-stat-value {
+        font-size: 1rem;
     }
 }

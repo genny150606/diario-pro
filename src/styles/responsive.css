@@ -1,14 +1,164 @@
-/* ── GLOBAL MOBILE SAFETY ── */
-* {
-    max-width: 100vw;
+/* ============================================
+   STUDYJOURNAL PRO — RESPONSIVE SYSTEM
+   Single source of truth for all responsive overrides
+   ============================================
+
+   BREAKPOINT SYSTEM (Canonical):
+     xs:   < 22.5em  (360px)  — tiny phones
+     sm:   22.5em–30em        — small phones
+     md:   30em–48em          — medium phones
+     lg:   48em–64em          — tablet portrait
+     xl:   64em–80em          — tablet landscape / small laptop
+     2xl:  80em+              — desktop
+     3xl:  90em+              — large desktop
+   ============================================ */
+
+/* ═══ 0. ZOOM RESILIENCE ═══ */
+html {
+    overflow-x: hidden;
+    scroll-behavior: smooth;
 }
 
-/* ── MOBILE HEADER — COMPACT MODE (< 768px) ── */
-@media (max-width: 767px) {
+body {
+    overflow-x: hidden;
+    min-width: 320px;
+}
 
-    /* Hide logo text, keep only icon */
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+    min-width: 0;
+}
+
+img,
+svg,
+video,
+canvas,
+iframe {
+    max-width: 100%;
+    height: auto;
+}
+
+input,
+textarea,
+select,
+button {
+    max-width: 100%;
+}
+
+/* ═══ 1. TINY PHONES < 22.5em (360px) ═══ */
+@media (max-width: 22.4375em) {
+    .app-header {
+        height: 52px;
+        padding: 0 0.6rem;
+        border-radius: 2rem;
+        width: calc(100% - 1rem);
+        top: 0.4rem;
+    }
+
+    .logo-img {
+        width: 20px;
+        height: 20px;
+    }
+
+    .content {
+        padding-top: 4.5rem;
+        padding-left: 0.5rem;
+        padding-right: 0.5rem;
+    }
+
+    .dashboard-pro {
+        padding: 0.25rem;
+    }
+
+    .dash-hero {
+        flex-direction: column;
+        gap: 0.8rem;
+    }
+
+    .dash-hero-stats {
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+
+    .dash-mini-stat {
+        padding: 0.3rem 0.7rem;
+    }
+
+    .stats-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .dash-card {
+        padding: 1rem;
+        border-radius: 12px;
+    }
+
+    .dash-card h3,
+    .section-title {
+        font-size: 1.3rem;
+    }
+
+    .pomodoro-timer-display {
+        font-size: 3rem;
+    }
+}
+
+/* ═══ 2. SMALL PHONES 22.5em–30em (360px–480px) ═══ */
+@media (min-width: 22.5em) and (max-width: 29.9375em) {
+    .content {
+        padding-top: 5rem;
+        padding-left: 0.75rem;
+        padding-right: 0.75rem;
+    }
+
+    .stats-grid {
+        grid-template-columns: 1fr 1fr;
+        gap: 0.8rem;
+    }
+
+    .dashboard-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+}
+
+/* ═══ 3. MEDIUM PHONES 30em–48em (480px–768px) ═══ */
+@media (min-width: 30em) and (max-width: 47.9375em) {
+    .app-header {
+        width: calc(100% - 1.5rem);
+        top: 0.6rem;
+    }
+
+    .content {
+        padding: 5rem 0.875rem 5rem;
+        width: 100%;
+        max-width: 100%;
+    }
+
+    .dashboard-grid {
+        grid-template-columns: 1fr;
+    }
+
+    #geminiChat {
+        bottom: calc(4rem + env(safe-area-inset-bottom, 0px));
+        right: 1rem;
+    }
+
+    #geminiChatWindow {
+        width: calc(100vw - 1rem);
+        max-height: 75vh;
+        bottom: calc(4.5rem + env(safe-area-inset-bottom, 0px));
+    }
+}
+
+/* ═══ COMBINED MOBILE (< 48em / 768px) ═══ */
+@media (max-width: 47.9375em) {
+
+    /* Header compact */
     .logo span {
-        display: none !important;
+        display: none;
     }
 
     .logo {
@@ -16,101 +166,87 @@
         flex-shrink: 0;
     }
 
-    /* Hide email text and chevron in account button */
     #userEmailDisplay {
-        display: none !important;
+        display: none;
     }
 
     .account-btn .chevron {
-        display: none !important;
+        display: none;
     }
 
     .account-btn {
         padding: 0.3rem 0.5rem;
         font-size: 0;
-        /* Hide any leftover text */
         width: 2rem;
         height: 2rem;
         border-radius: 50%;
         justify-content: center;
     }
 
-    /* Show a user icon instead of text */
     .account-btn::before {
         content: '👤';
         font-size: 1rem;
     }
 
-    /* Hamburger: show on mobile */
     .menu-toggle {
-        display: flex !important;
+        display: flex;
         flex-shrink: 0;
         font-size: 1rem;
     }
 
-    /* Compact right section */
     .header-right {
-        gap: 0.3rem !important;
+        gap: 0.3rem;
     }
 
     .header-right-actions {
         gap: 0.2rem;
     }
 
-    /* Theme toggle visible */
     #themeToggle {
         opacity: 1;
         font-size: 1rem;
     }
-}
 
-/* Medium mobile: re-show logo text */
-@media (min-width: 480px) and (max-width: 767px) {
-    .logo span {
-        display: inline !important;
-    }
-}
-
-@media (max-width: 1023px) {
-    .hero h1 {
-        font-size: clamp(2rem, 8vw, 2.8rem) !important;
-    }
-
-    .stats-grid {
-        grid-template-columns: 1fr;
-        gap: 1.5rem;
-    }
-
+    /* Content */
     .content {
-        padding: 8.5rem 1rem 4rem !important;
+        padding: 5rem 1rem 5rem;
         width: 100%;
         max-width: 100%;
     }
 
-    /* Modal Responsiveness */
-    .calendar-container {
-        padding: 1.5rem !important;
-        max-width: 90vw !important;
-        border-radius: 1.5rem !important;
+    /* Dashboard */
+    .dashboard-grid {
+        grid-template-columns: 1fr;
+        gap: 1.25rem;
     }
 
-    /* xpToast adjustment for mobile nav */
+    /* Stats */
+    .stats-grid {
+        grid-template-columns: 1fr 1fr;
+        gap: 0.8rem;
+    }
+
+    .stat-card {
+        padding: 1rem;
+    }
+
+    /* Calendar */
+    .calendar-container {
+        padding: 1.5rem;
+        max-width: 90vw;
+        border-radius: 1.5rem;
+    }
+
+    /* XP toast above bottom nav */
     .xp-toast {
-        bottom: 7.5rem !important;
-        /* Above the bottom bar */
+        bottom: 7.5rem;
         width: calc(100% - 3rem);
         max-width: 350px;
     }
 
-    /* Better Grid Stacking */
-    .dashboard-grid {
-        grid-template-columns: 1fr !important;
-        gap: 1.25rem !important;
-    }
-
-    /* Lift chatbot FAB above the mobile bottom nav */
+    /* Chatbot above bottom nav */
     #geminiChat {
-        bottom: 7rem !important;
+        bottom: 7rem;
         right: 1rem;
         z-index: 10003;
     }
@@ -119,75 +255,202 @@
         width: calc(100vw - 2rem);
         max-height: 70vh;
     }
+
+    /* Cards */
+    .task-item-card,
+    .note-item-card,
+    .grade-item-card {
+        padding: 1rem;
+        border-radius: 1rem;
+    }
+
+    .grade-item-content,
+    .note-item-header {
+        flex-wrap: wrap;
+        gap: 0.6rem;
+    }
+
+    /* Hero landing */
+    .hero-actions-radical {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    /* Prevent iOS auto-zoom on input focus */
+    input[type="text"],
+    input[type="email"],
+    input[type="password"],
+    input[type="search"],
+    input[type="number"],
+    input[type="tel"],
+    input[type="url"],
+    textarea,
+    select {
+        font-size: max(16px, 1rem);
+    }
 }
 
-/* ── TABLET (48em–63.9375em / 768px–1023px) ── */
+/* Re-show logo text on medium mobile */
+@media (min-width: 30em) and (max-width: 47.9375em) {
+    .logo span {
+        display: inline;
+    }
+}
+
+/* ═══ 4. TABLET PORTRAIT 48em–64em (768px–1024px) ═══ */
 @media (min-width: 48em) and (max-width: 63.9375em) {
+    .app-header {
+        width: calc(100% - 2.5rem);
+        max-width: 900px;
+    }
+
     .content {
-        padding: 8.5rem var(--space-6, 1.5rem) 4rem;
+        padding: 5.5rem 1.5rem 2rem;
+    }
+
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .dashboard-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .dash-hero {
+        flex-direction: row;
+    }
+
+    #geminiChatWindow {
+        width: 380px;
+    }
+
+    /* Landing features 2-col → 1-col */
+    #features .bento-header~div {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+        padding: 0 1rem;
+    }
+
+    #features .bento-header~div>div:first-child {
+        grid-template-columns: repeat(3, 1fr);
+    }
+
+    /* Landing pricing */
+    #pricing>div:last-child {
+        grid-template-columns: 1fr;
+    }
+
+    /* Landing testimonials */
+    #testimonials>div:nth-child(2) {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+/* ═══ 5. TABLET LANDSCAPE / SMALL LAPTOP 64em–80em (1024px–1280px) ═══ */
+@media (min-width: 64em) and (max-width: 79.9375em) {
+    .content {
+        padding: 5.5rem 2rem 2rem;
     }
 
     .stats-grid {
         grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
     }
 
-    .hero h1 {
-        font-size: var(--font-size-3xl);
+    .dashboard-grid {
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
     }
-}
-
-/* ── DESKTOP (64em+ / 1024px) ── */
-@media (min-width: 64em) {
 
     header,
     .mobile-top-bar {
-        padding: 0 var(--space-8);
-        gap: var(--space-8);
-    }
-
-    .content {
-        padding: 8.5rem var(--space-10, 2.5rem) 4rem;
-    }
-
-    .stats-grid {
-        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-    }
-
-    .hero h1 {
-        font-size: var(--font-size-4xl);
-    }
-
-    .hero p {
-        font-size: var(--font-size-lg);
+        padding: 0 var(--space-8, 2rem);
+        gap: var(--space-8, 2rem);
     }
 }
 
-/* ── LARGE DESKTOP (90em+ / 1440px) ── */
+/* ═══ 6. LARGE DESKTOP 90em+ (1440px) ═══ */
 @media (min-width: 90em) {
     .content {
         max-width: 67.5rem;
-        /* 1080px */
     }
 }
 
-/* ── SAFE AREA (iOS notch) ── */
+/* ═══ 7. SAFE AREA (iOS/Android notch) ═══ */
 @supports (padding: env(safe-area-inset-bottom)) {
-    .app-footer {
-        padding-bottom: calc(var(--space-8) + env(safe-area-inset-bottom));
+
+    .app-footer,
+    .mobile-bottom-nav {
+        padding-bottom: calc(0.5rem + env(safe-area-inset-bottom));
+    }
+
+    .sidebar {
+        padding-bottom: env(safe-area-inset-bottom);
+    }
+
+    .app-header {
+        top: max(0.75rem, env(safe-area-inset-top));
     }
 
     #geminiChat {
-        bottom: calc(var(--space-6) + env(safe-area-inset-bottom));
+        bottom: calc(var(--fab-bottom, 2rem) + env(safe-area-inset-bottom));
+    }
+
+    .modal-container,
+    .calendar-container,
+    .auth-modal {
+        padding-bottom: env(safe-area-inset-bottom);
     }
 }
 
-/* ── PRINT ── */
+@supports (padding: env(safe-area-inset-left)) {
+    .sidebar {
+        padding-left: env(safe-area-inset-left);
+    }
+
+    .content {
+        padding-right: max(1rem, env(safe-area-inset-right));
+    }
+}
+
+/* ═══ 8. HIGH DPI / RETINA ═══ */
+@media (-webkit-min-device-pixel-ratio: 2),
+(min-resolution: 192dpi) {
+    .app-header {
+        border-bottom-width: 0.5px;
+    }
+}
+
+/* ═══ 9. PREFERS REDUCED MOTION ═══ */
+@media (prefers-reduced-motion: reduce) {
+
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+
+    .sidebar-item,
+    .dash-card,
+    .hover-lift,
+    .hover-glow,
+    .animate-fade-in,
+    .reveal-section,
+    .orb {
+        transition: none !important;
+        animation: none !important;
+    }
+}
+
+/* ═══ 10. PRINT ═══ */
 @media print {
 
     header,
     .sidebar,
     #geminiChat,
-    .app-footer {
+    .app-footer,
+    .aurora-bg {
         display: none;
     }
 

@@ -633,7 +633,7 @@
 }
 
 /* Responsive */
-@media (max-width: 600px) {
+@media (max-width: 47.9375em) {
 
     .classroom-container,
     .classroom-view {
@@ -656,6 +656,26 @@
     .podium-name {
         font-size: 0.7rem;
         max-width: 80px;
+    }
+
+    .classroom-tabs {
+        flex-wrap: wrap;
+    }
+
+    .classroom-tab {
+        font-size: 0.75rem;
+        padding: 0.5rem;
+    }
+
+    .classroom-view-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+}
+
+@media (min-width: 48em) and (max-width: 63.9375em) {
+    .classrooms-grid {
+        grid-template-columns: repeat(2, 1fr);
     }
 }
 

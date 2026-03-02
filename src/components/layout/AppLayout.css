@@ -4,6 +4,7 @@
    ============================================ */
 
 .app-layout {
+    min-height: 100svh;
     min-height: 100vh;
     position: relative;
     overflow: hidden;
@@ -74,26 +75,24 @@
 }
 
 /* ── MOBILE ── */
-@media (max-width: 767px) {
+@media (max-width: 47.9375em) {
     .content {
-        padding: 1rem !important;
+        min-width: 0;
+        max-width: 100%;
+        overflow-x: hidden;
     }
 
     .stats-grid {
-        grid-template-columns: 1fr 1fr !important;
-        gap: 0.8rem !important;
+        grid-template-columns: 1fr 1fr;
+        gap: 0.8rem;
     }
 
     .stat-card {
-        padding: 1rem !important;
-    }
-
-    .hero h1 {
-        font-size: 1.8rem !important;
+        padding: 1rem;
     }
 
     .chatbot-fab {
-        bottom: 1rem;
+        bottom: calc(1rem + var(--bottom-nav-height, 56px));
         right: 1rem;
         width: 48px;
         height: 48px;
@@ -102,7 +101,7 @@
     .chatbot-window {
         width: calc(100vw - 1.5rem);
         right: 0.75rem;
-        bottom: 4rem;
+        bottom: calc(4rem + var(--bottom-nav-height, 56px));
         max-height: 65vh;
     }
 }

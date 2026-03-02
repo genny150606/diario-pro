@@ -1054,43 +1054,111 @@ body {
     }
 }
 
-@media (max-width: 480px) {
+/* ═══ LANDING RESPONSIVE — Complete ═══ */
+
+/* Tiny phones */
+@media (max-width: 22.4375em) {
     .ds-value {
-        font-size: 1.6rem;
+        font-size: 1.4rem;
+    }
+
+    .hero-title-main {
+        font-size: clamp(1.4rem, 5vw, 2rem) !important;
+    }
+
+    .hero-description {
+        font-size: 0.85rem;
+    }
+
+    .bento-card {
+        padding: 1rem;
+        border-radius: 1rem;
+    }
+
+    .hero-floating-preview {
+        display: none;
     }
 }
 
-/* ═══ LANDING RESPONSIVE — New Sections ═══ */
-@media (max-width: 768px) {
+/* Mobile (< 768px) */
+@media (max-width: 47.9375em) {
+    .ds-value {
+        font-size: 1.6rem;
+    }
+
+    /* Hero */
+    .hero-actions-radical {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .hero-floating-preview {
+        transform: none !important;
+        animation: none !important;
+    }
+
+    /* Bento grid */
+    .bento-grid {
+        grid-template-columns: 1fr;
+    }
 
     /* Features 2-col → 1-col */
     #features .bento-header~div {
-        grid-template-columns: 1fr !important;
-        gap: 1.5rem !important;
-        padding: 0 1rem !important;
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+        padding: 0 1rem;
     }
 
     #features .bento-header~div>div:first-child {
-        grid-template-columns: repeat(3, 1fr) !important;
+        grid-template-columns: repeat(3, 1fr);
     }
 
     /* Pricing stack */
     #pricing>div:last-child {
-        grid-template-columns: 1fr !important;
+        grid-template-columns: 1fr;
     }
 
     /* Testimonials */
     #testimonials>div:nth-child(2) {
-        grid-template-columns: 1fr !important;
+        grid-template-columns: 1fr;
     }
 
     #testimonials>div:last-child {
-        grid-template-columns: 1fr 1fr !important;
+        grid-template-columns: 1fr 1fr;
     }
 
-    /* Hero value props */
-    .hero-actions-radical {
+    /* Nav */
+    .dynamic-island-nav .nav-links a {
+        font-size: 0.8rem;
+    }
+
+    /* Footer */
+    .landing-footer {
         flex-direction: column;
-        align-items: center;
+        text-align: center;
+        gap: 1rem;
+        padding: 2rem 1rem;
+    }
+
+    .footer-links {
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 0.75rem;
+    }
+}
+
+/* Tablet portrait */
+@media (min-width: 48em) and (max-width: 63.9375em) {
+    .bento-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    #features .bento-header~div {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+    }
+
+    #testimonials>div:nth-child(2) {
+        grid-template-columns: 1fr 1fr;
     }
 }

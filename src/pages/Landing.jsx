@@ -5,7 +5,7 @@ import { supabase } from '../lib/supabase'
 import AuthModal from '../components/auth/AuthModal'
 import {
     Sparkles, BrainCircuit, Swords, Calendar, Activity, Home,
-    ArrowRight, Star, Check, X as XIcon, ChevronDown, Zap, Users, Trophy, Shield, BarChart3
+    ArrowRight, Star, Check, X as XIcon, ChevronDown, Zap, Users, Trophy, Shield, BarChart3, MessageSquare, Send
 } from 'lucide-react'
 import '../styles/home.css'
 
@@ -67,6 +67,11 @@ export default function Landing() {
     const { user } = useAuth()
     const navigate = useNavigate()
     const [showAuth, setShowAuth] = useState(false)
+    const [showReviewModal, setShowReviewModal] = useState(false)
+    const [reviews, setReviews] = useState([])
+    const [newReviewText, setNewReviewText] = useState('')
+    const [newReviewRating, setNewReviewRating] = useState(5)
+    const [submittingReview, setSubmittingReview] = useState(false)
     const [stats, setStats] = useState({ notes: '...', flashcards: '...', duels: '...', users: '...' })
     const [gdprAccepted, setGdprAccepted] = useState(() => localStorage.getItem('gdpr_accepted') === 'true')
     const [openFaq, setOpenFaq] = useState(0)
@@ -74,13 +79,48 @@ export default function Landing() {
 
     const ctaAction = () => user ? navigate('/app') : setShowAuth(true)
 
-    // Load live stats
+    const handleLeaveReviewClick = () => {
+        if (!user) {
+            setShowAuth(true)
+        } else {
+            setShowReviewModal(true)
+        }
+    }
+
+    const submitReview = async () => {
+        if (newReviewText.length < 10) return alert('La recensione deve avere almeno 10 caratteri.')
+        setSubmittingReview(true)
+        try {
+            const { error } = await supabase.from('reviews').insert({
+                user_id: user.id,
+                rating: newReviewRating,
+                content: newReviewText,
+                is_approved: true
+            })
+            if (error) throw error
+
+            const { data: revs } = await supabase.from('reviews_with_users').select('*').order('created_at', { ascending: false }).limit(6)
+            if (revs) setReviews(revs)
+
+            setShowReviewModal(false)
+            setNewReviewText('')
+            setNewReviewRating(5)
+        } catch (err) {
+            console.error('Error post review:', err)
+            alert('Errore pubblicazione recensione. Riprova più tardi.')
+        } finally {
+            setSubmittingReview(false)
+        }
+    }
+
+    // Load live stats and reviews
     useEffect(() => {
         let mounted = true
         async function loadStats() {
             try {
                 const { count: users } = await supabase.from('users_data').select('*', { count: 'exact', head: true })
                 const { data: siteStats } = await supabase.from('site_stats').select('key, value')
+                const { data: revs } = await supabase.from('reviews_with_users').select('*').order('created_at', { ascending: false }).limit(6)
                 if (mounted) {
                     setStats({
                         notes: siteStats?.find(s => s.key === 'total_notes_created')?.value || '0',
@@ -88,6 +128,7 @@ export default function Landing() {
                         duels: siteStats?.find(s => s.key === 'total_duels_completed')?.value || '0',
                         users: users || '0'
                     })
+                    if (revs) setReviews(revs)
                 }
             } catch { if (mounted) setStats({ notes: '0', flashcards: '0', duels: '0', users: '0' }) }
         }
@@ -205,7 +246,7 @@ export default function Landing() {
                     <div className="nav-links">
                         <Link to="/" className="nav-home-icon" title="Home"><Home size={20} /></Link>
                         <a href="#features">Features</a>
-                        <a href="#testimonials">Recensioni</a>
+                        <a href="#reviews">Recensioni</a>
                         <a href="#pricing">Prezzi</a>
                     </div>
                     <button className="nav-cta" onClick={ctaAction} style={{ border: 'none', cursor: 'pointer' }}>
@@ -361,43 +402,47 @@ export default function Landing() {
                     </div>
                 </section>
 
-                {/* ═══ SOCIAL PROOF ═══ */}
-                <section id="testimonials" className="reveal-section" data-nav-color="rgba(10, 10, 12, 0.85)" style={{ padding: '6rem 2rem', maxWidth: 1200, margin: '0 auto' }}>
+                {/* ═══ REVIEWS ═══ */}
+                <section id="reviews" className="reviews-section reveal-section" data-nav-color="rgba(10, 10, 12, 0.85)" style={{ padding: '6rem 2rem', maxWidth: 1200, margin: '0 auto' }}>
                     <div className="feature-large-text" style={{ textAlign: 'center', marginBottom: '3rem' }}>
                         <h2 className="section-title-minimal">
-                            Amato dagli <span className="muted" style={{ background: 'linear-gradient(135deg, #6495FF, #FFD700)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>studenti.</span>
+                            Più di 1000 studenti <br /><span className="muted" style={{ background: 'linear-gradient(135deg, #6495FF, #FFD700)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>studiano con noi.</span>
                         </h2>
                         <p style={{ fontSize: 16, color: 'rgba(255,255,255,0.5)', maxWidth: 500, margin: '1rem auto 0' }}>
                             Leggi cosa dicono gli studenti che hanno trasformato il loro modo di studiare
                         </p>
+                        <button onClick={handleLeaveReviewClick} style={{ marginTop: '2rem', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', padding: '10px 20px', borderRadius: 20, cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: 8 }}>
+                            <MessageSquare size={16} /> Lascia Recensione Reale
+                        </button>
                     </div>
 
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '1.5rem' }}>
-                        {TESTIMONIALS.map((t, i) => (
-                            <div key={i} style={{
-                                background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(100,150,255,0.15)',
-                                borderRadius: 14, padding: '1.5rem', transition: 'all 0.3s'
-                            }}
-                                className="hover-glow"
-                            >
-                                <div style={{ display: 'flex', gap: 4, marginBottom: '0.8rem' }}>
-                                    {[...Array(t.rating)].map((_, j) => (
-                                        <Star key={j} size={14} fill="#FFD700" color="#FFD700" />
-                                    ))}
-                                </div>
-                                <p style={{ fontSize: 14, lineHeight: 1.6, color: 'rgba(255,255,255,0.8)', marginBottom: '1rem', fontStyle: 'italic' }}>
-                                    &ldquo;{t.quote}&rdquo;
-                                </p>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                                    <span style={{ fontSize: 28 }}>{t.avatar}</span>
-                                    <div>
-                                        <div style={{ fontSize: 14, fontWeight: 600 }}>{t.name}</div>
-                                        <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.4)' }}>{t.school}</div>
+                    {reviews.length > 0 ? (
+                        <div className="reviews-masonry">
+                            {reviews.map((t, i) => (
+                                <div key={i} className="review-card hover-glow" style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(100,150,255,0.15)', borderRadius: 14, padding: '1.5rem', breakInside: 'avoid', marginBottom: '1.5rem', transition: 'all 0.3s' }}>
+                                    <div className="review-stars" style={{ display: 'flex', gap: 4, marginBottom: '0.8rem' }}>
+                                        {[...Array(t.rating || 5)].map((_, j) => (
+                                            <Star key={j} size={14} fill="#FFD700" color="#FFD700" />
+                                        ))}
+                                    </div>
+                                    <div className="review-content" style={{ fontSize: 14, lineHeight: 1.6, color: 'rgba(255,255,255,0.8)', marginBottom: '1rem', fontStyle: 'italic' }}>"{t.content}"</div>
+                                    <div className="review-author" style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                                        <div className="review-avatar" style={{ width: 40, height: 40, borderRadius: '50%', background: 'linear-gradient(135deg, #6495FF, #8264FF)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: 16 }}>{t.name ? t.name.charAt(0).toUpperCase() : 'S'}</div>
+                                        <div>
+                                            <div style={{ fontWeight: 700, fontSize: '0.95rem' }}>{t.name} {t.surname ? t.surname.charAt(0) + '.' : ''}</div>
+                                            <div style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.85rem' }}>@{t.username}</div>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                        ))}
-                    </div>
+                            ))}
+                        </div>
+                    ) : (
+                        <div style={{ textAlign: 'center', padding: '4rem', marginTop: '2rem', borderRadius: 24, border: '1px dashed rgba(255,255,255,0.1)' }}>
+                            <Star size={48} color="rgba(255,255,255,0.2)" style={{ marginBottom: '1rem', margin: '0 auto' }} />
+                            <h3 style={{ fontSize: 24 }}>Nessuna recensione</h3>
+                            <p style={{ color: 'rgba(255,255,255,0.5)' }}>Sii il primo a scrivere la storia di Diario Pro!</p>
+                        </div>
+                    )}
 
                     {/* Stats Bar */}
                     <div style={{
@@ -559,6 +604,53 @@ export default function Landing() {
             )}
 
             {showAuth && <AuthModal onClose={() => setShowAuth(false)} />}
+
+            {showReviewModal && (
+                <div className="auth-overlay" onClick={(e) => e.target === e.currentTarget && setShowReviewModal(false)} style={{ zIndex: 100001, padding: '1rem', background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(20px)', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'fixed', inset: 0 }}>
+                    <div className="auth-card" style={{ width: '100%', maxWidth: 500, padding: '3rem', background: 'rgba(15, 15, 18, 1)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 32, boxShadow: '0 40px 100px rgba(0,0,0,0.8)' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2.5rem' }}>
+                            <h3 style={{ fontSize: 28, fontWeight: 900, margin: 0, fontFamily: 'Outfit' }}>Lascia Feedback</h3>
+                            <button onClick={() => setShowReviewModal(false)} style={{ background: 'rgba(255,255,255,0.05)', borderRadius: '50%', width: 40, height: 40, display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', cursor: 'pointer', transition: 'all 0.3s' }}><XIcon size={20} /></button>
+                        </div>
+
+                        <div style={{ marginBottom: '2rem' }}>
+                            <label style={{ display: 'block', marginBottom: '1rem', fontSize: 13, color: 'rgba(255,255,255,0.5)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: 1 }}>Il tuo voto reale</label>
+                            <div style={{ display: 'flex', gap: 12 }}>
+                                {[1, 2, 3, 4, 5].map(star => (
+                                    <Star
+                                        key={star}
+                                        size={36}
+                                        fill={star <= newReviewRating ? "#FFD700" : "transparent"}
+                                        color={star <= newReviewRating ? "#FFD700" : "rgba(255,255,255,0.2)"}
+                                        style={{ cursor: 'pointer', transition: 'all 0.2s', filter: star <= newReviewRating ? 'drop-shadow(0 0 15px rgba(255, 215, 0, 0.4))' : 'none' }}
+                                        onClick={() => setNewReviewRating(star)}
+                                    />
+                                ))}
+                            </div>
+                        </div>
+
+                        <div style={{ marginBottom: '3rem' }}>
+                            <label style={{ display: 'block', marginBottom: '1rem', fontSize: 13, color: 'rgba(255,255,255,0.5)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: 1 }}>La tua opinione</label>
+                            <textarea
+                                value={newReviewText}
+                                onChange={e => setNewReviewText(e.target.value)}
+                                placeholder="Racconta come questo software ha impattato sul tuo studio..."
+                                style={{ width: '100%', boxSizing: 'border-box', minHeight: 160, background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 20, padding: '1.5rem', color: '#fff', fontSize: 16, fontFamily: 'inherit', resize: 'vertical', outline: 'none', transition: 'border-color 0.3s' }}
+                                onFocus={(e) => e.target.style.borderColor = '#6495FF'}
+                                onBlur={(e) => e.target.style.borderColor = 'rgba(255,255,255,0.1)'}
+                            />
+                        </div>
+
+                        <button
+                            disabled={submittingReview || newReviewText.length < 10}
+                            onClick={submitReview}
+                            style={{ width: '100%', padding: '1.4rem', background: 'linear-gradient(135deg, #6495FF, #8264FF)', color: '#fff', fontSize: 18, fontWeight: 800, borderRadius: 20, border: 'none', cursor: submittingReview || newReviewText.length < 10 ? 'not-allowed' : 'pointer', opacity: submittingReview || newReviewText.length < 10 ? 0.5 : 1, display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 10, transition: 'all 0.3s', boxShadow: '0 10px 30px rgba(100,150,255,0.4)' }}
+                        >
+                            {submittingReview ? 'Pubblicazione...' : <><Send size={20} /> Condividi Feedback</>}
+                        </button>
+                    </div>
+                </div>
+            )}
         </div>
     )
 }

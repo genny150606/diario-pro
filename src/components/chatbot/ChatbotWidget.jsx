@@ -32,56 +32,30 @@ export default function ChatbotWidget() {
         }
     }, [isOpen])
 
-    // Nuclear Spline Watermark Removal
+    // Safe Spline Watermark Removal
     useEffect(() => {
         const removeWatermark = () => {
             const viewers = document.querySelectorAll('spline-viewer');
             viewers.forEach(viewer => {
                 if (viewer && viewer.shadowRoot) {
-                    // NUCLEAR OPTION: Hide EVERYTHING in shadowRoot that isn't the canvas
-                    const allElements = viewer.shadowRoot.querySelectorAll('*');
-                    allElements.forEach(el => {
-                        // If it's not the canvas, and it's not a root container we need, hide it
-                        if (el.tagName !== 'CANVAS' && el.tagName !== 'SLOT' && el.tagName !== 'STYLE') {
-                            // We check if it's part of the UI/Logo by its typical positioning or name
-                            const isLogo = el.id?.toLowerCase().includes('logo') ||
-                                el.id?.toLowerCase().includes('badge') ||
-                                el.className?.toString().toLowerCase().includes('spline') ||
-                                el.tagName === 'A';
-
-                            // Even if it doesn't match the name, if it's positioned like a logo, kill it
-                            const style = window.getComputedStyle(el);
-                            const isPositionedLikeLogo = (style.position === 'absolute' && (style.bottom !== 'auto' || style.top !== 'auto'));
-
-                            if (isLogo || isPositionedLikeLogo) {
-                                el.style.display = 'none';
-                                el.style.setProperty('display', 'none', 'important');
-                                el.style.opacity = '0';
-                                el.style.setProperty('opacity', '0', 'important');
-                                el.style.pointerEvents = 'none';
-                                el.style.visibility = 'hidden';
-                            }
+                    const logoLink = viewer.shadowRoot.querySelector('#logo');
+                    if (logoLink) {
+                        logoLink.style.display = 'none';
+                        logoLink.style.opacity = '0';
+                    }
+                    const aTags = viewer.shadowRoot.querySelectorAll('a');
+                    aTags.forEach(a => {
+                        if (a.href && a.href.includes('spline.design')) {
+                            a.style.display = 'none';
+                            a.style.opacity = '0';
                         }
                     });
                 }
             });
         };
 
-        let pollCount = 0;
-        const maxPolls = 30; // 30 polls instead of 200
-        const pollInterval = 150; // 150ms instead of 100ms
-
-        const interval = setInterval(() => {
-            removeWatermark();
-            pollCount++;
-            if (pollCount >= maxPolls) {
-                clearInterval(interval);
-            }
-        }, pollInterval);
-
-        return () => {
-            clearInterval(interval);
-        };
+        const interval = setInterval(removeWatermark, 1000);
+        return () => clearInterval(interval);
     }, []);
 
     const formatMarkdown = (text) => {

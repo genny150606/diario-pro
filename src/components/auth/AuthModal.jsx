@@ -100,172 +100,160 @@ export default function AuthModal({ onClose }) {
     }
 
     return (
-        <div className="auth-overlay" onClick={(e) => e.target === e.currentTarget && onClose()}>
-            <div className="auth-card-premium">
-                <button className="auth-close-btn" onClick={onClose}><X size={20} /></button>
+        <div className="auth-overlay-ultra" onClick={(e) => e.target === e.currentTarget && onClose()}>
+            <div className="auth-card-ultra">
+                <button className="auth-close-btn-ultra" onClick={onClose}><X size={20} /></button>
 
                 {/* LEFT SIDE: FORM AREA */}
-                <div className="auth-form-section">
-                    <div className="auth-header">
-                        <img src="/favicon.png" alt="Logo" className="auth-mobile-logo" />
-                        <h2>{tab === 'login' ? 'Bentornato' : 'Inizia Ora'}</h2>
-                        <p>{tab === 'login' ? 'Accedi al tuo Diario di Studio AI' : 'Unisciti alla rivoluzione dello studio'}</p>
+                <div className="auth-form-side-ultra">
+                    <div className="auth-header-ultra">
+                        <div className="auth-logo-badge">
+                            <img src="/favicon.png" alt="StudyJournal Pro Logo" />
+                            <span>Diario Pro</span>
+                        </div>
+                        <h2>{tab === 'login' ? 'Bentornato.' : 'Unisciti a Noi.'}</h2>
+                        <p>{tab === 'login' ? 'Accedi al tuo ecosistema di studio potenziato dall\'IA' : 'Il tuo viaggio verso l\'eccellenza accademica inizia qui'}</p>
                     </div>
 
-                    <div className="auth-tabs">
+                    <div className="auth-tabs-ultra">
                         <button
-                            className={`auth-tab ${tab === 'login' ? 'active' : ''}`}
+                            className={`auth-tab-ultra ${tab === 'login' ? 'active' : ''}`}
                             onClick={() => { setTab('login'); setError(''); setSuccess('') }}
                         >
-                            Accedi
+                            <User size={16} /> Login
                         </button>
                         <button
-                            className={`auth-tab ${tab === 'signup' ? 'active' : ''}`}
+                            className={`auth-tab-ultra ${tab === 'signup' ? 'active' : ''}`}
                             onClick={() => { setTab('signup'); setError(''); setSuccess('') }}
                         >
-                            Registrati
+                            <Sparkles size={16} /> Registrati
                         </button>
                     </div>
 
-                    {error && (
-                        <div className="auth-message auth-error">
-                            <AlertCircle size={16} />
-                            <span>{error}</span>
-                        </div>
-                    )}
-                    {success && (
-                        <div className="auth-message auth-success">
-                            <CheckCircle2 size={16} />
-                            <span>{success}</span>
-                        </div>
-                    )}
+                    <div className="auth-messages-wrapper">
+                        {error && (
+                            <div className="auth-alert error">
+                                <AlertCircle size={16} /> <span>{error}</span>
+                            </div>
+                        )}
+                        {success && (
+                            <div className="auth-alert success">
+                                <CheckCircle2 size={16} /> <span>{success}</span>
+                            </div>
+                        )}
+                    </div>
 
-                    {/* LOGIN FORM */}
-                    {tab === 'login' && (
-                        <form className="auth-form fade-in" onSubmit={handleLogin}>
-                            <div className="auth-input-group">
-                                <Mail className="auth-input-icon" size={18} />
-                                <input
-                                    type="email" id="authEmail" className="auth-input"
-                                    placeholder="la-tua-email@esempio.com"
-                                    value={loginEmail} onChange={e => setLoginEmail(e.target.value)}
-                                    autoComplete="email"
-                                    required
-                                />
-                            </div>
-                            <div className="auth-input-group">
-                                <Lock className="auth-input-icon" size={18} />
-                                <input
-                                    type="password" id="authPassword" className="auth-input"
-                                    placeholder="••••••••"
-                                    value={loginPassword} onChange={e => setLoginPassword(e.target.value)}
-                                    autoComplete="current-password"
-                                    required
-                                />
-                            </div>
-                            <button type="submit" className="auth-submit-btn" disabled={loading}>
-                                <span>{loading ? 'Caricamento...' : 'Accedi all\'App'}</span>
-                                {!loading && <ArrowRight size={18} />}
-                            </button>
-                        </form>
-                    )}
+                    <div className="auth-forms-container">
+                        {tab === 'login' && (
+                            <form className="auth-form-ultra fade-in" onSubmit={handleLogin}>
+                                <div className="input-group-ultra">
+                                    <div className="input-icon-ultra"><Mail size={18} /></div>
+                                    <input
+                                        type="email" id="authEmail" className="input-ultra"
+                                        placeholder="Email istituzionale o personale"
+                                        value={loginEmail} onChange={e => setLoginEmail(e.target.value)}
+                                        autoComplete="email" required
+                                    />
+                                </div>
+                                <div className="input-group-ultra">
+                                    <div className="input-icon-ultra"><Lock size={18} /></div>
+                                    <input
+                                        type="password" id="authPassword" className="input-ultra"
+                                        placeholder="••••••••"
+                                        value={loginPassword} onChange={e => setLoginPassword(e.target.value)}
+                                        autoComplete="current-password" required
+                                    />
+                                </div>
+                                <button type="submit" className="submit-btn-ultra" disabled={loading}>
+                                    {loading ? <span className="loader-pulse"></span> : <><span>Accedi all'Avatar</span> <ArrowRight size={18} /></>}
+                                </button>
+                            </form>
+                        )}
 
-                    {/* SIGNUP FORM */}
-                    {tab === 'signup' && (
-                        <form className="auth-form fade-in" onSubmit={handleSignup}>
-                            <div className="auth-fields-row">
-                                <div className="auth-input-group">
-                                    <User className="auth-input-icon" size={18} />
+                        {tab === 'signup' && (
+                            <form className="auth-form-ultra fade-in" onSubmit={handleSignup}>
+                                <div className="input-row-ultra">
+                                    <div className="input-group-ultra">
+                                        <div className="input-icon-ultra"><User size={18} /></div>
+                                        <input
+                                            type="text" id="signupName" className="input-ultra"
+                                            placeholder="Nome"
+                                            value={signupName} onChange={e => setSignupName(e.target.value)} required
+                                        />
+                                    </div>
+                                    <div className="input-group-ultra">
+                                        <div className="input-icon-ultra"><User size={18} /></div>
+                                        <input
+                                            type="text" id="signupSurname" className="input-ultra"
+                                            placeholder="Cognome"
+                                            value={signupSurname} onChange={e => setSignupSurname(e.target.value)} required
+                                        />
+                                    </div>
+                                </div>
+                                <div className="input-row-ultra">
+                                    <div className="input-group-ultra">
+                                        <div className="input-icon-ultra"><Calendar size={18} /></div>
+                                        <input
+                                            type="number" id="signupAge" className="input-ultra"
+                                            placeholder="Età" min="10" max="99"
+                                            value={signupAge} onChange={e => setSignupAge(e.target.value)} required
+                                        />
+                                    </div>
+                                    <div className="input-group-ultra">
+                                        <div className="input-icon-ultra"><AtSign size={18} /></div>
+                                        <input
+                                            type="text" id="signupUsername" className="input-ultra"
+                                            placeholder="Username"
+                                            value={signupUsername} onChange={e => setSignupUsername(e.target.value)} required
+                                        />
+                                    </div>
+                                </div>
+                                <div className="input-group-ultra">
+                                    <div className="input-icon-ultra"><Mail size={18} /></div>
                                     <input
-                                        type="text" id="signupName" className="auth-input"
-                                        placeholder="Nome"
-                                        value={signupName} onChange={e => setSignupName(e.target.value)}
-                                        required
+                                        type="email" id="signupEmail" className="input-ultra"
+                                        placeholder="tua@email.com"
+                                        value={signupEmail} onChange={e => setSignupEmail(e.target.value)}
+                                        autoComplete="email" required
                                     />
                                 </div>
-                                <div className="auth-input-group">
-                                    <User className="auth-input-icon" size={18} />
+                                <div className="input-group-ultra">
+                                    <div className="input-icon-ultra"><Lock size={18} /></div>
                                     <input
-                                        type="text" id="signupSurname" className="auth-input"
-                                        placeholder="Cognome"
-                                        value={signupSurname} onChange={e => setSignupSurname(e.target.value)}
-                                        required
+                                        type="password" id="signupPassword" className="input-ultra"
+                                        placeholder="Min. 6 caratteri"
+                                        value={signupPassword} onChange={e => setSignupPassword(e.target.value)}
+                                        autoComplete="new-password" required
                                     />
                                 </div>
-                            </div>
-                            <div className="auth-fields-row">
-                                <div className="auth-input-group">
-                                    <Calendar className="auth-input-icon" size={18} />
-                                    <input
-                                        type="number" id="signupAge" className="auth-input"
-                                        placeholder="Età (es. 16)" min="10" max="99"
-                                        value={signupAge} onChange={e => setSignupAge(e.target.value)}
-                                        required
-                                    />
-                                </div>
-                                <div className="auth-input-group">
-                                    <AtSign className="auth-input-icon" size={18} />
-                                    <input
-                                        type="text" id="signupUsername" className="auth-input"
-                                        placeholder="Username"
-                                        value={signupUsername} onChange={e => setSignupUsername(e.target.value)}
-                                        required
-                                    />
-                                </div>
-                            </div>
-                            <div className="auth-input-group">
-                                <Mail className="auth-input-icon" size={18} />
-                                <input
-                                    type="email" id="signupEmail" className="auth-input"
-                                    placeholder="la-tua-email@esempio.com"
-                                    value={signupEmail} onChange={e => setSignupEmail(e.target.value)}
-                                    autoComplete="email"
-                                    required
-                                />
-                            </div>
-                            <div className="auth-input-group">
-                                <Lock className="auth-input-icon" size={18} />
-                                <input
-                                    type="password" id="signupPassword" className="auth-input"
-                                    placeholder="Password (min. 6 car.)"
-                                    value={signupPassword} onChange={e => setSignupPassword(e.target.value)}
-                                    autoComplete="new-password"
-                                    required
-                                />
-                            </div>
-                            <button type="submit" className="auth-submit-btn" disabled={loading}>
-                                <span>{loading ? 'Creazione...' : 'Crea Account AI'}</span>
-                                {!loading && <Sparkles size={18} />}
-                            </button>
-                        </form>
-                    )}
+                                <button type="submit" className="submit-btn-ultra" disabled={loading}>
+                                    {loading ? <span className="loader-pulse"></span> : <><span>Forgia Profilo</span> <Sparkles size={18} /></>}
+                                </button>
+                            </form>
+                        )}
+                    </div>
                 </div>
 
                 {/* RIGHT SIDE: VISUAL SHOWCASE */}
-                <div className="auth-showcase-section">
-                    <div className="auth-glow-orb orb-1"></div>
-                    <div className="auth-glow-orb orb-2"></div>
+                <div className="auth-visual-ultra">
+                    <div className="visual-blur-orb orb-primary"></div>
+                    <div className="visual-blur-orb orb-secondary"></div>
+                    <div className="visual-blur-orb orb-tertiary"></div>
 
-                    <div className="auth-showcase-content">
-                        <div className="auth-glass-badge">
-                            <Sparkles size={14} className="text-accent" />
-                            <span>Potenziato dall'Intelligenza Artificiale</span>
+                    <div className="visual-content-ultra">
+                        <div className="visual-glass-card">
+                            <Sparkles size={24} color="#FFD700" />
+                            <h3>L'arma segreta dei top performer.</h3>
+                            <p>Oltre 1.000 studenti hanno già rivoluzionato il loro metodo di studio.</p>
+                            <div className="visual-features">
+                                <div className="visual-feature-item">
+                                    <Brain size={16} /> <span>Flashcard Generate dall'IA</span>
+                                </div>
+                                <div className="visual-feature-item">
+                                    <Users size={16} /> <span>Duelli e Stanze Multiplayer</span>
+                                </div>
+                            </div>
                         </div>
-                        <h3>Studia in modo più intelligente, non più duramente.</h3>
-                        <ul className="auth-features-list">
-                            <li>
-                                <div className="feature-icon-wrapper"><Brain size={18} /></div>
-                                <span>Generazione Flashcard e Quiz dai tuoi appunti</span>
-                            </li>
-                            <li>
-                                <div className="feature-icon-wrapper"><Users size={18} /></div>
-                                <span>Stanze di Studio virtuali con Pomodoro Timer</span>
-                            </li>
-                            <li>
-                                <div className="feature-icon-wrapper"><CheckCircle2 size={18} /></div>
-                                <span>Sistema XP, Avatar e Classifiche in tempo reale</span>
-                            </li>
-                        </ul>
                     </div>
                 </div>
 

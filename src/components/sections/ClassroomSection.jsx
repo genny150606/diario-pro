@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react'
 import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../hooks/useAuth'
 import { useData } from '../../hooks/useData'
+import { useToast } from '../../contexts/ToastContext'
 import {
     GraduationCap, Plus, Users, Trophy, BookOpen,
     ArrowLeft, Copy, Check, Zap, FileText,
@@ -75,6 +76,7 @@ function LeaderboardTab({ members }) {
 
 function ResourcesTab({ classroomId, userId }) {
     const { data: userData } = useData()
+    const { addToast } = useToast()
     const [resources, setResources] = useState([])
     const [showShareModal, setShowShareModal] = useState(false)
     const [loading, setLoading] = useState(true)
@@ -128,7 +130,7 @@ function ResourcesTab({ classroomId, userId }) {
 
             if (insertErr) {
                 console.error('[CLASSROOM] Share error:', insertErr)
-                alert('Errore nella condivisione: ' + insertErr.message)
+                addToast('Errore nella condivisione: ' + insertErr.message, 'error')
                 return
             }
 
@@ -137,7 +139,7 @@ function ResourcesTab({ classroomId, userId }) {
             setShowShareModal(false)
         } catch (err) {
             console.error('[CLASSROOM] Share exception:', err)
-            alert('Errore: ' + err.message)
+            addToast('Errore: ' + err.message, 'error')
         }
     }
 

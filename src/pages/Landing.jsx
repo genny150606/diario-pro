@@ -1,4 +1,4 @@
-import { useState, useEffect, lazy, Suspense } from 'react'
+import { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
 import { supabase } from '../lib/supabase'
@@ -16,6 +16,8 @@ export default function Landing() {
     const [gdprAccepted, setGdprAccepted] = useState(
         () => localStorage.getItem('gdpr_accepted') === 'true'
     )
+
+
 
     // Load homepage stats
     useEffect(() => {
@@ -246,16 +248,37 @@ export default function Landing() {
                         </div>
 
                         <div className="hero-floating-preview">
-                            <Suspense fallback={<div className="preview-loading-skeleton" />}>
-                                <div className="spline-hero-container">
-                                    <spline-viewer
-                                        url="https://prod.spline.design/rPFH4AfknG-ptPHN/scene.splinecode"
-                                        loading-alpha="0"
-                                        hint-background-color="transparent"
-                                        alpha="true"
-                                    ></spline-viewer>
+                            <div className="hero-stats-dashboard">
+                                <div className="stats-dashboard-header">
+                                    <div className="dashboard-pulse" />
+                                    <span>Live Platform Stats</span>
                                 </div>
-                            </Suspense>
+                                <div className="stats-dashboard-grid">
+                                    <div className="dashboard-stat-card" style={{ '--accent': '#6495FF' }}>
+                                        <div className="ds-icon">👥</div>
+                                        <div className="ds-value">{stats.users}</div>
+                                        <div className="ds-label">Studenti Attivi</div>
+                                    </div>
+                                    <div className="dashboard-stat-card" style={{ '--accent': '#30D158' }}>
+                                        <div className="ds-icon">📝</div>
+                                        <div className="ds-value">{stats.notes}</div>
+                                        <div className="ds-label">Note Create</div>
+                                    </div>
+                                    <div className="dashboard-stat-card" style={{ '--accent': '#FFD60A' }}>
+                                        <div className="ds-icon">🃏</div>
+                                        <div className="ds-value">{stats.flashcards}</div>
+                                        <div className="ds-label">Flashcard</div>
+                                    </div>
+                                    <div className="dashboard-stat-card" style={{ '--accent': '#FF6B9D' }}>
+                                        <div className="ds-icon">⚔️</div>
+                                        <div className="ds-value">{stats.duels}</div>
+                                        <div className="ds-label">Sfide Completate</div>
+                                    </div>
+                                </div>
+                                <div className="stats-dashboard-footer">
+                                    <span className="footer-dot" /> Aggiornamento in tempo reale
+                                </div>
+                            </div>
                             <div className="floating-badge badge-1"><BrainCircuit size={18} /> AI Flashcards</div>
                             <div className="floating-badge badge-2"><Swords size={18} /> Duel Arena</div>
                             <div className="floating-badge badge-3"><Sparkles size={18} /> Knowledge Hub</div>

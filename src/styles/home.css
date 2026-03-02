@@ -879,3 +879,183 @@ body {
     gap: 1rem;
     box-shadow: 0 1rem 3rem rgba(0, 0, 0, 0.5);
 }
+
+/* ── HERO STATS DASHBOARD ── */
+.hero-stats-dashboard {
+    width: 100%;
+    background: rgba(15, 15, 20, 0.6);
+    backdrop-filter: blur(40px) saturate(180%);
+    -webkit-backdrop-filter: blur(40px) saturate(180%);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 2rem;
+    padding: 2.5rem;
+    position: relative;
+    overflow: hidden;
+}
+
+.hero-stats-dashboard::before {
+    content: '';
+    position: absolute;
+    inset: -1px;
+    border-radius: 2rem;
+    padding: 1px;
+    background: linear-gradient(135deg, rgba(100, 150, 255, 0.3), transparent 40%, transparent 60%, rgba(255, 107, 157, 0.3));
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
+}
+
+.stats-dashboard-header {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 2rem;
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.15rem;
+    color: rgba(255, 255, 255, 0.4);
+}
+
+.dashboard-pulse {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #30D158;
+    box-shadow: 0 0 12px rgba(48, 209, 88, 0.6);
+    animation: livePulse 2s ease-in-out infinite;
+}
+
+@keyframes livePulse {
+
+    0%,
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+
+    50% {
+        opacity: 0.5;
+        transform: scale(0.8);
+    }
+}
+
+.stats-dashboard-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1.5rem;
+}
+
+.dashboard-stat-card {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 1.2rem;
+    padding: 1.8rem 1.5rem;
+    text-align: center;
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    position: relative;
+    overflow: hidden;
+}
+
+.dashboard-stat-card::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: var(--accent);
+    opacity: 0.6;
+    transition: opacity 0.3s, height 0.3s;
+}
+
+.dashboard-stat-card:hover {
+    background: rgba(255, 255, 255, 0.06);
+    transform: translateY(-6px);
+    border-color: rgba(255, 255, 255, 0.12);
+    box-shadow: 0 1.5rem 3rem rgba(0, 0, 0, 0.3), 0 0 40px color-mix(in srgb, var(--accent) 15%, transparent);
+}
+
+.dashboard-stat-card:hover::after {
+    opacity: 1;
+    height: 4px;
+}
+
+.ds-icon {
+    font-size: 2rem;
+    margin-bottom: 1rem;
+    filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.1));
+}
+
+.ds-value {
+    font-family: 'Outfit', sans-serif;
+    font-size: 2.8rem;
+    font-weight: 800;
+    line-height: 1;
+    color: #fff;
+    margin-bottom: 0.5rem;
+    letter-spacing: -2px;
+    background: linear-gradient(to bottom, #fff, rgba(255, 255, 255, 0.6));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.ds-label {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1rem;
+    color: rgba(255, 255, 255, 0.35);
+    font-weight: 600;
+}
+
+.stats-dashboard-footer {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    justify-content: center;
+    margin-top: 2rem;
+    font-size: 0.75rem;
+    color: rgba(255, 255, 255, 0.25);
+    font-weight: 500;
+}
+
+.footer-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #30D158;
+    animation: livePulse 2s ease-in-out infinite;
+}
+
+@media (max-width: 768px) {
+    .stats-dashboard-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1rem;
+    }
+
+    .hero-stats-dashboard {
+        padding: 1.5rem;
+        border-radius: 1.5rem;
+    }
+
+    .ds-value {
+        font-size: 2rem;
+    }
+
+    .ds-icon {
+        font-size: 1.5rem;
+    }
+
+    .dashboard-stat-card {
+        padding: 1.2rem 1rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .ds-value {
+        font-size: 1.6rem;
+    }
+}

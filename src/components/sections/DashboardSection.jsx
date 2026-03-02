@@ -6,6 +6,7 @@ import {
     Target, Edit3, Clock, Zap, TrendingUp, CalendarDays, BookOpen,
     Timer, Trophy, Headphones, ArrowRight, Flame, Star, Brain
 } from 'lucide-react'
+import Skeleton from '../ui/Skeleton'
 import '../../styles/dashboard-pro.css'
 
 const QUOTES = [
@@ -40,7 +41,7 @@ function ActivityHeatmap({ tasks, notes, flashcards }) {
             d.setDate(d.getDate() - i)
             const dateStr = d.toISOString().split('T')[0]
 
-            // Count activity: tasks completed, notes created, flashcards created on this day
+            // Count activity
             let count = 0
                 ; (tasks || []).forEach(t => {
                     if (t.completed && t.completedAt?.startsWith(dateStr)) count++
@@ -116,13 +117,13 @@ function QuickActions() {
 }
 
 export default function DashboardSection() {
-    const { data, getWeightedAverage, getCompletedTasksCount } = useData()
+    const { data, loading, getWeightedAverage, getCompletedTasksCount } = useData()
     const navigate = useNavigate()
+    const [greeting, setGreeting] = useState(getGreeting())
 
     const average = getWeightedAverage()
     const completedTasks = getCompletedTasksCount()
     const quote = useMemo(() => QUOTES[Math.floor(Math.random() * QUOTES.length)], [])
-    const greeting = useMemo(() => getGreeting(), [])
 
     const xp = data.stats?.xp || 0
     const level = data.stats?.level || 1
@@ -146,8 +147,6 @@ export default function DashboardSection() {
 
     const totalNotes = (data.notes || []).length
     const totalFlashcards = (data.flashcards || []).length
-    const totalTasks = (data.tasks || []).length
-    const totalGrades = (data.grades || []).length
     const streak = data.stats?.currentStreak || 0
     const totalPomodoros = data.stats?.pomodoros || 0
 
@@ -163,215 +162,234 @@ export default function DashboardSection() {
     ]
 
     return (
-        <section className="dashboard-pro">
-            {/* Hero Section */}
-            <div className="dash-hero">
-                <div className="dash-hero-text">
-                    <h1>
-                        <span className="dash-greeting-emoji">{greeting.emoji}</span>
-                        <span className="dash-greeting-text">{greeting.text}!</span>
-                    </h1>
-                    <p className="dash-quote">&ldquo;{quote}&rdquo;</p>
-                </div>
-                <div className="dash-hero-stats">
-                    <div className="dash-mini-stat">
-                        <Flame size={16} className="dash-mini-icon fire" />
-                        <span className="dash-mini-value">{streak}</span>
-                        <span className="dash-mini-label">streak</span>
-                    </div>
-                    <div className="dash-mini-stat">
-                        <Star size={16} className="dash-mini-icon star" />
-                        <span className="dash-mini-value">{xp}</span>
-                        <span className="dash-mini-label">XP</span>
+        <section className="dashboard-section animate-fade-in">
+            <header className="dashboard-header">
+                <div className="header-greeting">
+                    <span className="greeting-emoji">{greeting.emoji}</span>
+                    <div className="greeting-text">
+                        <h1>{greeting.text}, Genny</h1>
+                        <p>{quote}</p>
                     </div>
                 </div>
-            </div>
+            </header>
 
-            {/* Top Row: XP + Quick Actions */}
-            <div className="dash-top-row stagger-item stagger-1">
-                {/* XP Card */}
-                <div className="dash-card dash-xp-card">
-                    <div className="xp-ring-wrapper">
-                        <svg width="100" height="100" viewBox="0 0 100 100">
-                            <circle cx="50" cy="50" r={radius} fill="transparent"
-                                className="xp-ring-bg" strokeWidth="6" />
-                            <circle cx="50" cy="50" r={radius} fill="transparent"
-                                stroke="url(#xpGrad)" strokeWidth="6"
-                                strokeDasharray={circumference} strokeDashoffset={strokeDashoffset}
-                                className="xp-ring-progress" />
-                            <defs>
-                                <linearGradient id="xpGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                                    <stop offset="0%" stopColor="#38F9D7" />
-                                    <stop offset="100%" stopColor="#4FACFE" />
-                                </linearGradient>
-                            </defs>
-                        </svg>
-                        <div className="xp-ring-center">
-                            <span className="xp-level-num">{level}</span>
-                            <span className="xp-level-label">LVL</span>
+            {loading ? (
+                <div className="dashboard-skeletons" style={{ padding: '0 1.5rem' }}>
+                    <div className="card glass-card" style={{ height: '180px', marginBottom: '1.5rem', padding: '1.5rem' }}>
+                        <Skeleton variant="title" style={{ width: '40%' }} />
+                        <Skeleton variant="text" style={{ width: '90%', marginTop: '1rem' }} />
+                        <div style={{ display: 'flex', gap: '1rem', marginTop: '1.5rem' }}>
+                            <Skeleton variant="avatar" />
+                            <Skeleton variant="avatar" />
+                            <Skeleton variant="avatar" />
                         </div>
                     </div>
-                    <div className="xp-info">
-                        <div className="xp-title-row">
-                            <h3>{levelTitle}</h3>
-                            <span className="xp-badge"><Trophy size={12} /> Lv.{level}</span>
+                    <div className="dashboard-main-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
+                        <div className="card glass-card" style={{ height: '300px' }}>
+                            <Skeleton variant="title" style={{ width: '50%', margin: '1.5rem' }} />
+                            <Skeleton variant="card" style={{ margin: '0 1.5rem', height: '180px' }} />
                         </div>
-                        <div className="xp-bar-wrapper">
-                            <div className="xp-bar-fill" style={{ width: `${progress}%` }} />
-                        </div>
-                        <div className="xp-detail">
-                            <span>{xp} / {nextLevelXP} XP</span>
-                            <span className="xp-remaining">{nextLevelXP - xp} XP rimasti</span>
+                        <div className="card glass-card" style={{ height: '300px' }}>
+                            <Skeleton variant="title" style={{ width: '50%', margin: '1.5rem' }} />
+                            {[1, 2, 3].map(i => (
+                                <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '1rem', margin: '0 1.5rem 1rem' }}>
+                                    <Skeleton style={{ width: '20px', height: '20px' }} />
+                                    <Skeleton variant="text" style={{ flex: 1, marginBottom: 0 }} />
+                                </div>
+                            ))}
                         </div>
                     </div>
                 </div>
-
-                {/* Quick Actions */}
-                <div className="dash-card dash-quick-card">
-                    <h3><Zap size={18} /> Azioni Rapide</h3>
-                    <QuickActions />
-                </div>
-            </div>
-
-            {/* Stats Grid */}
-            <div className="dash-stats-row stagger-item stagger-2">
-                <div className="dash-stat-item">
-                    <div className="dash-stat-icon" style={{ '--stat-color': '#4FACFE' }}><FileText size={20} /></div>
-                    <div className="dash-stat-content">
-                        <span className="dash-stat-value">{totalNotes}</span>
-                        <span className="dash-stat-label">Note</span>
-                    </div>
-                </div>
-                <div className="dash-stat-item">
-                    <div className="dash-stat-icon" style={{ '--stat-color': '#A78BFA' }}><Layers size={20} /></div>
-                    <div className="dash-stat-content">
-                        <span className="dash-stat-value">{totalFlashcards}</span>
-                        <span className="dash-stat-label">Flashcard</span>
-                    </div>
-                </div>
-                <div className="dash-stat-item">
-                    <div className="dash-stat-icon" style={{ '--stat-color': '#38F9D7' }}><CheckCircle size={20} /></div>
-                    <div className="dash-stat-content">
-                        <span className="dash-stat-value">{completedTasks}</span>
-                        <span className="dash-stat-label">Completati</span>
-                    </div>
-                </div>
-                <div className="dash-stat-item">
-                    <div className="dash-stat-icon" style={{ '--stat-color': '#F59E0B' }}><GraduationCap size={20} /></div>
-                    <div className="dash-stat-content">
-                        <span className="dash-stat-value">{average || '—'}</span>
-                        <span className="dash-stat-label">Media</span>
-                    </div>
-                </div>
-                <div className="dash-stat-item">
-                    <div className="dash-stat-icon" style={{ '--stat-color': '#FF6B6B' }}><Timer size={20} /></div>
-                    <div className="dash-stat-content">
-                        <span className="dash-stat-value">{totalPomodoros}</span>
-                        <span className="dash-stat-label">Pomodori</span>
-                    </div>
-                </div>
-            </div>
-
-            {/* Middle Row: Heatmap + Deadlines */}
-            <div className="dash-mid-row stagger-item stagger-3">
-                {/* Activity Heatmap */}
-                <div className="dash-card dash-heatmap-card">
-                    <h3><CalendarDays size={18} /> Attività Ultimi 30 Giorni</h3>
-                    <ActivityHeatmap tasks={data.tasks} notes={data.notes} flashcards={data.flashcards} />
-                </div>
-
-                {/* Upcoming Deadlines */}
-                <div className="dash-card dash-deadlines-card">
-                    <div className="dash-card-header">
-                        <h3><Clock size={18} /> Prossime Scadenze</h3>
-                        <button className="dash-see-all" onClick={() => navigate('/app/tasks')}>
-                            Vedi tutto <ArrowRight size={14} />
-                        </button>
-                    </div>
-                    <div className="deadlines-list">
-                        {upcomingTasks.length === 0 ? (
-                            <div className="dash-empty-state">
-                                <CheckCircle size={28} />
-                                <span>Nessuna scadenza a breve! 🎉</span>
+            ) : (
+                <div className="dashboard-main-grid">
+                    {/* Top Row: XP + Quick Actions */}
+                    <div className="dash-top-row stagger-item stagger-1">
+                        <div className="dash-card dash-xp-card">
+                            <div className="xp-ring-wrapper">
+                                <svg width="100" height="100" viewBox="0 0 100 100">
+                                    <circle cx="50" cy="50" r={radius} fill="transparent"
+                                        className="xp-ring-bg" strokeWidth="6" />
+                                    <circle cx="50" cy="50" r={radius} fill="transparent"
+                                        stroke="url(#xpGrad)" strokeWidth="6"
+                                        strokeDasharray={circumference} strokeDashoffset={strokeDashoffset}
+                                        className="xp-ring-progress" />
+                                    <defs>
+                                        <linearGradient id="xpGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                                            <stop offset="0%" stopColor="#38F9D7" />
+                                            <stop offset="100%" stopColor="#4FACFE" />
+                                        </linearGradient>
+                                    </defs>
+                                </svg>
+                                <div className="xp-ring-center">
+                                    <span className="xp-level-num">{level}</span>
+                                    <span className="xp-level-label">LVL</span>
+                                </div>
                             </div>
-                        ) : upcomingTasks.map(t => {
-                            const daysLeft = Math.ceil((new Date(t.dueDate) - new Date()) / 86400000)
-                            const urgency = daysLeft <= 1 ? 'urgent' : daysLeft <= 3 ? 'soon' : 'normal'
-                            return (
-                                <div key={t.id} className={`deadline-item ${urgency}`}>
-                                    <div className="deadline-dot" />
-                                    <div className="deadline-info">
-                                        <span className="deadline-name">{t.description}</span>
-                                        <span className="deadline-date">
-                                            {daysLeft <= 0 ? 'Scaduto!' : daysLeft === 1 ? 'Domani' : `Fra ${daysLeft} giorni`}
-                                        </span>
-                                    </div>
+                            <div className="xp-info">
+                                <div className="xp-title-row">
+                                    <h3>{levelTitle}</h3>
+                                    <span className="xp-badge"><Trophy size={12} /> Lv.{level}</span>
                                 </div>
-                            )
-                        })}
+                                <div className="xp-bar-wrapper">
+                                    <div className="xp-bar-fill" style={{ width: `${progress}%` }} />
+                                </div>
+                                <div className="xp-detail">
+                                    <span>{xp} / {nextLevelXP} XP</span>
+                                    <span className="xp-remaining">{nextLevelXP - xp} XP rimasti</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="dash-card dash-quick-card">
+                            <h3><Zap size={18} /> Azioni Rapide</h3>
+                            <QuickActions />
+                        </div>
+                    </div>
+
+                    {/* Stats Grid */}
+                    <div className="dash-stats-row stagger-item stagger-2">
+                        <div className="dash-stat-item">
+                            <div className="dash-stat-icon" style={{ '--stat-color': '#4FACFE' }}><FileText size={20} /></div>
+                            <div className="dash-stat-content">
+                                <span className="dash-stat-value">{totalNotes}</span>
+                                <span className="dash-stat-label">Note</span>
+                            </div>
+                        </div>
+                        <div className="dash-stat-item">
+                            <div className="dash-stat-icon" style={{ '--stat-color': '#A78BFA' }}><Layers size={20} /></div>
+                            <div className="dash-stat-content">
+                                <span className="dash-stat-value">{totalFlashcards}</span>
+                                <span className="dash-stat-label">Flashcard</span>
+                            </div>
+                        </div>
+                        <div className="dash-stat-item">
+                            <div className="dash-stat-icon" style={{ '--stat-color': '#38F9D7' }}><CheckCircle size={20} /></div>
+                            <div className="dash-stat-content">
+                                <span className="dash-stat-value">{completedTasks}</span>
+                                <span className="dash-stat-label">Completati</span>
+                            </div>
+                        </div>
+                        <div className="dash-stat-item">
+                            <div className="dash-stat-icon" style={{ '--stat-color': '#F59E0B' }}><GraduationCap size={20} /></div>
+                            <div className="dash-stat-content">
+                                <span className="dash-stat-value">{average || '—'}</span>
+                                <span className="dash-stat-label">Media</span>
+                            </div>
+                        </div>
+                        <div className="dash-stat-item">
+                            <div className="dash-stat-icon" style={{ '--stat-color': '#FF6B6B' }}><Timer size={20} /></div>
+                            <div className="dash-stat-content">
+                                <span className="dash-stat-value">{totalPomodoros}</span>
+                                <span className="dash-stat-label">Pomodori</span>
+                            </div>
+                        </div>
+                        <div className="dash-stat-item">
+                            <div className="dash-stat-icon" style={{ '--stat-color': '#F43F5E' }}><Flame size={20} /></div>
+                            <div className="dash-stat-content">
+                                <span className="dash-stat-value">{streak}</span>
+                                <span className="dash-stat-label">Streak</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Middle Row: Heatmap + Deadlines */}
+                    <div className="dash-mid-row stagger-item stagger-3">
+                        <div className="dash-card dash-heatmap-card">
+                            <h3><CalendarDays size={18} /> Attività Ultimi 30 Giorni</h3>
+                            <ActivityHeatmap tasks={data.tasks} notes={data.notes} flashcards={data.flashcards} />
+                        </div>
+
+                        <div className="dash-card dash-deadlines-card">
+                            <div className="dash-card-header">
+                                <h3><Clock size={18} /> Prossime Scadenze</h3>
+                                <button className="dash-see-all" onClick={() => navigate('/app/tasks')}>
+                                    Vedi tutto <ArrowRight size={14} />
+                                </button>
+                            </div>
+                            <div className="deadlines-list">
+                                {upcomingTasks.length === 0 ? (
+                                    <div className="dash-empty-state">
+                                        <CheckCircle size={28} />
+                                        <span>Nessuna scadenza a breve! 🎉</span>
+                                    </div>
+                                ) : upcomingTasks.map(t => {
+                                    const daysLeft = Math.ceil((new Date(t.dueDate) - new Date()) / 86400000)
+                                    const urgency = daysLeft <= 1 ? 'urgent' : daysLeft <= 3 ? 'soon' : 'normal'
+                                    return (
+                                        <div key={t.id} className={`deadline-item ${urgency}`}>
+                                            <div className="deadline-dot" />
+                                            <div className="deadline-info">
+                                                <span className="deadline-name">{t.description}</span>
+                                                <span className="deadline-date">
+                                                    {daysLeft <= 0 ? 'Scaduto!' : daysLeft === 1 ? 'Domani' : `Fra ${daysLeft} giorni`}
+                                                </span>
+                                            </div>
+                                        </div>
+                                    )
+                                })}
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Bottom Row: Grades Trend + Challenges */}
+                    <div className="dash-bottom-row stagger-item stagger-4">
+                        <div className="dash-card dash-grades-card">
+                            <h3><BarChart3 size={18} /> Trend Voti</h3>
+                            {recentGrades.length === 0 ? (
+                                <div className="dash-empty-state">
+                                    <TrendingUp size={28} />
+                                    <span>Nessun voto inserito</span>
+                                </div>
+                            ) : (
+                                <div className="grades-chart">
+                                    {[...recentGrades].reverse().map((g, i) => {
+                                        const val = parseFloat(g.value) || 0
+                                        const pct = Math.min(100, (val / 10) * 100)
+                                        return (
+                                            <div key={i} className="grade-bar-wrapper">
+                                                <span className="grade-bar-value">{val}</span>
+                                                <div className="grade-bar-track">
+                                                    <div className={`grade-bar-fill ${val >= 6 ? 'pass' : 'fail'}`}
+                                                        style={{ height: `${pct}%` }} />
+                                                </div>
+                                                <span className="grade-bar-label">{g.subject?.substring(0, 3) || '—'}</span>
+                                            </div>
+                                        )
+                                    })}
+                                </div>
+                            )}
+                        </div>
+
+                        <div className="dash-card dash-challenges-card">
+                            <h3><Target size={18} /> Sfide del Giorno</h3>
+                            <div className="challenges-list">
+                                {challenges.map((c, i) => {
+                                    const done = c.current >= c.goal
+                                    const pct = Math.min(100, (c.current / c.goal) * 100)
+                                    return (
+                                        <div key={i} className={`challenge-row ${done ? 'done' : ''}`}>
+                                            <div className="challenge-icon" style={{ background: `${c.color}15`, color: c.color }}>
+                                                <c.icon size={18} />
+                                            </div>
+                                            <div className="challenge-body">
+                                                <div className="challenge-top">
+                                                    <span className="challenge-name">{c.name}</span>
+                                                    <span className="challenge-reward">+{c.reward} XP</span>
+                                                </div>
+                                                <div className="challenge-bar">
+                                                    <div className="challenge-bar-fill" style={{ width: `${pct}%`, background: c.color }} />
+                                                </div>
+                                                <span className="challenge-progress">{Math.min(c.current, c.goal)}/{c.goal}</span>
+                                            </div>
+                                            {done && <CheckCircle size={18} className="challenge-check" />}
+                                        </div>
+                                    )
+                                })}
+                            </div>
+                        </div>
                     </div>
                 </div>
-            </div>
-
-            {/* Bottom Row: Grades Trend + Challenges */}
-            <div className="dash-bottom-row stagger-item stagger-4">
-                {/* Grades Chart */}
-                <div className="dash-card dash-grades-card">
-                    <h3><BarChart3 size={18} /> Trend Voti</h3>
-                    {recentGrades.length === 0 ? (
-                        <div className="dash-empty-state">
-                            <TrendingUp size={28} />
-                            <span>Nessun voto inserito</span>
-                        </div>
-                    ) : (
-                        <div className="grades-chart">
-                            {[...recentGrades].reverse().map((g, i) => {
-                                const val = parseFloat(g.value) || 0
-                                const pct = Math.min(100, (val / 10) * 100)
-                                return (
-                                    <div key={i} className="grade-bar-wrapper">
-                                        <span className="grade-bar-value">{val}</span>
-                                        <div className="grade-bar-track">
-                                            <div className={`grade-bar-fill ${val >= 6 ? 'pass' : 'fail'}`}
-                                                style={{ height: `${pct}%` }} />
-                                        </div>
-                                        <span className="grade-bar-label">{g.subject?.substring(0, 3) || '—'}</span>
-                                    </div>
-                                )
-                            })}
-                        </div>
-                    )}
-                </div>
-
-                {/* Daily Challenges */}
-                <div className="dash-card dash-challenges-card">
-                    <h3><Target size={18} /> Sfide del Giorno</h3>
-                    <div className="challenges-list">
-                        {challenges.map((c, i) => {
-                            const done = c.current >= c.goal
-                            const pct = Math.min(100, (c.current / c.goal) * 100)
-                            return (
-                                <div key={i} className={`challenge-row ${done ? 'done' : ''}`}>
-                                    <div className="challenge-icon" style={{ background: `${c.color}15`, color: c.color }}>
-                                        <c.icon size={18} />
-                                    </div>
-                                    <div className="challenge-body">
-                                        <div className="challenge-top">
-                                            <span className="challenge-name">{c.name}</span>
-                                            <span className="challenge-reward">+{c.reward} XP</span>
-                                        </div>
-                                        <div className="challenge-bar">
-                                            <div className="challenge-bar-fill" style={{ width: `${pct}%`, background: c.color }} />
-                                        </div>
-                                        <span className="challenge-progress">{Math.min(c.current, c.goal)}/{c.goal}</span>
-                                    </div>
-                                    {done && <CheckCircle size={18} className="challenge-check" />}
-                                </div>
-                            )
-                        })}
-                    </div>
-                </div>
-            </div>
+            )}
         </section>
     )
 }

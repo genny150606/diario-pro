@@ -5,8 +5,12 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 import multer from "multer";
 import { AccessToken } from "livekit-server-sdk";
 
-// Carica variabili d'ambiente (per lo sviluppo locale, su Vercel usa quelle già iniettate)
-dotenv.config();
+// Carica variabili d'ambiente dalla cartella api/ (dove si trova questo file)
+import { fileURLToPath } from 'url';
+import { dirname, resolve } from 'path';
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+dotenv.config({ path: resolve(__dirname, '.env') });
 
 // Caricamento dinamico per moduli legacy CommonJS come pdf-parse
 let pdfParse = null;

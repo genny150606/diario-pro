@@ -1,10 +1,13 @@
 import { useState, useMemo } from 'react'
 import { createPortal } from 'react-dom'
 import { useData } from '../../hooks/useData'
+import { useToast } from '../../contexts/ToastContext'
 import { Plus, Sparkles, BookOpen, Trash2, Calendar, FileText, HelpCircle, CheckCircle, ChevronDown, Info, Search, Edit3, X, Zap, RefreshCw, ChevronLeft, ChevronRight } from 'lucide-react'
+import Skeleton from '../ui/Skeleton'
 
 export default function NotesSection() {
-    const { data, addNote, updateNote, deleteNote, saveData } = useData()
+    const { data, loading, addNote, updateNote, deleteNote, saveData } = useData()
+    const { addToast } = useToast()
     const [activeTab, setActiveTab] = useState('notes')
 
     // Note Management States
@@ -134,10 +137,10 @@ export default function NotesSection() {
             }))
 
             saveData({ ...data, flashcards: [...data.flashcards, ...newFlashcards] })
-            alert(`✅ ${newFlashcards.length} flashcard create!`)
+            addToast(`✅ ${newFlashcards.length} flashcard create!`, 'success')
             setActiveTab('flashcards')
         } catch (err) {
-            alert(`❌ Errore AI: ${err.message}`)
+            addToast(`❌ Errore AI: ${err.message}`, 'error')
         } finally {
             setGenerating(false)
         }
@@ -186,7 +189,7 @@ export default function NotesSection() {
                 setCurrentFcIndex(prev => prev + 1)
                 setFlippedCards(new Set())
             } else {
-                alert("Ottimo lavoro! Sessione completata. 🎉")
+                addToast("Ottimo lavoro! Sessione completata. 🎉", "success")
                 setStudyMode(false)
             }
             // Reset animazione per la successiva
@@ -266,22 +269,41 @@ export default function NotesSection() {
     }
 
     return (
-        <section className="section active reveal-entrance">
-            <div className="hero">
-                <h1><span className="gradient-text">Note & Flashcard</span> <BookOpen size={32} className="inline-icon hero-icon-floating" /></h1>
-                <p>Gestisci i tuoi appunti e studia con l'intelligenza artificiale</p>
+        <section className="notes-section animate-fade-in">
+            <div className="section-header">
+                <div className="header-content">
+                    <h1>Il tuo Diario Geometra</h1>
+                    <p>Organizza, studia e potenzia la tua mente con l'IA.</p>
+                </div>
+                <div className="tabs">
+                    <button className={`tab-btn ${activeTab === 'notes' ? 'active' : ''}`} onClick={() => setActiveTab('notes')}>
+                        <FileText size={18} /> Note
+                    </button>
+                    <button className={`tab-btn ${activeTab === 'flashcards' ? 'active' : ''}`} onClick={() => setActiveTab('flashcards')}>
+                        <Zap size={18} /> Flashcards
+                    </button>
+                </div>
             </div>
 
-            <div className="tabs">
-                <button className={`tab-btn ${activeTab === 'notes' ? 'active' : ''}`} onClick={() => setActiveTab('notes')}>
-                    Note ({data.notes.length})
-                </button>
-                <button className={`tab-btn ${activeTab === 'flashcards' ? 'active' : ''}`} onClick={() => setActiveTab('flashcards')}>
-                    Flashcard ({data.flashcards.length})
-                </button>
-            </div>
-
-            {activeTab === 'notes' && (
+            {loading ? (
+                <div className="loading-skeletons" style={{ padding: '0 1.5rem' }}>
+                    <div className="card glass-card skeleton-card" style={{ height: '300px', marginBottom: '1.5rem' }}>
+                        <Skeleton variant="title" style={{ width: '30%', margin: '1.5rem' }} />
+                        <Skeleton variant="text" style={{ width: '90%', margin: '0 1.5rem 0.5rem' }} />
+                        <Skeleton variant="text" style={{ width: '85%', margin: '0 1.5rem 0.5rem' }} />
+                        <Skeleton variant="text" style={{ width: '40%', margin: '0 1.5rem 1.5rem' }} />
+                    </div>
+                    <div className="notes-list" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '1.5rem' }}>
+                        {[1, 2, 3, 4].map(i => (
+                            <div key={i} className="card glass-card" style={{ height: '160px' }}>
+                                <Skeleton variant="title" style={{ width: '50%', margin: '1.25rem' }} />
+                                <Skeleton variant="text" style={{ width: '80%', margin: '0 1.25rem 0.5rem' }} />
+                                <Skeleton variant="text" style={{ width: '70%', margin: '0 1.25rem' }} />
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            ) : activeTab === 'notes' && (
                 <div className="tab-content active">
                     <div className="card glass-card hover-glow note-input-card">
                         <h3><Plus size={18} style={{ verticalAlign: 'middle', marginRight: '8px' }} /> {editingNoteId ? 'Modifica Nota' : 'Nuova Nota'}</h3>

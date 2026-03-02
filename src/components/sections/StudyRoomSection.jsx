@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useCallback } from 'react'
 import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../hooks/useAuth'
+import { useToast } from '../../contexts/ToastContext'
 import {
-    LiveKitRoom,
     TrackToggle,
     useParticipants,
     useConnectionState,
@@ -220,6 +220,13 @@ function PomodoroTimer({ room, isCreator }) {
 
 function ActiveRoomView({ room, token, onLeave, userId }) {
     const isCreator = room.creator_id === userId
+    const { addToast } = useToast()
+
+    const copyCode = () => {
+        const code = room.id.substring(0, 6).toUpperCase()
+        navigator.clipboard.writeText(code)
+        addToast(`Codice ${code} copiato!`, 'success')
+    }
 
     return (
         <div className="study-room-active">
@@ -229,8 +236,12 @@ function ActiveRoomView({ room, token, onLeave, userId }) {
                         <Headphones size={20} />
                         {room.name}
                     </h2>
-                    <div style={{ color: 'var(--color-accent)', fontWeight: 800, letterSpacing: '2px', fontSize: '0.9rem', marginTop: '0.5rem' }}>
-                        CODICE STANZA: {room.id.substring(0, 6).toUpperCase()}
+                    <div
+                        onClick={copyCode}
+                        style={{ color: 'var(--color-accent)', fontWeight: 800, letterSpacing: '2px', fontSize: '0.9rem', marginTop: '0.5rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem' }}
+                        title="Clicca per copiare"
+                    >
+                        CODICE STANZA: {room.id.substring(0, 6).toUpperCase()} <Copy size={14} />
                     </div>
                 </div>
                 <button className="btn-leave-room" onClick={onLeave}>
@@ -306,14 +317,13 @@ function CreateRoomModal({ onClose, onCreate }) {
 // ============================================
 
 export default function StudyRoomSection() {
-    const { user } = useAuth()
+    const { addToast } = useToast()
     const [rooms, setRooms] = useState([])
     const [participantCounts, setParticipantCounts] = useState({})
     const [activeRoom, setActiveRoom] = useState(null)
     const [livekitToken, setLivekitToken] = useState(null)
     const [showCreateModal, setShowCreateModal] = useState(false)
     const [joinCode, setJoinCode] = useState('')
-    const [error, setError] = useState(null)
     const [loading, setLoading] = useState(true)
 
     // Derived short code
@@ -326,8 +336,7 @@ export default function StudyRoomSection() {
             joinRoom(targetRoom)
             setJoinCode('')
         } else {
-            setError('Codice stanza non valido o stanza inesistente.')
-            setTimeout(() => setError(null), 3000)
+            addToast('Codice stanza non valido o stanza inesistente.', 'error')
         }
     }
 
@@ -435,9 +444,10 @@ export default function StudyRoomSection() {
 
             setLivekitToken(token)
             setActiveRoom(room)
+            addToast(`Entrato in ${room.name}`, 'success')
         } catch (err) {
             console.error('[STUDY_ROOMS] Join error:', err)
-            setError(`Impossibile entrare nella stanza: ${err.message}`)
+            addToast(`Impossibile entrare nella stanza: ${err.message}`, 'error')
         }
     }
 

@@ -1,13 +1,13 @@
 import { useState, useRef, useEffect } from 'react'
 import { useData } from '../../hooks/useData'
+import { useToast } from '../../contexts/ToastContext'
 import {
-    Upload, FileText, Sparkles, MessageSquare,
-    BookOpen, Trash2, Send, ChevronDown,
-    Plus, CheckCircle, Info, Loader2, FileUp
+    Upload, FileText, Loader2, Search, Filter, BookOpen, MoreVertical, Trash2, Edit2, Play, Plus, Zap, RefreshCw, Sparkles, ChevronDown, Info, Calendar, Send, FileUp
 } from 'lucide-react'
 
 export default function KnowledgeHubSection() {
-    const { data, saveData } = useData()
+    const { data, saveData, updateData } = useData()
+    const { addToast } = useToast()
     const [file, setFile] = useState(null)
     const [analyzing, setAnalyzing] = useState(false)
     const [analysisResult, setAnalysisResult] = useState(null)
@@ -31,7 +31,7 @@ export default function KnowledgeHubSection() {
         if (selectedFile && selectedFile.type === 'application/pdf') {
             setFile(selectedFile)
         } else {
-            alert('Per favore seleziona un file PDF.')
+            addToast('Per favore seleziona un file PDF.', 'warning')
         }
     }
 
@@ -59,7 +59,7 @@ export default function KnowledgeHubSection() {
                 content: 'Ciao! Ho analizzato il documento. Puoi farmi domande sul contenuto o guardare il riassunto qui sopra.'
             }])
         } catch (err) {
-            alert(`Errore: ${err.message}`)
+            addToast(`Errore: ${err.message}`, 'error')
         } finally {
             setAnalyzing(false)
         }
@@ -109,7 +109,7 @@ export default function KnowledgeHubSection() {
             ...data,
             flashcards: [...data.flashcards, ...newCards]
         })
-        alert(`${newCards.length} flashcard importate con successo!`)
+        addToast(`${newCards.length} flashcard importate con successo!`, 'success')
     }
 
     return (

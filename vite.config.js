@@ -1,9 +1,9 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 
-// https://vite.dev/config/
 export default defineConfig({
     plugins: [react()],
+
     server: {
         proxy: {
             '/api': {
@@ -11,5 +11,27 @@ export default defineConfig({
                 changeOrigin: true,
             }
         }
+    },
+
+    build: {
+        // Vendor chunk splitting for better caching
+        rollupOptions: {
+            output: {
+                manualChunks: {
+                    'react-vendor': ['react', 'react-dom', 'react-router-dom'],
+                    'supabase': ['@supabase/supabase-js'],
+                    'icons': ['lucide-react'],
+                }
+            }
+        },
+
+        // Split CSS per chunk (route-level CSS)
+        cssCodeSplit: true,
+
+        // Inline small assets (< 8KB)
+        assetsInlineLimit: 8192,
+
+        // No source maps in production
+        sourcemap: false,
     }
 })

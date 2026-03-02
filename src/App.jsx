@@ -22,16 +22,16 @@ const SettingsSection = lazy(() => import('./components/sections/SettingsSection
 const StudyRoomSection = lazy(() => import('./components/sections/StudyRoomSection'))
 const ClassroomSection = lazy(() => import('./components/sections/ClassroomSection'))
 
+// Lightweight section loading fallback
+const SectionFallback = () => (
+    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '40vh', opacity: 0.4 }}>
+        <div style={{ width: 32, height: 32, border: '3px solid rgba(255,255,255,0.15)', borderTopColor: '#6495FF', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
+    </div>
+)
+
 function ProtectedRoute({ children }) {
     const { user, loading } = useAuth()
-
-    if (loading) {
-        console.log('[APP] ProtectedRoute: Auth is loading...')
-        return <LoadingScreen />
-    }
-
-    console.log('[APP] ProtectedRoute: Auth loaded, user:', user?.id || 'none')
-
+    if (loading) return <LoadingScreen />
     return user ? children : <Navigate to="/" replace />
 }
 
@@ -41,7 +41,6 @@ export default function App() {
             <Routes>
                 <Route path="/" element={<Landing />} />
 
-                {/* Protected App Routes with Nested Navigation */}
                 <Route
                     path="/app"
                     element={
@@ -50,20 +49,20 @@ export default function App() {
                         </ProtectedRoute>
                     }
                 >
-                    <Route index element={<DashboardSection />} />
-                    <Route path="notes" element={<NotesSection />} />
-                    <Route path="tasks" element={<TasksSection />} />
-                    <Route path="grades" element={<GradesSection />} />
-                    <Route path="pomodoro" element={<PomodoroSection />} />
-                    <Route path="stats" element={<StatsSection />} />
-                    <Route path="duel" element={<DuelSection />} />
-                    <Route path="social" element={<SocialSection />} />
-                    <Route path="gamification" element={<GamificationSection />} />
-                    <Route path="calendar" element={<CalendarSection />} />
-                    <Route path="knowledge" element={<KnowledgeHubSection />} />
-                    <Route path="study-rooms" element={<StudyRoomSection />} />
-                    <Route path="classroom" element={<ClassroomSection />} />
-                    <Route path="settings" element={<SettingsSection />} />
+                    <Route index element={<Suspense fallback={<SectionFallback />}><DashboardSection /></Suspense>} />
+                    <Route path="notes" element={<Suspense fallback={<SectionFallback />}><NotesSection /></Suspense>} />
+                    <Route path="tasks" element={<Suspense fallback={<SectionFallback />}><TasksSection /></Suspense>} />
+                    <Route path="grades" element={<Suspense fallback={<SectionFallback />}><GradesSection /></Suspense>} />
+                    <Route path="pomodoro" element={<Suspense fallback={<SectionFallback />}><PomodoroSection /></Suspense>} />
+                    <Route path="stats" element={<Suspense fallback={<SectionFallback />}><StatsSection /></Suspense>} />
+                    <Route path="duel" element={<Suspense fallback={<SectionFallback />}><DuelSection /></Suspense>} />
+                    <Route path="social" element={<Suspense fallback={<SectionFallback />}><SocialSection /></Suspense>} />
+                    <Route path="gamification" element={<Suspense fallback={<SectionFallback />}><GamificationSection /></Suspense>} />
+                    <Route path="calendar" element={<Suspense fallback={<SectionFallback />}><CalendarSection /></Suspense>} />
+                    <Route path="knowledge" element={<Suspense fallback={<SectionFallback />}><KnowledgeHubSection /></Suspense>} />
+                    <Route path="study-rooms" element={<Suspense fallback={<SectionFallback />}><StudyRoomSection /></Suspense>} />
+                    <Route path="classroom" element={<Suspense fallback={<SectionFallback />}><ClassroomSection /></Suspense>} />
+                    <Route path="settings" element={<Suspense fallback={<SectionFallback />}><SettingsSection /></Suspense>} />
                 </Route>
 
                 <Route path="*" element={<Navigate to="/" replace />} />

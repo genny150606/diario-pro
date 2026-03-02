@@ -15,6 +15,66 @@
     outline-offset: 2px;
 }
 
+/* ============================================
+   CUSTOM SCROLLBAR (Premium Glassmorphism Style)
+   ============================================ */
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+    /* For horizontal scrollbars */
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.25);
+}
+
+/* Firefox */
+* {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 255, 255, 0.15) transparent;
+}
+
+/* ============================================
+   GLOBAL MICRO-INTERACTIONS & UTILITIES
+   ============================================ */
+
+/* Smooth fade-in for page transitions */
+.animate-fade-in {
+    animation: fadeIn 0.4s ease-out forwards;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Universal Hover Lift for Cards */
+.hover-lift {
+    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.hover-lift:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px var(--shadow-glow);
+    border-color: var(--color-border-hover);
+}
+
 /* Badge */
 .badge {
     display: inline-flex;

@@ -97,17 +97,23 @@ export default function AppLayout() {
 
             {/* Header */}
             <header className="app-header">
-                <button
-                    className="menu-toggle"
-                    onClick={() => setSidebarOpen(!sidebarOpen)}
-                    aria-label="Toggle menu"
-                >
-                    <Menu size={20} />
-                </button>
+                <div className="header-left-group">
+                    <button
+                        className="menu-toggle"
+                        onClick={() => setSidebarOpen(!sidebarOpen)}
+                        aria-label="Toggle menu"
+                    >
+                        <Menu size={20} />
+                    </button>
 
-                <Link pos="/" className="logo" style={{ display: 'flex', alignItems: 'center', gap: '10px', textDecoration: 'none' }}>
+                    <Link to="/" className="home-link-svg" title="Torna alla Home" style={{ display: 'flex', alignItems: 'center', color: 'var(--color-text)', opacity: 0.7, transition: 'opacity 0.2s' }}>
+                        <Home size={20} />
+                    </Link>
+                </div>
+
+                <Link to="/" className="logo" style={{ display: 'flex', alignItems: 'center', gap: '10px', textDecoration: 'none' }}>
                     <img src="/S.png" alt="StudyJournal Pro Logo" style={{ height: '36px', width: 'auto', filter: 'drop-shadow(0 0 8px rgba(100, 150, 255, 0.4))' }} />
-                    <span style={{ fontSize: '1.2rem', fontWeight: 800, color: 'var(--color-text)' }}>StudyJournal</span>
+                    <span className="logo-text" style={{ fontSize: '1.2rem', fontWeight: 800, color: 'var(--color-text)' }}>StudyJournal</span>
                 </Link>
 
                 <div className="header-right-group">

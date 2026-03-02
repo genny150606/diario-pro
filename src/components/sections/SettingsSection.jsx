@@ -1,11 +1,17 @@
 import { useState, useMemo, useRef, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../../hooks/useAuth'
 import { useData } from '../../hooks/useData'
+import { useToast } from '../../contexts/ToastContext'
+import { supabase } from '../../lib/supabase'
 import { Settings, User, Moon, Sun, Palette, BookOpen, Download, Upload, Trash2, AlertTriangle, Plus, X, Shield, Info, Database, GraduationCap, Zap, Flame, LogOut, Camera } from 'lucide-react'
 
 export default function SettingsSection() {
+    const navigate = useNavigate()
     const { user, signOut, updatePassword } = useAuth()
     const { data, saveData } = useData()
+    const { addToast } = useToast()
+    const [gdprLoading, setGdprLoading] = useState(false)
     const [schoolType, setSchoolType] = useState(() => localStorage.getItem('schoolType') || 'liceo')
     const [newPassword, setNewPassword] = useState('')
     const [passwordMsg, setPasswordMsg] = useState('')
@@ -90,11 +96,11 @@ export default function SettingsSection() {
                 if (imported && typeof imported === 'object') {
                     if (window.confirm('⚠️ Questo sovrascriverà i tuoi dati attuali. Continuare?')) {
                         saveData(imported)
-                        alert('✅ Dati importati con successo!')
+                        addToast('✅ Dati importati con successo!', 'success')
                     }
                 }
             } catch {
-                alert('❌ File JSON non valido')
+                addToast('❌ File JSON non valido', 'error')
             }
         }
         reader.readAsText(file)
@@ -106,7 +112,62 @@ export default function SettingsSection() {
         const DEFAULT = { notes: [], tasks: [], grades: [], flashcards: [], diaryEntries: [], pomodoroSessions: [], presences: [], uniExams: [], uniGrades: [], counters: {}, stats: { totalHours: 0, totalSessions: 0, xp: 0, level: 1, unlockedFeatures: [] } }
         saveData(DEFAULT)
         setDeleteConfirm('')
-        alert('✅ Tutti i dati sono stati eliminati.')
+        addToast('✅ Tutti i dati sono stati eliminati.', 'success')
+    }
+
+    // ── GDPR: Export All Data ──
+    const handleGdprExport = async () => {
+        try {
+            setGdprLoading(true)
+            const exportData = {
+                exported_at: new Date().toISOString(),
+                user_id: user.id,
+                email: user.email,
+                data: data
+            }
+            const jsonString = JSON.stringify(exportData, null, 2)
+            const blob = new Blob([jsonString], { type: 'application/json' })
+            const url = URL.createObjectURL(blob)
+            const link = document.createElement('a')
+            link.href = url
+            link.download = `diario-pro-${user.id}-${new Date().toISOString().split('T')[0]}.json`
+            link.click()
+            URL.revokeObjectURL(url)
+            addToast('✅ Dati esportati con successo!', 'success')
+        } catch (err) {
+            console.error('GDPR Export failed:', err)
+            addToast('❌ Errore durante l\'esportazione: ' + err.message, 'error')
+        } finally {
+            setGdprLoading(false)
+        }
+    }
+
+    // ── GDPR: Delete Account ──
+    const handleDeleteAccount = async () => {
+        const confirmed = window.confirm(
+            'ATTENZIONE: Questa azione è IRREVERSIBILE.\nEliminerà TUTTI i tuoi dati e il tuo account.\nSei sicuro di voler procedere?'
+        )
+        if (!confirmed) return
+
+        try {
+            setGdprLoading(true)
+            const { error: deleteError } = await supabase
+                .from('users_data')
+                .delete()
+                .eq('id', user.id)
+
+            if (deleteError) throw deleteError
+
+            localStorage.removeItem(`sj_data_${user.id}`)
+            localStorage.removeItem('profilePhoto')
+            await signOut()
+            navigate('/')
+            alert('Account eliminato permanentemente. Ci dispiace vederti andare via 😢')
+        } catch (err) {
+            console.error('Account delete failed:', err)
+            alert('Errore durante l\'eliminazione: ' + err.message)
+            setGdprLoading(false)
+        }
     }
 
     // Storage stats
@@ -133,7 +194,7 @@ export default function SettingsSection() {
     const handlePhotoUpload = (e) => {
         const file = e.target.files?.[0]
         if (!file) return
-        if (!file.type.startsWith('image/')) { alert('Seleziona un\'immagine valida'); return }
+        if (!file.type.startsWith('image/')) { addToast('Seleziona un\'immagine valida', 'warning'); return }
 
         const reader = new FileReader()
         reader.onload = (evt) => {
@@ -358,6 +419,39 @@ export default function SettingsSection() {
                     <input type="password" placeholder="Nuova password (min. 6 caratteri)" value={newPassword} onChange={e => setNewPassword(e.target.value)} />
                     <button className="btn-secondary" onClick={handlePasswordChange} disabled={!newPassword} style={{ width: '100%' }}>Aggiorna Password</button>
                     {passwordMsg && <p className="password-msg">{passwordMsg}</p>}
+                </div>
+            </div>
+
+            {/* ── GDPR COMPLIANCE ── */}
+            <div className="settings-group">
+                <div className="settings-group-header">
+                    <span className="settings-group-icon">⚖️</span>
+                    <div>
+                        <h3 className="settings-group-title">Privacy & Dati Personali (GDPR)</h3>
+                        <p className="settings-group-desc">Controlli per i tuoi dati personali</p>
+                    </div>
+                </div>
+                <div className="gdpr-controls">
+                    <button
+                        className="btn-secondary"
+                        onClick={handleGdprExport}
+                        disabled={gdprLoading}
+                        style={{ width: '100%', marginBottom: '1rem' }}
+                    >
+                        <Download size={18} /> 📥 Scarica i miei dati (GDPR Art. 20)
+                    </button>
+                    <button
+                        className="btn-danger-full"
+                        onClick={handleDeleteAccount}
+                        disabled={gdprLoading}
+                        style={{ width: '100%' }}
+                    >
+                        <Trash2 size={18} /> 🗑️ Elimina account e tutti i dati
+                    </button>
+                    <p style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.4)', marginTop: '1rem', lineHeight: 1.5 }}>
+                        ⚠️ L'eliminazione è PERMANENTE e non può essere annullata.
+                        I tuoi dati verranno cancellati da tutti i server entro 30 giorni.
+                    </p>
                 </div>
             </div>
 

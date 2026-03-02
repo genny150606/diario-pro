@@ -67,12 +67,20 @@ export default function ChatbotWidget() {
             });
         };
 
-        const interval = setInterval(removeWatermark, 100);
-        const timeout = setTimeout(() => clearInterval(interval), 20000); // Polling for 20s
+        let pollCount = 0;
+        const maxPolls = 30; // 30 polls instead of 200
+        const pollInterval = 150; // 150ms instead of 100ms
+
+        const interval = setInterval(() => {
+            removeWatermark();
+            pollCount++;
+            if (pollCount >= maxPolls) {
+                clearInterval(interval);
+            }
+        }, pollInterval);
 
         return () => {
             clearInterval(interval);
-            clearTimeout(timeout);
         };
     }, []);
 

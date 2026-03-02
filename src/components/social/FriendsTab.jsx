@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../hooks/useAuth'
-
+import { useToast } from '../../contexts/ToastContext'
+import { Plus, Users, Search, UserPlus, Check, X, Shield, Star, Swords, MessageSquare, Trash2, UserMinus } from 'lucide-react'
 export default function FriendsTab() {
     const { user } = useAuth()
+    const { addToast } = useToast()
     const [friends, setFriends] = useState([])
     const [pendingRequests, setPendingRequests] = useState([])
     const [loading, setLoading] = useState(true)
@@ -83,7 +85,7 @@ export default function FriendsTab() {
             fetchFriendsData() // Refresh list
         } catch (error) {
             console.error('Error accepting friend request:', error)
-            alert('Errore accettazione amicizia.')
+            addToast('Errore accettazione amicizia.', 'error')
         }
     }
 
@@ -214,7 +216,7 @@ export default function FriendsTab() {
                                         style={{ padding: '0.4rem 1rem', borderRadius: '20px', fontSize: '0.85rem' }}
                                         onClick={() => {
                                             // TODO: Pass to Duel UI
-                                            alert(`Sfida ${f.friendName} non ancora implementata nella Bacheca, usa il menu Duello!`)
+                                            addToast(`Sfida ${f.friendName} non ancora implementata nella Bacheca, usa il menu Duello!`, 'info')
                                         }}
                                     >
                                         ⚔️ Sfida

@@ -111,3 +111,124 @@
         min-height: 60px !important;
     }
 }
+
+/* ── Activity Feed ── */
+.activity-feed {
+    display: flex;
+    flex-direction: column;
+    gap: 1.2rem;
+    margin-top: 2rem;
+}
+
+.activity-card {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1.5rem;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    padding: 1.5rem;
+    border-left: 4px solid;
+    transition: all 0.3s;
+    cursor: pointer;
+}
+
+.activity-card:hover {
+    background: rgba(255, 255, 255, 0.08);
+    transform: translateX(4px);
+}
+
+.activity-main {
+    display: flex;
+    gap: 1rem;
+    flex: 1;
+    align-items: flex-start;
+}
+
+.activity-emoji {
+    font-size: 1.5rem;
+    min-width: 32px;
+}
+
+.activity-message {
+    color: #fff;
+    font-size: 1rem;
+    font-weight: 500;
+    margin: 0;
+}
+
+.activity-time {
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 0.85rem;
+    display: block;
+    margin-top: 0.25rem;
+}
+
+.activity-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.action-btn {
+    padding: 0.5rem 1rem;
+    background: rgba(100, 150, 255, 0.1);
+    border: none;
+    color: #6495FF;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: all 0.2s;
+}
+
+.action-btn:hover {
+    background: rgba(100, 150, 255, 0.2);
+}
+
+/* ── Friends Grid (Activity Tab) ── */
+.friends-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 1.5rem;
+    margin-top: 2rem;
+}
+
+.friend-card {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    padding: 1.5rem;
+    text-align: center;
+    transition: all 0.3s;
+}
+
+.friend-card:hover {
+    background: rgba(100, 150, 255, 0.1);
+    transform: translateY(-4px);
+}
+
+.friend-avatar {
+    width: 64px;
+    height: 64px;
+    background: linear-gradient(135deg, #6495FF, #FFD700);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    font-weight: 800;
+    margin: 0 auto 1rem;
+    color: #000;
+}
+
+@media (max-width: 768px) {
+    .activity-card {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .activity-actions {
+        width: 100%;
+        justify-content: flex-end;
+    }
+}

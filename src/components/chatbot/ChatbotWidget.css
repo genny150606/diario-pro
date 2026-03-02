@@ -114,16 +114,20 @@
     height: 50px;
     border-radius: 12px;
     background: transparent;
-    display: flex;
-    align-items: center;
-    justify-content: center;
     flex-shrink: 0;
-    overflow: visible;
+    position: relative;
+    overflow: hidden;
+    /* Hide the overflow to clip the Spline logo */
 }
 
 .chatbot-avatar spline-viewer {
-    width: 100%;
-    height: 100%;
+    width: 80px;
+    height: 80px;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    /* Centers the 3D model, pushing the bottom-right logo out of bounds */
 }
 
 .chatbot-header h4 {

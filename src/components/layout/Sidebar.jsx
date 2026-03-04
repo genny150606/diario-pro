@@ -8,7 +8,7 @@ export default function Sidebar({ sections, isOpen, setSidebarOpen, onExit }) {
     const bottomSections = sections.filter(s => s.bottom)
 
     const handleLinkClick = () => {
-        if (window.innerWidth < 768) {
+        if (window.innerWidth <= 900) {
             setSidebarOpen(false)
         }
     }

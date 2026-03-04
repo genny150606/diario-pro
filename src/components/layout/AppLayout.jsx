@@ -1,10 +1,12 @@
 import { useState, useEffect } from 'react'
 import { useNavigate, Link, Outlet, useLocation } from 'react-router-dom'
+import { motion, AnimatePresence } from 'framer-motion'
 import { useAuth } from '../../hooks/useAuth'
 import { useData } from '../../hooks/useData'
 import { useDailyBonus } from '../../hooks/useDailyBonus'
 import ChatbotWidget from '../chatbot/ChatbotWidget'
 import NotificationCenter from '../NotificationCenter'
+import Sidebar from './Sidebar'
 import './AppLayout.css'
 
 // Import all app styles
@@ -19,17 +21,22 @@ import '../../styles/responsive.css'
 import '../../styles/gamification.css'
 
 // Lucide SVG Icons
-import { LogOut, User, Settings, Menu, X } from 'lucide-react'
+import { LogOut, User, Settings, Menu, X, Home, CheckSquare, BookOpen, Users, Brain, Swords, Timer, GraduationCap, BarChart2, Calendar, Trophy, Globe, LayoutGrid } from 'lucide-react'
 
-const PILL_LINKS = [
-    { id: 'dashboard', label: 'Dashboard', path: '/app' },
-    { id: 'grades', label: 'Voti', path: '/app/grades' },
-    { id: 'tasks', label: 'Task', path: '/app/tasks' },
-    { id: 'notes', label: 'Note', path: '/app/notes' },
-    { id: 'knowledge', label: 'AI', path: '/app/knowledge' },
-    { id: 'classroom', label: 'Class', path: '/app/classroom' },
-    { id: 'pomodoro', label: 'Focus', path: '/app/pomodoro' },
-    { id: 'duel', label: 'Arena', path: '/app/duel' },
+const APP_SECTIONS = [
+    { id: 'dashboard', label: 'Home', path: '/app', Icon: Home },
+    { id: 'tasks', label: 'Task', path: '/app/tasks', Icon: CheckSquare },
+    { id: 'notes', label: 'Note', path: '/app/notes', Icon: BookOpen },
+    { id: 'classroom', label: 'Classi', path: '/app/classroom', Icon: Users },
+    { id: 'knowledge', label: 'AI', path: '/app/knowledge', Icon: Brain },
+    { id: 'duel', label: 'Arena', path: '/app/duel', Icon: Swords },
+    { id: 'pomodoro', label: 'Focus', path: '/app/pomodoro', Icon: Timer },
+    { id: 'grades', label: 'Voti', path: '/app/grades', Icon: GraduationCap },
+    { id: 'stats', label: 'Statistiche', path: '/app/stats', Icon: BarChart2 },
+    { id: 'calendar', label: 'Calendario', path: '/app/calendar', Icon: Calendar },
+    { id: 'gamification', label: 'Livelli', path: '/app/gamification', Icon: Trophy },
+    { id: 'social', label: 'Social', path: '/app/social', Icon: Globe },
+    { id: 'study-rooms', label: 'Rooms', path: '/app/study-rooms', Icon: LayoutGrid, bottom: true },
 ]
 
 export default function AppLayout() {
@@ -66,82 +73,44 @@ export default function AppLayout() {
 
     return (
         <div className="app-layout" data-theme="dark">
-            {/* Deep Cosmic Background & Orbs */}
-            <div className="cosmic-bg">
-                <div className="cosmic-orb orb-c1"></div>
-                <div className="cosmic-orb orb-c2"></div>
-                <div className="cosmic-orb orb-c3"></div>
+            {/* Mobile Header (Only visible on small screens) */}
+            <div className="mobile-header">
+                <Link to="/app" className="pill-logo">
+                    <img src="/favicon.png" alt="StudyJournal Pro Logo" />
+                    <span className="pill-logo-text">StudyJournal <strong>Pro</strong></span>
+                </Link>
+                <button className="mobile-toggle-btn" onClick={() => setMobileNavOpen(true)}>
+                    <Menu size={24} color="#00f3ff" />
+                </button>
             </div>
 
-            {/* Top Navigation Pill (Dynamic Island) */}
-            <header className="pill-nav-wrapper">
-                <div className="pill-nav">
-                    {/* Left: Logo */}
-                    <Link to="/app" className="pill-logo">
-                        <img src="/favicon.png" alt="StudyJournal Pro Logo" />
-                        <span className="pill-logo-text">StudyJournal <strong>Pro</strong></span>
-                    </Link>
+            {/* Main Sidebar */}
+            <Sidebar
+                sections={APP_SECTIONS}
+                isOpen={mobileNavOpen}
+                setSidebarOpen={setMobileNavOpen}
+                onExit={handleSignOut}
+            />
 
-                    {/* Center: Links (Hidden on small mobile) */}
-                    <nav className={`pill-links ${mobileNavOpen ? 'mobile-open' : ''}`}>
-                        {PILL_LINKS.map(link => (
-                            <Link
-                                key={link.id}
-                                to={link.path}
-                                className={`pill-link ${isActive(link.path) ? 'active' : ''}`}
-                                onClick={() => setMobileNavOpen(false)}
-                            >
-                                {link.label}
-                            </Link>
-                        ))}
-                    </nav>
-
-                    {/* Right: Actions */}
-                    <div className="pill-actions">
-                        {/* Mobile Hamburger toggle */}
-                        <button className="mobile-toggle-btn" onClick={() => setMobileNavOpen(!mobileNavOpen)}>
-                            {mobileNavOpen ? <X size={20} /> : <Menu size={20} />}
-                        </button>
-
-                        <div className="user-profile-wrapper">
-                            <button
-                                className="pill-account-btn"
-                                onClick={(e) => { e.stopPropagation(); setMenuOpen(!menuOpen) }}
-                            >
-                                <User size={18} />
-                            </button>
-
-                            {menuOpen && (
-                                <div className="pill-dropdown show fade-in">
-                                    <div className="dropdown-header">
-                                        <span className="dropdown-email">{user?.email}</span>
-                                        <span className="dropdown-level">Lvl. {data?.stats?.level || 1} • {data?.stats?.currentStreak || 0}🔥</span>
-                                    </div>
-                                    <div className="dropdown-divider"></div>
-                                    <Link to="/app/settings" className="dropdown-item" onClick={() => setMenuOpen(false)}>
-                                        <Settings size={14} /> Impostazioni
-                                    </Link>
-                                    <div className="dropdown-divider"></div>
-                                    <button className="dropdown-item text-danger" onClick={handleSignOut}>
-                                        <LogOut size={14} /> Esci
-                                    </button>
-                                </div>
-                            )}
-                        </div>
-                    </div>
-                </div>
-            </header>
-
-            {/* Click outside to close dropdowns */}
-            {menuOpen && (
-                <div style={{ position: 'fixed', inset: 0, zIndex: 900 }} onClick={() => setMenuOpen(false)} />
+            {/* Click outside to close mobile sidebar */}
+            {mobileNavOpen && (
+                <div className="mobile-sidebar-overlay" onClick={() => setMobileNavOpen(false)} />
             )}
 
             {/* Main content */}
             <main className="main-content-area">
-                <div className="content page-transition" key={location.pathname}>
-                    <Outlet />
-                </div>
+                <AnimatePresence mode="wait">
+                    <motion.div
+                        className="content"
+                        key={location.pathname}
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -10 }}
+                        transition={{ duration: 0.25, ease: "easeInOut" }}
+                    >
+                        <Outlet />
+                    </motion.div>
+                </AnimatePresence>
             </main>
 
             {/* AI Chatbot */}

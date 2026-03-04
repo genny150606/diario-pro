@@ -47,9 +47,32 @@
    GLOBAL MICRO-INTERACTIONS & UTILITIES
    ============================================ */
 
+/* ── ELEGANT GLASS PANELS ── */
+.glass-panel {
+    background: var(--glass-bg);
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
+    border: 1px solid var(--color-border);
+    box-shadow: var(--shadow-sm);
+    position: relative;
+    border-radius: var(--radius-lg);
+    transition: all var(--duration-base) var(--ease-out);
+}
+
+.glass-panel:hover {
+    box-shadow: var(--shadow-md);
+    border-color: var(--color-border-strong);
+}
+
+.glass-deep {
+    background: var(--color-bg-secondary);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+}
+
 /* Smooth fade-in for page transitions */
 .animate-fade-in {
-    animation: fadeIn 0.4s ease-out forwards;
+    animation: fadeIn 0.4s var(--ease-out) forwards;
 }
 
 @keyframes fadeIn {
@@ -64,15 +87,14 @@
     }
 }
 
-/* Universal Hover Lift for Cards */
+/* Universal Hover Lift for Cards (Elegant Style) */
 .hover-lift {
-    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+    transition: transform var(--duration-base) var(--ease-out), box-shadow var(--duration-base) var(--ease-out);
 }
 
 .hover-lift:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 24px var(--shadow-glow);
-    border-color: var(--color-border-hover);
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-lg);
 }
 
 /* Badge */

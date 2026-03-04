@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
 import { X } from 'lucide-react'
 
 export default function NotificationCenter() {
@@ -34,48 +35,53 @@ export default function NotificationCenter() {
             maxWidth: 360,
             width: '100%'
         }}>
-            {notifications.map((notif, idx) => (
-                <div
-                    key={notif.id}
-                    style={{
-                        background: 'rgba(20, 20, 24, 0.92)',
-                        backdropFilter: 'blur(20px)',
-                        WebkitBackdropFilter: 'blur(20px)',
-                        border: `1px solid ${notif.type === 'success' ? 'rgba(48,209,88,0.3)' : notif.type === 'warning' ? 'rgba(255,159,10,0.3)' : 'rgba(100,150,255,0.3)'}`,
-                        borderRadius: 14,
-                        padding: '1rem 1.2rem',
-                        pointerEvents: 'auto',
-                        boxShadow: '0 12px 40px rgba(0,0,0,0.5)',
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                        alignItems: 'flex-start',
-                        gap: 12,
-                        animation: 'notifSlideIn 0.35s cubic-bezier(0.16, 1, 0.3, 1)',
-                    }}
-                >
-                    <div>
-                        <div style={{ fontWeight: 700, fontSize: 14, marginBottom: 3, color: '#fff' }}>
-                            {notif.title}
-                        </div>
-                        <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.6)' }}>
-                            {notif.message}
-                        </div>
-                    </div>
-                    <button
-                        onClick={() => setNotifications(prev => prev.filter(n => n.id !== notif.id))}
+            <AnimatePresence>
+                {notifications.map((notif, idx) => (
+                    <motion.div
+                        key={notif.id}
+                        layout
+                        initial={{ opacity: 0, x: 50, scale: 0.9 }}
+                        animate={{ opacity: 1, x: 0, scale: 1 }}
+                        exit={{ opacity: 0, scale: 0.9, transition: { duration: 0.2 } }}
                         style={{
-                            background: 'none',
-                            border: 'none',
-                            color: 'rgba(255,255,255,0.3)',
-                            cursor: 'pointer',
-                            padding: 0,
-                            flexShrink: 0,
+                            background: 'rgba(20, 20, 24, 0.92)',
+                            backdropFilter: 'blur(20px)',
+                            WebkitBackdropFilter: 'blur(20px)',
+                            border: `1px solid ${notif.type === 'success' ? 'rgba(48,209,88,0.3)' : notif.type === 'warning' ? 'rgba(255,159,10,0.3)' : 'rgba(100,150,255,0.3)'}`,
+                            borderRadius: 14,
+                            padding: '1rem 1.2rem',
+                            pointerEvents: 'auto',
+                            boxShadow: '0 12px 40px rgba(0,0,0,0.5)',
+                            display: 'flex',
+                            justifyContent: 'space-between',
+                            alignItems: 'flex-start',
+                            gap: 12,
                         }}
                     >
-                        <X size={14} />
-                    </button>
-                </div>
-            ))}
+                        <div>
+                            <div style={{ fontWeight: 700, fontSize: 14, marginBottom: 3, color: '#fff' }}>
+                                {notif.title}
+                            </div>
+                            <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.6)' }}>
+                                {notif.message}
+                            </div>
+                        </div>
+                        <button
+                            onClick={() => setNotifications(prev => prev.filter(n => n.id !== notif.id))}
+                            style={{
+                                background: 'none',
+                                border: 'none',
+                                color: 'rgba(255,255,255,0.3)',
+                                cursor: 'pointer',
+                                padding: 0,
+                                flexShrink: 0,
+                            }}
+                        >
+                            <X size={14} />
+                        </button>
+                    </motion.div>
+                ))}
+            </AnimatePresence>
         </div>
     )
 }

@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
 import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../hooks/useAuth'
 import { Flame, Trophy, Search } from 'lucide-react'
@@ -150,7 +151,7 @@ export default function ExploreTab() {
 
             {/* Main Column: Search */}
             <div className="explore-main">
-                <div className="card" style={{ background: 'rgba(25, 25, 35, 0.6)', backdropFilter: 'blur(10px)' }}>
+                <div className="card" style={{ padding: '2rem' }}>
                     <h3 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                         <Search size={22} className="text-accent" /> Cerca Compagni
                     </h3>
@@ -189,41 +190,57 @@ export default function ExploreTab() {
                     )}
 
                     {searchResults.length > 0 && (
-                        <div style={{ marginTop: '2rem', display: 'flex', flexDirection: 'column', gap: '1rem', animation: 'fadeIn 0.3s ease' }}>
+                        <motion.div
+                            style={{ marginTop: '2rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}
+                            initial={{ opacity: 0, y: 15 }}
+                            animate={{ opacity: 1, y: 0 }}
+                        >
                             <h4 style={{ color: 'var(--color-text-secondary)', fontSize: '0.9rem', textTransform: 'uppercase', letterSpacing: '1px' }}>Risultati</h4>
-                            {searchResults.map(u => (
-                                <div key={u.id} className="card user-result-card" style={{
-                                    display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-                                    padding: '1rem 1.2rem', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)',
-                                    borderRadius: '16px', transition: 'all 0.2s ease', cursor: 'default'
-                                }}>
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                                        <div className="avatar" style={{
-                                            width: 50, height: 50, borderRadius: '50%',
-                                            background: getAvatarGradient(u.username),
-                                            display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                            color: 'white', fontWeight: 'bold', fontSize: '1.4rem',
-                                            boxShadow: '0 4px 10px rgba(0,0,0,0.2)'
-                                        }}>
-                                            {u.username[0].toUpperCase()}
-                                        </div>
-                                        <div>
-                                            <div style={{ fontWeight: 600, fontSize: '1.15rem' }}>{u.username}</div>
-                                            <div style={{ fontSize: '0.85rem', color: 'var(--color-accent)', fontWeight: 500, display: 'flex', alignItems: 'center', gap: '0.3rem', marginTop: '0.2rem' }}>
-                                                <Trophy size={12} /> Livello {u.level}
+                            <AnimatePresence>
+                                {searchResults.map((u, i) => (
+                                    <motion.div
+                                        key={u.id}
+                                        className="card user-result-card"
+                                        initial={{ opacity: 0, x: -20 }}
+                                        animate={{ opacity: 1, x: 0 }}
+                                        exit={{ opacity: 0, scale: 0.95 }}
+                                        transition={{ delay: i * 0.05 }}
+                                        whileHover={{ scale: 1.02 }}
+                                        style={{
+                                            display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                                            padding: '1rem 1.2rem', background: 'var(--glass-bg-deep)', border: '1px solid var(--glass-border)',
+                                            borderRadius: '16px', cursor: 'default'
+                                        }}
+                                    >
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                                            <div className="avatar" style={{
+                                                width: 50, height: 50, borderRadius: '50%',
+                                                background: getAvatarGradient(u.username),
+                                                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                                color: 'white', fontWeight: 'bold', fontSize: '1.4rem',
+                                                boxShadow: '0 4px 10px rgba(0,0,0,0.2)'
+                                            }}>
+                                                {u.username[0].toUpperCase()}
+                                            </div>
+                                            <div>
+                                                <div style={{ fontWeight: 600, fontSize: '1.15rem' }}>{u.username}</div>
+                                                <div style={{ fontSize: '0.85rem', color: 'var(--color-accent)', fontWeight: 500, display: 'flex', alignItems: 'center', gap: '0.3rem', marginTop: '0.2rem' }}>
+                                                    <Trophy size={12} /> Livello {u.level}
+                                                </div>
                                             </div>
                                         </div>
-                                    </div>
-                                    <button
-                                        className="btn-secondary"
-                                        onClick={() => handleAddFriend(u.id, u.username)}
-                                        style={{ padding: '0.6rem 1.2rem', borderRadius: '25px', fontSize: '0.95rem', fontWeight: 600 }}
-                                    >
-                                        ➕ Aggiungi
-                                    </button>
-                                </div>
-                            ))}
-                        </div>
+                                        <motion.button
+                                            className="btn-secondary"
+                                            onClick={() => handleAddFriend(u.id, u.username)}
+                                            whileTap={{ scale: 0.95 }}
+                                            style={{ padding: '0.6rem 1.2rem', borderRadius: '25px', fontSize: '0.95rem', fontWeight: 600 }}
+                                        >
+                                            ➕ Aggiungi
+                                        </motion.button>
+                                    </motion.div>
+                                ))}
+                            </AnimatePresence>
+                        </motion.div>
                     )}
                 </div>
             </div>
@@ -232,7 +249,13 @@ export default function ExploreTab() {
             <div className="explore-sidebar" style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
 
                 {/* Trending Tab */}
-                <div className="card" style={{ padding: '1.2rem' }}>
+                <motion.div
+                    className="card"
+                    initial={{ opacity: 0, x: 40 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: 0.1, type: 'spring', stiffness: 200, damping: 20 }}
+                    style={{ padding: '1.2rem' }}
+                >
                     <h4 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1rem', color: 'var(--color-text)' }}>
                         <Flame size={18} color="var(--color-danger)" /> Tendenze
                     </h4>
@@ -250,10 +273,16 @@ export default function ExploreTab() {
                             ))}
                         </div>
                     )}
-                </div>
+                </motion.div>
 
                 {/* Leaderboard Tab */}
-                <div className="card" style={{ padding: '1.2rem' }}>
+                <motion.div
+                    className="card"
+                    initial={{ opacity: 0, x: 40 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: 0.2, type: 'spring', stiffness: 200, damping: 20 }}
+                    style={{ padding: '1.2rem' }}
+                >
                     <h4 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1rem', color: 'var(--color-text)' }}>
                         <Trophy size={18} color="var(--color-accent)" /> Top Studenti
                     </h4>
@@ -279,7 +308,7 @@ export default function ExploreTab() {
                             ))}
                         </div>
                     )}
-                </div>
+                </motion.div>
 
             </div>
         </div>

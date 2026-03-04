@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
 import { Sparkles, Send, X, Bot } from 'lucide-react'
 import { useData } from '../../hooks/useData'
 import './ChatbotWidget.css'
@@ -178,68 +179,89 @@ export default function ChatbotWidget() {
             </div>
 
             {/* Chat Window */}
-            {isOpen && (
-                <div className="chatbot-window">
-                    <div className="chatbot-header">
-                        <div className="chatbot-avatar">
-                            <spline-viewer
-                                url="https://prod.spline.design/7CwI66tHlWIL45AN/scene.splinecode"
-                                loading-alpha="0"
-                                hint-background-color="transparent"
-                                alpha="true"
-                            ></spline-viewer>
-                        </div>
-                        <div>
-                            <h4>StudyJournal AI</h4>
-                            <span className="chatbot-status">
-                                {loading ? '✍️ Scrivendo...' : '🟢 Online'}
-                            </span>
-                        </div>
-                    </div>
-
-                    <div className="chatbot-messages">
-                        {messages.map((msg, i) => (
-                            <div key={msg.id || i} className={`chat-bubble ${msg.role}`}>
-                                <div dangerouslySetInnerHTML={{ __html: formatMarkdown(msg.content) }} />
+            <AnimatePresence>
+                {isOpen && (
+                    <motion.div
+                        className="chatbot-window"
+                        initial={{ opacity: 0, scale: 0.9, y: 20, transformOrigin: 'bottom right' }}
+                        animate={{ opacity: 1, scale: 1, y: 0 }}
+                        exit={{ opacity: 0, scale: 0.9, y: 20 }}
+                        transition={{ type: 'spring', stiffness: 300, damping: 25 }}
+                    >
+                        <div className="chatbot-header">
+                            <div className="chatbot-avatar">
+                                <spline-viewer
+                                    url="https://prod.spline.design/7CwI66tHlWIL45AN/scene.splinecode"
+                                    loading-alpha="0"
+                                    hint-background-color="transparent"
+                                    alpha="true"
+                                ></spline-viewer>
                             </div>
-                        ))}
-
-                        {messages.length === 1 && !loading && (
-                            <div className="chatbot-suggestions">
-                                <button onClick={() => handleSend("Crea degli appunti riassuntivi su...")} className="suggestion-chip">
-                                    📝 Crea Appunti
-                                </button>
-                                <button onClick={() => handleSend("Genera 5 flashcard su...")} className="suggestion-chip">
-                                    🎴 Genera Flashcard
-                                </button>
-                                <button onClick={() => handleSend("Puoi spiegarmi in modo semplice...")} className="suggestion-chip">
-                                    🧠 Spiegami un concetto
-                                </button>
+                            <div>
+                                <h4>StudyJournal AI</h4>
+                                <span className="chatbot-status">
+                                    {loading ? '✍️ Scrivendo...' : '🟢 Online'}
+                                </span>
                             </div>
-                        )}
-                        <div ref={messagesEndRef} />
-                    </div>
+                        </div>
 
-                    <div className="chatbot-input-area">
-                        <input
-                            ref={inputRef}
-                            type="text"
-                            placeholder="Chiedi all'AI..."
-                            value={input}
-                            onChange={e => setInput(e.target.value)}
-                            onKeyDown={handleKeyDown}
-                            disabled={loading}
-                        />
-                        <button
-                            className="chatbot-send-btn"
-                            onClick={handleSend}
-                            disabled={loading || !input.trim()}
-                        >
-                            {loading ? <span className="spinner"></span> : <Send size={18} strokeWidth={2.5} />}
-                        </button>
-                    </div>
-                </div>
-            )}
+                        <div className="chatbot-messages">
+                            <AnimatePresence initial={false}>
+                                {messages.map((msg, i) => (
+                                    <motion.div
+                                        key={msg.id || i}
+                                        className={`chat-bubble ${msg.role}`}
+                                        initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                                        layout
+                                    >
+                                        <div dangerouslySetInnerHTML={{ __html: formatMarkdown(msg.content) }} />
+                                    </motion.div>
+                                ))}
+                            </AnimatePresence>
+
+                            {messages.length === 1 && !loading && (
+                                <motion.div
+                                    className="chatbot-suggestions"
+                                    initial={{ opacity: 0, y: 10 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    transition={{ delay: 0.5 }}
+                                >
+                                    <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={() => handleSend("Crea degli appunti riassuntivi su...")} className="suggestion-chip">
+                                        📝 Crea Appunti
+                                    </motion.button>
+                                    <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={() => handleSend("Genera 5 flashcard su...")} className="suggestion-chip">
+                                        🎴 Genera Flashcard
+                                    </motion.button>
+                                    <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={() => handleSend("Puoi spiegarmi in modo semplice...")} className="suggestion-chip">
+                                        🧠 Spiegami un concetto
+                                    </motion.button>
+                                </motion.div>
+                            )}
+                            <div ref={messagesEndRef} />
+                        </div>
+
+                        <div className="chatbot-input-area">
+                            <input
+                                ref={inputRef}
+                                type="text"
+                                placeholder="Chiedi all'AI..."
+                                value={input}
+                                onChange={e => setInput(e.target.value)}
+                                onKeyDown={handleKeyDown}
+                                disabled={loading}
+                            />
+                            <button
+                                className="chatbot-send-btn"
+                                onClick={handleSend}
+                                disabled={loading || !input.trim()}
+                            >
+                                {loading ? <span className="spinner"></span> : <Send size={18} strokeWidth={2.5} />}
+                            </button>
+                        </div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
         </>
     )
 }

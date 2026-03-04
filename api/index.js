@@ -120,7 +120,7 @@ async function getAIText(result) {
 }
 
 async function generateWithFallback(prompt, feature) {
-    const modelsToTry = ["gemini-2.0-flash", "gemini-1.5-flash", "gemini-1.5-flash-8b", "gemini-1.5-pro"];
+    const modelsToTry = ["gemini-2.5-flash", "gemini-2.5-pro", "gemini-2.0-flash"];
     const currentAI = getAIForFeature(feature);
 
     if (!currentAI) throw new Error("Nessuna chiave API Gemini configurata per il sistema.");
@@ -248,19 +248,23 @@ Copri i punti chiave dell'argomento. Non aggiungere NULLA fuori dall'array JSON.
 
 app.post("/api/generate-duel-quiz", async (req, res) => {
     try {
-        const { subject, context, amount = 5 } = req.body;
+        const { subject, context, amount = 5, difficulty = 'Medio' } = req.body;
         let prompt = "";
         const jsonFormat = `[{"question": "domanda?", "options": ["A", "B", "C", "D"], "correct": 0}]`;
 
         if (context && context.trim().length > 0) {
             prompt = `Analizza il seguente testo e genera esattamente ${amount} domande a risposta multipla basate sul suo contenuto.
+Livello di difficoltà richiesto: ${difficulty.toUpperCase()}.
+IMPORTANTE: Genera TUTTO in lingua italiana (domande e risposte).
 Restituisci SOLO un array JSON valido, senza markdown, senza testo aggiuntivo.
 Formato: ${jsonFormat}
 Dove "correct" è l'indice (0-3) della risposta esatta.
 Testo: ${context.substring(0, 8000)}`;
         } else {
             const finalSubject = subject || "Cultura Generale";
-            prompt = `Genera esattamente ${amount} domande a risposta multipla di alto livello su: "${finalSubject}".
+            prompt = `Genera esattamente ${amount} domande a risposta multipla su: "${finalSubject}".
+Livello di difficoltà richiesto: ${difficulty.toUpperCase()}. Le domande devono essere modellate rigorosamente su questa difficoltà.
+IMPORTANTE: Genera TUTTO in lingua italiana (domande e risposte).
 Restituisci SOLO un array JSON valido, senza markdown, senza testo aggiuntivo.
 Formato: ${jsonFormat}
 Dove "correct" è l'indice (0-3) della risposta esatta.`;
@@ -286,6 +290,159 @@ Dove "correct" è l'indice (0-3) della risposta esatta.`;
     }
 });
 
+// ============================================
+// DUEL MULTIPLAYER SERVER-SIDE ENDPOINTS
+// All Supabase operations happen server-to-server (no CORS)
+// ============================================
+
+async function supabaseRest(path, method = 'GET', body = null, extraHeaders = {}) {
+    const headers = {
+        'apikey': SUPABASE_ANON_KEY,
+        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+        'Content-Type': 'application/json',
+        'Prefer': 'return=representation',
+        ...extraHeaders
+    };
+    const opts = { method, headers };
+    if (body && method !== 'GET') opts.body = JSON.stringify(body);
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/${path}`, opts);
+    const text = await res.text();
+    let data;
+    try { data = JSON.parse(text); } catch { data = text; }
+    if (!res.ok) throw new Error(typeof data === 'object' ? JSON.stringify(data) : data);
+    return data;
+}
+
+// CREATE ROOM
+app.post("/api/duel/create-room", async (req, res) => {
+    try {
+        const { code, subject, quiz, playerName } = req.body;
+        if (!code || !quiz || !playerName) return res.status(400).json({ error: "Campi mancanti" });
+
+        const rooms = await supabaseRest('quiz_rooms', 'POST', [{ code, subject, ai_data: quiz, status: 'waiting' }]);
+        const room = Array.isArray(rooms) ? rooms[0] : rooms;
+
+        await supabaseRest('quiz_players', 'POST', [{ room_id: room.id, username: playerName, score: 0, is_ready: true }]);
+
+        res.json({ room });
+    } catch (e) {
+        console.error("[DUEL_CREATE]", e.message);
+        res.status(500).json({ error: e.message });
+    }
+});
+
+// JOIN ROOM
+app.post("/api/duel/join-room", async (req, res) => {
+    try {
+        const { code, playerName } = req.body;
+        if (!code || !playerName) return res.status(400).json({ error: "Campi mancanti" });
+
+        const rooms = await supabaseRest(`quiz_rooms?code=eq.${encodeURIComponent(code)}&select=*`);
+        if (!rooms || rooms.length === 0) return res.status(404).json({ error: "Codice non trovato." });
+        const room = rooms[0];
+        if (room.status !== 'waiting') return res.status(400).json({ error: "Partita già iniziata o terminata." });
+
+        await supabaseRest('quiz_players', 'POST', [{ room_id: room.id, username: playerName, score: 0, is_ready: true }]);
+
+        res.json({ room });
+    } catch (e) {
+        console.error("[DUEL_JOIN]", e.message);
+        res.status(500).json({ error: e.message });
+    }
+});
+
+// POLL ROOM STATUS
+app.get("/api/duel/room-status/:roomId", async (req, res) => {
+    try {
+        const { roomId } = req.params;
+        const rooms = await supabaseRest(`quiz_rooms?id=eq.${roomId}&select=*`);
+        const room = rooms?.[0];
+        if (!room) return res.status(404).json({ error: "Stanza non trovata" });
+
+        const players = await supabaseRest(`quiz_players?room_id=eq.${roomId}&select=*&order=created_at.asc`);
+
+        res.json({ room, players: players || [] });
+    } catch (e) {
+        console.error("[DUEL_POLL]", e.message);
+        res.status(500).json({ error: e.message });
+    }
+});
+
+// LAUNCH DUEL (Host sets status to active)
+app.post("/api/duel/launch", async (req, res) => {
+    try {
+        const { roomId } = req.body;
+        if (!roomId) return res.status(400).json({ error: "roomId mancante" });
+
+        await supabaseRest(`quiz_rooms?id=eq.${roomId}`, 'PATCH', { status: 'active' });
+        res.json({ ok: true });
+    } catch (e) {
+        console.error("[DUEL_LAUNCH]", e.message);
+        res.status(500).json({ error: e.message });
+    }
+});
+
+// UPDATE SCORE
+app.post("/api/duel/update-score", async (req, res) => {
+    try {
+        const { roomId, playerName, score, questionIndex } = req.body;
+        if (!roomId || !playerName) return res.status(400).json({ error: "Campi mancanti" });
+
+        await supabaseRest(
+            `quiz_players?room_id=eq.${roomId}&username=eq.${encodeURIComponent(playerName)}`,
+            'PATCH',
+            { score, current_question_index: questionIndex }
+        );
+        res.json({ ok: true });
+    } catch (e) {
+        console.error("[DUEL_SCORE]", e.message);
+        res.status(500).json({ error: e.message });
+    }
+});
+
+// JOIN AS SPECTATOR (3rd+ person)
+app.post("/api/duel/join-spectator", async (req, res) => {
+    try {
+        const { code, playerName } = req.body;
+        if (!code || !playerName) return res.status(400).json({ error: "Campi mancanti" });
+
+        const rooms = await supabaseRest(`quiz_rooms?code=eq.${encodeURIComponent(code)}&select=*`);
+        if (!rooms || rooms.length === 0) return res.status(404).json({ error: "Codice non trovato." });
+        const room = rooms[0];
+
+        // Get current players
+        const players = await supabaseRest(`quiz_players?room_id=eq.${room.id}&select=*&order=created_at.asc`);
+
+        res.json({ room, players: players || [], role: 'spectator' });
+    } catch (e) {
+        console.error("[DUEL_SPECTATOR]", e.message);
+        res.status(500).json({ error: e.message });
+    }
+});
+
+// IN-MEMORY LIVE CHAT (per-room)
+const roomChats = {};
+
+app.post("/api/duel/chat/send", (req, res) => {
+    const { roomId, username, message } = req.body;
+    if (!roomId || !username || !message) return res.status(400).json({ error: "Campi mancanti" });
+
+    if (!roomChats[roomId]) roomChats[roomId] = [];
+    const chatMsg = { username, message: message.substring(0, 200), timestamp: Date.now() };
+    roomChats[roomId].push(chatMsg);
+    // Keep only last 50 messages per room
+    if (roomChats[roomId].length > 50) roomChats[roomId] = roomChats[roomId].slice(-50);
+
+    res.json({ ok: true });
+});
+
+app.get("/api/duel/chat/:roomId", (req, res) => {
+    const { roomId } = req.params;
+    const since = parseInt(req.query.since) || 0;
+    const msgs = (roomChats[roomId] || []).filter(m => m.timestamp > since);
+    res.json({ messages: msgs });
+});
+
 app.post("/api/chat", async (req, res) => {
     try {
         const currentAI = getAIForFeature('chat');
@@ -308,7 +465,7 @@ app.post("/api/chat", async (req, res) => {
         ];
         const contents = normalizeGeminiHistory(rawContents);
 
-        const modelsToTry = ["gemini-2.0-flash", "gemini-1.5-flash", "gemini-1.5-flash-8b", "gemini-1.5-pro"];
+        const modelsToTry = ["gemini-2.5-flash", "gemini-2.5-pro", "gemini-2.0-flash"];
         let lastError = null;
 
         for (const modelName of modelsToTry) {
@@ -431,7 +588,7 @@ ${documentText.substring(0, 25000)}`;
         ];
         const contents = normalizeGeminiHistory(rawContents);
 
-        const modelsToTry = ["gemini-2.0-flash", "gemini-1.5-flash", "gemini-1.5-pro"];
+        const modelsToTry = ["gemini-2.5-flash", "gemini-2.5-pro", "gemini-2.0-flash"];
         let lastError = null;
 
         for (const modelName of modelsToTry) {
@@ -449,6 +606,33 @@ ${documentText.substring(0, 25000)}`;
         throw lastError || new Error("Generazione document chat fallita su tutti i modelli");
     } catch (e) {
         res.status(500).json({ error: e.message });
+    }
+});
+
+// ============================================
+// DASHBOARD INSIGHT ENDPOINT
+// ============================================
+
+app.post("/api/dashboard-insight", async (req, res) => {
+    try {
+        const { xp, level, streak, pomodoros, tasks } = req.body;
+
+        const prompt = `Sei un coach personale empatico, amichevole e molto umano, esperto in produttività in un'app di studio.
+Analizza in modo incoraggiante e caldo questi dati dello studente:
+- XP Attuali: ${xp}
+- Livello: ${level}
+- Streak (giorni consecutivi di studio): ${streak}
+- Pomodori completati: ${pomodoros}
+- Task urgenti in coda: ${tasks}
+
+Genera UNA SINGOLA FRASE, calda e motivazionale (max 15-20 parole), commentando una cosa positiva che sta andando bene e dando un piccolo consiglio umano su cosa focheggiare, es: "Stai tenendo un ritmo fantastico! Ricordati di fare una pausa prima di affrontare quei task urgenti."
+Non usare nomi come "Sistema" o "Coach". Sii un amico che consiglia. Non usare Markdown o virgolette. Solo testo diretto, in italiano.`;
+
+        const aiText = await generateWithFallback(prompt, 'chat');
+        res.json({ insight: aiText.trim() });
+    } catch (e) {
+        console.error("[DASHBOARD INSIGHT ERR]:", e.message);
+        res.status(500).json({ error: "Errore generazione insight" });
     }
 });
 

@@ -1,212 +1,204 @@
-import { useMemo, useState, useEffect } from 'react'
+import { useState, useEffect } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
+import {
+    Trophy, Swords, Timer, BookOpen, CheckSquare,
+    ArrowRight, Star, Zap, Layout, Activity, Sparkles, PlusCircle
+} from 'lucide-react'
 import { useData } from '../../hooks/useData'
 import { useNavigate } from 'react-router-dom'
-import {
-    Clock, Flame, Play, Pause, SkipForward, SkipBack, MoreHorizontal
-} from 'lucide-react'
-import Skeleton from '../ui/Skeleton'
 import '../../styles/dashboard-pro.css'
 
 export default function DashboardSection() {
-    const { data, loading } = useData()
+    const { data, upcomingTasks, recentNotes } = useData()
     const navigate = useNavigate()
+    const [scrolled, setScrolled] = useState(false)
 
-    const xp = data.stats?.xp || 0
-    const level = data.stats?.level || 1
-    const nextLevelXP = 5000 // Mock threshold based on the image
-    const progress = Math.min(100, Math.max(0, (xp / nextLevelXP) * 100))
+    useEffect(() => {
+        const handleScroll = () => setScrolled(window.scrollY > 20)
+        window.addEventListener('scroll', handleScroll)
+        return () => window.removeEventListener('scroll', handleScroll)
+    }, [])
 
-    const upcomingTasks = useMemo(() => {
-        return (data.tasks || [])
-            .filter(t => !t.completed && t.dueDate)
-            .sort((a, b) => new Date(a.dueDate) - new Date(b.dueDate))
-            .slice(0, 3)
-    }, [data.tasks])
+    const containerVariants = {
+        hidden: { opacity: 0 },
+        visible: {
+            opacity: 1,
+            transition: { staggerChildren: 0.12, delayChildren: 0.1 }
+        }
+    }
 
-    const recentNotes = useMemo(() => {
-        return (data.notes || [])
-            .sort((a, b) => new Date(b.updatedAt || b.createdAt) - new Date(a.updatedAt || a.createdAt))
-            .slice(0, 3)
-    }, [data.notes])
+    const itemVariants = {
+        hidden: { opacity: 0, y: 30, scale: 0.95 },
+        visible: {
+            opacity: 1,
+            y: 0,
+            scale: 1,
+            transition: { type: 'spring', stiffness: 100, damping: 20 }
+        }
+    }
 
-    const streak = data.stats?.currentStreak || 0
-    const totalPomodoros = data.stats?.pomodoros || 0
-    const studyHours = Math.floor((totalPomodoros * 25) / 60) || 0
+    const floatingVariants = {
+        animate: {
+            y: [0, -10, 0],
+            transition: { duration: 4, repeat: Infinity, ease: "easeInOut" }
+        }
+    }
 
-    const radius = 30
-    const circumference = 2 * Math.PI * radius
-    const strokeDashoffset = circumference - (progress / 100) * circumference
-
-    // Mock Pomodoro State for Deep Work Card
-    const [timeLeft, setTimeLeft] = useState(25 * 60)
-    const [isRunning, setIsRunning] = useState(false)
-    const minutes = Math.floor(timeLeft / 60)
-    const seconds = timeLeft % 60
-
-    if (loading) {
-        return (
-            <section className="dashboard-bento animate-fade-in" style={{ padding: '2rem' }}>
-                <Skeleton variant="card" style={{ height: '120px', marginBottom: '1rem' }} />
-                <Skeleton variant="card" style={{ height: '300px' }} />
-            </section>
-        )
+    // Helper for date safety
+    const formatSafeDate = (dateStr, fallback = 'Data non impostata') => {
+        const d = new Date(dateStr)
+        return isNaN(d.getTime()) ? fallback : d.toLocaleDateString('it-IT', { day: '2-digit', month: '2-digit', year: 'numeric' })
     }
 
     return (
-        <section className="dashboard-bento animate-fade-in">
-            {/* ROW 1: Stats Grid */}
-            <div className="bento-header">
-                <h2 className="bento-title">Statistiche</h2>
+        <div className="v3-dashboard-container">
+            <div className="v3-ambient-canvas">
+                <div className="v3-orb orb-1"></div>
+                <div className="v3-orb orb-2"></div>
+                <div className="v3-orb orb-3"></div>
             </div>
 
-            <div className="bento-row grid-3">
-                {/* 1. XP Progress */}
-                <div className="bento-card bento-xp">
-                    <div className="bento-xp-ring">
-                        <svg width="80" height="80" viewBox="0 0 80 80">
-                            <circle cx="40" cy="40" r={radius} fill="transparent" className="ring-bg" strokeWidth="6" />
-                            <circle cx="40" cy="40" r={radius} fill="transparent"
-                                stroke="url(#xpGrad)" strokeWidth="6" strokeLinecap="round"
-                                strokeDasharray={circumference} strokeDashoffset={strokeDashoffset}
-                                className="ring-progress" />
-                            <defs>
-                                <linearGradient id="xpGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                                    <stop offset="0%" stopColor="#6495FF" />
-                                    <stop offset="100%" stopColor="#D946EF" />
-                                </linearGradient>
-                            </defs>
-                        </svg>
-                        <div className="ring-center">
-                            <span className="ring-text">XP</span>
-                        </div>
-                    </div>
-                    <div className="bento-xp-info">
-                        <span className="card-label">Progresso XP</span>
-                        <div className="card-value-row">
-                            <span className="card-value">{xp}</span>
-                            <span className="card-sub">/{nextLevelXP} XP</span>
-                        </div>
-                        <span className="card-bottom">Livello {level}</span>
-                    </div>
-                </div>
+            <motion.section
+                className="v3-hero-section"
+                initial="hidden"
+                animate="visible"
+                variants={containerVariants}
+            >
+                <div className="v3-hero-content">
+                    <motion.div variants={itemVariants} className="v3-hero-badge">
+                        <Sparkles size={14} />
+                        <span>AI Dynamic Workspace</span>
+                    </motion.div>
 
-                {/* 2. Study Hours */}
-                <div className="bento-card">
-                    <div className="card-icon-wrapper" style={{ '--icon-color': '#818CF8' }}>
-                        <Clock size={24} />
-                    </div>
-                    <div className="card-info">
-                        <span className="card-label">Ore di Studio</span>
-                        <div className="card-value-row">
-                            <span className="card-value">{studyHours}</span>
-                            <span className="card-sub">ore</span>
-                        </div>
-                        <span className="card-bottom">Questo mese</span>
-                    </div>
-                    <div className="card-glow" style={{ background: 'rgba(129, 140, 248, 0.15)' }}></div>
-                </div>
+                    <motion.h1 variants={itemVariants} className="v3-display-title">
+                        BENTORNATO,<br />
+                        <span className="v3-gradient-text">{data.user?.name || 'STUDENTE'}</span>
+                    </motion.h1>
 
-                {/* 3. Daily Streak */}
-                <div className="bento-card">
-                    <div className="card-icon-wrapper" style={{ '--icon-color': '#F59E0B' }}>
-                        <Flame size={24} />
-                    </div>
-                    <div className="card-info">
-                        <span className="card-label">Serie di Giorni</span>
-                        <div className="card-value-row">
-                            <span className="card-value">{streak}</span>
-                            <span className="card-sub">giorni</span>
-                        </div>
-                        <span className="card-bottom">Continua così!</span>
-                    </div>
-                    <div className="card-glow" style={{ background: 'rgba(245, 158, 11, 0.15)' }}></div>
-                </div>
-            </div>
-
-            {/* ROW 2: Smart Cards */}
-            <div className="bento-header" style={{ marginTop: '2rem' }}>
-                <h2 className="bento-title">Schede Rapide</h2>
-            </div>
-
-            <div className="bento-row grid-smart">
-                {/* 4. Deep Work (Pomodoro) */}
-                <div className="bento-card card-deep-work">
-                    <div className="deep-work-header">
-                        <h3 className="card-section-title">Concentrazione</h3>
-                    </div>
-                    <div className="deep-work-body">
-                        <div className="timer-inner-card">
-                            <div className="timer-top-row">
-                                <span className="timer-label">Pomodoro</span>
-                                <MoreHorizontal size={18} className="icon-muted" />
-                            </div>
-                            <div className="timer-display">
-                                {String(minutes).padStart(2, '0')}:{String(seconds).padStart(2, '0')}
-                            </div>
-                            <button className="timer-start-btn" onClick={() => setIsRunning(!isRunning)}>
-                                {isRunning ? 'Pausa' : 'Inizia Focus'}
-                            </button>
-                            <div className="timer-controls">
-                                <button className="timer-ctrl-btn"><SkipBack size={14} /></button>
-                                <button className="timer-ctrl-btn" onClick={() => setIsRunning(!isRunning)}>
-                                    {isRunning ? <Pause size={14} /> : <Play size={14} />}
-                                </button>
-                                <button className="timer-ctrl-btn"><SkipForward size={14} /></button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                {/* 5. Recent Notes */}
-                <div className="bento-card bento-list-card">
-                    <div className="card-section-header">
-                        <h3 className="card-section-title">Note Recenti</h3>
-                        <button className="icon-btn-muted" onClick={() => navigate('/app/notes')}>
-                            <MoreHorizontal size={18} />
+                    <motion.div variants={itemVariants} className="v3-hero-actions">
+                        <button className="v3-btn-primary" onClick={() => navigate('/app/notes/new')}>
+                            <PlusCircle size={20} />
+                            <span>Nuova Nota</span>
                         </button>
+                        <button className="v3-btn-secondary" onClick={() => navigate('/app/duel')}>
+                            <Swords size={20} />
+                            <span>L'Arena</span>
+                        </button>
+                    </motion.div>
+                </div>
+
+                <motion.div className="v3-floating-metrics" variants={floatingVariants} animate="animate">
+                    <div className="metric-pill glass-v3">
+                        <Trophy size={16} />
+                        <span>Livello {data.gamification?.level || 1}</span>
                     </div>
-                    <div className="bento-list">
-                        {recentNotes.length === 0 ? (
-                            <div className="empty-muted">Nessuna nota recente.</div>
-                        ) : recentNotes.map(n => (
-                            <div key={n.id} className="bento-list-item glow-item" onClick={() => navigate('/app/notes?id=' + n.id)}>
-                                <h4 className="item-title">{n.title || 'Nota Senza Titolo'}</h4>
-                                <p className="item-desc">
-                                    Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore...
-                                </p>
-                                <span className="item-meta">Ultima modifica recente</span>
-                            </div>
+                    <div className="metric-pill glass-v3 highlight">
+                        <Zap size={16} />
+                        <span>{data.gamification?.streak || 0} Giorni</span>
+                    </div>
+                </motion.div>
+            </motion.section>
+
+            <motion.div
+                className="v3-organic-grid"
+                initial="hidden"
+                whileInView="visible"
+                viewport={{ once: true }}
+                variants={containerVariants}
+            >
+                {/* 1. ARENA SHOWCASE */}
+                <motion.div className="v3-card arena-showcase-v3 glass-v3 col-2" variants={itemVariants}>
+                    <div className="v3-badge-live">LIVE</div>
+                    <div className="v3-card-inner">
+                        <div className="v3-card-visual">
+                            <div className="arena-glow-v3"></div>
+                            <Swords size={48} />
+                        </div>
+                        <div className="v3-card-info">
+                            <h3>L'Arena</h3>
+                            <p>Sfida altri studenti in tempo reale e scala la classifica globale.</p>
+                            <button className="v3-card-link" onClick={() => navigate('/app/duel')}>
+                                Entra Ora <ArrowRight size={16} />
+                            </button>
+                        </div>
+                    </div>
+                </motion.div>
+
+                {/* 2. ACTIVITY TREND */}
+                <motion.div className="v3-card activity-card-v3 glass-v3" variants={itemVariants}>
+                    <div className="v3-card-header">
+                        <Activity size={20} />
+                        <span>Sinergia di Studio</span>
+                    </div>
+                    <div className="v3-trend-viz">
+                        {[40, 70, 45, 90, 65, 80, 50].map((h, i) => (
+                            <motion.div
+                                key={i}
+                                className="v3-bar"
+                                initial={{ height: 0 }}
+                                whileInView={{ height: `${h}%` }}
+                                transition={{ delay: 0.2 + (i * 0.1), duration: 1 }}
+                            />
                         ))}
                     </div>
-                </div>
+                </motion.div>
 
-                {/* 6. Upcoming Tasks */}
-                <div className="bento-card bento-list-card card-tasks">
-                    <div className="card-section-header">
-                        <h3 className="card-section-title">Prossimi Task</h3>
-                        <button className="icon-btn-muted" onClick={() => navigate('/app/tasks')}>
-                            <MoreHorizontal size={18} />
-                        </button>
+                {/* 3. AI COACHING */}
+                <motion.div className="v3-card coaching-card-v3 glass-v3 highlight" variants={itemVariants}>
+                    <div className="v3-card-header">
+                        <Sparkles size={20} />
+                        <span>AI Coaching</span>
                     </div>
-                    <div className="bento-list">
-                        {upcomingTasks.length === 0 ? (
-                            <div className="empty-muted">Nessun task in scadenza.</div>
-                        ) : upcomingTasks.map((t, idx) => {
-                            const colors = ['#F43F5E', '#4ADE80', '#6495FF']
-                            const dotColor = colors[idx % colors.length]
-                            return (
-                                <div key={t.id} className="bento-list-item outline-item" onClick={() => navigate('/app/tasks')}>
-                                    <div className="task-title-row">
-                                        <div className="task-dot" style={{ backgroundColor: dotColor }} />
-                                        <h4 className="item-title task-title">{t.description}</h4>
-                                    </div>
-                                    <span className="item-meta task-meta">In Scadenza</span>
+                    <p>"Oggi è il momento perfetto per approfondire Matematica. La tua costanza sta dando frutti straordinari."</p>
+                </motion.div>
+
+                {/* 4. TASKS */}
+                <motion.div className="v3-card tasks-card-v3 glass-v3 col-2" variants={itemVariants}>
+                    <div className="v3-card-header">
+                        <CheckSquare size={20} />
+                        <span>Compiti Imminenti</span>
+                    </div>
+                    <div className="v3-item-list">
+                        {(upcomingTasks || []).slice(0, 3).map(t => (
+                            <div key={t.id} className="v3-list-item">
+                                <div className="v3-dot"></div>
+                                <div className="v3-item-content">
+                                    <h4>{t.description}</h4>
+                                    <span>{formatSafeDate(t.dueDate)}</span>
                                 </div>
-                            )
-                        })}
+                            </div>
+                        ))}
+                        {(!upcomingTasks || upcomingTasks.length === 0) && (
+                            <div className="v3-empty-msg">Ottimo lavoro! Nessun compito per ora.</div>
+                        )}
                     </div>
-                </div>
-            </div>
-        </section>
+                </motion.div>
+
+                {/* 5. NOTES */}
+                <motion.div className="v3-card notes-card-v3 glass-v3" variants={itemVariants}>
+                    <div className="v3-card-header">
+                        <BookOpen size={20} />
+                        <span>Note Recenti</span>
+                    </div>
+                    <div className="v3-mini-notes">
+                        {(recentNotes || []).slice(0, 2).map(n => (
+                            <div key={n.id} className="v3-mini-note" onClick={() => navigate(`/app/notes?id=${n.id}`)}>
+                                <h5>{n.title || 'Senza Titolo'}</h5>
+                                <span>{formatSafeDate(n.updatedAt || n.createdAt, 'Recentemente')}</span>
+                            </div>
+                        ))}
+                        {(!recentNotes || recentNotes.length === 0) && (
+                            <div className="v3-empty-msg">Crea la tua prima nota!</div>
+                        )}
+                    </div>
+                </motion.div>
+
+                {/* 6. FOCUS AREA */}
+                <motion.div className="v3-card focus-card-v3 glass-v3" variants={itemVariants} onClick={() => navigate('/app/pomodoro')}>
+                    <Timer size={32} />
+                    <span>Smart Focus</span>
+                </motion.div>
+            </motion.div>
+        </div>
     )
 }

@@ -243,7 +243,7 @@ textarea:focus {
 }
 
 /* ══════════════════════════════════════════════
-   TASK GAMIFICATION STYLES
+   TASK GAMIFICATION STYLES (MINIMAL & ELEGANT)
    ══════════════════════════════════════════════ */
 
 .task-stats {
@@ -254,42 +254,42 @@ textarea:focus {
 }
 
 .task-stats .stat-card {
-    background: rgba(100, 150, 255, 0.1);
-    border: 1px solid rgba(100, 150, 255, 0.2);
-    border-radius: 12px;
+    background: var(--color-bg-secondary);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
     padding: 1.5rem;
     text-align: center;
     min-height: auto;
+    box-shadow: var(--shadow-sm);
 }
 
 .task-stats .stat-number {
     font-size: 2.5rem;
-    font-weight: 800;
-    color: #6495FF;
+    font-weight: var(--fw-bold);
+    color: var(--color-text);
     margin: 0.5rem 0;
     line-height: 1;
 }
 
 .task-stats .stat-label {
-    text-transform: none;
-    letter-spacing: normal;
-    font-size: 0.85rem;
-    font-weight: 500;
-    color: rgba(255, 255, 255, 0.6);
+    font-size: var(--font-size-sm);
+    font-weight: var(--fw-medium);
+    color: var(--color-text-secondary);
 }
 
 .progress-bar {
-    height: 4px;
-    background: rgba(255, 255, 255, 0.1);
-    border-radius: 2px;
+    height: 6px;
+    background: var(--color-bg-tertiary);
+    border-radius: var(--radius-full);
     overflow: hidden;
     margin-top: 0.75rem;
 }
 
 .progress-fill {
     height: 100%;
-    background: linear-gradient(90deg, #6495FF, #FFD700);
-    transition: width 0.3s ease;
+    background: var(--color-accent);
+    transition: width 0.4s var(--ease-out);
+    border-radius: var(--radius-full);
 }
 
 .task-form {
@@ -304,15 +304,14 @@ textarea:focus {
 }
 
 .group-title {
-    font-size: 1.1rem;
-    font-weight: 600;
+    font-size: var(--font-size-lg);
+    font-weight: var(--fw-semibold);
     margin-bottom: 1rem;
-    color: #fff;
+    color: var(--color-text);
 }
 
 .group-title.highlight {
-    color: #FFD60A;
-    font-size: 1.2rem;
+    color: var(--color-warning);
 }
 
 .task-list {
@@ -325,24 +324,31 @@ textarea:focus {
     display: flex;
     align-items: center;
     gap: 1rem;
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 10px;
+    background: var(--color-bg-elevated);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
     padding: 1.25rem;
-    transition: all 0.2s;
+    transition: all 0.2s var(--ease-out);
+    box-shadow: var(--shadow-sm);
 }
 
 .task-item:hover {
-    background: rgba(255, 255, 255, 0.08);
-    transform: translateX(4px);
+    background: var(--color-bg-secondary);
+    border-color: var(--color-border-strong);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
 }
 
 .task-item.completed {
     opacity: 0.6;
+    background: var(--color-bg-tertiary);
+    box-shadow: none;
+    transform: none;
 }
 
 .task-item.completed h4 {
     text-decoration: line-through;
+    color: var(--color-text-tertiary);
 }
 
 .task-checkbox {
@@ -350,11 +356,16 @@ textarea:focus {
     border: none;
     cursor: pointer;
     padding: 0;
-    color: #6495FF;
+    color: var(--color-text-tertiary);
+    transition: color 0.2s;
     display: flex;
     align-items: center;
     justify-content: center;
     min-width: 40px;
+}
+
+.task-checkbox:hover {
+    color: var(--color-success);
 }
 
 .task-item .task-content {
@@ -363,36 +374,41 @@ textarea:focus {
 
 .task-item .task-content h4 {
     margin: 0 0 0.5rem 0;
-    color: #fff;
+    color: var(--color-text);
     font-size: 1rem;
+    font-weight: var(--fw-medium);
 }
 
 .task-item .task-meta {
     display: flex;
     gap: 0.75rem;
     flex-wrap: wrap;
-    font-size: 0.85rem;
+    font-size: var(--font-size-xs);
 }
 
 .subject-badge,
 .priority-badge,
 .due-date {
-    padding: 0.3rem 0.75rem;
-    background: rgba(255, 255, 255, 0.08);
-    border-radius: 4px;
-    color: rgba(255, 255, 255, 0.8);
+    padding: 0.25rem 0.75rem;
+    background: var(--color-bg-tertiary);
+    border-radius: var(--radius-full);
+    color: var(--color-text-secondary);
     display: inline-flex;
     align-items: center;
     gap: 0.3rem;
+    font-weight: var(--fw-medium);
 }
 
 .task-xp {
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    font-weight: 600;
-    color: #FFD60A;
+    font-weight: var(--fw-semibold);
+    color: var(--color-accent);
     white-space: nowrap;
+    background: var(--color-accent-bg);
+    padding: 0.25rem 0.75rem;
+    border-radius: var(--radius-full);
 }
 
 .task-delete {
@@ -400,14 +416,15 @@ textarea:focus {
     border: none;
     cursor: pointer;
     padding: 0.5rem;
-    color: #FF3B30;
+    color: var(--color-danger);
     transition: all 0.2s;
-    display: flex;
-    align-items: center;
+    opacity: 0.5;
+    border-radius: var(--radius-full);
 }
 
 .task-delete:hover {
-    transform: scale(1.2);
+    opacity: 1;
+    background: rgba(239, 68, 68, 0.1);
 }
 
 @media (max-width: 768px) {

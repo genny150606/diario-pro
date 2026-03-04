@@ -1,8 +1,8 @@
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect, useCallback } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
 import { useAuth } from '../../hooks/useAuth'
 import { useData } from '../../hooks/useData'
-import { supabase } from '../../lib/supabase'
-import { Swords, Target, Edit3, FileText, Paperclip, Clock, Key, User, Trophy, Play, RotateCcw, ChevronLeft, Sparkles, BookOpen, GraduationCap, Calculator, Globe, History, Atom, Brain, Zap, PlusCircle, X, Bot } from 'lucide-react'
+import { Swords, Target, Edit3, FileText, Paperclip, Clock, Key, User, Trophy, Play, RotateCcw, ChevronLeft, Sparkles, BookOpen, GraduationCap, Calculator, Globe, History, Atom, Brain, Zap, PlusCircle, X, Bot, Send, Eye, MessageCircle } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import './DuelSection.css'
 
@@ -35,6 +35,7 @@ export default function DuelSection() {
     const [joinCodeInput, setJoinCodeInput] = useState('')
     const [playerName, setPlayerName] = useState('')
     const [questionAmount, setQuestionAmount] = useState(5)
+    const [difficulty, setDifficulty] = useState('Medio')
 
     const [questions, setQuestions] = useState([])
     const [currentIndex, setCurrentIndex] = useState(0)
@@ -45,8 +46,16 @@ export default function DuelSection() {
     const [countdownNumber, setCountdownNumber] = useState(3)
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState('')
+    const [isAnswering, setIsAnswering] = useState(false)
+    const [isSpectator, setIsSpectator] = useState(false)
+    const [chatMessages, setChatMessages] = useState([])
+    const [chatInput, setChatInput] = useState('')
     const timerRef = useRef(null)
     const pollIntervalRef = useRef(null)
+    const answerTimeoutRef = useRef(null)
+    const chatPollRef = useRef(null)
+    const lastChatTimestamp = useRef(0)
+    const chatEndRef = useRef(null)
 
     const apiUrl = import.meta.env.VITE_API_URL || (import.meta.env.DEV ? '' : 'https://diario-pro.vercel.app')
 
@@ -63,6 +72,8 @@ export default function DuelSection() {
         return () => {
             if (pollIntervalRef.current) clearInterval(pollIntervalRef.current)
             if (timerRef.current) clearInterval(timerRef.current)
+            if (answerTimeoutRef.current) clearTimeout(answerTimeoutRef.current)
+            if (chatPollRef.current) clearInterval(chatPollRef.current)
         }
     }, [])
 
@@ -84,25 +95,44 @@ export default function DuelSection() {
         }
     }, [state, currentRoom])
 
+    // Chat polling
+    useEffect(() => {
+        if (currentRoom?.id && [DUEL_STATES.WAITING, DUEL_STATES.PLAYING, DUEL_STATES.COUNTDOWN].includes(state)) {
+            chatPollRef.current = setInterval(async () => {
+                try {
+                    const res = await fetch(`${apiUrl}/api/duel/chat/${currentRoom.id}?since=${lastChatTimestamp.current}`)
+                    if (!res.ok) return
+                    const { messages } = await res.json()
+                    if (messages.length > 0) {
+                        setChatMessages(prev => [...prev, ...messages])
+                        lastChatTimestamp.current = messages[messages.length - 1].timestamp
+                        setTimeout(() => chatEndRef.current?.scrollIntoView({ behavior: 'smooth' }), 100)
+                    }
+                } catch { }
+            }, 2000)
+        }
+        return () => { if (chatPollRef.current) clearInterval(chatPollRef.current) }
+    }, [state, currentRoom?.id])
+
+    const sendChatMessage = async () => {
+        if (!chatInput.trim() || !currentRoom?.id) return
+        try {
+            await fetch(`${apiUrl}/api/duel/chat/send`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ roomId: currentRoom.id, username: playerName, message: chatInput.trim() })
+            })
+            setChatInput('')
+        } catch { }
+    }
+
     const pollRoomStatus = async () => {
         if (!currentRoom?.id) return
 
         try {
-            const { data: room, error: roomErr } = await supabase
-                .from('quiz_rooms')
-                .select('*')
-                .eq('id', currentRoom.id)
-                .single()
-
-            if (roomErr) throw roomErr
-
-            const { data: playersList, error: pErr } = await supabase
-                .from('quiz_players')
-                .select('*')
-                .eq('room_id', currentRoom.id)
-                .order('created_at', { ascending: true })
-
-            if (pErr) throw pErr
+            const res = await fetch(`${apiUrl}/api/duel/room-status/${currentRoom.id}`)
+            if (!res.ok) throw new Error('Poll failed')
+            const { room, players: playersList } = await res.json()
 
             setPlayers(playersList || [])
             setCurrentRoom(room)
@@ -114,10 +144,9 @@ export default function DuelSection() {
     const pollPlayersScore = async () => {
         if (!currentRoom?.id) return
         try {
-            const { data: playersList } = await supabase
-                .from('quiz_players')
-                .select('username, score, current_question_index')
-                .eq('room_id', currentRoom.id)
+            const res = await fetch(`${apiUrl}/api/duel/room-status/${currentRoom.id}`)
+            if (!res.ok) return
+            const { players: playersList } = await res.json()
 
             if (playersList) setPlayers(playersList)
         } catch (err) {
@@ -171,10 +200,10 @@ export default function DuelSection() {
         setLoading(true)
         setError('')
         try {
-            let body = { subject: 'Cultura Generale', context: '', amount: questionAmount }
+            let body = { subject: 'Cultura Generale', context: '', amount: questionAmount, difficulty }
             if (sourceType === 'subject') body.subject = subject
             else if (sourceType === 'notes') {
-                const note = appData?.notes?.find(n => n.id.toString() === selectedNoteId.toString())
+                const note = appData?.notes?.find(n => String(n.id) === String(selectedNoteId))
                 if (!note) throw new Error('Seleziona un appunto.')
                 body.subject = `Note: ${note.title}`; body.context = note.content
             } else if (sourceType === 'pdf') {
@@ -204,17 +233,25 @@ export default function DuelSection() {
             const { quiz } = responseData
             if (!quiz || quiz.length === 0) throw new Error("L'AI non ha generato domande.")
 
+            // Validate each question has the correct structure
+            const validQuiz = quiz.filter(q => q.question && Array.isArray(q.options) && q.options.length >= 2 && typeof q.correct === 'number')
+            if (validQuiz.length === 0) throw new Error("Le domande generate non hanno il formato corretto. Riprova.")
+
             const code = Math.random().toString(36).substring(2, 6).toUpperCase()
-            const { data: room, error: rErr } = await supabase
-                .from('quiz_rooms')
-                .insert([{ code, subject: body.subject, ai_data: quiz, status: 'waiting' }])
-                .select().single()
-            if (rErr) throw rErr
 
-            // Add host to players
-            await supabase.from('quiz_players').insert([{ room_id: room.id, username: playerName, score: 0, is_ready: true }])
+            // Create room via server-side API (no CORS issues)
+            const roomRes = await fetch(`${apiUrl}/api/duel/create-room`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ code, subject: body.subject, quiz: validQuiz, playerName })
+            })
+            if (!roomRes.ok) {
+                const errData = await roomRes.json().catch(() => ({}))
+                throw new Error(errData.error || 'Errore creazione stanza')
+            }
+            const { room } = await roomRes.json()
 
-            setQuestions(quiz)
+            setQuestions(validQuiz)
             setRoomCode(code)
             setCurrentRoom(room)
             setIsHost(true)
@@ -228,36 +265,106 @@ export default function DuelSection() {
         }
     }
 
+    // SOLO PLAY (no Supabase needed)
+    const handleSoloPlay = async () => {
+        setLoading(true)
+        setError('')
+        try {
+            let body = { subject: 'Cultura Generale', context: '', amount: questionAmount, difficulty }
+            if (sourceType === 'subject') body.subject = subject
+            else if (sourceType === 'notes') {
+                const note = appData?.notes?.find(n => String(n.id) === String(selectedNoteId))
+                if (!note) throw new Error('Seleziona un appunto.')
+                body.subject = `Note: ${note.title}`; body.context = note.content
+            } else if (sourceType === 'pdf') {
+                if (!pdfText.trim()) throw new Error('Carica un file.')
+                body.subject = `Document: ${pdfName || 'Manuale'}`; body.context = pdfText
+            }
+
+            const response = await fetch(`${apiUrl}/api/generate-duel-quiz`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(body)
+            })
+
+            const responseText = await response.text()
+            let responseData = {}
+            try { responseData = JSON.parse(responseText) } catch (e) { }
+
+            if (!response.ok) {
+                let errorMsg = responseData.error || responseText || 'Errore generazione quiz AI.'
+                if (String(errorMsg).includes('429')) errorMsg = 'Quota API esaurita. Riprova più tardi.'
+                else errorMsg = `[Errore]: ${String(errorMsg)}`
+                throw new Error(errorMsg)
+            }
+
+            const { quiz } = responseData
+            if (!quiz || quiz.length === 0) throw new Error("L'AI non ha generato domande.")
+
+            const validQuiz = quiz.filter(q => q.question && Array.isArray(q.options) && q.options.length >= 2 && typeof q.correct === 'number')
+            if (validQuiz.length === 0) throw new Error("Le domande generate non hanno il formato corretto. Riprova.")
+
+            // Skip Supabase entirely — just set local state and start
+            setQuestions(validQuiz)
+            setRoomCode('SOLO')
+            setCurrentRoom(null)
+            setIsHost(true)
+            setPlayers([{ username: playerName, is_ready: true, score: 0 }])
+            startCountdown() // Go directly to countdown, no waiting room
+        } catch (err) {
+            console.error('[SOLO_PLAY_ERR]', err)
+            setError(err?.message || err?.error_description || String(err) || 'Errore Sconosciuto')
+        } finally {
+            setLoading(false)
+        }
+    }
+
     // JOIN MATCH
     const handleJoinMatch = async () => {
         if (!joinCodeInput) return setError('Inserisci un codice.')
         setLoading(true)
         setError('')
         try {
-            const { data: room, error: rErr } = await supabase
-                .from('quiz_rooms')
-                .select('*')
-                .eq('code', joinCodeInput.toUpperCase().trim())
-                .maybeSingle()
-            if (rErr) throw rErr
-            if (!room) throw new Error('Codice non trovato.')
-            if (room.status !== 'waiting') throw new Error('Partita già iniziata o terminata.')
+            // First try joining as player
+            const res = await fetch(`${apiUrl}/api/duel/join-room`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ code: joinCodeInput.toUpperCase().trim(), playerName })
+            })
+            const data = await res.json()
 
-            // Join as player
-            const { error: pErr } = await supabase
-                .from('quiz_players')
-                .insert([{ room_id: room.id, username: playerName, score: 0, is_ready: true }])
-            if (pErr) throw pErr
+            if (res.ok) {
+                // Joined as player
+                const room = data.room
+                setQuestions(room.ai_data || [])
+                setRoomCode(room.code)
+                setCurrentRoom(room)
+                setIsHost(false)
+                setIsSpectator(false)
+                setState(DUEL_STATES.WAITING)
+            } else if (res.status === 400 && data.error?.includes('iniziata')) {
+                // Room already active — join as spectator
+                const specRes = await fetch(`${apiUrl}/api/duel/join-spectator`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ code: joinCodeInput.toUpperCase().trim(), playerName })
+                })
+                const specData = await specRes.json()
+                if (!specRes.ok) throw new Error(specData.error || 'Errore ingresso spettatore')
 
-            setQuestions(room.ai_data || [])
-            setRoomCode(room.code)
-            setCurrentRoom(room)
-            setIsHost(false)
-            setState(DUEL_STATES.WAITING)
-            // React useEffect will start polling on next render
+                setQuestions(specData.room.ai_data || [])
+                setRoomCode(specData.room.code)
+                setCurrentRoom(specData.room)
+                setPlayers(specData.players || [])
+                setIsHost(false)
+                setIsSpectator(true)
+                setState(specData.room.status === 'active' ? DUEL_STATES.PLAYING : DUEL_STATES.WAITING)
+            } else {
+                throw new Error(data.error || 'Errore ingresso stanza')
+            }
         } catch (err) {
             console.error('[JOIN_MATCH_ERR]', err)
-            setError(err?.message || err?.error_description || String(err) || 'Errore Sconosciuto')
+            setError(err?.message || String(err))
         } finally {
             setLoading(false)
         }
@@ -266,13 +373,32 @@ export default function DuelSection() {
     const handleLaunchDuel = async () => {
         if (!isHost || players.length < 2) return
         try {
-            await supabase.from('quiz_rooms').update({ status: 'active' }).eq('id', currentRoom.id)
+            await fetch(`${apiUrl}/api/duel/launch`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ roomId: currentRoom.id })
+            })
         } catch (err) {
             setError('Errore nell\'avvio della sfida.')
         }
     }
 
-    const startCountdown = () => {
+    const startTimer = useCallback(() => {
+        setTimeLeft(15)
+        if (timerRef.current) clearInterval(timerRef.current)
+        timerRef.current = setInterval(() => {
+            setTimeLeft(prev => {
+                if (prev <= 1) {
+                    clearInterval(timerRef.current)
+                    handleAnswerInternal(false, -1)
+                    return 0
+                }
+                return prev - 1
+            })
+        }, 1000)
+    }, []) // eslint-disable-line
+
+    const startCountdown = useCallback(() => {
         setState(DUEL_STATES.COUNTDOWN)
         setCountdownNumber(3)
         let count = 3
@@ -285,7 +411,7 @@ export default function DuelSection() {
                 startTimer()
             }
         }, 1000)
-    }
+    }, [startTimer])
 
     const [strikeClass, setStrikeClass] = useState('')
 
@@ -294,30 +420,33 @@ export default function DuelSection() {
         if (state === DUEL_STATES.WAITING && currentRoom?.status === 'active') {
             startCountdown()
         }
-    }, [state, currentRoom?.status])
+    }, [state, currentRoom?.status, startCountdown])
 
-    const startTimer = () => {
-        setTimeLeft(15)
-        if (timerRef.current) clearInterval(timerRef.current)
-        timerRef.current = setInterval(() => {
-            setTimeLeft(prev => {
-                if (prev <= 1) {
-                    clearInterval(timerRef.current)
-                    handleAnswer(false, -1)
-                    return 0
-                }
-                return prev - 1
-            })
-        }, 1000)
+    // Hide sidebar during arena
+    useEffect(() => {
+        const isArena = [DUEL_STATES.COUNTDOWN, DUEL_STATES.PLAYING].includes(state)
+        if (isArena) {
+            document.body.classList.add('arena-fullscreen')
+        } else {
+            document.body.classList.remove('arena-fullscreen')
+        }
+        return () => document.body.classList.remove('arena-fullscreen')
+    }, [state])
+
+    // Internal answer handler (used by timer timeout to avoid stale closures)
+    const handleAnswerInternal = (isCorrect, index) => {
+        handleAnswer(isCorrect, index)
     }
 
     const handleAnswer = async (isCorrect, index) => {
+        if (isAnswering) return // Prevent double-clicks
+        setIsAnswering(true)
         clearInterval(timerRef.current)
         setSelectedAnswer(index)
 
         // Visual Arcade Strike Feedback
         setStrikeClass(isCorrect ? 'strike-correct' : 'strike-wrong')
-        setTimeout(() => setStrikeClass(''), 400) // Rimuovi l'animazione dopo 400ms
+        setTimeout(() => setStrikeClass(''), 400)
 
         let newScore = score
         if (isCorrect) {
@@ -330,17 +459,18 @@ export default function DuelSection() {
             setStreak(0)
         }
 
-        // Sync score to DB
+        // Sync score to DB via server-side API
         if (currentRoom?.id) {
-            supabase.from('quiz_players')
-                .update({ score: newScore, current_question_index: currentIndex + 1 })
-                .eq('room_id', currentRoom.id)
-                .eq('username', playerName)
-                .then(() => { })
+            fetch(`${apiUrl}/api/duel/update-score`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ roomId: currentRoom.id, playerName, score: newScore, questionIndex: currentIndex + 1 })
+            }).catch(() => { })
         }
 
-        setTimeout(() => {
+        answerTimeoutRef.current = setTimeout(() => {
             setSelectedAnswer(null)
+            setIsAnswering(false)
             if (currentIndex + 1 >= questions.length) {
                 setState(DUEL_STATES.FINISHED)
             } else {
@@ -353,9 +483,12 @@ export default function DuelSection() {
     const resetQuiz = () => {
         if (pollIntervalRef.current) clearInterval(pollIntervalRef.current)
         if (timerRef.current) clearInterval(timerRef.current)
+        if (answerTimeoutRef.current) clearTimeout(answerTimeoutRef.current)
+        if (chatPollRef.current) clearInterval(chatPollRef.current)
         setState(DUEL_STATES.LOBBY)
         setQuestions([]); setCurrentIndex(0); setScore(0); setStreak(0); setError(''); setStrikeClass('')
-        setRoomCode(''); setCurrentRoom(null); setPlayers([])
+        setRoomCode(''); setCurrentRoom(null); setPlayers([]); setIsAnswering(false); setIsSpectator(false)
+        setChatMessages([]); setChatInput(''); lastChatTimestamp.current = 0
     }
 
     const currentQ = questions[currentIndex]
@@ -363,346 +496,486 @@ export default function DuelSection() {
     const opponent = players?.find(p => p.username !== playerName)
     const isFullscreen = [DUEL_STATES.WAITING, DUEL_STATES.COUNTDOWN, DUEL_STATES.PLAYING, DUEL_STATES.FINISHED].includes(state)
 
+    const AmbientBackground = () => (
+        <div className="ambient-mesh-bg">
+            <div className="mesh-orb orb-1"></div>
+            <div className="mesh-orb orb-2"></div>
+            <div className="mesh-orb orb-3"></div>
+        </div>
+    )
+
     const sectionStyle = isFullscreen ? {
         position: 'fixed',
         top: 0, left: 0, right: 0, bottom: 0,
-        zIndex: 100000, /* Sopra ogni altro Header o Sidebar */
-        background: 'linear-gradient(135deg, #050505 0%, #0a0a0f 100%)',
+        zIndex: 100000,
+        background: 'transparent',
         overflowY: 'auto',
         overflowX: 'hidden',
         minHeight: '100vh',
         padding: '2rem 1rem',
         display: 'flex',
         flexDirection: 'column'
-    } : { maxWidth: '800px', margin: '0 auto' }
+    } : { maxWidth: '1200px', margin: '0 auto', position: 'relative' }
 
     return (
         <section className={`section active ${isFullscreen ? 'duel-fullscreen' : ''} reveal-entrance`} style={sectionStyle}>
-            {state === DUEL_STATES.LOBBY && (
-                <>
-                    <div className="hero">
-                        <h1><span className="gradient-text">Duello AI</span> <Swords size={32} className="inline-icon hero-icon-floating" /></h1>
-                        <p>Sfida un tuo amico in tempo reale con quiz generati dall'intelligenza artificiale</p>
-                    </div>
+            <AmbientBackground />
 
-                    {error && <div className="card" style={{ borderLeft: '3px solid #FF453A', marginBottom: '1rem' }}><p style={{ color: '#FF453A', margin: 0 }}>{error}</p></div>}
+            <AnimatePresence mode="wait">
+                {state === DUEL_STATES.LOBBY && (
+                    <motion.div
+                        key="lobby"
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -20 }}
+                        transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+                    >
+                        <div className="hero">
+                            <motion.h1
+                                initial={{ opacity: 0, scale: 0.9 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                transition={{ delay: 0.2 }}
+                            >
+                                Duello AI <Swords size={32} className="inline-icon hero-icon-floating" />
+                            </motion.h1>
+                            <p>Sfida un tuo amico in tempo reale con quiz generati dall'intelligenza artificiale</p>
+                        </div>
 
-                    <div className="duel-lobby-grid">
-                        <div className="duel-card highlight-card">
-                            <div className="duel-config-container">
-                                <div style={{ marginBottom: '1rem' }}>
-                                    <h3><Target size={22} className="inline-icon text-accent" /> Configura Battaglia</h3>
-                                    <p style={{ color: 'var(--color-text-secondary)', fontSize: '0.9rem' }}>
-                                        Scegli la tua arma e preparati alla sfida.
-                                    </p>
-                                </div>
+                        {error && (
+                            <motion.div
+                                className="duel-card"
+                                style={{ borderLeft: '4px solid #FF453A', marginBottom: '2rem', padding: '1.5rem' }}
+                                initial={{ x: -20, opacity: 0 }}
+                                animate={{ x: 0, opacity: 1 }}
+                            >
+                                <p style={{ color: '#FF453A', margin: 0, fontWeight: 700 }}>{error}</p>
+                            </motion.div>
+                        )}
 
-                                <div className="segmented-control">
-                                    <button className={`segmented-btn ${sourceType === 'subject' ? 'active' : ''}`} onClick={() => setSourceType('subject')}><Globe size={16} /> Materia</button>
-                                    <button className={`segmented-btn ${sourceType === 'notes' ? 'active' : ''}`} onClick={() => setSourceType('notes')}><Edit3 size={16} /> Note</button>
-                                    <button className={`segmented-btn ${sourceType === 'pdf' ? 'active' : ''}`} onClick={() => setSourceType('pdf')}><FileText size={16} /> PDF</button>
-                                </div>
+                        <div className="duel-lobby-grid">
+                            <div className="duel-card highlight-card">
+                                <div className="duel-config-container">
+                                    <div style={{ marginBottom: '1.5rem' }}>
+                                        <h3 style={{ fontSize: '1.5rem', fontWeight: 800, marginBottom: '0.5rem' }}>
+                                            <Target size={24} className="inline-icon text-accent" /> Configura Battaglia
+                                        </h3>
+                                        <p style={{ color: 'var(--color-text-tertiary)', fontSize: '1rem', fontWeight: 500 }}>
+                                            Scegli la tua arma e preparati alla sfida.
+                                        </p>
+                                    </div>
 
-                                {sourceType === 'subject' && (
-                                    <div className="selection-grid reveal-entrance">
-                                        {[
-                                            { name: 'Matematica', icon: <Calculator size={20} /> },
-                                            { name: 'Italiano', icon: <BookOpen size={20} /> },
-                                            { name: 'Storia', icon: <History size={20} /> },
-                                            { name: 'Scienze', icon: <Atom size={20} /> },
-                                            { name: 'Inglese', icon: <Globe size={20} /> },
-                                            { name: 'Filosofia', icon: <Brain size={20} /> },
-                                            { name: 'Fisica', icon: <Zap size={20} /> },
-                                            { name: 'Generale', icon: <Sparkles size={20} /> },
-                                        ].map(s => (
-                                            <div
-                                                key={s.name}
-                                                className={`selection-card ${subject === s.name ? 'active' : ''}`}
-                                                onClick={() => setSubject(s.name)}
+                                    <div className="segmented-control">
+                                        <button className={`segmented-btn ${sourceType === 'subject' ? 'active' : ''}`} onClick={() => setSourceType('subject')}><Globe size={18} /> Materia</button>
+                                        <button className={`segmented-btn ${sourceType === 'notes' ? 'active' : ''}`} onClick={() => setSourceType('notes')}><Edit3 size={18} /> Note</button>
+                                        <button className={`segmented-btn ${sourceType === 'pdf' ? 'active' : ''}`} onClick={() => setSourceType('pdf')}><FileText size={18} /> PDF</button>
+                                    </div>
+
+                                    <AnimatePresence mode="wait">
+                                        {sourceType === 'subject' && (
+                                            <motion.div
+                                                key="subject"
+                                                className="selection-grid"
+                                                initial={{ opacity: 0, x: 20 }}
+                                                animate={{ opacity: 1, x: 0 }}
+                                                exit={{ opacity: 0, x: -20 }}
                                             >
-                                                <div className="icon-box">{s.icon}</div>
-                                                <div className="label">{s.name}</div>
-                                            </div>
-                                        ))}
-                                    </div>
-                                )}
-
-                                {sourceType === 'notes' && (
-                                    <div className="selection-grid reveal-entrance">
-                                        {appData?.notes?.length > 0 ? (
-                                            appData.notes.map(n => (
-                                                <div
-                                                    key={n.id}
-                                                    className={`selection-card ${selectedNoteId === n.id ? 'active' : ''}`}
-                                                    onClick={() => setSelectedNoteId(n.id)}
-                                                >
-                                                    <div className="icon-box"><FileText size={20} /></div>
-                                                    <div className="label">{n.title}</div>
-                                                </div>
-                                            ))
-                                        ) : (
-                                            <p style={{ gridColumn: '1/-1', textAlign: 'center', padding: '1rem', color: 'var(--color-text-tertiary)' }}>
-                                                Nessuna nota trovata.
-                                            </p>
+                                                {[
+                                                    { name: 'Matematica', icon: <Calculator size={22} /> },
+                                                    { name: 'Italiano', icon: <BookOpen size={22} /> },
+                                                    { name: 'Storia', icon: <History size={22} /> },
+                                                    { name: 'Scienze', icon: <Atom size={22} /> },
+                                                    { name: 'Inglese', icon: <Globe size={22} /> },
+                                                    { name: 'Filosofia', icon: <Brain size={22} /> },
+                                                    { name: 'Fisica', icon: <Zap size={22} /> },
+                                                    { name: 'Generale', icon: <Sparkles size={22} /> },
+                                                ].map(s => (
+                                                    <div
+                                                        key={s.name}
+                                                        className={`selection-card ${subject === s.name ? 'active' : ''}`}
+                                                        onClick={() => setSubject(s.name)}
+                                                    >
+                                                        <div className="icon-box">{s.icon}</div>
+                                                        <div className="label">{s.name}</div>
+                                                    </div>
+                                                ))}
+                                            </motion.div>
                                         )}
-                                    </div>
-                                )}
 
-                                {sourceType === 'pdf' && (
-                                    <div className="reveal-entrance">
-                                        <div style={{ marginBottom: '1rem' }}>
-                                            <label className="btn-secondary" style={{ width: '100%', marginBottom: '1rem', textAlign: 'center', cursor: 'pointer', borderRadius: '1rem' }}>
-                                                <input type="file" accept=".pdf,.txt" style={{ display: 'none' }} onChange={handleFileUpload} />
-                                                <Paperclip size={18} /> {pdfName}
-                                            </label>
-                                            <textarea
-                                                className="form-input"
-                                                placeholder="O incolla testo qui per generare i quiz..."
-                                                style={{ height: '120px', borderRadius: '1.25rem', background: 'rgba(255,255,255,0.04)' }}
-                                                value={pdfText}
-                                                onChange={e => setPdfText(e.target.value)}
-                                            />
+                                        {sourceType === 'notes' && (
+                                            <motion.div
+                                                key="notes"
+                                                className="selection-grid"
+                                                initial={{ opacity: 0, x: 20 }}
+                                                animate={{ opacity: 1, x: 0 }}
+                                                exit={{ opacity: 0, x: -20 }}
+                                            >
+                                                {appData?.notes?.length > 0 ? (
+                                                    appData.notes.map(n => (
+                                                        <div
+                                                            key={n.id}
+                                                            className={`selection-card ${selectedNoteId === n.id ? 'active' : ''}`}
+                                                            onClick={() => setSelectedNoteId(n.id)}
+                                                        >
+                                                            <div className="icon-box"><FileText size={22} /></div>
+                                                            <div className="label">{n.title}</div>
+                                                        </div>
+                                                    ))
+                                                ) : (
+                                                    <p style={{ gridColumn: '1/-1', textAlign: 'center', padding: '2rem', color: 'var(--color-text-tertiary)', fontWeight: 600 }}>
+                                                        Nessuna nota trovata.
+                                                    </p>
+                                                )}
+                                            </motion.div>
+                                        )}
+
+                                        {sourceType === 'pdf' && (
+                                            <motion.div
+                                                key="pdf"
+                                                initial={{ opacity: 0, x: 20 }}
+                                                animate={{ opacity: 1, x: 0 }}
+                                                exit={{ opacity: 0, x: -20 }}
+                                            >
+                                                <div style={{ marginBottom: '1.5rem' }}>
+                                                    <label className="btn-secondary" style={{ width: '100%', marginBottom: '1.25rem', textAlign: 'center', cursor: 'pointer', borderRadius: '1.25rem', padding: '1rem' }}>
+                                                        <input type="file" accept=".pdf,.txt" style={{ display: 'none' }} onChange={handleFileUpload} />
+                                                        <Paperclip size={20} /> {pdfName}
+                                                    </label>
+                                                    <textarea
+                                                        className="form-input"
+                                                        placeholder="O incolla testo qui per generare i quiz..."
+                                                        style={{ height: '140px', borderRadius: '1.5rem', background: 'rgba(255,255,255,0.05)', padding: '1.2rem', fontSize: '1rem' }}
+                                                        value={pdfText}
+                                                        onChange={e => setPdfText(e.target.value)}
+                                                    />
+                                                </div>
+                                            </motion.div>
+                                        )}
+                                    </AnimatePresence>
+
+                                    <div className="premium-config-box">
+                                        <div className="slider-header" style={{ marginBottom: '1rem' }}>
+                                            <label style={{ color: 'var(--color-text-secondary)', fontWeight: 700, fontSize: '1rem' }}>Difficoltà</label>
                                         </div>
-                                    </div>
-                                )}
+                                        <div className="segmented-control" style={{ marginBottom: '2rem', width: '100%' }}>
+                                            {['Facile', 'Medio', 'Difficile'].map(lvl => (
+                                                <button
+                                                    key={lvl}
+                                                    className={`segmented-btn ${difficulty === lvl ? 'active' : ''}`}
+                                                    onClick={() => setDifficulty(lvl)}
+                                                    style={{ flex: 1 }}
+                                                >
+                                                    {lvl}
+                                                </button>
+                                            ))}
+                                        </div>
 
-                                <div className="premium-config-box reveal-up">
-                                    <div className="slider-header">
-                                        <label style={{ color: 'var(--color-text-secondary)', fontWeight: 600 }}>Numero di domande</label>
-                                        <div className="slider-val-badge">{questionAmount}</div>
+                                        <div className="slider-header" style={{ marginBottom: '1.2rem' }}>
+                                            <label style={{ color: 'var(--color-text-secondary)', fontWeight: 700, fontSize: '1rem' }}>Numero di domande</label>
+                                            <div className="slider-val-badge">{questionAmount}</div>
+                                        </div>
+                                        <input
+                                            type="range"
+                                            min="3"
+                                            max="20"
+                                            value={questionAmount}
+                                            onChange={e => setQuestionAmount(parseInt(e.target.value))}
+                                            className="premium-slider"
+                                        />
                                     </div>
+
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginTop: '1rem' }}>
+                                        <button
+                                            className="btn-primary flex-center gap-sm"
+                                            onClick={handleSoloPlay}
+                                            disabled={loading}
+                                            style={{ padding: '1.25rem', fontSize: '1.1rem', borderRadius: '1.5rem', boxShadow: '0 20px 40px rgba(91, 159, 243, 0.3)' }}
+                                        >
+                                            {loading ? <><Sparkles size={22} className="spin" /> GENERO ARENA...</> : <><Zap size={22} /> GIOCA DA SOLO</>}
+                                        </button>
+                                        <button
+                                            className="btn-secondary flex-center gap-sm"
+                                            onClick={handleCreateMatch}
+                                            disabled={loading}
+                                            style={{ padding: '1.1rem', fontSize: '1rem', borderRadius: '1.5rem', background: 'rgba(255,255,255,0.05)' }}
+                                        >
+                                            <Swords size={20} /> CREA STANZA MULTIPLAYER
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="duel-card" style={{ height: 'fit-content', alignSelf: 'start', position: 'sticky', top: '2rem', display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}>
+                                <div className="icon-box" style={{ margin: '0 auto 1.5rem', width: '64px', height: '64px', borderRadius: '18px', background: 'rgba(91, 159, 243, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--color-accent)' }}>
+                                    <Key size={32} />
+                                </div>
+                                <h3 style={{ fontSize: '1.5rem', fontWeight: 800, marginBottom: '0.75rem' }}>Entra in Sfida</h3>
+                                <p style={{ fontSize: '1rem', color: 'var(--color-text-tertiary)', marginBottom: '2rem', fontWeight: 500 }}>Inserisci il codice ricevuto dal tuo avversario.</p>
+
+                                <div style={{ width: '100%', marginBottom: '2rem' }}>
                                     <input
-                                        type="range"
-                                        min="3"
-                                        max="20"
-                                        value={questionAmount}
-                                        onChange={e => setQuestionAmount(parseInt(e.target.value))}
-                                        className="premium-slider"
+                                        type="text"
+                                        placeholder="----"
+                                        maxLength={4}
+                                        value={joinCodeInput}
+                                        onChange={e => setJoinCodeInput(e.target.value.toUpperCase())}
+                                        style={{
+                                            width: '100%',
+                                            textAlign: 'center',
+                                            fontSize: '2.5rem',
+                                            fontWeight: 900,
+                                            textTransform: 'uppercase',
+                                            letterSpacing: '12px',
+                                            background: 'rgba(255,255,255,0.05)',
+                                            border: '1px solid rgba(255,255,255,0.1)',
+                                            borderRadius: '1.5rem',
+                                            color: 'var(--color-accent)',
+                                            padding: '1.5rem 0'
+                                        }}
                                     />
                                 </div>
 
-                                <button
-                                    className="btn-primary flex-center gap-sm"
-                                    onClick={handleCreateMatch}
-                                    disabled={loading}
-                                    style={{ marginTop: '1rem', padding: '1.2rem', fontSize: '1.1rem', borderRadius: '1.25rem', boxShadow: '0 10px 30px rgba(99, 102, 241, 0.4)' }}
-                                >
-                                    {loading ? <><Sparkles size={20} className="spin" /> GENERO ARENA...</> : <><Swords size={20} /> CREA STANZA DI BATTAGLIA</>}
+                                <button className="btn-primary" onClick={handleJoinMatch} disabled={loading} style={{ width: '100%', padding: '1.25rem', borderRadius: '1.5rem', boxShadow: '0 15px 30px rgba(91, 159, 243, 0.2)' }}>
+                                    {loading ? <Clock size={20} className="spin" /> : <><Sparkles size={20} /> PARTECIPA</>}
                                 </button>
                             </div>
                         </div>
+                    </motion.div>
+                )}
 
-                        <div className="duel-card" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', textAlign: 'center' }}>
-                            <div className="icon-box-large" style={{ margin: '0 auto 1.5rem', width: '60px', height: '60px', borderRadius: '50%', background: 'rgba(255,255,255,0.05)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--color-accent)' }}>
-                                <Key size={30} />
+                {state === DUEL_STATES.WAITING && (
+                    <motion.div
+                        key="waiting"
+                        className="duel-card"
+                        style={{ textAlign: 'center', padding: '3rem', maxWidth: '800px', width: '100%', margin: 'auto' }}
+                        initial={{ opacity: 0, scale: 0.95 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        exit={{ opacity: 0, scale: 1.05 }}
+                    >
+                        <div style={{ marginBottom: '2.5rem' }}>
+                            <h1 style={{ fontSize: '5rem', margin: '0.5rem 0', letterSpacing: '16px', color: 'var(--color-accent)', fontWeight: 900 }}>{roomCode}</h1>
+                            <p style={{ color: 'var(--color-text-tertiary)', fontSize: '1.2rem', fontWeight: 500 }}>Condividi questo codice con lo sfidante</p>
+                        </div>
+
+                        <div style={{ display: 'flex', gap: '3rem', justifyContent: 'center', marginBottom: '4rem', alignItems: 'center' }}>
+                            <div className="player-lobby-card">
+                                <div className="avatar"><User size={40} /></div>
+                                <div className="name">{playerName} (Tu)</div>
+                                <div className="status ready">Pronto!</div>
                             </div>
-                            <h3>Entra in Sfida</h3>
-                            <p style={{ fontSize: '0.9rem', color: 'var(--color-text-secondary)', marginBottom: '1.5rem' }}>Inserisci il codice ricevuto dal tuo avversario.</p>
-                            <input
-                                type="text"
-                                placeholder="----"
-                                maxLength={4}
-                                value={joinCodeInput}
-                                onChange={e => setJoinCodeInput(e.target.value.toUpperCase())}
-                                style={{ textAlign: 'center', fontSize: '2rem', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '8px', marginBottom: '1.5rem', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--glass-border)', borderRadius: '1rem', color: 'var(--color-accent)' }}
-                            />
-                            <button className="btn-secondary" onClick={handleJoinMatch} disabled={loading} style={{ padding: '1rem', borderRadius: '1rem' }}>
-                                {loading ? <Clock size={18} className="spin" /> : <><Sparkles size={18} /> PARTECIPA</>}
-                            </button>
+                            <div className="vs-circle">VS</div>
+                            <div className="player-lobby-card">
+                                {opponent ? (
+                                    <>
+                                        <div className="avatar"><User size={40} /></div>
+                                        <div className="name">{opponent.username}</div>
+                                        <div className="status ready">Pronto!</div>
+                                    </>
+                                ) : (
+                                    <>
+                                        <div className="avatar pulse">?</div>
+                                        <div className="name" style={{ opacity: 0.5 }}>In attesa...</div>
+                                        <div className="status waiting">---</div>
+                                    </>
+                                )}
+                            </div>
                         </div>
-                    </div>
-                </>
-            )}
 
-            {state === DUEL_STATES.WAITING && (
-                <div className="duel-card" style={{ textAlign: 'center', padding: '3rem', maxWidth: '800px', width: '100%', margin: 'auto' }}>
-                    <div style={{ marginBottom: '2rem' }}>
-                        <h1 style={{ fontSize: '4rem', margin: '0.5rem 0', letterSpacing: '12px', color: 'var(--color-accent)', textShadow: '0 0 20px rgba(91,159,243,0.5)' }}>{roomCode}</h1>
-                        <p style={{ color: 'var(--color-text-tertiary)' }}>Condividi questo codice con lo sfidante</p>
-                    </div>
-
-                    <div style={{ display: 'flex', gap: '2rem', justifyContent: 'center', marginBottom: '3rem' }}>
-                        <div className="player-lobby-card">
-                            <div className="avatar"><User size={32} /></div>
-                            <div className="name">{playerName} (Tu)</div>
-                            <div className="status ready">Pronto!</div>
-                        </div>
-                        <div className="vs-circle">VS</div>
-                        <div className="player-lobby-card">
-                            {opponent ? (
-                                <>
-                                    <div className="avatar"><User size={32} /></div>
-                                    <div className="name">{opponent.username}</div>
-                                    <div className="status ready">Pronto!</div>
-                                </>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', alignItems: 'center' }}>
+                            {isHost ? (
+                                <button
+                                    className="btn-primary"
+                                    style={{ padding: '1.25rem 4rem', fontSize: '1.3rem', borderRadius: '1.5rem', boxShadow: '0 20px 40px rgba(91, 159, 243, 0.4)' }}
+                                    disabled={players.length < 2}
+                                    onClick={handleLaunchDuel}
+                                >
+                                    <Sparkles size={24} /> INIZIA BATTAGLIA <Sparkles size={24} />
+                                </button>
                             ) : (
-                                <>
-                                    <div className="avatar pulse">?</div>
-                                    <div className="name" style={{ opacity: 0.5 }}>In attesa...</div>
-                                    <div className="status waiting">---</div>
-                                </>
+                                <p style={{ color: 'var(--color-text-tertiary)', fontWeight: 600, fontSize: '1.1rem' }}>In attesa che l'Host avvii la sfida...</p>
                             )}
-                        </div>
-                    </div>
 
-                    {isHost ? (
-                        <button className="btn-primary" style={{ padding: '1rem 3rem', fontSize: '1.2rem', boxShadow: '0 0 30px rgba(91, 159, 243, 0.4)' }} disabled={players.length < 2} onClick={handleLaunchDuel}>
-                            <Sparkles size={20} /> INIZIA BATTAGLIA <Sparkles size={20} />
+                            <button className="btn-minimal" onClick={resetQuiz} style={{ fontSize: '1rem', opacity: 0.7 }}>Esci dalla stanza</button>
+                        </div>
+                    </motion.div>
+                )}
+
+                {state === DUEL_STATES.COUNTDOWN && (
+                    <motion.div
+                        key="countdown"
+                        className="duel-countdown-screen"
+                        style={{ margin: 'auto' }}
+                        initial={{ opacity: 0, scale: 0.5 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        exit={{ opacity: 0, scale: 2 }}
+                    >
+                        <div className="countdown-number">{countdownNumber > 0 ? countdownNumber : 'GO!'}</div>
+                        <motion.p
+                            style={{ fontSize: '2rem', fontWeight: 800, marginTop: '2rem', letterSpacing: '8px', color: 'var(--color-text)' }}
+                            animate={{ opacity: [0.5, 1, 0.5] }}
+                            transition={{ duration: 1, repeat: Infinity }}
+                        >
+                            PREPARATI ALLO SCONTRO!
+                        </motion.p>
+                    </motion.div>
+                )}
+
+                {state === DUEL_STATES.PLAYING && currentQ && Array.isArray(currentQ.options) && (
+                    <motion.div
+                        key="playing"
+                        className={`duel-arena-wrapper ${strikeClass}`}
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                    >
+                        {/* Top Bar: Timer + Progress */}
+                        <header className="arena-header">
+                            <div className="arena-logo">
+                                <Swords size={22} className="text-accent" />
+                                <span className="arena-logo-text" style={{ fontSize: '1.2rem', fontWeight: 800 }}>Arena Duello</span>
+                                {isSpectator && <span className="spectator-badge"><Eye size={14} /> SPETTATORE</span>}
+                            </div>
+                            <div className="arena-progress-info">
+                                <span className="arena-q-counter" style={{ fontSize: '1.1rem' }}>Domanda {currentIndex + 1}/{questions.length}</span>
+                            </div>
+                            <div className="arena-timer">
+                                <div className="live-dot pulse"></div>
+                                <span className="timer-value" style={{ color: timeLeft <= 5 ? '#FF453A' : 'var(--color-text)', fontSize: '1.5rem' }}>
+                                    00:{String(timeLeft).padStart(2, '0')}
+                                </span>
+                            </div>
+                        </header>
+
+                        {/* Scoreboard Bar */}
+                        <div className="arena-scoreboard-bar">
+                            <div className="sb-player sb-blue">
+                                <div className="avatar-sm" style={{ width: '36px', height: '36px', borderRadius: '50%', background: 'rgba(91, 159, 243, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                    <User size={18} />
+                                </div>
+                                <span className="sb-name">{playerName}</span>
+                                <span className="sb-score">{isSpectator ? (players[0]?.score || 0) : score}</span>
+                            </div>
+                            <div className="sb-vs" style={{ fontSize: '1.2rem', opacity: 0.5 }}>VS</div>
+                            <div className="sb-player sb-red">
+                                <div className="avatar-sm" style={{ width: '36px', height: '36px', borderRadius: '50%', background: 'rgba(239, 68, 68, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                    <Bot size={18} />
+                                </div>
+                                <span className="sb-name">{opponent?.username || 'Avversario'}</span>
+                                <span className="sb-score">{opponent?.score || 0}</span>
+                            </div>
+                        </div>
+
+                        {/* Main Content: Question + Chat */}
+                        <div className="arena-body">
+                            <div className="arena-question-col">
+                                {/* Question */}
+                                <motion.div
+                                    className="question-card"
+                                    key={`q-${currentIndex}`}
+                                    initial={{ opacity: 0, y: 10 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                >
+                                    <h2>{currentQ.question}</h2>
+                                </motion.div>
+
+                                {/* Options */}
+                                <div className="options-grid">
+                                    {currentQ.options.map((opt, i) => {
+                                        let cls = 'option-btn'
+                                        if (selectedAnswer !== null) {
+                                            if (i === currentQ.correct) cls += ' correct'
+                                            else if (i === selectedAnswer) cls += ' wrong'
+                                        }
+                                        return (
+                                            <motion.button
+                                                key={i}
+                                                className={cls}
+                                                onClick={() => !isSpectator && handleAnswer(i === currentQ.correct, i)}
+                                                disabled={selectedAnswer !== null || isSpectator}
+                                                whileHover={!isSpectator && selectedAnswer === null ? { x: 5 } : {}}
+                                                whileTap={!isSpectator && selectedAnswer === null ? { scale: 0.98 } : {}}
+                                            >
+                                                <span className="opt-letter">{['A', 'B', 'C', 'D'][i]}</span>
+                                                <span className="opt-text">{opt}</span>
+                                            </motion.button>
+                                        )
+                                    })}
+                                </div>
+                            </div>
+
+                            {/* Live Chat Sidebar */}
+                            <aside className="arena-chat-sidebar">
+                                <h3 className="sidebar-title"><MessageCircle size={18} /> Live Chat</h3>
+                                <div className="chat-messages">
+                                    {chatMessages.length === 0 && (
+                                        <div className="chat-empty">Nessun messaggio ancora...</div>
+                                    )}
+                                    {chatMessages.map((msg, i) => (
+                                        <motion.div
+                                            key={i}
+                                            className={`chat-msg ${msg.username === playerName ? 'own' : ''}`}
+                                            initial={{ opacity: 0, x: 10 }}
+                                            animate={{ opacity: 1, x: 0 }}
+                                        >
+                                            <span className="chat-user">{msg.username}</span>
+                                            <span className="chat-text">{msg.message}</span>
+                                        </motion.div>
+                                    ))}
+                                    <div ref={chatEndRef} />
+                                </div>
+                                <div className="chat-input-row">
+                                    <input
+                                        type="text"
+                                        placeholder="Scrivi un messaggio..."
+                                        value={chatInput}
+                                        onChange={e => setChatInput(e.target.value)}
+                                        onKeyDown={e => e.key === 'Enter' && sendChatMessage()}
+                                        className="chat-input"
+                                        maxLength={200}
+                                    />
+                                    <button className="chat-send-btn" onClick={sendChatMessage}><Send size={18} /></button>
+                                </div>
+                            </aside>
+                        </div>
+
+                        {/* Exit button */}
+                        <button className="btn-minimal" onClick={resetQuiz} style={{ alignSelf: 'center', marginTop: '1rem', opacity: 0.6 }}>
+                            Esci dall'arena
                         </button>
-                    ) : (
-                        <p style={{ color: 'var(--color-text-secondary)', marginTop: '1rem' }}>In attesa che l'Host avvii la sfida...</p>
-                    )}
+                    </motion.div>
+                )}
 
-                    <button className="btn-minimal" onClick={resetQuiz} style={{ marginTop: '2rem', display: 'block', margin: '2rem auto' }}>Esci dalla stanza</button>
-                </div>
-            )}
+                {state === DUEL_STATES.FINISHED && (
+                    <motion.div
+                        key="results"
+                        className="duel-results-screen"
+                        style={{ margin: 'auto', maxWidth: '800px', width: '100%', textAlign: 'center' }}
+                        initial={{ opacity: 0, y: 30 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -30 }}
+                    >
+                        <div className="duel-trophy"><Trophy size={80} color="var(--color-accent)" /></div>
+                        <h2 style={{ fontSize: '3rem', fontWeight: 800, marginBottom: '2rem' }}>Sfida Conclusa!</h2>
 
-            {state === DUEL_STATES.COUNTDOWN && (
-                <div className="duel-countdown-screen" style={{ margin: 'auto' }}>
-                    <div className="countdown-number" style={{ textShadow: '0 0 40px var(--color-accent)' }}>{countdownNumber > 0 ? countdownNumber : 'GO!'}</div>
-                    <p style={{ fontSize: '2rem', fontWeight: 800, marginTop: '2rem', letterSpacing: '4px' }}>PREPARATI ALLO SCONTRO!</p>
-                </div>
-            )}
-
-            {state === DUEL_STATES.PLAYING && currentQ && (
-                <div className={`duel-arena-wrapper ${strikeClass}`}>
-                    {/* Top Header */}
-                    <header className="arena-header">
-                        <div className="arena-logo">
-                            <img src="/favicon.png" alt="Logo" className="arena-logo-img" />
-                            <span className="arena-logo-text">StudyJournal <span className="pro-badge">Pro</span></span>
-                            <span className="arena-divider">|</span>
-                            <span className="arena-title">Duel Arena</span>
-                        </div>
-                        <div className="arena-timer">
-                            <div className="live-dot pulse"></div>
-                            <span>Live countdown:</span>
-                            <span className="timer-value">
-                                {String(Math.floor(timeLeft / 60)).padStart(2, '0')}:{String(timeLeft % 60).padStart(2, '0')}
-                            </span>
-                        </div>
-                    </header>
-
-                    {/* Main Arena Layout */}
-                    <div className="arena-main-layout">
-
-                        {/* LEFT: Player Panel */}
-                        <div className="player-panel panel-blue">
-                            <div className="player-avatar-wrapper">
-                                <div className="avatar-glow"></div>
-                                <div className="avatar-circle"><User size={48} /></div>
+                        <div style={{ display: 'flex', gap: '2.5rem', justifyContent: 'center', margin: '3rem 0', alignItems: 'flex-end' }}>
+                            <div className={`result-card ${score >= (opponent?.score || 0) ? 'winner' : 'loser'}`}>
+                                <div style={{ fontSize: '0.9rem', fontWeight: 700, opacity: 0.6 }}>IL TUO SCORE</div>
+                                <div className="val">{score}</div>
+                                {score >= (opponent?.score || 0) && <div className="tag"><Trophy size={14} /> VINCITORE</div>}
                             </div>
-                            <h2 className="player-name">Tu (User)</h2>
-                            <div className="player-level">Lvl {appData?.stats?.level || 1}</div>
-
-                            <div className="player-score-block">
-                                <span className="score-value">{score}</span>
-                                <span className="score-label">Punti</span>
-                            </div>
-
-                            <div className="player-progress-wrapper">
-                                <div className="player-progress-bar">
-                                    <div className="progress-fill" style={{ width: `${((currentIndex) / questions.length) * 100}%` }}></div>
-                                </div>
-                                <span className="progress-text">{currentIndex}/{questions.length} Domande</span>
+                            <div className={`result-card ${(opponent?.score || 0) > score ? 'winner' : 'loser'}`}>
+                                <div style={{ fontSize: '0.9rem', fontWeight: 700, opacity: 0.6 }}>AVVERSARIO</div>
+                                <div className="val">{opponent?.score || 0}</div>
+                                {(opponent?.score || 0) > score && <div className="tag"><Trophy size={14} /> VINCITORE</div>}
                             </div>
                         </div>
 
-                        {/* CENTER: Question Area */}
-                        <div className="arena-center">
-                            <div className="question-card glass-neon">
-                                <h2>{currentQ.question}</h2>
-                            </div>
-
-                            <div className="options-grid">
-                                {currentQ.options.map((opt, i) => {
-                                    let cls = 'option-btn'
-                                    if (selectedAnswer !== null) {
-                                        if (i === currentQ.correct) cls += ' correct'
-                                        else if (i === selectedAnswer) cls += ' wrong'
-                                    }
-                                    return (
-                                        <button key={i} className={cls} onClick={() => handleAnswer(i === currentQ.correct, i)} disabled={selectedAnswer !== null}>
-                                            <span className="opt-letter">{['A)', 'B)', 'C)', 'D)'][i]}</span>
-                                            <span className="opt-text">{opt}</span>
-                                        </button>
-                                    )
-                                })}
-                            </div>
+                        <div style={{ display: 'flex', gap: '1.5rem', justifyContent: 'center', marginTop: '3rem' }}>
+                            <button className="btn-primary" style={{ padding: '1.25rem 3rem', borderRadius: '1.5rem' }} onClick={resetQuiz}><RotateCcw size={20} /> Rigioca</button>
+                            <button className="btn-secondary" style={{ padding: '1.25rem 3rem', borderRadius: '1.5rem', background: 'rgba(255,255,255,0.05)' }} onClick={resetQuiz}><ChevronLeft size={20} /> Lobby Principale</button>
                         </div>
-
-                        {/* RIGHT: Opponent Panel */}
-                        <div className="player-panel panel-red">
-                            <div className="player-avatar-wrapper">
-                                <div className="avatar-glow"></div>
-                                <div className="avatar-circle"><Bot size={48} /></div>
-                            </div>
-                            <h2 className="player-name">{opponent?.username || 'Avversario'}</h2>
-                            <div className="player-level">Lvl 5</div>
-
-                            <div className="player-score-block">
-                                <span className="score-value">{opponent?.score || 0}</span>
-                                <span className="score-label">Punti</span>
-                            </div>
-
-                            <div className="player-progress-wrapper">
-                                <div className="player-progress-bar">
-                                    <div className="progress-fill" style={{ width: `${((opponent?.current_question_index || 0) / questions.length) * 100}%` }}></div>
-                                </div>
-                                <span className="progress-text">{opponent?.current_question_index || 0}/{questions.length} Domande</span>
-                            </div>
-                        </div>
-
-                        {/* FAR RIGHT: Live Crowd Sidebar */}
-                        <aside className="live-crowd-sidebar">
-                            <h3 className="sidebar-title">Live Crowd & Classifica</h3>
-                            <div className="crowd-feed">
-                                <div className="feed-item"><span className="emoji">🔥</span> Andrea P. ha risposto correttamente!</div>
-                                <div className="feed-item"><span className="emoji">🎉</span> Marco G. è salito in classifica!</div>
-                                <div className="feed-item"><span className="emoji">👏</span> Tifate per Andrea!</div>
-                                <div className="feed-item"><span className="emoji">🤓</span> Giulia R. ha una streak di 5!</div>
-                            </div>
-
-                            <div className="leaderboard">
-                                <h4 className="leaderboard-title">Leaderboard</h4>
-                                <ol className="leaderboard-list">
-                                    <li>Giulia R. - 15800 Punti</li>
-                                    <li>Matteo B. - 14200 Punti</li>
-                                    <li>Andrea P. - 13900 Punti</li>
-                                    <li>Tu - {score} Punti</li>
-                                    <li>Avversario - {opponent?.score || 0} Punti</li>
-                                </ol>
-                            </div>
-                        </aside>
-
-                    </div>
-                </div>
-            )}
-
-            {state === DUEL_STATES.FINISHED && (
-                <div className="duel-results-screen reveal-up" style={{ margin: 'auto', maxWidth: '800px', width: '100%', textAlign: 'center' }}>
-                    <div className="duel-trophy"><Trophy size={64} color="var(--color-accent)" /></div>
-                    <h2>Sfida Conclusa!</h2>
-
-                    <div style={{ display: 'flex', gap: '2rem', justifyContent: 'center', margin: '2rem 0' }}>
-                        <div className={`result-card ${score >= (opponent?.score || 0) ? 'winner' : 'loser'}`}>
-                            <div style={{ fontSize: '0.8rem' }}>IL TUO SCORE</div>
-                            <div className="val">{score}</div>
-                            {score >= (opponent?.score || 0) && <div className="tag"><Trophy size={14} /> VINCITORE</div>}
-                        </div>
-                        <div className={`result-card ${(opponent?.score || 0) > score ? 'winner' : 'loser'}`}>
-                            <div style={{ fontSize: '0.8rem' }}>AVVERSARIO</div>
-                            <div className="val">{opponent?.score || 0}</div>
-                            {(opponent?.score || 0) > score && <div className="tag"><Trophy size={14} /> VINCITORE</div>}
-                        </div>
-                    </div>
-
-                    <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center' }}>
-                        <button className="btn-primary" onClick={resetQuiz}><RotateCcw size={18} /> Rigioca</button>
-                        <button className="btn-secondary" onClick={resetQuiz}><ChevronLeft size={18} /> Lobby Principal</button>
-                    </div>
-                </div>
-            )}
+                    </motion.div>
+                )}
+            </AnimatePresence>
         </section>
     )
 }

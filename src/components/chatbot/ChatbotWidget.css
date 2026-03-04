@@ -74,30 +74,17 @@
     width: 400px;
     max-height: 600px;
     height: 75vh;
-    background: var(--glass-bg-deep);
-    backdrop-filter: blur(40px) saturate(200%);
-    -webkit-backdrop-filter: blur(40px) saturate(200%);
-    border: 1px solid var(--glass-border);
-    border-radius: 1.5rem;
+    background: rgba(20, 20, 22, 0.45);
+    backdrop-filter: blur(50px) saturate(210%);
+    -webkit-backdrop-filter: blur(50px) saturate(210%);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 2rem;
     display: flex;
     flex-direction: column;
     z-index: 9998;
-    box-shadow: 0 30px 60px rgba(0, 0, 0, 0.2), 0 0 0 1px rgba(255, 255, 255, 0.05) inset;
-    animation: chatSlideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-    overflow: hidden;
+    box-shadow: 0 30px 60px rgba(0, 0, 0, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.1);
     transform-origin: bottom right;
-}
-
-@keyframes chatSlideUp {
-    from {
-        opacity: 0;
-        transform: translateY(30px) scale(0.9);
-    }
-
-    to {
-        opacity: 1;
-        transform: translateY(0) scale(1);
-    }
+    overflow: hidden;
 }
 
 .chatbot-header {
@@ -105,8 +92,8 @@
     align-items: center;
     gap: 1rem;
     padding: 1.25rem 1.5rem;
-    background: rgba(255, 255, 255, 0.02);
-    border-bottom: 1px solid var(--glass-border);
+    background: rgba(255, 255, 255, 0.03);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .chatbot-avatar {

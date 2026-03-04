@@ -1,0 +1,226 @@
+/* ============================================
+   StudyJournal Pro - GLOBAL HUD HACK OVERRIDE
+   This file forcefully overrides existing Bento/Glass 
+   components site-wide to match the new HUD aesthetic.
+   ============================================ */
+
+/* ── 1. GLOBAL TYPOGRAPHY & OVERLAYS ── */
+:root {
+    --cyber-black: #050508;
+    --cyber-bg-panel: rgba(5, 5, 10, 0.8);
+    --hud-border-glow: rgba(0, 243, 255, 0.2);
+}
+
+body .app-layout {
+    font-family: 'Share Tech Mono', monospace !important;
+    background: var(--cyber-black) !important;
+}
+
+/* Ensure all text uses the HUD font */
+body .app-layout p,
+body .app-layout span,
+body .app-layout div,
+body .app-layout li {
+    font-family: 'Share Tech Mono', monospace;
+}
+
+/* Headings use Orbitron */
+body .app-layout h1,
+body .app-layout h2,
+body .app-layout h3,
+body .app-layout h4,
+body .app-layout h5,
+body .app-layout h6 {
+    font-family: 'Orbitron', monospace !important;
+    text-transform: uppercase !important;
+    letter-spacing: 2px;
+}
+
+/* ── GLOBAL SCANLINES (For pages other than Dashboard) ── */
+.global-hud-scanlines {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 9000;
+    background: linear-gradient(to bottom,
+            rgba(0, 243, 255, 0),
+            rgba(0, 243, 255, 0.03) 50%,
+            rgba(0, 243, 255, 0));
+    background-size: 100% 4px;
+}
+
+/* ── 2. CARD TO HUD PANEL CONVERSIONS ── */
+/* Target common Bento/Glass classes across all sections */
+
+.bento-card,
+.glass-panel,
+.stat-card,
+.task-card,
+.note-card,
+.feature-card,
+.room-card,
+.duel-card,
+.grade-card,
+.study-session-card,
+.ai-chat-container,
+.ai-message,
+.card-stack .card,
+.knowledge-input-panel,
+.card,
+.classroom-card,
+.result-card,
+div[style*="background: rgba(255, 255, 255"],
+div[style*="background: rgba(25, 25, 35"],
+div[style*="background: rgba(5,5,5"] {
+    background: var(--cyber-bg-panel) !important;
+    backdrop-filter: none !important;
+    /* Disable blurry glass */
+    -webkit-backdrop-filter: none !important;
+
+    border: 1px solid var(--hud-border-glow) !important;
+    border-radius: 0 !important;
+    /* Sharp corners */
+
+    /* Cyberpunk Cut Corners */
+    clip-path: polygon(15px 0, 100% 0, 100% calc(100% - 15px), calc(100% - 15px) 100%, 0 100%, 0 15px) !important;
+    box-shadow: inset 0 0 20px rgba(0, 243, 255, 0.05) !important;
+
+    transition: all 0.2s ease !important;
+    position: relative;
+}
+
+/* Add HUD brackets/glitch bars on hover for intercepted cards */
+.bento-card:hover,
+.glass-panel:hover,
+.stat-card:hover,
+.task-card:hover,
+.note-card:hover,
+.room-card:hover,
+.duel-card:hover {
+    transform: none !important;
+    /* Disable bouncy translate */
+    border-color: var(--neon-cyan) !important;
+    box-shadow: inset 0 0 20px rgba(0, 243, 255, 0.15) !important;
+}
+
+/* ── 3. BUTTON OVERRIDES ── */
+/* Force all primary/action buttons into Cyber-Buttons */
+.btn-primary,
+.action-btn,
+.submit-btn,
+button[type="submit"],
+.room-action-btn,
+.duel-action-btn {
+    background: rgba(0, 0, 0, 0.8) !important;
+    border: 1px solid var(--neon-cyan) !important;
+    color: var(--neon-cyan) !important;
+    border-radius: 0 !important;
+    font-family: 'Share Tech Mono', monospace !important;
+    font-weight: 700 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 2px !important;
+    clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px) !important;
+    box-shadow: none !important;
+}
+
+.btn-primary:hover,
+.action-btn:hover,
+.submit-btn:hover,
+button[type="submit"]:hover,
+.room-action-btn:hover,
+.duel-action-btn:hover {
+    background: var(--neon-cyan) !important;
+    color: #000 !important;
+    box-shadow: 0 0 15px var(--neon-cyan-glow) !important;
+    transform: none !important;
+}
+
+/* Ghost / Secondary Buttons */
+.btn-ghost,
+.secondary-btn,
+.cancel-btn {
+    background: transparent !important;
+    border: 1px dashed rgba(255, 255, 255, 0.3) !important;
+    color: rgba(255, 255, 255, 0.7) !important;
+    border-radius: 0 !important;
+    font-family: 'Share Tech Mono', monospace !important;
+    text-transform: uppercase !important;
+}
+
+.btn-ghost:hover,
+.secondary-btn:hover,
+.cancel-btn:hover {
+    border-color: var(--neon-magenta) !important;
+    color: var(--neon-magenta) !important;
+    border-style: solid !important;
+    box-shadow: 0 0 10px rgba(255, 0, 60, 0.2) !important;
+}
+
+/* ── 4. INPUTS & TEXTAREAS ── */
+input[type="text"],
+input[type="number"],
+input[type="email"],
+input[type="password"],
+textarea,
+select {
+    background: rgba(0, 0, 0, 0.8) !important;
+    border: 1px solid rgba(0, 243, 255, 0.3) !important;
+    border-radius: 0 !important;
+    color: var(--neon-cyan) !important;
+    font-family: 'Share Tech Mono', monospace !important;
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+    border-color: var(--neon-cyan) !important;
+    box-shadow: 0 0 10px var(--neon-cyan-glow) !important;
+    outline: none !important;
+}
+
+/* ── 5. SPECIFIC SECTION FIXES ── */
+
+/* Headers inside sections */
+.section-header h1,
+.section-title,
+.page-title {
+    color: #fff !important;
+    text-shadow: 0 0 10px var(--neon-cyan-glow) !important;
+    border-bottom: 2px solid var(--neon-cyan) !important;
+    padding-bottom: 0.5rem;
+    margin-bottom: 2rem;
+    display: inline-block;
+}
+
+.section-header p,
+.section-subtitle {
+    color: var(--neon-cyan) !important;
+    font-family: 'Share Tech Mono', monospace !important;
+    text-transform: uppercase;
+}
+
+/* Badges / Status Pills */
+.badge,
+.status-pill,
+.tag {
+    background: rgba(0, 243, 255, 0.1) !important;
+    border: 1px solid var(--neon-cyan) !important;
+    color: var(--neon-cyan) !important;
+    border-radius: 0 !important;
+    font-family: 'Share Tech Mono', monospace !important;
+    text-transform: uppercase;
+    clip-path: polygon(5px 0, 100% 0, calc(100% - 5px) 100%, 0 100%) !important;
+}
+
+/* Progress Bars */
+.progress-bar-bg {
+    background: rgba(255, 255, 255, 0.1) !important;
+    border-radius: 0 !important;
+    clip-path: polygon(5px 0, 100% 0, calc(100% - 5px) 100%, 0 100%) !important;
+}
+
+.progress-bar-fill {
+    background: var(--neon-cyan) !important;
+    border-radius: 0 !important;
+    box-shadow: 0 0 10px var(--neon-cyan-glow) !important;
+}

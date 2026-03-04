@@ -3,6 +3,7 @@ import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../hooks/useAuth'
 import { useToast } from '../../contexts/ToastContext'
 import {
+    LiveKitRoom,
     TrackToggle,
     useParticipants,
     useConnectionState,
@@ -12,7 +13,7 @@ import {
 import { Track, ConnectionState } from 'livekit-client'
 import {
     Headphones, Plus, Users, Timer, Play, Pause,
-    RotateCcw, LogOut, MicOff, Coffee, Flame, Clock
+    RotateCcw, LogOut, MicOff, Coffee, Flame, Clock, Copy
 } from 'lucide-react'
 import '../../styles/study-room.css'
 
@@ -317,6 +318,7 @@ function CreateRoomModal({ onClose, onCreate }) {
 // ============================================
 
 export default function StudyRoomSection() {
+    const { user } = useAuth()
     const { addToast } = useToast()
     const [rooms, setRooms] = useState([])
     const [participantCounts, setParticipantCounts] = useState({})
@@ -325,6 +327,7 @@ export default function StudyRoomSection() {
     const [showCreateModal, setShowCreateModal] = useState(false)
     const [joinCode, setJoinCode] = useState('')
     const [loading, setLoading] = useState(true)
+    const [error, setError] = useState(null)
 
     // Derived short code
     const getShortCode = (id) => id?.substring(0, 6).toUpperCase()
